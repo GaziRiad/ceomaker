@@ -1,0 +1,78 @@
+import { getRedirectUrl, getRewrittenUrl, isRewrite } from "next/experimental/testing/server";
+import { NextRequest } from "next/server";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { proxy } from "./proxy";
+
+function request(url: string, cookie?: string) {
+  const parsed = new URL(url);
+  return new NextRequest(url, {
+    headers: { host: parsed.host, ...(cookie ? { cookie } : {}) },
+  });
+}
+
+describe("proxy", () => {
+  beforeEach(() => {
+    vi.stubEnv("ROOT_DOMAIN", "ceomaker.com");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("rewrites a tenant host to the internal tenant route", () => {
+    const response = proxy(request("https://amelia.ceomaker.com/"));
+    expect(isRewrite(response)).toBe(true);
+    expect(getRewrittenUrl(response)).toBe("https://amelia.ceomaker.com/s/amelia");
+  });
+
+  it("keeps the path for tenant sub-pages", () => {
+    const response = proxy(request("https://amelia.ceomaker.com/press"));
+    expect(getRewrittenUrl(response)).toBe("https://amelia.ceomaker.com/s/amelia/press");
+  });
+
+  it("blocks API routes on tenant hosts", () => {
+    const response = proxy(request("https://amelia.ceomaker.com/api/auth/get-session"));
+    expect(getRewrittenUrl(response)).toBe("https://amelia.ceomaker.com/__not-found");
+  });
+
+  it("blocks direct access to the internal tenant route on the app host", () => {
+    const response = proxy(request("https://ceomaker.com/s/amelia"));
+    expect(getRewrittenUrl(response)).toBe("https://ceomaker.com/__not-found");
+  });
+
+  it("does not let one tenant host reach another tenant's route", () => {
+    const response = proxy(request("https://amelia.ceomaker.com/s/mallory"));
+    expect(getRewrittenUrl(response)).toBe("https://amelia.ceomaker.com/s/amelia/s/mallory");
+  });
+
+  it("passes the app host through", () => {
+    const response = proxy(request("https://ceomaker.com/pricing"));
+    expect(isRewrite(response)).toBe(false);
+    expect(getRedirectUrl(response)).toBeNull();
+  });
+
+  it("redirects signed-out visitors away from the dashboard", () => {
+    const response = proxy(request("https://ceomaker.com/dashboard"));
+    expect(response.status).toBe(307);
+    expect(getRedirectUrl(response)).toBe("https://ceomaker.com/sign-in");
+  });
+
+  it("lets a request with a session cookie reach the dashboard (the page re-verifies it)", () => {
+    const response = proxy(
+      request("https://ceomaker.com/dashboard", "__Secure-better-auth.session_token=abc.def"),
+    );
+    expect(getRedirectUrl(response)).toBeNull();
+  });
+
+  it("redirects www to the apex, keeping the path", () => {
+    const response = proxy(request("https://www.ceomaker.com/sign-in?next=%2Fdashboard"));
+    expect(response.status).toBe(308);
+    expect(getRedirectUrl(response)).toBe("https://ceomaker.com/sign-in?next=%2Fdashboard");
+  });
+
+  it("returns not found for unknown hosts in production", () => {
+    const response = proxy(request("https://attacker.example/"));
+    expect(getRewrittenUrl(response)).toBe("https://attacker.example/__not-found");
+  });
+});

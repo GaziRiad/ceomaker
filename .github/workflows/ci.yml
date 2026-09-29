@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ceomaker
+          POSTGRES_PASSWORD: ceomaker
+          POSTGRES_DB: ceomaker_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ceomaker"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://ceomaker:ceomaker@localhost:5432/ceomaker_test
+      DATABASE_URL: postgres://ceomaker:ceomaker@localhost:5432/ceomaker_test
+      BETTER_AUTH_SECRET: ci-only-secret-never-used-outside-ci-0000
+      APP_URL: http://localhost:3000
+      ROOT_DOMAIN: localhost:3000
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: Migrations match the schema
+        run: |
+          pnpm --filter @ceomaker/db exec drizzle-kit generate
+          git status --porcelain packages/db/migrations
+          test -z "$(git status --porcelain packages/db/migrations)"
+      - run: pnpm build

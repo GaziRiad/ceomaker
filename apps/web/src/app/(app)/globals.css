@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+
+  --color-paper: #fbfaf7;
+  --color-ink: #16181d;
+  --color-stone: #5f636a;
+  --color-line: #e6e2d9;
+  --color-navy: #1f3a5f;
+  --color-navy-deep: #16304f;
+  --color-gold: #8a6d3b;
+  --color-gold-soft: #b08d57;
+}
+
+@layer base {
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+  }
+}

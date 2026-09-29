@@ -1,0 +1,4 @@
+/* Stylesheet for customer sites only: template utilities, nothing from the dashboard. */
+@import "tailwindcss" source(none);
+@import "@ceomaker/templates/styles.css";
+@source "./";

@@ -1,0 +1,21 @@
+# Local Postgres for development and integration tests: `docker compose up -d`
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ceomaker
+      POSTGRES_PASSWORD: ceomaker
+      POSTGRES_DB: ceomaker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ceomaker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:

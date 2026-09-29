@@ -1,0 +1,96 @@
+import type { SiteContent, TemplateKey, Theme } from "@ceomaker/schema";
+import { sql } from "drizzle-orm";
+import {
+  check,
+  foreignKey,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+  uuid,
+  type AnyPgColumn,
+  type PgTableExtraConfigValue,
+} from "drizzle-orm/pg-core";
+import { user } from "./auth";
+
+export const siteStatus = pgEnum("site_status", ["draft", "published", "paused"]);
+export const siteVersionKind = pgEnum("site_version_kind", ["draft", "published"]);
+
+export const site = pgTable(
+  "site",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    subdomain: text("subdomain").notNull().unique(),
+    status: siteStatus("status").notNull().default("draft"),
+    publishedVersionId: uuid("published_version_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table): PgTableExtraConfigValue[] => [
+    index("site_user_id_idx").on(table.userId),
+    // Composite key: a site can only ever point at one of its own versions, so a bug can never
+    // serve one tenant's content on another tenant's domain.
+    foreignKey({
+      name: "site_published_version_fk",
+      columns: [table.publishedVersionId, table.id],
+      foreignColumns: [siteVersion.id, siteVersion.siteId],
+    }),
+    // Defense in depth: mirrors subdomainSchema so no code path can store a malformed host label.
+    check(
+      "site_subdomain_format",
+      sql`${table.subdomain} ~ '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$' and length(${table.subdomain}) between 3 and 40 and position('--' in ${table.subdomain}) = 0`,
+    ),
+    check(
+      "site_published_has_version",
+      sql`${table.status} = 'draft' or ${table.publishedVersionId} is not null`,
+    ),
+  ],
+);
+
+/**
+ * One mutable draft per site plus an append-only history of published snapshots.
+ * Published rows are made immutable by a database trigger (see the custom migration).
+ */
+export const siteVersion = pgTable(
+  "site_version",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    siteId: uuid("site_id")
+      .notNull()
+      .references((): AnyPgColumn => site.id, { onDelete: "cascade" }),
+    kind: siteVersionKind("kind").notNull(),
+    schemaVersion: integer("schema_version").notNull(),
+    templateKey: text("template_key").$type<TemplateKey>().notNull(),
+    theme: jsonb("theme").$type<Theme>().notNull(),
+    content: jsonb("content").$type<SiteContent>().notNull(),
+    createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+  },
+  (table) => [
+    unique("site_version_id_site_id_unique").on(table.id, table.siteId),
+    index("site_version_site_id_created_at_idx").on(table.siteId, table.createdAt),
+    uniqueIndex("site_version_one_draft_per_site")
+      .on(table.siteId)
+      .where(sql`${table.kind} = 'draft'`),
+    check(
+      "site_version_published_at",
+      sql`(${table.kind} = 'published') = (${table.publishedAt} is not null)`,
+    ),
+  ],
+);

@@ -1,0 +1,18 @@
+/*
+ * Design tokens for customer sites. Each site sets the --site-* variables from its theme
+ * (see themeToStyle); these utilities read them, so one stylesheet serves every tenant.
+ * Import this after `@import "tailwindcss"` in the stylesheet that renders sites.
+ */
+@source "./";
+
+@theme inline {
+  --color-site-bg: var(--site-bg);
+  --color-site-fg: var(--site-fg);
+  --color-site-primary: var(--site-primary);
+  --color-site-on-primary: var(--site-on-primary);
+  --color-site-accent: var(--site-accent);
+  --color-site-muted: var(--site-muted);
+  --font-site-heading: var(--site-font-heading);
+  --font-site-body: var(--site-font-body);
+  --radius-site: var(--site-radius);
+}
