@@ -1,0 +1,8 @@
+# Keep LF line endings in the working tree on every OS. Without this, Git on Windows checks
+# files out with CRLF and `pnpm format:check` fails.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

@@ -10,7 +10,7 @@ function request(url: string, cookie?: string) {
   });
 }
 
-describe("proxy", () => {
+describe("proxy in subdomain mode", () => {
   beforeEach(() => {
     vi.stubEnv("ROOT_DOMAIN", "ceomaker.com");
     vi.stubEnv("NODE_ENV", "production");
@@ -71,8 +71,71 @@ describe("proxy", () => {
     expect(getRedirectUrl(response)).toBe("https://ceomaker.com/sign-in?next=%2Fdashboard");
   });
 
+  it("does not serve path-mode addresses once subdomains are in use", () => {
+    const response = proxy(request("https://ceomaker.com/sites/amelia"));
+    expect(getRewrittenUrl(response)).toBe("https://ceomaker.com/__not-found");
+  });
+
   it("returns not found for unknown hosts in production", () => {
     const response = proxy(request("https://attacker.example/"));
     expect(getRewrittenUrl(response)).toBe("https://attacker.example/__not-found");
+  });
+});
+
+describe("proxy in path mode (no ROOT_DOMAIN, e.g. *.vercel.app)", () => {
+  beforeEach(() => {
+    vi.stubEnv("ROOT_DOMAIN", "");
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const app = "https://ceomaker.vercel.app";
+
+  it("rewrites /sites/<name> to the internal tenant route", () => {
+    const response = proxy(request(`${app}/sites/amelia`));
+    expect(isRewrite(response)).toBe(true);
+    expect(getRewrittenUrl(response)).toBe(`${app}/s/amelia`);
+  });
+
+  it("keeps the rest of the path", () => {
+    expect(getRewrittenUrl(proxy(request(`${app}/sites/amelia/press`)))).toBe(
+      `${app}/s/amelia/press`,
+    );
+  });
+
+  it("redirects mixed-case names to the lowercase address", () => {
+    const response = proxy(request(`${app}/sites/Amelia?ref=card`));
+    expect(response.status).toBe(308);
+    expect(getRedirectUrl(response)).toBe(`${app}/sites/amelia?ref=card`);
+  });
+
+  it.each(["/sites", "/sites/ab", "/sites/app", "/sites/bad--name", "/s/amelia", "/s"])(
+    "returns not found for %s",
+    (path) => {
+      expect(getRewrittenUrl(proxy(request(`${app}${path}`)))).toBe(`${app}/__not-found`);
+    },
+  );
+
+  it("never exposes API routes under a site path", () => {
+    expect(getRewrittenUrl(proxy(request(`${app}/sites/amelia/api/auth/get-session`)))).toBe(
+      `${app}/__not-found`,
+    );
+  });
+
+  it("serves the app on any host, since there are no tenant hosts", () => {
+    for (const host of [app, "https://ceomaker-git-feature.vercel.app"]) {
+      const response = proxy(request(`${host}/sign-in`));
+      expect(isRewrite(response)).toBe(false);
+      expect(getRedirectUrl(response)).toBeNull();
+    }
+  });
+
+  it("still redirects signed-out visitors away from the dashboard", () => {
+    const response = proxy(request(`${app}/dashboard`));
+    expect(response.status).toBe(307);
+    expect(getRedirectUrl(response)).toBe(`${app}/sign-in`);
   });
 });

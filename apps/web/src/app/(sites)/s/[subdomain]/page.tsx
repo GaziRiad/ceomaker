@@ -8,7 +8,8 @@ import { monogramIconDataUri, SiteRenderer } from "@ceomaker/templates";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { tenantUrl } from "@/lib/routing";
+import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
+import { routingConfigFromEnv, siteUrl } from "@/lib/routing";
 import { getPublishedSite } from "@/lib/sites";
 
 type Params = PageProps<"/s/[subdomain]">["params"];
@@ -30,27 +31,31 @@ async function loadSite(subdomain: string) {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { subdomain } = await params;
   const site = await loadSite(subdomain);
-  if (!site) return { title: "Site not found", robots: { index: false, follow: false } };
+  if (!site) {
+    return {
+      title: "Site not found",
+      robots: { index: false, follow: false },
+      icons: { icon: PLATFORM_ICON_DATA_URI },
+    };
+  }
 
   const { meta } = parseSiteContentForRender(site.content);
   const title = meta?.title ?? meta?.name ?? subdomain;
   const theme = themeSchema.safeParse(site.theme);
+  const routing = routingConfigFromEnv();
+  const url = siteUrl(subdomain, routing);
   return {
-    metadataBase: new URL(
-      tenantUrl(
-        subdomain,
-        process.env.APP_URL ?? "http://localhost:3000",
-        process.env.ROOT_DOMAIN ?? "localhost:3000",
-      ),
-    ),
     title,
     description: meta?.description,
-    alternates: { canonical: "/" },
+    alternates: { canonical: url },
     icons: {
       icon: monogramIconDataUri(meta?.name ?? subdomain, theme.success ? theme.data : defaultTheme),
     },
-    openGraph: { type: "profile", title, description: meta?.description, url: "/" },
+    openGraph: { type: "profile", title, description: meta?.description, url },
     twitter: { card: "summary", title, description: meta?.description },
+    // Path-mode addresses (e.g. on *.vercel.app) are temporary. Keeping them out of search
+    // indexes avoids duplicates competing with the real domain after launch.
+    ...(routing.mode === "path" ? { robots: { index: false, follow: false } } : {}),
   };
 }
 

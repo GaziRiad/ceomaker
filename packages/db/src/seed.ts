@@ -1,5 +1,6 @@
 import { defaultTheme, demoSiteContent } from "@ceomaker/schema";
 import { eq } from "drizzle-orm";
+import { isMainModule } from "./cli";
 import { createDatabase, type Database } from "./client";
 import { createSite, publishSite, saveDraft } from "./queries/sites";
 import { site, user } from "./schema";
@@ -38,7 +39,7 @@ export async function seedDemoSite(db: Database) {
   return publishSite(db, { userId: DEMO_OWNER_ID, siteId });
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   if (process.env.NODE_ENV === "production" && !process.argv.includes("--force")) {
     console.error("Refusing to seed a production database without --force");
     process.exit(1);

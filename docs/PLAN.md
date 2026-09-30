@@ -205,3 +205,20 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 - **Theme contrast is enforced.** Body and secondary text must reach WCAG AA (4.5:1) against the background, or the theme is rejected.
 - **Customer sites don't inherit the CEOMaker favicon.** Per-site monogram icons are a Phase 4 item.
 - **Follow-ups found during the build:** per-tenant `robots.txt`/`sitemap.xml` and favicons (P4); edge rate limiting against random-subdomain cache floods (P5); email verification before first publish (P3); CDN purge on publish if we ever self-host behind a CDN.
+
+## Implementation notes (pre-launch setup)
+
+- **Hosting before the domain exists.** The product runs on Vercel's free `*.vercel.app` address. Customer subdomains are impossible there, so the app has a **path mode**, selected when `ROOT_DOMAIN` is unset: sites live at `/sites/<name>`, and the internal `/s/*` route stays unreachable directly. Setting `ROOT_DOMAIN` switches to subdomain mode, and the `/sites/` addresses then return 404, so no site ever has two public URLs.
+- **Path-mode trade-offs.**
+  - Customer pages share the product's origin. That's acceptable pre-launch, because content can't run scripts and session cookies are HttpOnly, but it's a reason to buy the domain before real customers.
+  - Path-mode pages are `noindex`, so the temporary addresses don't compete in search after launch.
+- **App URL is derived.** `appUrl()` uses `APP_URL` if set. Otherwise it uses Vercel's `VERCEL_PROJECT_PRODUCTION_URL` in production and `VERCEL_BRANCH_URL`/`VERCEL_URL` in previews. Better Auth trusts both preview URLs, so sign-in works on preview deployments.
+- **Database: Neon in Frankfurt**, with Vercel functions pinned to `fra1` next to it.
+  - Branch `main` is production. Branch `dev` serves local development and previews, with a `ceomaker_test` database for integration tests.
+  - Migrations run in the Vercel build over the direct (unpooled) connection. The app uses the pooled one.
+- **Neon connection strings** include `channel_binding=require`, which postgres.js forwards to the server as an unknown setting, and the connection is rejected. `createDatabase` strips it; TLS is still enforced by `sslmode`.
+- **Windows.**
+  - The migrate and seed scripts detected "run directly" by comparing a `file://` URL with a `D:\` path, so on Windows they silently did nothing. They now compare real paths.
+  - `.gitattributes` forces LF line endings so the formatting check passes on Windows checkouts.
+- **Node 24 LTS everywhere** (local, CI, Vercel). pnpm is installed directly (`npm i -g pnpm@10.33.0`), because Node 25+ no longer bundles Corepack. On Vercel, `ENABLE_EXPERIMENTAL_COREPACK=1` makes the build use the pinned pnpm version instead of pnpm 9.
+- **Vercel Hobby is non-commercial.** Upgrade to Pro before Phase 3 billing goes live.

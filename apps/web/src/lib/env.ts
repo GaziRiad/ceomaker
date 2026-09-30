@@ -5,9 +5,11 @@ const serverEnvSchema = z.object({
   DATABASE_URL: z.url(),
   BETTER_AUTH_SECRET: z
     .string()
-    .min(32, "BETTER_AUTH_SECRET must be at least 32 characters (openssl rand -base64 32)"),
-  APP_URL: z.url(),
-  ROOT_DOMAIN: z.string().min(1),
+    .min(32, "BETTER_AUTH_SECRET must be at least 32 characters (see .env.example)"),
+  // Optional: derived from Vercel's system variables when unset (see appUrl in lib/routing).
+  APP_URL: z.url().optional(),
+  // Optional: unset means path mode, with customer sites at /sites/<name>.
+  ROOT_DOMAIN: z.string().min(1).optional(),
 });
 
 export type ServerEnv = z.output<typeof serverEnvSchema>;

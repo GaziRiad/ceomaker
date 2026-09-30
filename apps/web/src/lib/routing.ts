@@ -2,8 +2,25 @@ import { isValidSubdomain } from "@ceomaker/schema";
 
 /** Internal path prefix tenant requests are rewritten to. Never reachable directly. */
 export const TENANT_PATH_PREFIX = "/s";
+/** Public prefix for customer sites in path mode (no custom domain yet). */
+export const SITES_PATH_PREFIX = "/sites";
 /** Rewrite target that matches no route, so global-not-found renders with a 404 status. */
 export const NOT_FOUND_PATH = "/__not-found";
+
+/**
+ * - subdomain: customer sites at <name>.<rootDomain>. Used once we own a domain.
+ * - path: customer sites at <app>/sites/<name>. Used on hosts where we can't create subdomains,
+ *   such as a free *.vercel.app address.
+ */
+export type RoutingConfig = SubdomainRoutingConfig | { mode: "path" };
+
+export interface SubdomainRoutingConfig {
+  mode: "subdomain";
+  /** e.g. "ceomaker.com" in production, "localhost:3000" in development. Port is ignored. */
+  rootDomain: string;
+  /** Serve the app on hosts we don't recognise (local IPs, preview deployments). */
+  unknownHostsServeApp: boolean;
+}
 
 export type HostResolution =
   | { kind: "app" }
@@ -11,12 +28,7 @@ export type HostResolution =
   | { kind: "tenant"; subdomain: string }
   | { kind: "not-found" };
 
-export interface RoutingConfig {
-  /** e.g. "ceomaker.com" in production, "localhost:3000" in development. Port is ignored. */
-  rootDomain: string;
-  /** Serve the app on hosts we don't recognise (local IPs, preview deployments). Off in production. */
-  unknownHostsServeApp: boolean;
-}
+type Env = Record<string, string | undefined>;
 
 function hostnameOf(host: string): string {
   const value = host.trim().toLowerCase();
@@ -27,10 +39,10 @@ function hostnameOf(host: string): string {
 }
 
 /**
- * Decides which surface a request belongs to, from the Host header alone.
+ * Subdomain mode: decides which surface a request belongs to, from the Host header alone.
  * Tenant labels are validated here so a malformed or reserved name never reaches the database.
  */
-export function resolveHost(host: string | null, config: RoutingConfig): HostResolution {
+export function resolveHost(host: string | null, config: SubdomainRoutingConfig): HostResolution {
   if (!host) return { kind: "not-found" };
   const hostname = hostnameOf(host);
   const root = hostnameOf(config.rootDomain);
@@ -47,18 +59,74 @@ export function resolveHost(host: string | null, config: RoutingConfig): HostRes
   return config.unknownHostsServeApp ? { kind: "app" } : { kind: "not-found" };
 }
 
-/** Read on every request, so it uses the raw environment rather than the validated server env. */
-export function routingConfigFromEnv(): RoutingConfig {
+export type SitesPathResolution =
+  | { kind: "none" }
+  | { kind: "invalid" }
+  | { kind: "site"; subdomain: string; rest: string; canonical: boolean };
+
+/** Path mode: parses "/sites/<name>[/rest]". Names are case-insensitive but served lowercase. */
+export function parseSitesPath(pathname: string): SitesPathResolution {
+  if (pathname !== SITES_PATH_PREFIX && !pathname.startsWith(`${SITES_PATH_PREFIX}/`)) {
+    return { kind: "none" };
+  }
+  const [, , rawName = "", ...rest] = pathname.split("/");
+  const subdomain = rawName.toLowerCase();
+  if (!isValidSubdomain(subdomain)) return { kind: "invalid" };
   return {
-    rootDomain: process.env.ROOT_DOMAIN ?? "localhost:3000",
-    // Only production refuses unknown hosts; dev and preview deployments serve the app on them.
-    unknownHostsServeApp:
-      process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV === "preview",
+    kind: "site",
+    subdomain,
+    rest: rest.length > 0 ? `/${rest.join("/")}` : "",
+    canonical: rawName === subdomain,
   };
 }
 
-/** Public URL of a tenant site, e.g. https://amelia.ceomaker.com */
-export function tenantUrl(subdomain: string, appUrl: string, rootDomain: string): string {
-  const { protocol } = new URL(appUrl);
-  return `${protocol}//${subdomain}.${rootDomain}`;
+export function isInternalTenantPath(pathname: string): boolean {
+  return pathname === TENANT_PATH_PREFIX || pathname.startsWith(`${TENANT_PATH_PREFIX}/`);
+}
+
+/** Subdomain mode when ROOT_DOMAIN is set, path mode otherwise. Read on every request. */
+export function routingConfigFromEnv(env: Env = process.env): RoutingConfig {
+  const rootDomain = env.ROOT_DOMAIN?.trim();
+  if (!rootDomain) return { mode: "path" };
+  return {
+    mode: "subdomain",
+    rootDomain,
+    // Only production refuses unknown hosts; dev and preview deployments serve the app on them.
+    unknownHostsServeApp: env.NODE_ENV !== "production" || env.VERCEL_ENV === "preview",
+  };
+}
+
+/**
+ * Public URL of the product, without a trailing slash. APP_URL wins; on Vercel it is derived
+ * from the system variables so the free *.vercel.app address and previews work with no config.
+ */
+export function appUrl(env: Env = process.env): string {
+  if (env.APP_URL) return env.APP_URL.replace(/\/+$/, "");
+  const vercelHost =
+    env.VERCEL_ENV === "production"
+      ? env.VERCEL_PROJECT_PRODUCTION_URL
+      : (env.VERCEL_BRANCH_URL ?? env.VERCEL_URL);
+  return vercelHost ? `https://${vercelHost}` : "http://localhost:3000";
+}
+
+/** Public URL of a customer site: https://amelia.ceomaker.com or https://<app>/sites/amelia */
+export function siteUrl(
+  subdomain: string,
+  config: RoutingConfig = routingConfigFromEnv(),
+  base: string = appUrl(),
+): string {
+  if (config.mode === "path") return `${base}${SITES_PATH_PREFIX}/${subdomain}`;
+  const { protocol } = new URL(base);
+  return `${protocol}//${subdomain}.${config.rootDomain}`;
+}
+
+/** How a site address is displayed around the name the user types, without the protocol. */
+export function siteAddressParts(
+  config: RoutingConfig = routingConfigFromEnv(),
+  base: string = appUrl(),
+): { prefix: string; suffix: string } {
+  if (config.mode === "path") {
+    return { prefix: `${new URL(base).host}${SITES_PATH_PREFIX}/`, suffix: "" };
+  }
+  return { prefix: "", suffix: `.${config.rootDomain}` };
 }

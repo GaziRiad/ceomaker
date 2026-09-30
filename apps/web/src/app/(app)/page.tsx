@@ -1,4 +1,4 @@
-import { tenantUrl } from "@/lib/routing";
+import { siteUrl } from "@/lib/routing";
 import { ButtonLink, Container, Wordmark } from "./components";
 
 const steps = [
@@ -72,11 +72,7 @@ function SitePreview() {
 }
 
 export default function HomePage() {
-  const exampleUrl = tenantUrl(
-    "demo",
-    process.env.APP_URL ?? "http://localhost:3000",
-    process.env.ROOT_DOMAIN ?? "localhost:3000",
-  );
+  const exampleUrl = siteUrl("demo");
 
   return (
     <>

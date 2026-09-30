@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getSession } from "@/lib/auth";
-import { serverEnv } from "@/lib/env";
-import { tenantUrl } from "@/lib/routing";
+import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { Container, Wordmark } from "../components";
 import { ClaimSiteForm } from "./claim-form";
 import { SignOutButton } from "./sign-out-button";
@@ -21,7 +20,7 @@ async function Dashboard() {
   const session = await getSession();
   if (!session) redirect("/sign-in");
 
-  const env = serverEnv();
+  const address = siteAddressParts();
   const sites = await listSitesForUser(getDb(), session.user.id);
 
   return (
@@ -46,12 +45,12 @@ async function Dashboard() {
               <p className="mb-6 leading-relaxed text-stone">
                 Choose the address your site will live at. You can build and preview for free.
               </p>
-              <ClaimSiteForm rootDomain={env.ROOT_DOMAIN} />
+              <ClaimSiteForm prefix={address.prefix} suffix={address.suffix} />
             </div>
           ) : (
             <ul className="mt-8 space-y-4">
               {sites.map((site) => {
-                const url = tenantUrl(site.subdomain, env.APP_URL, env.ROOT_DOMAIN);
+                const url = siteUrl(site.subdomain);
                 const status = STATUS_LABELS[site.status];
                 return (
                   <li
@@ -60,7 +59,9 @@ async function Dashboard() {
                   >
                     <div className="min-w-0">
                       <p className="truncate font-semibold">
-                        {site.subdomain}.{env.ROOT_DOMAIN}
+                        {address.prefix}
+                        {site.subdomain}
+                        {address.suffix}
                       </p>
                       <span
                         className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${status.className}`}

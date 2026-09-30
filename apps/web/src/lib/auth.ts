@@ -5,14 +5,30 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { headers } from "next/headers";
 import { serverEnv } from "./env";
+import { appUrl } from "./routing";
+
+/**
+ * Origins allowed to call the auth API. A Vercel preview is reachable at both its branch URL and
+ * its per-deployment URL, so both are trusted there. Production trusts only the app URL.
+ */
+function trustedOrigins(baseUrl: string): string[] {
+  const origins = [baseUrl];
+  if (process.env.VERCEL_ENV === "preview") {
+    for (const host of [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]) {
+      if (host) origins.push(`https://${host}`);
+    }
+  }
+  return origins;
+}
 
 function createAuth() {
   const env = serverEnv();
+  const baseUrl = appUrl();
   return betterAuth({
     appName: "CEOMaker",
-    baseURL: env.APP_URL,
+    baseURL: baseUrl,
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: [env.APP_URL],
+    trustedOrigins: trustedOrigins(baseUrl),
     database: drizzleAdapter(getDb(), {
       provider: "pg",
       schema: {
@@ -50,7 +66,7 @@ function createAuth() {
       // Session cookies stay host-only on the app domain. Never share them with *.<root>,
       // which is where customer sites live.
       crossSubDomainCookies: { enabled: false },
-      useSecureCookies: env.APP_URL.startsWith("https://"),
+      useSecureCookies: baseUrl.startsWith("https://"),
     },
     plugins: [nextCookies()],
   });

@@ -4,7 +4,10 @@ import { useActionState } from "react";
 import { buttonStyles } from "../components";
 import { claimSite, type ClaimSiteState } from "./actions";
 
-export function ClaimSiteForm({ rootDomain }: { rootDomain: string }) {
+const affixStyles = "flex shrink-0 items-center bg-paper px-3 text-sm text-stone";
+
+/** prefix/suffix frame the name the user types, e.g. "" + name + ".ceomaker.com". */
+export function ClaimSiteForm({ prefix, suffix }: { prefix: string; suffix: string }) {
   const [state, action, pending] = useActionState<ClaimSiteState, FormData>(claimSite, {});
 
   return (
@@ -13,6 +16,11 @@ export function ClaimSiteForm({ rootDomain }: { rootDomain: string }) {
         Your address
       </label>
       <div className="flex min-h-11 items-stretch overflow-hidden rounded-md border border-line bg-white focus-within:border-navy focus-within:ring-2 focus-within:ring-navy/20">
+        {prefix ? (
+          <span className={`${affixStyles} max-w-[60%] border-r border-line`} title={prefix}>
+            <span className="truncate">{prefix}</span>
+          </span>
+        ) : null}
         <input
           id="subdomain"
           name="subdomain"
@@ -29,9 +37,7 @@ export function ClaimSiteForm({ rootDomain }: { rootDomain: string }) {
           aria-invalid={state.error ? true : undefined}
           className="min-w-0 flex-1 px-3.5 text-base focus:outline-none"
         />
-        <span className="flex items-center border-l border-line bg-paper px-3 text-sm text-stone">
-          .{rootDomain}
-        </span>
+        {suffix ? <span className={`${affixStyles} border-l border-line`}>{suffix}</span> : null}
       </div>
       <p id="subdomain-hint" className="text-xs text-stone">
         3 to 40 characters: lowercase letters, numbers and hyphens.

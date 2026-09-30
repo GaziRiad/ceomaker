@@ -8,8 +8,27 @@ export interface DatabaseOptions {
   maxConnections?: number;
 }
 
+/**
+ * libpq options that postgres.js does not understand. postgres.js forwards unknown URL parameters
+ * to the server as settings, which Postgres rejects, and Neon's copy-paste connection strings
+ * include `channel_binding=require`. TLS is still enforced through `sslmode`.
+ */
+const CLIENT_ONLY_PARAMS = ["channel_binding"];
+
+export function normalizeConnectionString(url: string): string {
+  const parsed = new URL(url);
+  let changed = false;
+  for (const name of CLIENT_ONLY_PARAMS) {
+    if (parsed.searchParams.has(name)) {
+      parsed.searchParams.delete(name);
+      changed = true;
+    }
+  }
+  return changed ? parsed.toString() : url;
+}
+
 export function createDatabase(url: string, options: DatabaseOptions = {}) {
-  const client = postgres(url, {
+  const client = postgres(normalizeConnectionString(url), {
     max: options.maxConnections ?? 5,
     idle_timeout: 20,
     connect_timeout: 10,

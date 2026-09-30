@@ -1,5 +1,6 @@
+import { appUrl } from "@/lib/routing";
+
 export default function TenantNotFound() {
-  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[#fbfaf7] px-6 text-[#16181d]">
       <div className="max-w-md text-center">
@@ -11,7 +12,7 @@ export default function TenantNotFound() {
           The address may be unclaimed, or its owner has not published it yet.
         </p>
         <a
-          href={appUrl}
+          href={appUrl()}
           className="mt-8 inline-flex min-h-11 items-center rounded bg-[#1f3a5f] px-6 text-sm font-semibold text-white"
         >
           Create your own site
