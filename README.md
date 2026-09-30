@@ -49,12 +49,12 @@ packages/templates  Server-rendered site templates (Executive) and the template 
 
 ## Local development (Windows, macOS, Linux)
 
-Requirements: **Node 24 LTS**, **pnpm 10.33**, and a Postgres database (the setup below uses Neon's free tier, so there's nothing to install).
+Requirements: **Node 24 or newer** (CI and Vercel use 24 LTS; 26 also works), **pnpm 10.33**, and a Postgres database (the setup below uses Neon's free tier, so there's nothing to install).
 
 ### 1. Node and pnpm
 
 ```powershell
-node -v                          # needs v24.x; install with: winget install OpenJS.NodeJS.LTS
+node -v                          # needs v24 or newer; install with: winget install OpenJS.NodeJS.LTS
 npm install -g pnpm@10.33.0      # Node 25+ no longer ships Corepack, so install pnpm directly
 pnpm -v                          # 10.33.0
 ```
