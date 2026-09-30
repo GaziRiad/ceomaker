@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/styles.css">
+<script src="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--color-bg)} a{color:var(--color-accent-700)} a:hover{color:var(--color-accent-600)}
+@keyframes cm-spin{to{transform:rotate(360deg)}}
+@keyframes cm-pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--color-accent) 45%,transparent)}50%{box-shadow:0 0 0 6px transparent}}</style>
+</helmet>
+
+<div ref="{{ rootRef }}" style="background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:17px;line-height:1.5;min-height:100vh">
+
+<!-- ================= LANDING ================= -->
+<sc-if value="{{ is.landing }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Landing">
+  <header style="position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--color-bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-divider)">
+    <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,40px);height:68px;display:flex;align-items:center;gap:28px;font-size:15px">
+      <span style="margin-right:auto;font-family:var(--font-heading);font-weight:600;font-size:24px;letter-spacing:0.02em;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+      <a href="#how" style="color:var(--color-text);text-decoration:none">How it works</a>
+      <a href="#pricing" style="color:var(--color-text);text-decoration:none">Pricing</a>
+      <a href="#faq" style="color:var(--color-text);text-decoration:none">FAQ</a>
+      <button class="btn btn-ghost" onClick="{{ openLogin }}">Sign in</button>
+      <button class="btn btn-primary" style="padding:10px 16px" onClick="{{ start }}">Start free</button>
+    </div>
+  </header>
+
+  <section style="background:radial-gradient(900px 460px at 50% 0%,var(--color-accent-100),transparent 70%)">
+    <div style="max-width:1000px;margin:0 auto;padding:80px clamp(20px,4vw,40px) 96px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px">
+      <div data-reveal="" data-delay="0" style="display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border:1px solid var(--color-divider);border-radius:999px;background:var(--color-neutral-100);font-size:14px">
+        <span style="display:flex"><span style="width:26px;height:26px;border-radius:50%;background:var(--color-accent-700);color:var(--color-bg);font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid var(--color-neutral-100)">AH</span><span style="width:26px;height:26px;margin-left:-8px;border-radius:50%;background:var(--color-accent);color:var(--color-bg);font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid var(--color-neutral-100)">JW</span><span style="width:26px;height:26px;margin-left:-8px;border-radius:50%;background:var(--color-accent-400);color:var(--color-accent-900);font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid var(--color-neutral-100)">PR</span></span>
+        Private beta · for founders, executives and investors
+      </div>
+      <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:clamp(56px,8vw,104px);line-height:0.95;letter-spacing:-0.01em;text-transform:uppercase;text-wrap:balance"><sc-for list="{{ heroWords }}" as="w" hint-placeholder-count="7"><span data-reveal="" data-delay="{{ w.d }}" style="display:inline-block;margin:0 0.11em">{{ w.t }}</span></sc-for></h1>
+      <div data-reveal="" data-delay="480" style="max-width:620px;font-size:20px;line-height:1.5;color:var(--color-neutral-800);text-wrap:pretty">Answer a few questions with a tap. CEOMaker drafts a polished site in your voice, you refine it, and it goes live at your own address in minutes.</div>
+
+      <div data-reveal="" data-delay="640" class="blueprint" style="margin-top:28px;width:100%;max-width:820px;background:var(--color-neutral-100);box-shadow:var(--shadow-lg);text-align:left;display:flex;flex-direction:column">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--color-divider);font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)"><span>Step 1 of 5 · Let's start</span><span style="color:var(--color-neutral-600)">About 2 minutes</span></div>
+        <div style="padding:24px 20px 8px;font-family:var(--font-heading);font-weight:600;font-size:32px;text-transform:uppercase;letter-spacing:0.01em">I am a…</div>
+        <div style="padding:8px 20px 20px;display:flex;flex-wrap:wrap;gap:10px">
+          <sc-for list="{{ heroRoles }}" as="r" hint-placeholder-count="7">
+            <button onClick="{{ r.pick }}" style="all:unset;cursor:pointer;padding:12px 18px;border:1px solid var(--color-divider);border-radius:var(--radius-md);font-size:17px;background:var(--color-bg);transition:transform .25s cubic-bezier(.2,.7,.2,1),border-color .2s,background .2s,box-shadow .25s" style-hover="border-color:var(--color-accent);background:var(--color-accent-100);transform:translateY(-2px);box-shadow:var(--shadow-sm)">{{ r.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;padding:14px 20px;border-top:1px solid var(--color-divider);font-size:14px;color:var(--color-neutral-700)">
+          <span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Mostly taps, very little typing</span>
+          <span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Free to preview</span>
+          <span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>No card until you publish</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider);overflow:hidden;display:flex;align-items:center">
+    <span style="flex:none;padding:22px 24px 22px clamp(20px,4vw,40px);font-size:14px;color:var(--color-neutral-700);background:var(--color-bg);position:relative;z-index:1">Built for</span>
+    <div style="flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)">
+      <div data-marquee="" style="display:flex;width:max-content;font-family:var(--font-heading);font-weight:600;font-size:22px;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-neutral-600)">
+        <sc-for list="{{ marquee }}" as="m" hint-placeholder-count="14"><span style="padding:22px 22px;white-space:nowrap;display:flex;align-items:center;gap:22px">{{ m }}<span style="width:5px;height:5px;background:var(--color-accent-400)"></span></span></sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1200px;margin:0 auto;padding:112px clamp(20px,4vw,40px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">Before every meeting, they look you up</span>
+    <h2 data-reveal="" style="margin:0;max-width:880px;font-family:var(--font-heading);font-weight:600;font-size:clamp(40px,5vw,64px);line-height:1;text-transform:uppercase">An outdated profile. A three-line bio. Someone else with your name.</h2>
+    <div style="max-width:600px;font-size:19px;color:var(--color-neutral-800)">Investors, boards, journalists and future hires form a view before you speak. Give them one page that tells your story the way you would.</div>
+    <div style="margin-top:36px;width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px;text-align:left">
+      <sc-for list="{{ realities }}" as="r" hint-placeholder-count="3">
+        <div data-reveal="" data-delay="{{ r.d }}" class="blueprint" style="padding:28px;display:flex;flex-direction:column;gap:10px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:48px;line-height:1;color:var(--color-accent)">{{ r.n }}</span>
+          <span style="font-size:17px;line-height:1.5">{{ r.t }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="how" style="background:var(--color-surface);border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider)">
+    <div style="max-width:1200px;margin:0 auto;padding:112px clamp(20px,4vw,40px);display:flex;flex-direction:column;gap:48px">
+      <div data-reveal="" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+        <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">How it works</span>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:clamp(40px,5vw,64px);line-height:1;text-transform:uppercase">Live in three steps</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px">
+        <div data-reveal="" data-delay="0" class="blueprint" style="background:var(--color-neutral-100);padding:28px;display:flex;flex-direction:column;gap:18px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <span style="font-size:13px;letter-spacing:0.12em;color:var(--color-accent-700)">01</span>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:16px;background:var(--color-bg);border:1px solid var(--color-divider)">
+            <span style="padding:6px 12px;border:1px solid var(--color-accent);background:var(--color-accent-100);border-radius:var(--radius-md);font-size:14px">Chief executive</span><span style="padding:6px 12px;border:1px solid var(--color-divider);border-radius:var(--radius-md);font-size:14px">Logistics</span><span style="padding:6px 12px;border:1px solid var(--color-accent);background:var(--color-accent-100);border-radius:var(--radius-md);font-size:14px">Board roles</span><span style="padding:6px 12px;border:1px solid var(--color-divider);border-radius:var(--radius-md);font-size:14px">Measured</span>
+          </div>
+          <h3 style="margin:0;font-size:28px;text-transform:uppercase">Tap through a few questions</h3>
+          <span style="color:var(--color-neutral-800)">Role, industry, what the site is for and the voice you want. Add your CV or LinkedIn if you like. Nothing is published yet.</span>
+        </div>
+        <div data-reveal="" data-delay="110" class="blueprint" style="background:var(--color-neutral-100);padding:28px;display:flex;flex-direction:column;gap:18px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <span style="font-size:13px;letter-spacing:0.12em;color:var(--color-accent-700)">02</span>
+          <div style="padding:16px;background:var(--color-bg);border:1px solid var(--color-divider);display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Drafting · Hero</span>
+            <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;line-height:1.05;text-transform:uppercase">Building supply chains that hold up under pressure.</span>
+            <span style="height:6px;width:90%;background:var(--color-neutral-300)"></span><span style="height:6px;width:70%;background:var(--color-neutral-300)"></span>
+          </div>
+          <h3 style="margin:0;font-size:28px;text-transform:uppercase">Review your draft</h3>
+          <span style="color:var(--color-neutral-800)">CEOMaker writes a first version in a measured, professional voice. Edit any line, colour or section order.</span>
+        </div>
+        <div data-reveal="" data-delay="220" class="blueprint" style="background:var(--color-neutral-100);padding:28px;display:flex;flex-direction:column;gap:18px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <span style="font-size:13px;letter-spacing:0.12em;color:var(--color-accent-700)">03</span>
+          <div style="padding:16px;background:var(--color-bg);border:1px solid var(--color-divider);display:flex;align-items:center;gap:10px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)"></span><span style="flex:1;font-size:15px">amelia.ceomaker.com</span><span class="tag tag-accent">Live</span>
+          </div>
+          <h3 style="margin:0;font-size:28px;text-transform:uppercase">Publish</h3>
+          <span style="color:var(--color-neutral-800)">Your site goes live at yourname.ceomaker.com, fast on every phone and laptop. Your own domain is coming soon.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1200px;margin:0 auto;padding:112px clamp(20px,4vw,40px);display:flex;flex-direction:column;gap:48px">
+    <div data-reveal="" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+      <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">Against the alternatives</span>
+      <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:clamp(40px,5vw,64px);line-height:1;text-transform:uppercase">Agency quality, without the agency</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:24px">
+      <sc-for list="{{ compare }}" as="c" hint-placeholder-count="3">
+        <div data-reveal="" data-delay="{{ c.d }}" class="blueprint" style="padding:28px;display:flex;flex-direction:column;gap:12px;background:{{ c.bg }};transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:{{ c.kick }}">{{ c.name }}</span>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:40px;line-height:1;text-transform:uppercase">{{ c.time }}</span>
+          <span style="font-size:15px;color:var(--color-neutral-700)">{{ c.cost }}</span>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;font-size:15px">
+            <sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="4"><span style="display:flex;gap:10px;color:{{ r.color }}"><span style="width:14px;flex:none;color:{{ r.mc }}">{{ r.m }}</span>{{ r.t }}</span></sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="background:var(--color-surface);border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider)">
+    <div style="max-width:1200px;margin:0 auto;padding:112px clamp(20px,4vw,40px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px">
+      <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="3">
+        <figure data-reveal="" data-delay="{{ q.d }}" class="blueprint" style="margin:0;background:var(--color-neutral-100);padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:28px">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <blockquote style="margin:0;font-size:19px;line-height:1.5">“{{ q.quote }}”</blockquote>
+          <figcaption style="display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;border-radius:50%;background:var(--color-accent-200);color:var(--color-accent-800);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500">{{ q.ini }}</span><span style="display:flex;flex-direction:column;font-size:14px"><span style="font-weight:500">{{ q.name }}</span><span style="color:var(--color-neutral-700)">{{ q.role }}</span></span></figcaption>
+        </figure>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="pricing" style="max-width:1200px;margin:0 auto;padding:112px clamp(20px,4vw,40px);display:flex;flex-direction:column;align-items:center;gap:32px">
+    <div data-reveal="" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+      <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">Pricing</span>
+      <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:clamp(40px,5vw,64px);line-height:1;text-transform:uppercase">One plan. No surprises.</h2>
+      <span style="color:var(--color-neutral-800)">Build and preview for free. Pay only when you publish, and cancel any time.</span>
+    </div>
+    <div class="seg">
+      <sc-for list="{{ plans }}" as="p" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="plan" checked="{{ p.on }}" onChange="{{ p.pick }}">{{ p.label }}</label></sc-for>
+    </div>
+    <div data-reveal="" class="blueprint" style="width:100%;max-width:520px;background:var(--color-neutral-100);box-shadow:var(--shadow-md);padding:32px;display:flex;flex-direction:column;gap:20px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div data-price="" style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--font-heading);font-weight:600;font-size:72px;line-height:1">{{ price.price }}</span><span style="color:var(--color-neutral-700)">{{ price.per }}</span></div>
+      <span style="font-size:14px;color:var(--color-accent-700)">{{ price.note }}</span>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:16px">
+        <sc-for list="{{ included }}" as="i" hint-placeholder-count="6"><span style="display:flex;gap:10px;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>{{ i }}</span></sc-for>
+      </div>
+      <button class="btn btn-primary" style="justify-content:space-between;padding:14px 16px;font-size:16px" onClick="{{ start }}">Start building <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+    </div>
+  </section>
+
+  <section id="faq" style="max-width:820px;margin:0 auto;padding:0 clamp(20px,4vw,40px) 112px;display:flex;flex-direction:column;gap:28px">
+    <h2 data-reveal="" style="margin:0;text-align:center;font-family:var(--font-heading);font-weight:600;font-size:clamp(40px,5vw,64px);line-height:1;text-transform:uppercase">Questions</h2>
+    <div data-reveal="" data-delay="120" style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ faq }}" as="q" hint-placeholder-count="6">
+        <div style="border:1px solid var(--color-divider);background:var(--color-neutral-100)">
+          <button onClick="{{ q.toggle }}" style="all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 20px;font-size:18px;font-weight:500">{{ q.q }}<span style="font-size:22px;color:var(--color-accent)">{{ q.mark }}</span></button>
+          <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}"><div style="padding:0 20px 18px;color:var(--color-neutral-800)">{{ q.a }}</div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="background:var(--color-accent-900);color:var(--color-bg)">
+    <div style="max-width:1000px;margin:0 auto;padding:104px clamp(20px,4vw,40px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px">
+      <h2 data-reveal="" style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:clamp(48px,6.5vw,88px);line-height:0.95;text-transform:uppercase;text-wrap:balance">Be the first thing people find.</h2>
+      <span style="font-size:19px;color:var(--color-accent-200)">Two minutes of taps. A site you're proud to send.</span>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:8px">
+        <sc-for list="{{ heroRoles }}" as="r" hint-placeholder-count="7">
+          <button onClick="{{ r.pick }}" style="all:unset;cursor:pointer;padding:12px 18px;border:1px solid var(--color-accent-400);border-radius:var(--radius-md);font-size:16px;color:var(--color-bg);transition:transform .25s cubic-bezier(.2,.7,.2,1),background .2s" style-hover="background:var(--color-accent-800);transform:translateY(-2px)">{{ r.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <footer style="max-width:1200px;margin:0 auto;padding:28px clamp(20px,4vw,40px) 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:14px;color:var(--color-neutral-700)">
+    <span style="font-family:var(--font-heading);font-weight:600;font-size:18px;text-transform:uppercase;color:var(--color-text)">CEO<span style="color:var(--color-accent)">Maker</span></span>
+    <span>Personal websites for people who lead.</span><span>© 2026</span>
+  </footer>
+</div>
+</sc-if>
+
+<!-- ================= GUIDED FLOW ================= -->
+<sc-if value="{{ is.flow }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Guided questions" style="min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr))">
+  <div style="display:flex;flex-direction:column;padding:24px clamp(20px,4vw,56px) 40px;gap:32px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <span style="margin-right:auto;font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+      <button class="btn btn-ghost" onClick="{{ exit }}">Save and exit</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)"><span>Step {{ stepNum }} of 5</span><span style="color:var(--color-neutral-600)">{{ stepName }}</span></div>
+      <div style="height:3px;background:var(--color-neutral-300)"><div style="height:3px;width:{{ progress }};background:var(--color-accent);transition:width .3s"></div></div>
+    </div>
+    <div data-step="" style="flex:1;display:flex;flex-direction:column;gap:22px;max-width:640px">
+      <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:clamp(36px,4vw,52px);line-height:1;text-transform:uppercase">{{ q.title }}</h1>
+      <span style="color:var(--color-neutral-700);margin-top:-8px">{{ q.hint }}</span>
+
+      <sc-if value="{{ q.isChips }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
+          <sc-for list="{{ q.options }}" as="o" hint-placeholder-count="8">
+            <button onClick="{{ o.pick }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:13px 18px;border:1px solid {{ o.ring }};background:{{ o.bg }};border-radius:var(--radius-md);font-size:17px;transition:transform .2s cubic-bezier(.2,.7,.2,1),border-color .2s,background .2s" style-hover="border-color:var(--color-accent);transform:translateY(-2px)"><span style="display:{{ o.checkDisplay }};color:var(--color-accent-700)">✓</span>{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ q.isCards }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+          <sc-for list="{{ q.options }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.pick }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid {{ o.ring }};background:{{ o.bg }};border-radius:var(--radius-md)">
+              <span style="font-family:var(--font-heading);font-weight:600;font-size:24px;text-transform:uppercase">{{ o.label }}</span>
+              <span style="font-size:15px;line-height:1.45;color:var(--color-neutral-800)">{{ o.sample }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ q.isDetails }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+          <div class="field"><label>Full name</label><input class="input" value="{{ a.name }}" onChange="{{ setName }}" placeholder="Amelia Hart"></div>
+          <div class="field"><label>Organisation (optional)</label><input class="input" value="{{ a.org }}" onChange="{{ setOrg }}" placeholder="Meridian Freight Group"></div>
+        </div>
+        <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:6px">Optional · fills in your experience and results</span>
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
+          <sc-for list="{{ sources }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.pick }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:13px 18px;border:1px solid {{ o.ring }};background:{{ o.bg }};border-radius:var(--radius-md);font-size:16px"><span style="display:{{ o.checkDisplay }};color:var(--color-accent-700)">✓</span>{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn btn-secondary" style="padding:12px 16px" onClick="{{ back }}">Back</button>
+      <button class="btn btn-primary" style="min-width:220px;justify-content:space-between;padding:12px 16px;font-size:16px" onClick="{{ next }}" disabled="{{ nextDisabled }}">{{ nextLabel }} <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+      <sc-if value="{{ q.canSkip }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ skip }}">Skip</button></sc-if>
+    </div>
+  </div>
+  <div style="background:var(--color-surface);border-left:1px solid var(--color-divider);padding:40px clamp(20px,3vw,48px);display:flex;flex-direction:column;gap:14px">
+    <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Your site, taking shape</span>
+    <div class="blueprint" style="background:var(--color-neutral-100);box-shadow:var(--shadow-md)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="height:32px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)">{{ address }}.ceomaker.com</div>
+      <div ref="{{ frameRef }}" style="height:560px;overflow:hidden"><div style="width:1280px;zoom:{{ zoom }};pointer-events:none"><dc-import name="PortfolioTemplate" template="meridian" content="{{ preview }}" hint-size="1280px,1200px"></dc-import></div></div>
+    </div>
+    <span style="font-size:14px;color:var(--color-neutral-700)">A rough preview. The full draft is written after you choose a template.</span>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= LOGIN GATE ================= -->
+<sc-if value="{{ is.login }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Sign in to save" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:radial-gradient(800px 420px at 50% 0%,var(--color-accent-100),transparent 70%)">
+  <div class="blueprint" style="width:100%;max-width:440px;background:var(--color-neutral-100);box-shadow:var(--shadow-lg);padding:32px;display:flex;flex-direction:column;gap:18px">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <span style="font-family:var(--font-heading);font-weight:600;font-size:20px;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:40px;line-height:1;text-transform:uppercase">{{ login.title }}</h1>
+      <span style="color:var(--color-neutral-700)">{{ login.sub }}</span>
+    </div>
+    <button class="btn btn-secondary" style="justify-content:flex-start;gap:12px;padding:13px 16px;font-size:16px;background:var(--color-bg)" onClick="{{ login.done }}"><span style="width:22px;height:22px;border-radius:50%;border:1px solid var(--color-divider);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">G</span>Continue with Google</button>
+    <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--color-neutral-600)"><span style="flex:1;height:1px;background:var(--color-divider)"></span>or<span style="flex:1;height:1px;background:var(--color-divider)"></span></div>
+    <sc-if value="{{ login.emailSent }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:16px;border:1px solid var(--color-accent);background:var(--color-accent-100);display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Check your inbox</span><span style="font-size:15px;color:var(--color-neutral-800)">We sent a sign-in link to {{ a.email }}.</span><button class="btn btn-ghost" style="align-self:flex-start;padding-left:0" onClick="{{ login.done }}">Open the link (demo)</button></div>
+    </sc-if>
+    <sc-if value="{{ login.emailForm }}" hint-placeholder-val="{{ true }}">
+      <div class="field"><label>Work email</label><input class="input" type="email" value="{{ a.email }}" onChange="{{ setEmail }}" placeholder="you@company.com"></div>
+      <button class="btn btn-primary" style="justify-content:space-between;padding:13px 16px;font-size:16px" onClick="{{ login.sendLink }}">Email me a sign-in link <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg></button>
+    </sc-if>
+    <span style="font-size:13px;color:var(--color-neutral-600)">No password needed. Your answers are saved to your account and stay private.</span>
+    <button class="btn btn-ghost" style="align-self:flex-start;padding-left:0" onClick="{{ login.back }}">{{ login.backLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= BUILDER: TEMPLATE PICK ================= -->
+<sc-if value="{{ is.build }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Builder — choose template">
+  <header style="border-bottom:1px solid var(--color-divider);background:var(--color-neutral-100)">
+    <div style="max-width:1320px;margin:0 auto;padding:0 clamp(20px,3vw,32px);height:64px;display:flex;align-items:center;gap:20px;font-size:15px">
+      <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+      <span style="color:var(--color-neutral-600)">/</span><span>{{ address }}.ceomaker.com</span><span class="tag tag-neutral">Draft</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:50%;background:var(--color-accent-200);color:var(--color-accent-800);display:flex;align-items:center;justify-content:center;font-size:13px">{{ initials }}</span></span>
+    </div>
+  </header>
+  <div style="max-width:1320px;margin:0 auto;padding:40px clamp(20px,3vw,32px) 120px;display:flex;flex-direction:column;gap:28px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Your answers are saved · Choose a look</span>
+      <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:clamp(36px,4vw,52px);line-height:1;text-transform:uppercase">How should you be presented?</h1>
+      <span style="color:var(--color-neutral-700)">Each preview uses your answers. You can switch at any time without losing edits.</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:24px">
+      <sc-for list="{{ tpls }}" as="t" hint-placeholder-count="5">
+        <button onClick="{{ t.pick }}" class="blueprint" style="all:unset;cursor:pointer;position:relative;border:1px solid {{ t.ring }};background:var(--color-neutral-100);display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .2s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md)">
+          <div style="height:260px;overflow:hidden;border-bottom:1px solid var(--color-divider)"><div style="width:1280px;zoom:0.3;pointer-events:none"><dc-import name="PortfolioTemplate" template="{{ t.key }}" content="{{ preview }}" hint-size="1280px,900px"></dc-import></div></div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:16px">
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">{{ t.name }}</span><span style="font-size:14px;color:var(--color-neutral-700)">{{ t.desc }}</span></div>
+            <span style="width:22px;height:22px;flex:none;border-radius:50%;border:1px solid {{ t.ring }};background:{{ t.dot }}"></span>
+          </div>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="position:fixed;left:0;right:0;bottom:0;background:var(--color-neutral-100);border-top:1px solid var(--color-divider);box-shadow:var(--shadow-lg)">
+    <div style="max-width:1320px;margin:0 auto;padding:14px clamp(20px,3vw,32px);display:flex;align-items:center;gap:16px">
+      <span style="flex:1">Selected: <strong>{{ tplName }}</strong></span>
+      <button class="btn btn-primary" style="min-width:240px;justify-content:space-between;padding:12px 16px;font-size:16px" onClick="{{ toGenerate }}">Write my site <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= GENERATING ================= -->
+<sc-if value="{{ is.generating }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Generating" style="min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));background:radial-gradient(900px 520px at 15% 0%,var(--color-accent-100),transparent 70%)">
+  <div style="padding:28px clamp(20px,4vw,56px) 40px;display:flex;flex-direction:column;gap:40px">
+    <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;max-width:520px">
+      <span data-reveal="" style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ tplName }} template · {{ a.voice }} voice</span>
+      <h1 data-reveal="" data-delay="80" style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:clamp(44px,5vw,68px)">Writing your first draft</h1>
+      <div data-reveal="" data-delay="160" style="height:3px;background:var(--color-neutral-300)"><div style="height:3px;width:{{ genPct }};background:var(--color-accent);transition:width .9s cubic-bezier(.2,.7,.2,1)"></div></div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <sc-for list="{{ genRows }}" as="g" hint-placeholder-count="5">
+          <div data-gen="{{ g.i }}" style="display:flex;align-items:center;gap:14px;font-size:17px;color:{{ g.color }};transition:color .4s">
+            <span data-icon="" style="width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center">
+              <sc-if value="{{ g.done }}" hint-placeholder-val="{{ false }}"><span style="width:22px;height:22px;border-radius:50%;background:var(--color-accent);display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if>
+              <sc-if value="{{ g.active }}" hint-placeholder-val="{{ false }}">{{ spinner }}</sc-if>
+              <sc-if value="{{ g.pending }}" hint-placeholder-val="{{ true }}"><span style="width:10px;height:10px;border-radius:50%;border:1px solid var(--color-neutral-400)"></span></sc-if>
+            </span>{{ g.label }}
+          </div>
+        </sc-for>
+      </div>
+      <span style="font-size:14px;color:var(--color-neutral-700)">Usually under a minute. Everything stays a draft until you publish.</span>
+    </div>
+  </div>
+  <div style="padding:40px clamp(20px,3vw,48px);display:flex;align-items:center">
+    <div data-reveal="" data-delay="200" class="blueprint" style="width:100%;background:var(--color-neutral-100);box-shadow:var(--shadow-lg)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="height:34px;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-accent);animation:cm-pulse 1.6s ease-in-out infinite"></span>{{ address }}.ceomaker.com</div>
+      <div data-zoomkey="gen" style="position:relative;height:600px;overflow:hidden">
+        <div style="width:1280px;zoom:{{ zGen }};pointer-events:none"><dc-import name="PortfolioTemplate" template="{{ template }}" theme="{{ theme }}" content="{{ content }}" hint-size="1280px,1400px"></dc-import></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;top:{{ genTop }};background:var(--color-neutral-100);transition:top 1s cubic-bezier(.2,.7,.2,1);padding:36px 40px;display:flex;flex-direction:column;gap:14px">
+          <span style="height:10px;width:38%;background:var(--color-neutral-200)"></span><span style="height:26px;width:78%;background:var(--color-neutral-200)"></span><span style="height:26px;width:64%;background:var(--color-neutral-200)"></span><span style="height:10px;width:70%;background:var(--color-neutral-200);margin-top:12px"></span><span style="height:10px;width:58%;background:var(--color-neutral-200)"></span>
+        </div>
+        <div style="position:absolute;left:0;right:0;top:{{ genTop }};height:2px;background:var(--color-accent);box-shadow:0 0 18px 2px var(--color-accent-300);transition:top 1s cubic-bezier(.2,.7,.2,1),opacity .4s;opacity:{{ genLine }}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= EDITOR ================= -->
+<sc-if value="{{ is.editor }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Editor" style="height:100vh;display:grid;grid-template-rows:auto minmax(0,1fr)">
+  <header style="display:flex;align-items:center;gap:16px;padding:0 clamp(16px,2vw,24px);height:60px;background:var(--color-neutral-100);border-bottom:1px solid var(--color-divider);font-size:15px">
+    <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+    <span style="color:var(--color-neutral-500)">/</span><span>{{ address }}.ceomaker.com</span>
+    <span class="{{ statusTag }}">{{ statusLabel }}</span>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--color-neutral-700)"><span style="width:7px;height:7px;border-radius:50%;background:{{ saveDot }};transition:background .3s"></span>{{ saveLabel }}</span>
+    <button class="btn btn-ghost" onClick="{{ toDashboard }}">Dashboard</button>
+    <button class="btn btn-primary" style="padding:10px 16px;gap:10px;justify-content:space-between;min-width:140px" onClick="{{ openPublish }}">{{ publishLabel }} <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+  </header>
+  <div style="min-height:0;display:grid;grid-template-columns:360px minmax(0,1fr)">
+    <aside style="min-height:0;overflow:auto;background:var(--color-neutral-100);border-right:1px solid var(--color-divider);display:flex;flex-direction:column">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--color-divider)">
+        <div class="seg" style="width:100%;display:grid;grid-template-columns:repeat(3,1fr)">
+          <sc-for list="{{ edTabs }}" as="tb" hint-placeholder-count="2"><label class="seg-opt" style="justify-content:center"><input type="radio" name="edtab" checked="{{ tb.on }}" onChange="{{ tb.pick }}">{{ tb.label }}</label></sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ tab.content }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:12px 12px 8px;display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ sectionRows }}" as="r" hint-placeholder-count="6">
+            <div onClick="{{ r.select }}" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid {{ r.ring }};background:{{ r.bg }};opacity:{{ r.opacity }};transition:background .2s,border-color .2s,opacity .2s" style-hover="background:var(--color-accent-100)">
+              <span style="color:var(--color-neutral-500);font-size:13px;letter-spacing:-2px">⋮⋮</span>
+              <span style="flex:1;font-size:15px">{{ r.label }}</span>
+              <button onClick="{{ r.toggle }}" class="btn btn-ghost" style="padding:2px 8px;font-size:12px;color:var(--color-neutral-700)">{{ r.eye }}</button>
+            </div>
+          </sc-for>
+        </div>
+        <div data-panel="" style="padding:16px 16px 40px;display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--color-divider)">
+          <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ selLabel }}</span>
+          <sc-if value="{{ sel.hero }}" hint-placeholder-val="{{ true }}">
+            <div class="field"><label>Portrait</label>
+              <div style="display:flex;align-items:center;gap:14px;padding:12px;border:1px dashed {{ photoRing }};background:{{ photoBg }};transition:border-color .2s,background .2s" onDragOver="{{ photoDragOver }}" onDragLeave="{{ photoDragLeave }}" onDrop="{{ photoDrop }}">
+                <span style="position:relative;width:64px;height:80px;flex:none;overflow:hidden;background:var(--color-accent-200);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:600;font-size:22px;color:var(--color-accent-800)">{{ initials }}<sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background-image:{{ photoThumb }};background-size:cover;background-position:center"></span></sc-if></span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+                  <span style="font-size:13px;color:var(--color-neutral-700)">{{ photoHint }}</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <label class="btn btn-secondary" style="font-size:13px;padding:5px 10px;background:var(--color-neutral-100);cursor:pointer">{{ photoCta }}<input type="file" accept="image/png,image/jpeg,image/webp" onChange="{{ photoPick }}" style="display:none"></label>
+                    <sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" style="font-size:13px;padding:5px 8px" onClick="{{ photoRemove }}">Remove</button></sc-if>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field"><label>Eyebrow</label><input class="input" value="{{ content.eyebrow }}" onChange="{{ ce.eyebrow }}"></div>
+            <div class="field"><label>Headline</label><textarea class="input" style="min-height:76px;opacity:{{ rwOpacity }};transition:opacity .3s" value="{{ content.headline }}" onChange="{{ ce.headline }}"></textarea></div>
+            <div class="blueprint" style="padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--color-accent-100)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <span style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--color-accent-800)">{{ rwIcon }}{{ rwLabel }}</span>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ rewriteRows }}" as="w" hint-placeholder-count="3"><button class="btn btn-secondary" style="font-size:13px;padding:5px 10px;background:var(--color-neutral-100);transition:transform .2s,background .2s" style-hover="transform:translateY(-1px)" onClick="{{ w.run }}">{{ w.label }}</button></sc-for>
+              </div>
+            </div>
+            <div class="field"><label>Introduction</label><textarea class="input" style="min-height:120px" value="{{ content.subheadline }}" onChange="{{ ce.subheadline }}"></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="field"><label>Button label</label><input class="input" value="{{ content.cta }}" onChange="{{ ce.cta }}"></div><div class="field"><label>Button link</label><input class="input" value="{{ ctaHref }}" onChange="{{ ce.ctaHref }}" placeholder="#contact"></div></div>
+          </sc-if>
+          <sc-if value="{{ sel.about }}" hint-placeholder-val="{{ false }}">
+            <div class="field"><label>Opening paragraph</label><textarea class="input" style="min-height:120px" value="{{ content.aboutA }}" onChange="{{ ce.aboutA }}"></textarea></div>
+            <div class="field"><label>Second paragraph</label><textarea class="input" style="min-height:140px" value="{{ content.aboutC }}" onChange="{{ ce.aboutC }}"></textarea></div>
+          </sc-if>
+          <sc-if value="{{ sel.impact }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ statRows }}" as="st" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px"><input class="input" value="{{ st.v }}" onChange="{{ st.onV }}"><input class="input" value="{{ st.l }}" onChange="{{ st.onL }}"></div>
+            </sc-for>
+            <span style="font-size:13px;color:var(--color-neutral-700)">Up to 8 numbers. Four reads best.</span>
+          </sc-if>
+          <sc-if value="{{ sel.experience }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ expRows }}" as="e" hint-placeholder-count="3">
+              <div style="padding:12px;border:1px solid var(--color-divider);display:flex;flex-direction:column;gap:2px"><span style="font-weight:500">{{ e.role }}</span><span style="font-size:13px;color:var(--color-neutral-700)">{{ e.org }} · {{ e.dates }}</span></div>
+            </sc-for>
+            <button class="btn btn-ghost" style="align-self:flex-start;padding-left:0">+ Add a role</button>
+          </sc-if>
+          <sc-if value="{{ sel.work }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ workRows }}" as="w" hint-placeholder-count="4">
+              <div style="padding:12px;border:1px solid var(--color-divider);display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ w.kind }}</span><span style="font-weight:500">{{ w.title }}</span><span style="font-size:13px;color:var(--color-neutral-700)">{{ w.meta }} · {{ w.year }}</span></div>
+            </sc-for>
+            <button class="btn btn-ghost" style="align-self:flex-start;padding-left:0">+ Add a talk, article or board seat</button>
+          </sc-if>
+          <sc-if value="{{ sel.testimonials }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ tmRows }}" as="e" hint-placeholder-count="2">
+              <div style="padding:12px;border:1px solid var(--color-divider);display:flex;flex-direction:column;gap:6px"><span style="font-size:14px">“{{ e.quote }}”</span><span style="font-size:13px;color:var(--color-neutral-700)">{{ e.author }}, {{ e.role }}</span></div>
+            </sc-for>
+            <button class="btn btn-ghost" style="align-self:flex-start;padding-left:0">+ Add a quote</button>
+          </sc-if>
+          <sc-if value="{{ sel.contact }}" hint-placeholder-val="{{ false }}">
+            <div class="field"><label>Invitation</label><textarea class="input" style="min-height:76px" value="{{ content.blurb }}" onChange="{{ ce.blurb }}"></textarea></div>
+            <div class="field"><label>Email</label><input class="input" value="{{ content.email }}" onChange="{{ ce.email }}"></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:12px;color:var(--color-neutral-700)">Links</span>
+              <sc-for list="{{ linkRows }}" as="lk" hint-placeholder-count="2">
+                <div data-link="" style="display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid {{ lk.ring }};background:var(--color-bg)">
+                  <div style="display:flex;gap:6px"><input class="input" style="flex:1" value="{{ lk.label }}" onChange="{{ lk.onLabel }}" placeholder="Label"><button class="btn btn-ghost" style="padding:0 8px;font-size:18px;color:var(--color-neutral-600)" aria-label="Remove link" onClick="{{ lk.remove }}">×</button></div>
+                  <input class="input" value="{{ lk.href }}" onChange="{{ lk.onHref }}" placeholder="https://" spellcheck="false">
+                  <span style="font-size:12px;color:{{ lk.msgColor }}">{{ lk.msg }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ linkQuick }}" as="q" hint-placeholder-count="4"><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;background:var(--color-neutral-100)" onClick="{{ q.add }}">+ {{ q.label }}</button></sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tab.brand }}" hint-placeholder-val="{{ false }}">
+        <div data-panel="" style="padding:16px 16px 40px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Palette · {{ tplName }}</span><span style="font-size:13px;color:var(--color-neutral-700)">Every colour on the page follows these three.</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ paletteRows }}" as="p" hint-placeholder-count="5">
+              <button onClick="{{ p.pick }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid {{ p.ring }};background:var(--color-bg);transition:border-color .2s,transform .2s cubic-bezier(.2,.7,.2,1)" style-hover="transform:translateY(-1px)">
+                <span style="display:flex;height:34px;overflow:hidden;border:1px solid var(--color-divider)"><span style="flex:2;background:{{ p.bg }}"></span><span style="flex:1;background:{{ p.ink }}"></span><span style="flex:1;background:{{ p.accent }}"></span></span>
+                <span style="display:flex;justify-content:space-between;align-items:center;font-size:13px">{{ p.name }}<span style="display:{{ p.check }};color:var(--color-accent-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span></span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Custom colours</span>
+            <sc-for list="{{ colorRows }}" as="cr" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:40px minmax(0,1fr) 104px;gap:10px;align-items:center">
+                <label style="position:relative;width:40px;height:40px;border:1px solid var(--color-divider);background:{{ cr.value }};cursor:pointer;box-shadow:inset 0 0 0 3px var(--color-neutral-100)"><input type="color" value="{{ cr.value }}" onInput="{{ cr.onPick }}" style="position:absolute;inset:0;opacity:0;cursor:pointer"></label>
+                <span style="display:flex;flex-direction:column"><span style="font-size:14px">{{ cr.label }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ cr.hint }}</span></span>
+                <input class="input" value="{{ cr.value }}" onChange="{{ cr.onHex }}" spellcheck="false" style="font-family:ui-monospace,monospace;font-size:13px;text-transform:lowercase">
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid {{ contrast.ring }};background:{{ contrast.bg }}">
+            <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;min-width:64px">{{ contrast.ratio }}</span>
+            <span style="font-size:13px;color:var(--color-neutral-800)">{{ contrast.msg }}</span>
+          </div>
+          <button class="btn btn-ghost" style="align-self:flex-start;padding-left:0" onClick="{{ resetTheme }}">Reset to {{ tplName }} default</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tab.design }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:14px 16px 40px;display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ tpls }}" as="tp" hint-placeholder-count="5">
+            <button onClick="{{ tp.pick }}" style="all:unset;cursor:pointer;border:1px solid {{ tp.ring }};background:var(--color-bg);display:flex;flex-direction:column;transition:border-color .2s,transform .25s cubic-bezier(.2,.7,.2,1)" style-hover="transform:translateY(-2px)">
+              <div style="height:120px;overflow:hidden;border-bottom:1px solid var(--color-divider)"><div style="width:1280px;zoom:0.255;pointer-events:none"><dc-import name="PortfolioTemplate" template="{{ tp.key }}" theme="{{ tp.theme }}" content="{{ content }}" hint-size="1280px,600px"></dc-import></div></div>
+              <span style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px"><span style="font-family:var(--font-heading);font-weight:600;font-size:18px;text-transform:uppercase">{{ tp.name }}</span><span style="width:16px;height:16px;border-radius:50%;border:1px solid {{ tp.ring }};background:{{ tp.dot }}"></span></span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </aside>
+    <div style="min-height:0;overflow:auto;background:var(--color-surface);padding:28px">
+      <div class="blueprint" style="max-width:1280px;margin:0 auto;background:var(--color-neutral-100);box-shadow:var(--shadow-md)">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="height:32px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)">{{ address }}.ceomaker.com</div>
+        <div data-zoomkey="ed" style="overflow:hidden"><div style="width:1280px;zoom:{{ zEd }}"><dc-import name="PortfolioTemplate" template="{{ template }}" theme="{{ theme }}" content="{{ content }}" hide="{{ hide }}" hint-size="1280px,2400px"></dc-import></div></div>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ pub.open }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:30;background:color-mix(in srgb,var(--color-neutral-900) 40%,transparent);backdrop-filter:blur(3px)" onClick="{{ pub.close }}">
+      <div data-dialog="" class="dialog blueprint" style="width:min(540px,100%);gap:18px;padding:26px;border-radius:0" onClick="{{ stop }}">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <sc-if value="{{ pub.plan }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:34px">Publish your site</span><span style="font-size:15px;color:var(--color-neutral-700)">Build and preview for free. Pay only when you publish, and cancel any time.</span></div>
+          <div class="field"><label>Your address</label>
+            <div style="display:flex;align-items:stretch;min-height:42px;border:1px solid var(--color-accent);background:var(--color-neutral-100)">
+              <input value="{{ address }}" onChange="{{ setAddress }}" spellcheck="false" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:16px;padding:0 12px;color:var(--color-text)">
+              <span style="display:flex;align-items:center;padding:0 12px;background:var(--color-surface);font-size:14px;color:var(--color-neutral-700)">.ceomaker.com</span>
+            </div>
+            <span style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:var(--color-accent-700)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Available</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ planCards }}" as="p" hint-placeholder-count="2">
+              <button onClick="{{ p.pick }}" style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid {{ p.ring }};background:{{ p.bg }};transition:border-color .2s,background .2s">
+                <span style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--color-neutral-700)">{{ p.label }}<span class="tag tag-accent" style="visibility:{{ p.badge }}">2 months free</span></span>
+                <span style="font-family:var(--font-heading);font-weight:600;font-size:32px;line-height:1.1">{{ p.price }} <span style="font-family:var(--font-body);font-weight:400;font-size:14px;color:var(--color-neutral-700)">{{ p.per }}</span></span>
+                <span style="font-size:12px;color:var(--color-neutral-700)">{{ p.note }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <button class="btn btn-primary" style="justify-content:space-between;padding:13px 16px;font-size:16px" onClick="{{ pub.checkout }}"><span>Continue to checkout · {{ planTotal }}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+          <span style="font-size:12px;color:var(--color-neutral-600)">Secure checkout by Lemon Squeezy. VAT handled for you.</span>
+        </sc-if>
+        <sc-if value="{{ pub.paying }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:16px;padding:28px 4px">{{ spinner }}<div style="display:flex;flex-direction:column"><span style="font-weight:500">{{ pub.payLabel }}</span><span style="font-size:14px;color:var(--color-neutral-700)">Snapshotting your draft as version {{ nextVersion }}.</span></div></div>
+        </sc-if>
+        <sc-if value="{{ pub.done }}" hint-placeholder-val="{{ false }}">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none"><circle cx="28" cy="28" r="26" stroke="var(--color-accent)" stroke-width="1.5"></circle><path data-check="" d="M17 29l7 7 15-16" stroke="var(--color-accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="48" stroke-dashoffset="0"></path></svg>
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:34px">You're live</span><span style="font-size:15px;color:var(--color-neutral-700)">Published at <a href="#">{{ address }}.ceomaker.com</a>. Future edits stay in draft until you publish again.</span></div>
+          <div style="display:flex;gap:10px"><button class="btn btn-primary" onClick="{{ toDashboard }}">Go to dashboard</button><button class="btn btn-secondary" onClick="{{ pub.close }}">Keep editing</button></div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ================= DASHBOARD ================= -->
+<sc-if value="{{ is.dashboard }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Dashboard">
+  <header style="border-bottom:1px solid var(--color-divider);background:var(--color-neutral-100)">
+    <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,3vw,32px);height:64px;display:flex;align-items:center;gap:20px;font-size:15px">
+      <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+      <span style="margin-left:auto;font-size:14px;color:var(--color-neutral-700)">{{ a.email }}</span>
+      <span style="width:32px;height:32px;border-radius:50%;background:var(--color-accent-200);color:var(--color-accent-800);display:flex;align-items:center;justify-content:center;font-size:13px">{{ initials }}</span>
+    </div>
+  </header>
+  <main style="max-width:1200px;margin:0 auto;padding:48px clamp(20px,3vw,32px) 96px;display:flex;flex-direction:column;gap:32px">
+    <div data-reveal="" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Welcome back, {{ firstName }}</span><h1 style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:clamp(40px,4.5vw,56px)">Your site</h1></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px">
+      <div data-reveal="" data-delay="80" class="blueprint" style="grid-column:span 2;min-width:0;background:var(--color-neutral-100);display:flex;flex-direction:column">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div data-zoomkey="db" style="height:280px;overflow:hidden;border-bottom:1px solid var(--color-divider)"><div style="width:1280px;zoom:{{ zDb }};pointer-events:none"><dc-import name="PortfolioTemplate" template="{{ template }}" theme="{{ theme }}" content="{{ content }}" hide="{{ hide }}" hint-size="1280px,900px"></dc-import></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;flex-wrap:wrap">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-weight:500;font-size:17px">{{ address }}.ceomaker.com</span><span style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--color-accent-700)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-accent);animation:cm-pulse 1.8s ease-in-out infinite"></span>{{ statusLabel }} · {{ tplName }} template</span></div>
+          <button class="btn btn-secondary" onClick="{{ toEditor }}">Edit site</button>
+          <button class="btn btn-primary" style="gap:10px">View site <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div data-reveal="" data-delay="160" class="blueprint" style="padding:20px;display:flex;flex-direction:column;gap:6px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Plan</span><span style="font-family:var(--font-heading);font-weight:600;font-size:28px;text-transform:uppercase">{{ planLabel }} · {{ planTotal }}</span><span style="font-size:14px;color:var(--color-neutral-700)">{{ planRenew }}</span><button class="btn btn-ghost" style="align-self:flex-start;padding-left:0">Manage billing</button></div>
+        <div data-reveal="" data-delay="240" class="blueprint" style="padding:20px;display:flex;flex-direction:column;gap:6px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Custom domain</span><span style="font-family:var(--font-heading);font-weight:600;font-size:28px;text-transform:uppercase">Coming soon</span><span style="font-size:14px;color:var(--color-neutral-700)">Connect a domain you own, like {{ firstLower }}{{ lastLower }}.com.</span></div>
+      </div>
+    </div>
+    <div data-reveal="" data-delay="120" style="display:flex;flex-direction:column;gap:12px">
+      <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:28px">Published versions</h2>
+      <table class="table">
+        <thead><tr><th>Version</th><th>Published</th><th>Template</th><th></th></tr></thead>
+        <tbody><sc-for list="{{ versions }}" as="v" hint-placeholder-count="2"><tr><td>{{ v.n }}</td><td style="color:var(--color-neutral-700)">{{ v.date }}</td><td style="color:var(--color-neutral-700)">{{ v.tpl }}</td><td style="text-align:right"><span class="{{ v.cls }}">{{ v.action }}</span></td></tr></sc-for></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</sc-if>
+
+<!-- ================= NOT LIVE / PAUSED ================= -->
+<sc-if value="{{ is.status }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Site not live / paused" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;background:radial-gradient(800px 420px at 50% 0%,var(--color-accent-100),transparent 70%)">
+  <div data-reveal="" class="blueprint" style="width:100%;max-width:520px;background:var(--color-neutral-100);box-shadow:var(--shadow-lg);padding:36px;display:flex;flex-direction:column;gap:16px">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ statusPage.kicker }}</span>
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:44px">{{ statusPage.title }}</h1>
+    <span style="color:var(--color-neutral-800)">{{ statusPage.body }}</span>
+    <button class="btn btn-primary" style="align-self:flex-start;margin-top:8px;min-width:240px;justify-content:space-between;padding:12px 16px" onClick="{{ exit }}">Create your own site <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+    <span style="margin-top:20px;font-size:13px;color:var(--color-neutral-600)">Powered by CEO<span style="color:var(--color-accent)">Maker</span></span>
+  </div>
+</div>
+</sc-if>
+
+<!-- prototype screen switcher -->
+<div style="position:fixed;left:12px;bottom:12px;z-index:60;display:flex;align-items:center;gap:2px;padding:4px;background:var(--color-neutral-100);border:1px solid var(--color-divider);box-shadow:var(--shadow-md);font-size:12px;max-width:calc(100vw - 24px);overflow-x:auto">
+  <span style="padding:0 8px;color:var(--color-neutral-600);white-space:nowrap">Screens</span>
+  <sc-for list="{{ jumps }}" as="j" hint-placeholder-count="10"><button onClick="{{ j.go }}" style="all:unset;cursor:pointer;white-space:nowrap;padding:5px 9px;background:{{ j.bg }};color:{{ j.color }};transition:background .2s">{{ j.label }}</button></sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ROLES = ["Chief executive", "Founder", "Investor", "Board member", "Executive", "Managing partner", "Something else"];
+const INDUSTRIES = { "Technology": "technology that earns its place", "Finance": "capital that compounds", "Logistics": "supply chains that hold up under pressure", "Healthcare": "healthcare that reaches more people", "Energy": "energy systems for the next decade", "Consumer": "brands people come back to", "Industrial": "industry that runs on precision", "Real estate": "places that last", "Professional services": "advice that changes outcomes" };
+const STAGES = ["Early-stage startup", "Scale-up, 50–500 people", "Mid-size, 500–5,000", "Enterprise, 5,000+", "Fund or investment firm", "Advisory or portfolio career"];
+const GOALS = ["Speaking invitations", "Board and advisory roles", "Investor relations", "Press and media", "Attracting talent", "A credible first result on Google"];
+const VOICES = [
+  { label: "Measured", sample: "Calm and precise. Numbers do the talking." },
+  { label: "Warm", sample: "First person and approachable, a little more personal." },
+  { label: "Bold", sample: "Short sentences, strong claims. Suits founders." }
+];
+const TEMPLATES = [
+  { key: "meridian", name: "Meridian", desc: "Editorial ivory and a serif voice. For chief executives and chairs." },
+  { key: "aurora", name: "Aurora", desc: "Soft light, rounded cards, a floating profile. For founders." },
+  { key: "obsidian", name: "Obsidian", desc: "Black and champagne, a framed portrait. For investors." },
+  { key: "monument", name: "Monument", desc: "Your name as the headline, in cobalt. For operators." },
+  { key: "bento", name: "Bento", desc: "The whole profile in one grid of cards. Scans in seconds." },
+  { key: "chronicle", name: "Chronicle", desc: "A warm, long-form letter with a timeline. For advisors and writers." }
+];
+const GEN = ["Reading your answers", "Writing your headline and introduction", "Drafting About, Impact and Experience", "Checking tone against your chosen voice", "Laying it out in your template"];
+const SHORT = { "Technology": "Technology, built to last.", "Finance": "Capital that compounds.", "Logistics": "Freight that holds up.", "Healthcare": "Care that reaches further.", "Energy": "Energy for the next decade.", "Consumer": "Brands people return to.", "Industrial": "Industry, run with precision.", "Real estate": "Places that last.", "Professional services": "Advice that changes outcomes." };
+const SECTIONS = [["hero", "Hero", true], ["about", "About"], ["impact", "Impact"], ["experience", "Experience"], ["work", "Selected work"], ["testimonials", "What colleagues say"], ["contact", "Let's talk", true]];
+const DEF = {
+  cta: "Get in touch", blurb: "For speaking, board and advisory enquiries.", email: "office@example.com",
+  aboutA: "I joined Meridian as COO in 2015, when it was a regional carrier with ", aboutBold: "thin margins and no shared planning system", aboutB: ". Six years later we run one of Europe's most reliable mid-sized freight networks.",
+  aboutC: "Before Meridian, I spent a decade in operations at Alder & Crane Logistics in Hamburg. I sit on the board of the European Freight Council and mentor first-time founders in industrial technology.",
+  stats: [{ n: 1, v: "€780M", l: "Annual revenue, up from €310M" }, { n: 2, v: "31", l: "Countries served" }, { n: 3, v: "2,400", l: "People across the group" }, { n: 4, v: "42%", l: "Reduction in delivery variance" }],
+  experience: [{ role: "Chief Executive Officer", org: "Meridian Freight Group", dates: "2019 – Present" }, { role: "Chief Operating Officer", org: "Meridian Freight Group", dates: "2015 – 2019" }, { role: "VP Operations", org: "Alder & Crane Logistics", dates: "2010 – 2015" }],
+  testimonials: [{ quote: "Amelia combines operational depth with a rare calm under pressure. She made the hard calls early, and the business is stronger for it.", author: "Jonas Weber", role: "Chair, Meridian Freight Group" }, { quote: "The clearest thinker on supply chain resilience I have worked with.", author: "Priya Raman", role: "Partner, Northgate Capital" }]
+};
+const { experience: _dx, testimonials: _dt, ...DEFC } = DEF;
+const DEMO_ANSWERS = { role: "Chief executive", industry: "Logistics", stage: "Mid-size, 500–5,000", goals: ["Board and advisory roles", "Speaking invitations"], voice: "Measured", name: "Amelia Hart", org: "Meridian Freight Group", sources: [], email: "amelia@meridianfreight.eu" };
+const JUMPS = [["landing", "Landing"], ["flow", "Questions"], ["login", "Sign in"], ["build", "Templates"], ["generating", "Generating"], ["editor", "Editor"], ["publish", "Publish"], ["dashboard", "Dashboard"], ["notlive", "Not live"], ["paused", "Paused"]];
+const EASE = "cubic-bezier(.2,.7,.2,1)";
+const PALETTES = {
+  meridian: [["Ivory", "#f7f4ee", "#1a1a1a", "#8a6d3b"], ["Navy & brass", "#f5f3ee", "#14213d", "#a47e3b"], ["Oxford", "#f4f1ea", "#1c2b39", "#7a2e2e"], ["Sage", "#f2f1ea", "#1f2a24", "#4d6b53"], ["Stone", "#efece6", "#2a2826", "#6b5b4b"], ["Night edition", "#14120f", "#f1ece3", "#c9a86a"]],
+  aurora: [["Indigo", "#fbfbfd", "#0f1222", "#4f46e5"], ["Ocean", "#f8fbfd", "#0b1b2b", "#0284c7"], ["Emerald", "#fafcfb", "#0c1f17", "#059669"], ["Coral", "#fdfbfa", "#1f1210", "#e11d48"], ["Graphite", "#fafafa", "#111111", "#3f3f46"], ["Midnight", "#0c0e1a", "#eef0fa", "#818cf8"]],
+  obsidian: [["Champagne", "#0b0b0c", "#f2efe9", "#c9a86a"], ["Midnight", "#0a0f1c", "#eef1f7", "#8fb3ff"], ["Bordeaux", "#120a0c", "#f4ece9", "#c2575f"], ["Emerald night", "#08110e", "#e9f2ee", "#6fcf97"], ["Platinum", "#0c0c0d", "#f2f2f2", "#bfc3c9"], ["Daylight", "#f6f3ee", "#141414", "#9a7b45"]],
+  monument: [["Cobalt", "#f2f2ee", "#0a0a0a", "#1f3bff"], ["Signal", "#f2f2ee", "#0a0a0a", "#ff4d00"], ["Forest", "#f0f1ec", "#0b120d", "#0f7b3a"], ["Oxblood", "#efe9df", "#111111", "#b3261e"], ["Acid night", "#0b0b0b", "#f2f2ee", "#c8ff00"], ["Mono", "#ffffff", "#000000", "#000000"]],
+  bento: [["Emerald", "#ececef", "#111113", "#0e7a5f"], ["Sand", "#efebe4", "#1a1714", "#a15c2f"], ["Ice", "#eaeff3", "#0d1620", "#2563eb"], ["Plum", "#eeebf0", "#17111a", "#7c3aed"], ["Carbon", "#0f0f11", "#f2f2f4", "#34d399"], ["Blush", "#f3eceb", "#1c1414", "#be185d"]],
+  chronicle: [["Evergreen", "#f3efe6", "#22211d", "#2f4a3a"], ["Terracotta", "#f4eee6", "#2a1f19", "#b5562f"], ["Ink blue", "#f2f0ea", "#1b2230", "#2d4a7a"], ["Plum", "#f3eee9", "#261d22", "#6b3a52"], ["Charcoal", "#ecebe7", "#1c1c1c", "#555048"], ["Lamplight", "#16140f", "#efe8da", "#d4a55a"]]
+};
+const HEX = /^#[0-9a-f]{6}$/i;
+const lumH = h => { const n = parseInt(h.slice(1), 16), f = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(n >> 16 & 255) + 0.7152 * f(n >> 8 & 255) + 0.0722 * f(n & 255); };
+const ratio = (a, b) => { const x = lumH(a), y = lumH(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const QUICK = [["LinkedIn", "https://www.linkedin.com/in/"], ["X", "https://x.com/"], ["Company site", "https://"], ["Book a call", "https://"]];
+const linkMsg = h => !h ? ["Add a URL", "var(--color-neutral-600)"] : /^(https?:\/\/[^\s]+\.[^\s]+|mailto:[^\s@]+@[^\s@]+|tel:[+\d][\d\s-]+|#[\w-]+)$/i.test(h) ? ["Opens in a new tab", "var(--color-accent-700)"] : ["Use a full address starting with https://", "#a4402a"];
+const STEP_NAMES = ["Your role", "Your industry", "Your organisation", "What the site is for", "Voice and details"];
+
+class Component extends DCLogic {
+  state = { themes: {}, dragOver: false, sel: "hero", tab: "content", hide: {}, content: null, gen: 0, saving: false, rewriting: false, pubOpen: false, pubStage: "plan", payStep: 0, published: false, versions: 0, address: null, view: "landing", step: 0, loginMode: "form", zoom: 0.4, plan: "annual", open: 0, template: "meridian",
+    a: { role: null, industry: null, stage: null, goals: [], voice: "Measured", name: "", org: "", sources: [], email: "" } };
+  frameRef = el => { if (this._ro) this._ro.disconnect(); if (!el) return; this._ro = new ResizeObserver(() => { const z = el.clientWidth / 1280; if (Math.abs(z - this.state.zoom) > 0.005) this.setState({ zoom: z }); }); this._ro.observe(el); };
+  componentWillUnmount() { this._ro && this._ro.disconnect(); this._io && this._io.disconnect(); this._zo && this._zo.disconnect(); Object.keys(this).filter(k => k.startsWith("_ro_")).forEach(k => this[k] && this[k].disconnect()); clearTimeout(this._gt); clearTimeout(this._zt); clearTimeout(this._pt); clearTimeout(this._sv); clearTimeout(this._rw); }
+  rootRef = el => { this.rootEl = el; };
+  zoomRef(key, max) { this._zr = this._zr || {}; if (this._zr[key]) return this._zr[key]; const fn = el => { const old = this["_ro_" + key]; old && old.disconnect(); if (!el) return; const r = new ResizeObserver(() => { const z = Math.min(max || 1, el.clientWidth / 1280); if (Math.abs(z - (this.state["z_" + key] || 0)) > 0.004) this.setState({ ["z_" + key]: z }); }); r.observe(el); this["_ro_" + key] = r; }; this._zr[key] = fn; return fn; }
+  motionOK() { return (this.props.motion ?? true) && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  pop(sel, kf, dur, delay) { if (!this.motionOK()) return; requestAnimationFrame(() => { const RT = this.rootEl || document; RT.querySelectorAll(sel).forEach(el => el.animate(kf, { duration: dur, delay: delay || 0, easing: EASE, fill: "backwards" })); }); }
+  observeZoom() {
+    requestAnimationFrame(() => {
+      const RT = this.rootEl || document;
+      if (!this._zo) this._zo = new ResizeObserver(es => es.forEach(en => { const k = en.target.dataset.zoomkey; const z = Math.min(1, en.target.clientWidth / 1280); if (Math.abs(z - (this.state["z_" + k] || 0)) > 0.004) this.setState({ ["z_" + k]: z }); }));
+      RT.querySelectorAll("[data-zoomkey]").forEach(el => { if (!el.__zo) { el.__zo = 1; this._zo.observe(el); const k = el.dataset.zoomkey, z = Math.min(1, el.clientWidth / 1280); if (z > 0 && Math.abs(z - (this.state["z_" + k] || 0)) > 0.004) this.setState({ ["z_" + k]: z }); } });
+    });
+  }
+  setupMotion() {
+    this.observeZoom();
+    if (!this.motionOK()) return;
+    requestAnimationFrame(() => {
+      const root = this.rootEl || document;
+      if (this._io) this._io.disconnect();
+      this._io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.__rv && en.target.__rv.play(); this._io.unobserve(en.target); } }), { threshold: 0.08, rootMargin: "0px 0px -6% 0px" });
+      root.querySelectorAll("[data-reveal]").forEach(el => { if (el.__rv) return; const a = el.animate([{ opacity: 0, transform: "translateY(22px)" }, { opacity: 1, transform: "none" }], { duration: 800, delay: +(el.dataset.delay || 0), easing: EASE, fill: "backwards" }); a.pause(); el.__rv = a; this._io.observe(el); });
+      root.querySelectorAll("[data-marquee]").forEach(el => { if (el.__mq) return; el.__mq = el.animate([{ transform: "translateX(0)" }, { transform: "translateX(-50%)" }], { duration: 38000, iterations: Infinity }); });
+    });
+  }
+  componentDidMount() { this.setupMotion(); }
+  componentDidUpdate(pp, ps) {
+    const s = this.state;
+    this.observeZoom(); clearTimeout(this._zt); this._zt = setTimeout(() => this.observeZoom(), 120);
+    if (ps.view !== s.view) { this.setupMotion(); if (s.view === "generating") this.runGen(); }
+    if (ps.step !== s.step && s.view === "flow") this.pop("[data-step]", [{ opacity: 0, transform: "translateX(26px)" }, { opacity: 1, transform: "none" }], 460);
+    if (ps.plan !== s.plan) this.pop("[data-price]", [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], 380);
+    if (ps.sel !== s.sel || ps.tab !== s.tab) this.pop("[data-panel]", [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], 340);
+    if (!ps.pubOpen && s.pubOpen) this.pop("[data-dialog]", [{ opacity: 0, transform: "translateY(14px) scale(.97)" }, { opacity: 1, transform: "none" }], 420);
+    if (ps.pubStage !== s.pubStage && s.pubStage === "done") this.pop("[data-check]", [{ strokeDashoffset: 48 }, { strokeDashoffset: 0 }], 700, 150);
+    if (ps.gen !== s.gen && s.gen > 0) this.pop('[data-gen="' + (s.gen - 1) + '"] [data-icon]', [{ transform: "scale(.3)", opacity: 0 }, { transform: "scale(1.12)", opacity: 1, offset: 0.7 }, { transform: "scale(1)" }], 420);
+  }
+  runGen() { clearTimeout(this._gt); clearTimeout(this._zt); this.setState({ gen: 0 }); const tick = () => { if (this.state.view !== "generating") return; if (this.state.gen >= GEN.length) { this._gt = setTimeout(() => this.state.view === "generating" && this.go("editor"), 1100); return; } this.setState(st => ({ gen: st.gen + 1 })); this._gt = setTimeout(tick, 1150); }; this._gt = setTimeout(tick, 700); }
+  saved() { this.setState({ saving: true }); clearTimeout(this._sv); this._sv = setTimeout(() => this.setState({ saving: false }), 900); }
+  builderVals(s, a, preview) {
+    const content = s.content || { ...DEFC, ...preview };
+    const pal = PALETTES[s.template] || PALETTES.meridian;
+    const baseTheme = { bg: pal[0][1], ink: pal[0][2], accent: pal[0][3] };
+    const theme = { ...baseTheme, ...(s.themes[s.template] || {}) };
+    const setTheme = patch => { this.setState(st => ({ themes: { ...st.themes, [st.template]: { ...(st.themes[st.template] || {}), ...patch } } })); this.saved(); };
+    const links = content.links || [{ label: "LinkedIn", href: "https://www.linkedin.com/" }, { label: (a.org || "Website"), href: "https://example.com/" }];
+    const setLinks = next => { this.setState(st => ({ content: { ...(st.content || content), links: next } })); this.saved(); };
+    const readPhoto = file => { if (!file || !/^image\//.test(file.type)) return; if (file.size > 8e6) { this.setState({ photoErr: "That image is over 8 MB. Try a smaller one." }); return; } const r = new FileReader(); r.onload = () => { this.setState(st => ({ photoErr: null, dragOver: false, content: { ...(st.content || content), photo: r.result } })); this.saved(); }; r.readAsDataURL(file); };
+    const cr = ratio(theme.ink, theme.bg);
+    const setC = (k, v) => { this.setState(st => ({ content: { ...(st.content || content), [k]: v } })); this.saved(); };
+    const ce = {}; ["eyebrow", "headline", "subheadline", "cta", "ctaHref", "aboutA", "aboutC", "blurb", "email"].forEach(k => ce[k] = e => setC(k, e.target.value));
+    const stats = content.stats || DEF.stats;
+    const setStat = (i, k, v) => setC("stats", stats.map((x, j) => j === i ? { ...x, [k]: v } : x));
+    const phrase = INDUSTRIES[a.industry] || "work that holds up under pressure";
+    const lead = a.role === "Investor" ? "Backing " : "Leading ";
+    const RW = { Sharper: "I build " + phrase + ".", "More formal": lead + phrase + ".", Shorter: SHORT[a.industry] || "Work that holds up." };
+    const annual = s.plan === "annual";
+    const tpl = TEMPLATES.find(t => t.key === s.template) || TEMPLATES[0];
+    const spinner = React.createElement("span", { style: { width: 20, height: 20, boxSizing: "border-box", display: "inline-block", borderRadius: "50%", border: "2px solid var(--color-accent-200)", borderTopColor: "var(--color-accent)", animation: "cm-spin .8s linear infinite" } });
+    const pct = s.gen / GEN.length;
+    const nameParts = (a.name.trim() || "Your Name").split(/\s+/);
+    const jump = k => {
+      if (!a.name.trim() && ["build", "generating", "editor", "publish", "dashboard"].includes(k)) this.setState({ a: { ...DEMO_ANSWERS } });
+      if (k === "publish") return this.go("editor", { pubOpen: true, pubStage: "plan" });
+      if (k === "login") return this.go("login", { loginMode: "form", fromLanding: false });
+      this.go(k, { pubOpen: false });
+    };
+    return {
+      content, ce, hide: s.hide, template: s.template, spinner, theme,
+      ctaHref: content.ctaHref || "#contact",
+      hasPhoto: !!content.photo, photoThumb: content.photo ? "url(\"" + content.photo + "\")" : "none", photoCta: content.photo ? "Replace photo" : "Upload photo",
+      photoHint: s.photoErr || (s.dragOver ? "Drop to use this photo" : content.photo ? "Shown wherever the template has a portrait." : "Drag a headshot here. JPG, PNG or WebP, up to 8 MB."),
+      photoRing: s.dragOver ? "var(--color-accent)" : "var(--color-divider)", photoBg: s.dragOver ? "var(--color-accent-100)" : "var(--color-bg)",
+      photoPick: e => { readPhoto(e.target.files && e.target.files[0]); e.target.value = ""; },
+      photoDragOver: e => { e.preventDefault(); if (!s.dragOver) this.setState({ dragOver: true }); },
+      photoDragLeave: () => this.setState({ dragOver: false }),
+      photoDrop: e => { e.preventDefault(); readPhoto(e.dataTransfer.files && e.dataTransfer.files[0]); },
+      photoRemove: () => { this.setState(st => { const c2 = { ...(st.content || content) }; delete c2.photo; return { content: c2 }; }); this.saved(); },
+      linkRows: links.map((l, i) => { const [msg, msgColor] = linkMsg(l.href); return { ...l, msg, msgColor, ring: msgColor === "#a4402a" ? "#a4402a" : "var(--color-divider)",
+        onLabel: e => setLinks(links.map((x, j) => j === i ? { ...x, label: e.target.value } : x)),
+        onHref: e => setLinks(links.map((x, j) => j === i ? { ...x, href: e.target.value.trim() } : x)),
+        remove: () => setLinks(links.filter((_, j) => j !== i)) }; }),
+      linkQuick: QUICK.filter(([l]) => !links.some(x => x.label === l)).map(([label, href]) => ({ label, add: () => { setLinks([...links, { label, href }]); this.pop("[data-link]:last-of-type", [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], 320); } })),
+      paletteRows: pal.map(([name, bg, ink, accent]) => { const on = theme.bg === bg && theme.ink === ink && theme.accent === accent; return { name, bg, ink, accent, ring: on ? "var(--color-accent)" : "var(--color-divider)", check: on ? "inline" : "none", pick: () => setTheme({ bg, ink, accent }) }; }),
+      colorRows: [["bg", "Background", "Page ground"], ["ink", "Text", "Headlines and body copy"], ["accent", "Accent", "Buttons, numbers and highlights"]].map(([k, label, hint]) => ({ label, hint, value: theme[k],
+        onPick: e => setTheme({ [k]: e.target.value }),
+        onHex: e => { let v = e.target.value.trim(); if (!v.startsWith("#")) v = "#" + v; if (HEX.test(v)) setTheme({ [k]: v.toLowerCase() }); } })),
+      contrast: { ratio: cr.toFixed(1) + ":1", msg: cr >= 7 ? "Excellent contrast between text and background." : cr >= 4.5 ? "Good contrast. Meets the readability standard." : "Too low to read comfortably. Publishing needs at least 4.5:1.", ring: cr >= 4.5 ? "var(--color-divider)" : "#a4402a", bg: cr >= 4.5 ? "var(--color-bg)" : "#fbeae6" },
+      resetTheme: () => { this.setState(st => { const th = { ...st.themes }; delete th[st.template]; return { themes: th }; }); this.saved(); },
+      toGenerate: () => this.go("generating", { content: { ...DEFC, ...preview } }),
+      genRows: GEN.map((label, i) => ({ i, label, done: i < s.gen, active: i === s.gen, pending: i > s.gen, color: i <= s.gen ? "var(--color-text)" : "var(--color-neutral-500)" })),
+      genPct: Math.round(pct * 100) + "%", genTop: Math.round(pct * 100) + "%", genLine: pct >= 1 ? 0 : 1,
+      genRef: this.zoomRef("gen"), zGen: s.z_gen || 0.45, edRef: this.zoomRef("ed"), zEd: s.z_ed || 0.7, dbRef: this.zoomRef("db"), zDb: s.z_db || 0.5,
+      statusLabel: s.published ? "Live" : "Draft", statusTag: s.published ? "tag tag-accent" : "tag tag-neutral",
+      saveLabel: s.saving ? "Saving…" : "All changes saved", saveDot: s.saving ? "var(--color-neutral-400)" : "var(--color-accent)",
+      publishLabel: s.published ? "Update site" : "Publish",
+      toDashboard: () => this.go("dashboard", { pubOpen: false }), toEditor: () => this.go("editor"),
+      openPublish: () => this.setState({ pubOpen: true, pubStage: "plan" }),
+      edTabs: [["content", "Content"], ["brand", "Brand"], ["design", "Template"]].map(([k, label]) => ({ label, on: s.tab === k, pick: () => this.setState({ tab: k }) })),
+      tab: { content: s.tab === "content", brand: s.tab === "brand", design: s.tab === "design" },
+      sectionRows: SECTIONS.map(([k, label, fixed]) => { const hidden = !!s.hide[k], on = s.sel === k; return { label, ring: on ? "var(--color-accent)" : "transparent", bg: on ? "var(--color-accent-100)" : "transparent", opacity: hidden ? 0.45 : 1, eye: fixed ? "Fixed" : hidden ? "Show" : "Hide", select: () => this.setState({ sel: k }), toggle: e => { e.stopPropagation(); if (fixed) return; this.setState(st => ({ hide: { ...st.hide, [k]: !st.hide[k] } })); this.saved(); } }; }),
+      sel: Object.fromEntries(SECTIONS.map(([k]) => [k, s.sel === k])), selLabel: (SECTIONS.find(x => x[0] === s.sel) || [])[1],
+      rewriteRows: Object.keys(RW).map(label => ({ label, run: () => { this.setState({ rewriting: true }); clearTimeout(this._rw); this._rw = setTimeout(() => { this.setState({ rewriting: false }); setC("headline", RW[label]); }, 750); } })),
+      rwOpacity: s.rewriting ? 0.35 : 1, rwLabel: s.rewriting ? "Rewriting…" : "Rewrite the headline", rwIcon: s.rewriting ? React.createElement("span", { style: { width: 12, height: 12, boxSizing: "border-box", display: "inline-block", borderRadius: "50%", border: "2px solid var(--color-accent-200)", borderTopColor: "var(--color-accent)", animation: "cm-spin .8s linear infinite" } }) : null,
+      statRows: stats.map((x, i) => ({ ...x, onV: e => setStat(i, "v", e.target.value), onL: e => setStat(i, "l", e.target.value) })),
+      expRows: DEF.experience, workRows: [{ kind: "Keynote", title: "Resilient networks for a volatile decade", meta: "European Freight Forum", year: "2025" }, { kind: "Essay", title: "Why planning beats forecasting", meta: "Op-ed, logistics trade press", year: "2024" }, { kind: "Board", title: "European Freight Council", meta: "Non-executive director", year: "Since 2021" }, { kind: "Mentoring", title: "Industrial founders programme", meta: "Mentor to first-time founders", year: "Since 2019" }], tmRows: DEF.testimonials,
+      stop: e => e.stopPropagation(),
+      setAddress: e => this.setState({ address: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") }),
+      pub: {
+        open: s.pubOpen, plan: s.pubStage === "plan", paying: s.pubStage === "paying", done: s.pubStage === "done",
+        payLabel: s.payStep ? "Publishing your site" : "Confirming payment",
+        close: () => this.setState({ pubOpen: false }),
+        checkout: () => { this.setState({ pubStage: "paying", payStep: 0 }); this._pt = setTimeout(() => { this.setState({ payStep: 1 }); this._pt = setTimeout(() => this.setState(st => ({ pubStage: "done", published: true, versions: st.versions + 1 })), 1000); }, 1100); }
+      },
+      nextVersion: s.versions + 1,
+      planCards: [["monthly", "Monthly", "$9.99", "/ month", "Cancel any time"], ["annual", "Annual", "$99", "/ year", "$8.25 a month, billed yearly"]].map(([k, label, price, per, note]) => ({ label, price, per, note, badge: k === "annual" ? "visible" : "hidden", ring: s.plan === k ? "var(--color-accent)" : "var(--color-divider)", bg: s.plan === k ? "var(--color-accent-100)" : "var(--color-neutral-100)", pick: () => this.setState({ plan: k }) })),
+      planTotal: annual ? "$99 / year" : "$9.99 / month", planLabel: annual ? "Annual" : "Monthly", planRenew: annual ? "Renews 30 September 2027" : "Renews 30 October 2026",
+      firstName: nameParts[0], firstLower: nameParts[0].toLowerCase(), lastLower: (nameParts[1] || "").toLowerCase(),
+      versions: Array.from({ length: Math.max(1, s.versions) }, (_, i) => { const n = Math.max(1, s.versions) - i; return { n: "Version " + n, date: i === 0 ? "Today, 14:32" : "Today, 11:05", tpl: i === 0 ? tpl.name : "Meridian", action: i === 0 ? "Current" : "Restore", cls: i === 0 ? "tag tag-accent" : "btn btn-ghost" }; }),
+      statusPage: s.view === "paused" ? { kicker: "Paused", title: "This site is taking a break", body: "The owner's subscription has lapsed. The site will return as soon as it's renewed." } : { kicker: "Not available", title: "This site isn't live", body: "The address may be unclaimed, or its owner has not published it yet." },
+      jumps: JUMPS.map(([k, label]) => { const on = k === s.view || (k === "publish" && s.view === "editor" && s.pubOpen) || ((k === "notlive" || k === "paused") && s.view === k); const act = on && !(k === "editor" && s.pubOpen); return { label, bg: act ? "var(--color-accent-100)" : "transparent", color: act ? "var(--color-accent-800)" : "var(--color-neutral-700)", go: () => jump(k) }; })
+    };
+  }
+  setA(p) { this.setState(s => ({ a: { ...s.a, ...p } })); }
+  go(view, extra) { this.setState({ view, ...(extra || {}) }); window.scrollTo(0, 0); }
+  renderVals() {
+    const s = this.state, a = s.a, annual = s.plan === "annual";
+    const opt = (label, on, pick, extra) => ({ label, pick, ...(extra || {}), bg: on ? "var(--color-accent-100)" : "var(--color-neutral-100)", ring: on ? "var(--color-accent)" : "var(--color-divider)", checkDisplay: on ? "inline" : "none" });
+    const single = (key, list) => list.map(l => opt(l, a[key] === l, () => { this.setA({ [key]: l }); setTimeout(() => this.setState(st => ({ step: Math.min(4, st.step + 1) })), 180); }));
+    let q;
+    if (s.step === 0) q = { title: "I am a…", hint: "Pick the one that fits best.", isChips: true, options: single("role", ROLES) };
+    if (s.step === 1) q = { title: "My industry is…", hint: "This sets the vocabulary of your draft.", isChips: true, options: single("industry", Object.keys(INDUSTRIES)) };
+    if (s.step === 2) q = { title: "I work at…", hint: "Roughly. We'll phrase it for you.", isChips: true, canSkip: true, options: single("stage", STAGES) };
+    if (s.step === 3) q = { title: "I want the site to bring me…", hint: "Choose as many as you like. It decides section order and the call to action.", isChips: true, options: GOALS.map(g => { const on = a.goals.includes(g); return opt(g, on, () => this.setA({ goals: on ? a.goals.filter(x => x !== g) : [...a.goals, g] })); }) };
+    if (s.step === 4) q = { title: "Last one: how should it sound?", hint: "Then just your name. Everything else is optional.", isCards: true, isDetails: true, options: VOICES.map(v => opt(v.label, a.voice === v.label, () => this.setA({ voice: v.label }), { sample: v.sample })) };
+    const name = a.name.trim() || "Your Name";
+    const initials = name.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+    const role = a.role && a.role !== "Something else" ? a.role : "Leader";
+    const phrase = INDUSTRIES[a.industry] || "work that holds up under pressure";
+    const preview = {
+      name, initials, company: a.org || "Your organisation",
+      eyebrow: role + (a.org ? ", " + a.org : a.stage ? " · " + a.stage : ""),
+      headline: (a.voice === "Bold" ? "I build " : "Building ") + phrase + ".",
+      subheadline: "I lead " + (a.stage ? a.stage.toLowerCase().replace("early-stage startup", "an early-stage company").replace(/^(scale-up|mid-size|enterprise)/, "a $1 business") : "a growing organisation") + (a.industry ? " in " + a.industry.toLowerCase() : "") + ". " + (a.goals.length ? "Open to " + a.goals.slice(0, 2).map(g => g.toLowerCase()).join(" and ") + "." : "")
+    };
+    const address = s.address ?? (a.name.trim().split(/\s+/)[0] || "yourname").toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const start = () => this.go("flow", { step: 0 });
+    return {
+      ...this.builderVals(s, a, preview),
+      is: { landing: s.view === "landing", flow: s.view === "flow", login: s.view === "login", build: s.view === "build", generating: s.view === "generating", editor: s.view === "editor", dashboard: s.view === "dashboard", status: s.view === "notlive" || s.view === "paused" },
+      heroWords: "A personal website that matches your standing.".split(" ").map((w, i) => ({ t: w, d: 90 + i * 70 })),
+      marquee: [0, 1].flatMap(() => ["Chief executives", "Founders", "Board members", "Investors", "Managing partners", "Chief financial officers", "Non-executive directors"]),
+      a, q, preview, address, initials,
+      start, exit: () => this.go("landing"),
+      openLogin: () => this.go("login", { loginMode: "form", fromLanding: true }),
+      heroRoles: ROLES.map(l => ({ label: l, pick: () => { this.setA({ role: l }); this.go("flow", { step: 1 }); } })),
+      realities: [
+        { d: 0, n: "1st", t: "Your name is searched before almost every serious meeting, introduction or offer." },
+        { d: 110, n: "3 lines", t: "That's usually all a company bio says about you, and it's written for the company." },
+        { d: 220, n: "0", t: "Places online where your story is told in your words, in one place, on your terms." }
+      ],
+      stepNum: s.step + 1, stepName: STEP_NAMES[s.step], progress: ((s.step + 1) / 5 * 100) + "%",
+      nextLabel: s.step === 4 ? "Save and choose a template" : "Continue",
+      nextDisabled: (s.step === 0 && !a.role) || (s.step === 1 && !a.industry) || (s.step === 3 && !a.goals.length) || (s.step === 4 && !a.name.trim()),
+      next: () => s.step < 4 ? this.setState({ step: s.step + 1 }) : this.go("login", { loginMode: "form", fromLanding: false }),
+      skip: () => this.setState({ step: s.step + 1 }),
+      back: () => s.step > 0 ? this.setState({ step: s.step - 1 }) : this.go("landing"),
+      setName: e => this.setA({ name: e.target.value }), setOrg: e => this.setA({ org: e.target.value }), setEmail: e => this.setA({ email: e.target.value }),
+      sources: ["Upload CV (PDF or DOCX)", "Import from LinkedIn", "I'll add it later"].map(l => { const on = a.sources.includes(l); return opt(l, on, () => this.setA({ sources: on ? a.sources.filter(x => x !== l) : [...a.sources, l] })); }),
+      frameRef: this.frameRef, zoom: s.zoom,
+      login: {
+        title: s.fromLanding ? "Welcome back" : "Save your site",
+        sub: s.fromLanding ? "Sign in to keep building." : "Create a free account to keep your answers and continue to the builder.",
+        emailForm: s.loginMode === "form", emailSent: s.loginMode === "sent",
+        sendLink: () => this.setState({ loginMode: "sent" }),
+        done: () => this.go("build"),
+        back: () => s.fromLanding ? this.go("landing") : this.go("flow", { step: 4 }),
+        backLabel: s.fromLanding ? "Back to home" : "Back to questions"
+      },
+      tpls: TEMPLATES.map(t => { const on = s.template === t.key; return { ...t, theme: s.themes[t.key] || null, ring: on ? "var(--color-accent)" : "var(--color-divider)", dot: on ? "var(--color-accent)" : "transparent", pick: () => this.setState({ template: t.key }) }; }),
+      tplName: (TEMPLATES.find(t => t.key === s.template) || {}).name,
+      compare: [
+        { d: 0, name: "CEOMaker", time: "Minutes", cost: "$9.99 a month or $99 a year", bg: "var(--color-accent-100)", kick: "var(--color-accent-700)", rows: [["✓", "Copy drafted in your voice"], ["✓", "Six templates built for executives"], ["✓", "Edit anything, instantly"], ["✓", "Hosting and security included"]].map(([m, t]) => ({ m, t, mc: "var(--color-accent-700)", color: "var(--color-text)" })) },
+        { d: 110, name: "Design agency", time: "6–10 weeks", cost: "$5,000 to $20,000 upfront", bg: "transparent", kick: "var(--color-neutral-700)", rows: [["✓", "Copy written for you"], ["✓", "Bespoke design"], ["–", "Every change is a billable request"], ["–", "Hosting often extra"]].map(([m, t]) => ({ m, t, mc: m === "✓" ? "var(--color-accent-700)" : "var(--color-neutral-500)", color: m === "✓" ? "var(--color-text)" : "var(--color-neutral-700)" })) },
+        { d: 220, name: "DIY site builder", time: "Weekends", cost: "$15 to $40 a month, plus your time", bg: "transparent", kick: "var(--color-neutral-700)", rows: [["–", "You write every line"], ["–", "Generic templates"], ["✓", "Edit anything"], ["✓", "Hosting included"]].map(([m, t]) => ({ m, t, mc: m === "✓" ? "var(--color-accent-700)" : "var(--color-neutral-500)", color: m === "✓" ? "var(--color-text)" : "var(--color-neutral-700)" })) }
+      ],
+      quotes: [
+        { quote: "I'd put off a personal site for six years because an agency quote was a project in itself. This took an evening.", name: "Placeholder name", ini: "PN", role: "CFO, Series C fintech" },
+        { quote: "I tapped through the questions on my phone between meetings. The draft already sounded like me.", name: "Placeholder name", ini: "PN", role: "Managing Partner, growth fund" },
+        { quote: "Board recruiters now land on something I'm proud of instead of a three-year-old profile.", name: "Placeholder name", ini: "PN", role: "Former COO, industrial group" }
+      ].map((q, i) => ({ ...q, d: i * 110 })),
+      plans: [["monthly", "Monthly"], ["annual", "Annual · 2 months free"]].map(([k, label]) => ({ label, on: s.plan === k, pick: () => this.setState({ plan: k }) })),
+      price: annual ? { price: "$99", per: "/ year", note: "$8.25 a month, billed yearly" } : { price: "$9.99", per: "/ month", note: "Cancel any time" },
+      included: ["yourname.ceomaker.com address", "AI-drafted copy you can edit freely", "All six executive templates", "Mobile-first, fast everywhere", "Visitor analytics (coming soon)", "Your own domain (coming soon)"],
+      faq: [
+        ["How long does it take?", "About two minutes of questions, then a first draft in under a minute. Most people publish the same evening."],
+        ["Do I have to write anything?", "Only your name. Everything else is a tap. A CV or LinkedIn import is optional and fills in your experience."],
+        ["Who can see my site before I publish?", "Only you. Drafts are private, and nothing goes live until you choose to publish."],
+        ["Can I use my own domain?", "Custom domains are coming soon. Until then your site lives at yourname.ceomaker.com."],
+        ["What happens if I cancel?", "Your site is paused, not deleted. Renew and it comes back exactly as you left it."],
+        ["Is my information used to train AI?", "No. Your answers and CV are used only to write your site."]
+      ].map(([qq, aa], i) => ({ q: qq, a: aa, open: s.open === i, mark: s.open === i ? "−" : "+", toggle: () => this.setState({ open: s.open === i ? -1 : i }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

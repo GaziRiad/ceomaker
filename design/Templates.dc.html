@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/styles.css">
+<script src="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--color-surface)} a{color:var(--color-accent-700)} a:hover{color:var(--color-accent-600)}</style>
+</helmet>
+<section data-screen-label="Templates" style="padding:64px;display:flex;flex-direction:column;gap:36px;font-family:var(--font-body);color:var(--color-text)">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:760px">
+    <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">CEOMaker · Site templates</span>
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:52px;line-height:1;text-transform:uppercase">Six templates, one profile</h1>
+    <span style="color:var(--color-neutral-800)">Each template renders the same content (hero, about, impact, experience, selected work, testimonials, contact). Shown with the Amelia Hart demo site.</span>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+    <sc-for list="{{ templates }}" as="t" hint-placeholder-count="6">
+      <div id="{{ t.id }}" style="width:1280px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:baseline;gap:14px"><span class="tag tag-accent">{{ t.id }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:28px;text-transform:uppercase">{{ t.name }}</span><span style="color:var(--color-neutral-700)">{{ t.desc }}</span></div>
+        <div class="blueprint" style="width:1280px;background:var(--color-neutral-100);box-shadow:var(--shadow-lg)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <dc-import name="PortfolioTemplate" template="{{ t.key }}" hint-size="1280px,4200px"></dc-import>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const only = new URLSearchParams(location.search).get("only");
+    const all = [
+      { id: "T1", key: "meridian", name: "Meridian", desc: "Editorial ivory, a serif voice and numbered sections. For chief executives and chairs." },
+      { id: "T2", key: "aurora", name: "Aurora", desc: "Soft light, rounded cards and a floating profile. For founders and tech leaders." },
+      { id: "T3", key: "obsidian", name: "Obsidian", desc: "Black and champagne, a framed portrait. For investors and private enquiries." },
+      { id: "T4", key: "monument", name: "Monument", desc: "Your name as the headline, in cobalt. For operators who want to be remembered." },
+      { id: "T5", key: "bento", name: "Bento", desc: "The whole profile in a single grid of cards. Scans in seconds." },
+      { id: "T6", key: "chronicle", name: "Chronicle", desc: "A warm, long-form letter with a timeline. For writers, advisors and speakers." }
+    ];
+    return { templates: only ? all.filter(t => t.key === only) : all };
+  }
+}
+</script>
+</body>
+</html>
