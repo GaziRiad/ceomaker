@@ -26,5 +26,6 @@ export default defineConfig([
     "**/dist/**",
     "**/next-env.d.ts",
     "packages/db/migrations/**",
+    "design/**",
   ]),
 ]);

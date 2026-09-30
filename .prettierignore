@@ -2,3 +2,6 @@ pnpm-lock.yaml
 packages/db/migrations/
 .next/
 .turbo/
+
+# Design handoff exports (reference only, not app code)
+design/
