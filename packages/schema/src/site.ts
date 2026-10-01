@@ -1,15 +1,32 @@
 import { z } from "zod";
-import { longText, requiredText } from "./primitives";
+import { longText, requiredText, text } from "./primitives";
 import { sectionSchema, type Section } from "./sections";
 
 export const CURRENT_SCHEMA_VERSION = 1;
 
-/** Search/social metadata. Part of the versioned content so publishing updates it too. */
+/**
+ * Who the site is about. Part of the versioned content so publishing updates it too.
+ * Everything except the name is optional: templates render cleanly without it.
+ */
 export const siteMetaSchema = z.object({
   /** The person's display name: the site's brand in navigation and footer. */
   name: requiredText(60),
-  title: requiredText(70),
+  /** Search title. Derived from name, role and company when missing (see siteTitle). */
+  title: text(70).optional(),
+  /** Search description. Derived from the hero introduction when missing. */
   description: longText(160).optional(),
+  /** "Chief Executive Officer". Derived from the hero eyebrow when missing. */
+  role: text(80).optional(),
+  company: text(80).optional(),
+  location: text(60).optional(),
+  /** "Open to board and advisory roles" */
+  availability: text(80).optional(),
+  /** "Board and advisory roles", for tight spaces. */
+  availabilityShort: text(40).optional(),
+  /** Boards, employers and institutions shown as a strip or marquee. */
+  affiliations: z.array(requiredText(60)).max(12).default([]),
+  /** Short descriptors for the Monument marquee: "Operator", "Speaker". */
+  keywords: z.array(requiredText(30)).max(8).default([]),
 });
 
 export type SiteMeta = z.output<typeof siteMetaSchema>;
@@ -94,4 +111,29 @@ export function parseSiteContentForRender(raw: unknown): RenderableSiteContent {
     }
   }
   return { meta: meta.success ? meta.data : null, sections, droppedSections };
+}
+
+/** "Chief Executive Officer" from "Chief Executive Officer, Meridian Freight Group". */
+export function roleFromEyebrow(eyebrow: string | undefined): string {
+  return (eyebrow ?? "").split(/,|·/)[0]?.trim() ?? "";
+}
+
+/** Search title: the explicit one, else "Name · Role, Company" trimmed to fit. */
+export function siteTitle(meta: SiteMeta, hero?: { eyebrow?: string | undefined }): string {
+  if (meta.title) return meta.title;
+  const role = meta.role || roleFromEyebrow(hero?.eyebrow);
+  const position = [role, meta.company].filter(Boolean).join(", ");
+  const title = position ? `${meta.name} · ${position}` : meta.name;
+  return title.length > 70 ? `${title.slice(0, 69).trimEnd()}…` : title;
+}
+
+/** Search description: the explicit one, else the hero introduction trimmed to 160 characters. */
+export function siteDescription(
+  meta: SiteMeta,
+  hero?: { subheadline?: string | undefined },
+): string | undefined {
+  const value = meta.description || hero?.subheadline;
+  if (!value) return undefined;
+  const flat = value.replace(/\s+/g, " ").trim();
+  return flat.length > 160 ? `${flat.slice(0, 159).trimEnd()}…` : flat;
 }

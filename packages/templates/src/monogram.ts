@@ -1,4 +1,4 @@
-import { readableTextOn, type Theme } from "@ceomaker/schema";
+import { readableTextOn, type SiteColors } from "@ceomaker/schema";
 
 /** Up to two initials from a display name, letters only ("Amelia Hart" -> "AH"). */
 export function initialsOf(name: string): string {
@@ -9,13 +9,13 @@ export function initialsOf(name: string): string {
 }
 
 /**
- * Per-site favicon: the owner's initials on their primary color, as an inline SVG data URI.
+ * Per-site favicon: the owner's initials on their accent colour, as an inline SVG data URI.
  * No extra request, cached with the page. Inputs are safe to interpolate: initials are letters
- * only and theme colors are validated #rrggbb.
+ * only and colours are validated #rrggbb.
  */
-export function monogramIconDataUri(name: string, theme: Theme): string {
+export function monogramIconDataUri(name: string, colors: SiteColors): string {
   const initials = initialsOf(name) || "•";
-  const background = theme.colors.primary;
+  const background = colors.accent;
   const foreground = readableTextOn(background);
   const fontSize = initials.length > 1 ? 26 : 34;
   const svg =

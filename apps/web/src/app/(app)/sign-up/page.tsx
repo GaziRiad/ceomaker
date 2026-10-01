@@ -1,16 +1,6 @@
-import type { Metadata } from "next";
-import { AuthForm } from "../auth-form";
-import { AuthShell } from "../auth-shell";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Create your account" };
-
+/** Sign-up and sign-in are the same passwordless step now. */
 export default function SignUpPage() {
-  return (
-    <AuthShell
-      title="Create your account"
-      subtitle="Free to build and preview. Pay when you publish."
-    >
-      <AuthForm mode="sign-up" />
-    </AuthShell>
-  );
+  redirect("/sign-in");
 }

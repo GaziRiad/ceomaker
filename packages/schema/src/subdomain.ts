@@ -107,3 +107,38 @@ export const subdomainSchema = z
 export function isValidSubdomain(value: string): boolean {
   return subdomainSchema.safeParse(value).success && value === value.toLowerCase().trim();
 }
+
+function slugWords(name: string): string[] {
+  return name
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+/**
+ * Addresses to try for a new site, best first: "amelia", "amelia-hart", "ameliahart",
+ * then numbered variants. Every candidate passes subdomain validation. Names with no Latin
+ * letters (e.g. Arabic or Chinese script) yield nothing; callers fall back to a random name.
+ */
+export function suggestSubdomains(name: string): string[] {
+  const words = slugWords(name);
+  const first = words[0] ?? "";
+  const last = words.length > 1 ? words[words.length - 1]! : "";
+  const full = words.join("-").slice(0, SUBDOMAIN_MAX_LENGTH).replace(/-+$/, "");
+  const base = last ? `${first}-${last}` : first;
+  const candidates = [first, base, full, last ? `${first}${last}` : ""];
+  for (let n = 2; n <= 9; n += 1) candidates.push(`${base}-${n}`);
+  return [...new Set(candidates)].filter(isValidSubdomain);
+}
+
+/** Last resort when every suggestion is taken: "amelia-hart-x7k2" or "site-x7k2q9". */
+export function randomSubdomain(name: string, random: () => number = Math.random): string {
+  const alphabet = "abcdefghijkmnpqrstuvwxyz23456789";
+  const suffix = (length: number) =>
+    Array.from({ length }, () => alphabet[Math.floor(random() * alphabet.length)]).join("");
+  const [suggestion] = suggestSubdomains(name);
+  const candidate = suggestion ? `${suggestion.slice(0, 30)}-${suffix(4)}` : `site-${suffix(6)}`;
+  return isValidSubdomain(candidate) ? candidate : `site-${suffix(6)}`;
+}

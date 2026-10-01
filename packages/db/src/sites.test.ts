@@ -1,21 +1,57 @@
-import { defaultTheme, demoSiteContent, parseSiteContentForRender } from "@ceomaker/schema";
+import {
+  demoSiteContent,
+  demoThemeSettings,
+  onboardingAnswersSchema,
+  parseSiteContentForRender,
+} from "@ceomaker/schema";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase, type Database } from "./client";
-import { InvalidSiteDataError, SiteNotFoundError, SubdomainTakenError } from "./errors";
-import { runMigrations } from "./migrate";
 import {
+  AddressLockedError,
+  InvalidSiteDataError,
+  LowContrastError,
+  SiteNotFoundError,
+  SubdomainTakenError,
+} from "./errors";
+import { runMigrations } from "./migrate";
+import { finishAiUsage, startAiUsage } from "./queries/ai-usage";
+import { getMedia, insertMedia } from "./queries/media";
+import {
+  changeSubdomain,
   createSite,
-  getPublishedSiteBySubdomain,
+  createSiteFromAnswers,
+  getSiteForOwner,
+  getTenantSiteBySubdomain,
+  isSubdomainAvailable,
+  listPublishedVersions,
   listSitesForUser,
   publishSite,
+  restoreVersion,
   saveDraft,
 } from "./queries/sites";
 import { site, siteVersion, user } from "./schema";
 
 const url = process.env.TEST_DATABASE_URL;
 
-const draft = { templateKey: "executive" as const, theme: defaultTheme, content: demoSiteContent };
+const draft = {
+  templateKey: "meridian" as const,
+  theme: demoThemeSettings,
+  content: demoSiteContent,
+};
+
+const answers = onboardingAnswersSchema.parse({
+  role: "Chief executive",
+  industry: "Logistics",
+  goals: ["Speaking invitations"],
+  name: "Amelia Hart",
+  org: "Meridian Freight Group",
+});
+
+async function getLive(db: Database, subdomain: string) {
+  const tenant = await getTenantSiteBySubdomain(db, subdomain);
+  return tenant?.status === "published" ? tenant.site : null;
+}
 
 describe.skipIf(!url)("sites (integration)", () => {
   let db: Database;
@@ -34,7 +70,7 @@ describe.skipIf(!url)("sites (integration)", () => {
   });
 
   beforeEach(async () => {
-    await db.execute(sql`truncate table "user", site, site_version cascade`);
+    await db.execute(sql`truncate table "user", site, site_version, media, ai_usage cascade`);
     await db.insert(user).values([
       { id: "alice", name: "Alice", email: "alice@example.com" },
       { id: "mallory", name: "Mallory", email: "mallory@example.com" },
@@ -43,14 +79,14 @@ describe.skipIf(!url)("sites (integration)", () => {
 
   it("does not serve a site until it is published", async () => {
     await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
-    expect(await getPublishedSiteBySubdomain(db, "alice")).toBeNull();
+    expect(await getLive(db, "alice")).toBeNull();
 
     await publishSite(db, {
       userId: "alice",
       siteId: (await listSitesForUser(db, "alice"))[0]!.id,
     });
-    const published = await getPublishedSiteBySubdomain(db, "alice");
-    expect(published?.templateKey).toBe("executive");
+    const published = await getLive(db, "alice");
+    expect(published?.templateKey).toBe("meridian");
     expect(parseSiteContentForRender(published?.content).sections).toHaveLength(
       demoSiteContent.sections.length,
     );
@@ -96,12 +132,15 @@ describe.skipIf(!url)("sites (integration)", () => {
     const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
     const first = await publishSite(db, { userId: "alice", siteId: id });
 
-    const edited = { ...demoSiteContent, meta: { name: "Alice", title: "Alice, Updated" } };
+    const edited = {
+      ...demoSiteContent,
+      meta: { ...demoSiteContent.meta, title: "Alice, Updated" },
+    };
     await saveDraft(db, { ...draft, content: edited, userId: "alice", siteId: id });
     const second = await publishSite(db, { userId: "alice", siteId: id });
 
     expect(second.versionId).not.toBe(first.versionId);
-    const live = await getPublishedSiteBySubdomain(db, "alice");
+    const live = await getLive(db, "alice");
     expect(live?.versionId).toBe(second.versionId);
     expect(parseSiteContentForRender(live?.content).meta?.title).toBe("Alice, Updated");
 
@@ -110,11 +149,111 @@ describe.skipIf(!url)("sites (integration)", () => {
     ).rejects.toThrow();
   });
 
-  it("stops serving a paused site", async () => {
+  it("reports draft and paused sites instead of serving them", async () => {
     const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    expect(await getTenantSiteBySubdomain(db, "alice")).toEqual({ status: "draft" });
     await publishSite(db, { userId: "alice", siteId: id });
     await db.update(site).set({ status: "paused" }).where(eq(site.id, id));
-    expect(await getPublishedSiteBySubdomain(db, "alice")).toBeNull();
+    expect(await getTenantSiteBySubdomain(db, "alice")).toEqual({ status: "paused" });
+    expect(await getTenantSiteBySubdomain(db, "nobody")).toBeNull();
+  });
+
+  it("creates a site from answers on the best free address", async () => {
+    const first = await createSiteFromAnswers(db, { userId: "alice", answers });
+    const second = await createSiteFromAnswers(db, { userId: "mallory", answers });
+    expect(first.subdomain).toBe("amelia");
+    expect(second.subdomain).toBe("amelia-hart");
+
+    const owned = await getSiteForOwner(db, { userId: "alice", siteId: first.id });
+    expect(owned?.answers?.name).toBe("Amelia Hart");
+    expect(owned?.draft.templateKey).toBe("meridian");
+    expect(owned?.published).toBeNull();
+    expect(await getSiteForOwner(db, { userId: "mallory", siteId: first.id })).toBeNull();
+  });
+
+  it("falls back to a random address for names without Latin letters", async () => {
+    const created = await createSiteFromAnswers(db, {
+      userId: "alice",
+      answers: { ...answers, name: "李明" },
+    });
+    expect(created.subdomain).toMatch(/^site-[a-z0-9]{6}$/);
+  });
+
+  it("refuses to publish unreadable colours", async () => {
+    const { id } = await createSite(db, {
+      ...draft,
+      theme: { palettes: { meridian: { bg: "#ffffff", ink: "#eeeeee", accent: "#000000" } } },
+      userId: "alice",
+      subdomain: "alice",
+    });
+    await expect(publishSite(db, { userId: "alice", siteId: id })).rejects.toBeInstanceOf(
+      LowContrastError,
+    );
+  });
+
+  it("numbers versions and restores an earlier one to live and draft", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    const v1 = await publishSite(db, { userId: "alice", siteId: id });
+    await saveDraft(db, { ...draft, templateKey: "bento", userId: "alice", siteId: id });
+    const v2 = await publishSite(db, { userId: "alice", siteId: id });
+    expect([v1.versionNumber, v2.versionNumber]).toEqual([1, 2]);
+
+    const versions = await listPublishedVersions(db, { userId: "alice", siteId: id });
+    expect(versions.map((v) => [v.number, v.templateKey, v.isCurrent])).toEqual([
+      [2, "bento", true],
+      [1, "meridian", false],
+    ]);
+
+    await restoreVersion(db, { userId: "alice", siteId: id, versionId: v1.versionId });
+    expect((await getLive(db, "alice"))?.versionId).toBe(v1.versionId);
+    const owned = await getSiteForOwner(db, { userId: "alice", siteId: id });
+    expect(owned?.draft.templateKey).toBe("meridian");
+    expect(owned?.versionCount).toBe(2);
+    await expect(
+      restoreVersion(db, { userId: "mallory", siteId: id, versionId: v1.versionId }),
+    ).rejects.toBeInstanceOf(SiteNotFoundError);
+  });
+
+  it("lets the address change only before the first publish", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    await createSite(db, { ...draft, userId: "mallory", subdomain: "taken" });
+    expect(await isSubdomainAvailable(db, "taken")).toBe(false);
+    expect(await isSubdomainAvailable(db, "alice", { exceptSiteId: id })).toBe(true);
+    expect(await isSubdomainAvailable(db, "www")).toBe(false);
+
+    await expect(
+      changeSubdomain(db, { userId: "alice", siteId: id, subdomain: "taken" }),
+    ).rejects.toBeInstanceOf(SubdomainTakenError);
+    await changeSubdomain(db, { userId: "alice", siteId: id, subdomain: "alice-hart" });
+    await publishSite(db, { userId: "alice", siteId: id });
+    await expect(
+      changeSubdomain(db, { userId: "alice", siteId: id, subdomain: "alice-2" }),
+    ).rejects.toBeInstanceOf(AddressLockedError);
+  });
+
+  it("enforces AI rate limits per user, counting concurrent requests", async () => {
+    const limits = { kind: "rewrite" as const, limit: 2, windowMs: 60_000, siteId: null };
+    const a = await startAiUsage(db, { ...limits, userId: "alice" });
+    const b = await startAiUsage(db, { ...limits, userId: "alice" });
+    expect(a && b).toBeTruthy();
+    expect(await startAiUsage(db, { ...limits, userId: "alice" })).toBeNull();
+    expect(await startAiUsage(db, { ...limits, userId: "mallory" })).not.toBeNull();
+    await finishAiUsage(db, { id: a!.id, status: "succeeded", inputTokens: 10, outputTokens: 5 });
+  });
+
+  it("stores and serves uploaded media", async () => {
+    const data = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
+    const { id } = await insertMedia(db, {
+      userId: "alice",
+      contentType: "image/jpeg",
+      width: 10,
+      height: 10,
+      sha256: "abc",
+      data,
+    });
+    const stored = await getMedia(db, id);
+    expect(stored?.contentType).toBe("image/jpeg");
+    expect(Buffer.from(stored!.data).equals(Buffer.from(data))).toBe(true);
   });
 
   it("enforces subdomain format in the database, even if app validation is bypassed", async () => {
@@ -145,7 +284,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     await db.delete(user).where(eq(user.id, "mallory"));
     const [kept] = await db.select().from(siteVersion).where(eq(siteVersion.id, versionId));
     expect(kept?.createdBy).toBeNull();
-    expect((await getPublishedSiteBySubdomain(db, "alice"))?.versionId).toBe(versionId);
+    expect((await getLive(db, "alice"))?.versionId).toBe(versionId);
   });
 
   it("deletes everything when a user is deleted", async () => {

@@ -50,7 +50,6 @@ export const safeLinkUrl = z
     { message: "Links must be https, http, mailto:, tel: or an in-page #anchor" },
   );
 
-/** Image sources must be absolute https URLs (uploads will be served from our own media host). */
 export const httpsUrl = z
   .string()
   .trim()
@@ -59,8 +58,24 @@ export const httpsUrl = z
     message: "Must be an https URL",
   });
 
+/** Path of an image uploaded to CEOMaker, served by the app on every host (see /media/[id]). */
+export const MEDIA_PATH = /^\/media\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export function mediaPath(id: string): string {
+  return `/media/${id}`;
+}
+
+/** Image sources are our own uploads or absolute https URLs. Nothing else can reach an <img>. */
+export const imageSrc = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((value) => MEDIA_PATH.test(value) || parseUrl(value)?.protocol === "https:", {
+    message: "Must be an uploaded image or an https URL",
+  });
+
 export const imageRef = z.object({
-  src: httpsUrl,
+  src: imageSrc,
   alt: text(200),
 });
 

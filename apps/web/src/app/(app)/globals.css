@@ -1,21 +1,484 @@
 @import "tailwindcss";
+@import "@ceomaker/templates/styles.css";
+@source "../../components";
 
+/*
+ * "Industry" design system for the product: Barlow type, a cool neutral ground, one steel-blue
+ * accent, square blueprint frames with registration marks. Tokens are Tailwind theme variables,
+ * so they work both as utilities (bg-surface, text-accent-700) and as var(--color-…) in styles.
+ */
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-barlow), system-ui, sans-serif;
+  --font-heading: var(--font-barlow-condensed), system-ui, sans-serif;
 
-  --color-paper: #fbfaf7;
-  --color-ink: #16181d;
-  --color-stone: #5f636a;
-  --color-line: #e6e2d9;
-  --color-navy: #1f3a5f;
-  --color-navy-deep: #16304f;
-  --color-gold: #8a6d3b;
-  --color-gold-soft: #b08d57;
+  --color-bg: #f2f2f3;
+  --color-surface: #e9e9ea;
+  --color-text: #1d1f20;
+  --color-accent: #5980a6;
+  --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+  --color-danger: #a4402a;
+  --color-danger-soft: #fbeae6;
+
+  --color-neutral-100: #f5f5f8;
+  --color-neutral-200: #e7e7ea;
+  --color-neutral-300: #d4d4d7;
+  --color-neutral-400: #b7b7ba;
+  --color-neutral-500: #98989b;
+  --color-neutral-600: #7a7a7d;
+  --color-neutral-700: #5d5d60;
+  --color-neutral-800: #424244;
+  --color-neutral-900: #2b2b2d;
+
+  --color-accent-100: #eef6ff;
+  --color-accent-200: #d6ebff;
+  --color-accent-300: #b5d9fd;
+  --color-accent-400: #94bce3;
+  --color-accent-500: #749dc4;
+  --color-accent-600: #597ea3;
+  --color-accent-700: #416180;
+  --color-accent-800: #2c455d;
+  --color-accent-900: #1d2d3d;
+
+  --radius-md: 4px;
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
+
+  --ease-industry: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  --animate-spin-slow: spin 0.8s linear infinite;
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
-    @apply bg-paper font-sans text-ink antialiased;
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
+  a {
+    color: var(--color-accent-700);
+    text-underline-offset: 3px;
+  }
+  a:hover {
+    color: var(--color-accent-600);
+  }
+  :focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* Blueprint frame: hairline border with "+" registration marks at each corner. */
+  .blueprint {
+    position: relative;
+    border: 1px solid var(--color-divider);
+    border-radius: 0;
+  }
+  .blueprint > .corner {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    color: color-mix(in srgb, var(--color-text) 55%, transparent);
+    pointer-events: none;
+  }
+  .blueprint > .corner::before,
+  .blueprint > .corner::after {
+    content: "";
+    position: absolute;
+    background: currentColor;
+  }
+  .blueprint > .corner::before {
+    left: 5px;
+    top: 0;
+    width: 1px;
+    height: 100%;
+  }
+  .blueprint > .corner::after {
+    top: 5px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+  }
+  .blueprint > .corner.tl {
+    top: -6px;
+    left: -6px;
+  }
+  .blueprint > .corner.tr {
+    top: -6px;
+    right: -6px;
+  }
+  .blueprint > .corner.bl {
+    bottom: -6px;
+    left: -6px;
+  }
+  .blueprint > .corner.br {
+    bottom: -6px;
+    right: -6px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--color-text);
+    background: transparent;
+    border: 1px solid var(--color-divider);
+    border-radius: 0;
+    padding: 6.8px 12.24px;
+    transition:
+      background 0.2s,
+      border-color 0.2s,
+      color 0.2s,
+      transform 0.25s var(--ease-industry);
+  }
+  .btn svg {
+    display: block;
+    flex: none;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-600);
+    color: var(--color-bg);
+  }
+  .btn-primary:active:not(:disabled) {
+    background: var(--color-accent-700);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-text) 7%, transparent);
+    color: var(--color-text);
+  }
+  .btn-secondary:active:not(:disabled) {
+    background: color-mix(in srgb, var(--color-text) 14%, transparent);
+  }
+  .btn-ghost {
+    color: var(--color-accent-700);
+    border-color: transparent;
+    padding-inline: 3.4px;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    color: var(--color-accent-700);
+  }
+  .btn-ghost:active:not(:disabled) {
+    background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 3px 10px;
+    border-radius: 0;
+    white-space: nowrap;
+  }
+  .tag-accent {
+    background: var(--color-accent-100);
+    color: var(--color-accent-800);
+  }
+  .tag-neutral {
+    background: var(--color-neutral-200);
+    color: var(--color-neutral-800);
+  }
+  .tag-warning {
+    background: #fdf3e2;
+    color: #7a4b0c;
+  }
+
+  .field > label,
+  .field-label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  }
+  .input {
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--color-text);
+    caret-color: var(--color-accent);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: 0;
+  }
+  .input:hover {
+    border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+  }
+  .input:focus-visible {
+    border-color: var(--color-accent);
+    outline-offset: 0;
+  }
+  .input[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+  textarea.input {
+    min-height: 90px;
+    resize: vertical;
+    line-height: 1.45;
+  }
+
+  .seg {
+    display: inline-flex;
+    overflow: hidden;
+    border: 1px solid var(--color-divider);
+    border-radius: 0;
+  }
+  .seg-opt {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .seg-opt input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .seg-opt + .seg-opt {
+    border-left: 1px solid var(--color-divider);
+  }
+  .seg-opt:has(input:checked) {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+  .seg-opt:not(:has(input:checked)):hover {
+    background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  }
+  .seg-opt:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-text) 60%, transparent);
+    padding: 6.8px;
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .table td {
+    padding: 6.8px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+  .table tbody tr:hover {
+    background: color-mix(in srgb, var(--color-text) 4%, transparent);
+  }
+
+  .kicker {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent-700);
+  }
+
+  /* Choice chips in the guided questions and on the landing page. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 18px;
+    border: 1px solid var(--color-divider);
+    background: var(--color-neutral-100);
+    border-radius: var(--radius-md);
+    font-size: 17px;
+    color: var(--color-text);
+    text-decoration: none;
+    transition:
+      transform 0.2s var(--ease-industry),
+      border-color 0.2s,
+      background 0.2s,
+      box-shadow 0.25s;
+  }
+  .chip:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    color: var(--color-text);
+  }
+  .chip[aria-pressed="true"],
+  .chip[aria-checked="true"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent-100);
+  }
+
+  .lift {
+    transition:
+      transform 0.3s var(--ease-industry),
+      box-shadow 0.3s;
+  }
+  .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+@keyframes cm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cm-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+@keyframes cm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+}
+
+@keyframes cm-slide {
+  from {
+    opacity: 0;
+    transform: translateX(26px);
+  }
+}
+
+@keyframes cm-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes cm-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes cm-draw {
+  from {
+    stroke-dashoffset: 48;
+  }
+}
+
+.cm-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent-200);
+  border-top-color: var(--color-accent);
+  animation: cm-spin 0.8s linear infinite;
+}
+
+.cm-pulse {
+  animation: cm-pulse 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Above-the-fold entrances run from CSS on first paint, so nothing flashes before hydration. */
+  .cm-rise {
+    animation: cm-rise 0.8s var(--ease-industry) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .cm-slide {
+    animation: cm-slide 0.46s var(--ease-industry) both;
+  }
+  .cm-pop {
+    animation: cm-pop 0.42s var(--ease-industry) both;
+  }
+  .cm-marquee {
+    animation: cm-marquee 38s linear infinite;
+  }
+  .cm-draw {
+    animation: cm-draw 0.7s var(--ease-industry) 0.15s both;
+  }
+  /* Scroll reveals: hidden only once the observer has armed them (see Reveal). */
+  [data-reveal="armed"] {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  [data-reveal="shown"] {
+    transition:
+      opacity 0.8s var(--ease-industry),
+      transform 0.8s var(--ease-industry);
+    transition-delay: var(--delay, 0ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-spinner,
+  .cm-pulse {
+    animation-duration: 2.4s;
+  }
+  .lift:hover,
+  .chip:hover {
+    transform: none;
   }
 }

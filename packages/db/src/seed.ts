@@ -1,4 +1,4 @@
-import { defaultTheme, demoSiteContent } from "@ceomaker/schema";
+import { demoSiteContent, demoThemeSettings } from "@ceomaker/schema";
 import { eq } from "drizzle-orm";
 import { isMainModule } from "./cli";
 import { createDatabase, type Database } from "./client";
@@ -22,8 +22,8 @@ export async function seedDemoSite(db: Database) {
     .onConflictDoNothing();
 
   const draft = {
-    templateKey: "executive" as const,
-    theme: defaultTheme,
+    templateKey: "meridian" as const,
+    theme: demoThemeSettings,
     content: demoSiteContent,
   };
   const [existing] = await db

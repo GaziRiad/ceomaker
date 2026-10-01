@@ -52,10 +52,23 @@ describe("proxy in subdomain mode", () => {
     expect(getRedirectUrl(response)).toBeNull();
   });
 
-  it("redirects signed-out visitors away from the dashboard", () => {
+  it("redirects signed-out visitors to sign in, then back to where they were going", () => {
     const response = proxy(request("https://ceomaker.com/dashboard"));
     expect(response.status).toBe(307);
-    expect(getRedirectUrl(response)).toBe("https://ceomaker.com/sign-in");
+    expect(getRedirectUrl(response)).toBe("https://ceomaker.com/sign-in?callbackURL=%2Fdashboard");
+    const deep = proxy(request("https://ceomaker.com/dashboard/sites/abc/edit?x=1"));
+    expect(getRedirectUrl(deep)).toBe(
+      "https://ceomaker.com/sign-in?callbackURL=%2Fdashboard%2Fsites%2Fabc%2Fedit%3Fx%3D1",
+    );
+  });
+
+  it("serves uploaded images on tenant hosts", () => {
+    const response = proxy(
+      request("https://amelia.ceomaker.com/media/0b546125-b657-4ed2-b39f-846f38c86be4"),
+    );
+    expect(isRewrite(response)).toBe(false);
+    expect(getRedirectUrl(response)).toBeNull();
+    expect(response.status).toBe(200);
   });
 
   it("lets a request with a session cookie reach the dashboard (the page re-verifies it)", () => {
@@ -136,6 +149,6 @@ describe("proxy in path mode (no ROOT_DOMAIN, e.g. *.vercel.app)", () => {
   it("still redirects signed-out visitors away from the dashboard", () => {
     const response = proxy(request(`${app}/dashboard`));
     expect(response.status).toBe(307);
-    expect(getRedirectUrl(response)).toBe(`${app}/sign-in`);
+    expect(getRedirectUrl(response)).toBe(`${app}/sign-in?callbackURL=%2Fdashboard`);
   });
 });

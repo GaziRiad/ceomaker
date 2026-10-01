@@ -15,6 +15,13 @@
       "when": 1790699001222,
       "tag": "0001_published_versions_immutable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790844619696,
+      "tag": "0002_site_answers_media_ai_usage",
+      "breakpoints": true
     }
   ]
 }

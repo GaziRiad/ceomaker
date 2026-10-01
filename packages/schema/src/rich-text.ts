@@ -49,3 +49,31 @@ export function richTextFromPlain(value: string): RichText {
 export function richTextToPlain(value: RichText): string {
   return value.map((paragraph) => paragraph.spans.map((span) => span.text).join("")).join("\n\n");
 }
+
+const EMPHASIS = /\*([^*\n]+)\*/g;
+
+/**
+ * Editor convention for one paragraph: a phrase wrapped in *asterisks* is the highlighted run
+ * (italic in Meridian, gradient in Aurora, accent in Monument). Links are not editable here.
+ */
+export function paragraphToMarkup(paragraph: RichTextParagraph): string {
+  return paragraph.spans
+    .map((span) => (span.bold || span.italic ? `*${span.text}*` : span.text))
+    .join("");
+}
+
+/** Inverse of paragraphToMarkup. Unpaired asterisks stay literal. Null for blank input. */
+export function paragraphFromMarkup(value: string): RichTextParagraph | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const spans: RichTextSpan[] = [];
+  let last = 0;
+  for (const match of trimmed.matchAll(EMPHASIS)) {
+    const index = match.index ?? 0;
+    if (index > last) spans.push({ text: trimmed.slice(last, index) });
+    spans.push({ text: match[1] ?? "", italic: true });
+    last = index + match[0].length;
+  }
+  if (last < trimmed.length) spans.push({ text: trimmed.slice(last) });
+  return { spans };
+}

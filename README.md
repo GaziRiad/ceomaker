@@ -1,19 +1,19 @@
 # CEOMaker
 
-Personal websites for founders, executives and investors. A user signs up, describes their background (or uploads a CV), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com` on a monthly subscription.
+Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of six templates, gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Billing ($9.99 a month or $99 a year) comes in Phase 3; publishing is free during the beta.
 
 The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Status
 
-| Phase                                        | State   |
-| -------------------------------------------- | ------- |
-| 0. Foundation (monorepo, auth, DB, CI)       | Done    |
-| 1. Content contract + multi-tenant renderer  | Done    |
-| 2. Onboarding, AI generation, editor         | Next    |
-| 3. Publish + billing (Lemon Squeezy)         | Planned |
-| 4. Analytics, more templates, SEO            | Planned |
-| 5. Custom domains, renderer isolation, scale | Planned |
+| Phase                                        | State                         |
+| -------------------------------------------- | ----------------------------- |
+| 0. Foundation (monorepo, auth, DB, CI)       | Done                          |
+| 1. Content contract + multi-tenant renderer  | Done                          |
+| 2. Onboarding, AI generation, editor         | Done                          |
+| 3. Publish + billing (Lemon Squeezy)         | Publishing done, billing next |
+| 4. Analytics, more templates, SEO            | Planned                       |
+| 5. Custom domains, renderer isolation, scale | Planned                       |
 
 ## Architecture
 
@@ -26,13 +26,15 @@ One Next.js 16 app serves the product (landing page, auth, dashboard) and every 
 
 Only one mode is active at a time, so a site never has two public URLs. Path-mode pages are marked `noindex`, so the temporary addresses never compete in search with the real domain. Customer addresses expose no API, auth or dashboard routes in either mode.
 
-A site is data, not HTML. The Zod contract in [`packages/schema`](packages/schema) defines themes, section types and site content, and every layer uses it: the database layer validates writes against it, the renderer parses stored JSON through it, and the editor and AI generator will emit it.
+A site is data, not HTML. The Zod contract in [`packages/schema`](packages/schema) defines colours, section types, site content and the guided answers, and every layer uses it: the database layer validates writes against it, the renderer parses stored JSON through it, and the editor and the AI drafting step emit it.
 
 ```
-apps/web            Next.js app: proxy routing, dashboard, auth, tenant renderer route
-packages/schema     Zod content contract: sections, theme, rich text, subdomains, fixtures
+apps/web            Next.js app: landing, guided questions, sign-in, builder, editor, dashboard,
+                    AI drafting (lib/ai), media uploads, proxy routing, tenant renderer route
+packages/schema     Zod contract: sections, colours, rich text, answers, subdomains, fixtures
 packages/db         Drizzle schema, migrations, owner-scoped queries, seed
-packages/templates  Server-rendered site templates (Executive) and the template registry
+packages/templates  The six site templates (Meridian, Aurora, Obsidian, Monument, Bento,
+                    Chronicle), their shared view model and the registry
 ```
 
 ### Publishing and caching
@@ -44,7 +46,8 @@ packages/templates  Server-rendered site templates (Executive) and the template 
 
 - **Content is data.** User and AI content is validated structured data rendered as escaped text. There is no `dangerouslySetInnerHTML`. Links are restricted to `https`, `http`, `mailto:`, `tel:` and in-page anchors. Theme colors must be `#rrggbb`, so they can't inject CSS.
 - **Tenant isolation.** Queries that touch a site take the acting `userId` and scope to it. A composite foreign key means a site can only point at its own versions, so one tenant's content can never be served on another tenant's domain. Subdomain format is enforced in both the schema and a database `CHECK`.
-- **Sessions.** Better Auth cookies are host-only on the product domain and are never shared with `*.ceomaker.com`. Customer sites set no cookies. Sign-in and sign-up are rate limited, with counters stored in Postgres. In path mode, customer pages share the product's origin until the domain exists. That's acceptable pre-launch because site content can't run scripts and session cookies are HttpOnly, but it's one reason to move to subdomains before real customers arrive.
+- **Sessions.** Sign-in is passwordless: a single-use email link (stored hashed, valid 15 minutes) or Google. Better Auth cookies are host-only on the product domain and are never shared with `*.ceomaker.com`. Customer sites set no cookies. Sign-in requests are rate limited, with counters stored in Postgres.
+- **Uploads and AI.** Portraits are resized and re-encoded in the browser (which drops EXIF data such as GPS position), then checked again on the server by their bytes (JPEG, PNG or WebP only). CVs are sent once to the model to draft the site and never stored. AI drafts and rewrites are rate limited per user, and the model is told to use only facts from the answers and the CV: sections that need numbers, past roles or quotes start hidden and empty instead of invented. In path mode, customer pages share the product's origin until the domain exists. That's acceptable pre-launch because site content can't run scripts and session cookies are HttpOnly, but it's one reason to move to subdomains before real customers arrive.
 - **Headers.** CSP, HSTS (with `includeSubDomains`), `nosniff`, `frame-ancestors 'none'`, COOP and Permissions-Policy on every response. Inline scripts are allowed because cached pages can't carry per-request nonces (see `src/lib/security-headers.ts`). The structural guarantee above is the primary XSS defence.
 
 ## Local development (Windows, macOS, Linux)
@@ -76,14 +79,18 @@ copy .env.example .env
 
 Fill `.env`:
 
-| Variable                | Value                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| `DATABASE_URL`          | `dev` branch, `ceomaker` database, **pooled**                                           |
-| `DATABASE_URL_UNPOOLED` | `dev` branch, `ceomaker` database, **direct**                                           |
-| `TEST_DATABASE_URL`     | `dev` branch, `ceomaker_test` database, **direct**                                      |
-| `BETTER_AUTH_SECRET`    | Output of `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+| Variable                                   | Value                                                                                   |
+| ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                             | `dev` branch, `ceomaker` database, **pooled**                                           |
+| `DATABASE_URL_UNPOOLED`                    | `dev` branch, `ceomaker` database, **direct**                                           |
+| `TEST_DATABASE_URL`                        | `dev` branch, `ceomaker_test` database, **direct**                                      |
+| `BETTER_AUTH_SECRET`                       | Output of `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+| `ANTHROPIC_API_KEY`                        | Optional locally. See [AI drafting](#ai-drafting-claude)                                |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional. See [Google sign-in](#google-sign-in)                                         |
 
-Neon's strings may include `channel_binding=require`. That's fine: the app strips it, because the Postgres driver we use doesn't support it.
+Paste Neon's strings as they are. They may include `channel_binding=require`, which the app strips because the Postgres driver doesn't support it, and `sslmode=require`, which the app upgrades to `verify-full` so the server certificate is actually checked.
+
+Signing in locally needs no email setup: click "Email me a sign-in link" and the link prints in the terminal running `pnpm dev`.
 
 ```powershell
 pnpm db:migrate
@@ -128,23 +135,65 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    | `DATABASE_URL`                 | Neon `main`, pooled | Neon `dev`, pooled       |
    | `DATABASE_URL_UNPOOLED`        | Neon `main`, direct | Neon `dev`, direct       |
    | `BETTER_AUTH_SECRET`           | new random value    | a different random value |
+   | `RESEND_API_KEY`               | Resend key          | Resend key               |
+   | `EMAIL_FROM`                   | see below           | see below                |
+   | `GOOGLE_CLIENT_ID`             | optional            | (leave unset)            |
+   | `GOOGLE_CLIENT_SECRET`         | optional            | (leave unset)            |
+   | `ANTHROPIC_API_KEY`            | Claude key          | Claude key               |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
    - Leave `APP_URL` and `ROOT_DOMAIN` unset: the app derives its address from Vercel's system variables and serves customer sites at `/sites/<name>`.
 
 3. **Deploy.** The build log shows `Migrations applied` before `next build`.
 4. **Check:**
    - `https://<project>.vercel.app/api/health` returns `{"ok":true}`.
-   - Sign up, claim an address.
+   - Sign in, answer the questions, write a draft and publish it.
    - To show the demo site in production, run `pnpm db:seed` once from your machine with the production `DATABASE_URL`.
 5. **Monitor:** point a free uptime monitor at `/api/health`.
 
 Vercel's Hobby plan is for **non-commercial use only**. It's fine while building and testing; upgrade to Pro before taking payments.
+
+### Sign-in email (Resend)
+
+Production refuses to start an email sign-in without a key, so sign-in links are never written to logs.
+
+1. Create a free account at [resend.com](https://resend.com) (100 emails a day, 3,000 a month) and create an API key with sending access. Set it as `RESEND_API_KEY`.
+2. **Until you verify a domain**, Resend only delivers from `onboarding@resend.dev` to the address you signed up to Resend with. That's enough to test, not for other people. Leave `EMAIL_FROM` unset for this.
+3. **To let anyone sign in by email**, add a domain you own in Resend (Domains → Add domain), add the DNS records it shows, wait for "Verified", then set `EMAIL_FROM=CEOMaker <signin@yourdomain.com>`. Until then, Google sign-in is the way in for other people.
+
+### Google sign-in
+
+"Continue with Google" appears once both variables are set. In the [Google Cloud console](https://console.cloud.google.com):
+
+1. Create a project (for example `CEOMaker`).
+2. **Google Auth Platform → Branding**: app name `CEOMaker`, support email, developer contact email. Leave the logo empty: a logo triggers Google's brand verification.
+3. **Audience**: user type **External**. While the status is **Testing**, only the test users you add here can sign in. Click **Publish app** to open it to everyone. CEOMaker only asks for name, email and profile picture (`openid`, `email`, `profile`), which need no Google review.
+4. **Clients → Create client** → **Web application**:
+   - Authorized JavaScript origins: `http://localhost:3000` and `https://<project>.vercel.app`
+   - Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google` and `https://<project>.vercel.app/api/auth/callback/google`
+5. Copy the **Client ID** and **Client secret** right away (or download the JSON). Google shows the secret only once; if you lose it, add a new secret on the client and delete the old one.
+6. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env` and in Vercel (Production), then redeploy. Changes on Google's side can take a few minutes to apply.
+
+Preview deployments get a new URL each time, so Google sign-in works on localhost and production only. When you buy the domain, add `https://ceomaker.com` and `https://ceomaker.com/api/auth/callback/google` to the same client.
+
+A Google account and an email sign-in with the same address end up as one CEOMaker account.
+
+### AI drafting (Claude)
+
+Drafts use Claude Opus 5.5 (`claude-opus-5-5`) with structured output, streamed so the "Writing your first draft" screen follows real progress. Requests opt into Anthropic's server-side refusal fallbacks (`fallbacks: "default"`): if a request is declined by a safety classifier, the API retries it on a recommended fallback model in the same call.
+
+1. Create a key at [console.anthropic.com](https://console.anthropic.com) and add credit to the account.
+2. Set `ANTHROPIC_API_KEY` locally and in Vercel.
+3. Expect roughly $0.05 to $0.20 per first draft (more with a long PDF CV) and well under a cent per headline rewrite. Limits per user per day: 10 drafts, 60 rewrites (`AI_LIMITS` in `apps/web/src/lib/ai/client.ts`). Every request is logged in the `ai_usage` table with its token counts.
+
+Without a key the product still works end to end: the first draft is built from the answers alone, and the editor says so.
 
 ### When you buy the domain
 
 1. In Vercel, add `ceomaker.com`, `www.ceomaker.com` and `*.ceomaker.com`. Wildcard certificates use a DNS-01 challenge: either move the domain to Vercel's nameservers, or delegate `_acme-challenge.ceomaker.com` to Vercel and add a wildcard CNAME at your DNS provider.
 2. Set `ROOT_DOMAIN=ceomaker.com` and `APP_URL=https://ceomaker.com` for Production, then redeploy. Customer sites move to `<name>.ceomaker.com`, and the `/sites/` addresses stop resolving.
 3. Upgrade to Vercel Pro before charging customers.
+
+Buying the domain early also unblocks email sign-in for everyone (Resend needs a domain you own) and lets Google show your own domain on its consent screen.
 
 If you ever self-host behind a CDN instead of Vercel, the CDN honours the long `s-maxage` on customer pages. Publishing must then also purge the CDN cache for that address, or edits won't show until the cache expires.
 

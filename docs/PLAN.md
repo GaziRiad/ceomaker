@@ -216,9 +216,30 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 - **Database: Neon in Frankfurt**, with Vercel functions pinned to `fra1` next to it.
   - Branch `main` is production. Branch `dev` serves local development and previews, with a `ceomaker_test` database for integration tests.
   - Migrations run in the Vercel build over the direct (unpooled) connection. The app uses the pooled one.
-- **Neon connection strings** include `channel_binding=require`, which postgres.js forwards to the server as an unknown setting, and the connection is rejected. `createDatabase` strips it; TLS is still enforced by `sslmode`.
+- **Neon connection strings** include `channel_binding=require`, which postgres.js forwards to the server as an unknown setting, and the connection is rejected. `createDatabase` strips it. postgres.js also treats `sslmode=require` as "encrypt but accept any certificate", so remote connections are upgraded to `verify-full`; local hosts are left alone.
 - **Windows.**
   - The migrate and seed scripts detected "run directly" by comparing a `file://` URL with a `D:\` path, so on Windows they silently did nothing. They now compare real paths.
   - `.gitattributes` forces LF line endings so the formatting check passes on Windows checkouts.
 - **Node 24 LTS everywhere** (local, CI, Vercel). pnpm is installed directly (`npm i -g pnpm@10.33.0`), because Node 25+ no longer bundles Corepack. On Vercel, `ENABLE_EXPERIMENTAL_COREPACK=1` makes the build use the pinned pnpm version instead of pnpm 9.
 - **Vercel Hobby is non-commercial.** Upgrade to Pro before Phase 3 billing goes live.
+
+## Implementation notes (Phase 2: the Claude Design build)
+
+The app follows the handoff in `design/` (see `design/README.md`): the Industry design system for the product, and six templates matched to `PortfolioTemplate.dc.html` at 1280px.
+
+- **Templates render one view model.** `buildSiteModel` (packages/templates) derives names, dates, initials, the pull-quote and section order from validated content once; each template only lays it out. Sizes use container-query units (`fluid()`), so the same component is correct live, in the 1280px editor canvas and in 0.25x thumbnails. Every template was screenshot-compared with the design at 1280px (page heights within 3px) and checked at 390px and 820px.
+- **Colours are per template.** A version stores `{ palettes: { [template]: { bg, ink, accent } } }`; everything else derives through `color-mix`. Switching templates keeps each template's colours. Drafts may hold any colours; publishing requires 4.5:1 text contrast (database layer and editor both check).
+- **Order and visibility.** Hero is pinned first, contact last; the middle sections render in the order the user drags them. Hidden or empty sections never render. Bento is the exception the design calls for: one grid in a fixed order, with spans that fill rows whatever is present.
+- **Truthful drafts.** The AI writes positioning copy from the answers. Numbers, past roles, work and quotes only come from an attached CV; otherwise those sections start hidden and empty. The answers-only draft is saved first, so a failed or rate-limited AI call still leaves something to edit.
+- **CVs** (PDF or .docx, up to 4 MB, under Vercel's 4.5 MB body limit) are attached on the template screen, sent once to the model and not stored. The questions screen only records the intent, so the flow works when the sign-in link opens on another device. The answers themselves travel inside the sign-in link for the same reason.
+- **Passwordless auth.** Magic links (single use, hashed at rest, 15 minutes) via Resend, plus Google. Email and password sign-in is off.
+- **Images in Postgres** (`media` table, bytea, max 3 MB, served at `/media/<id>` with a one-year immutable cache, allowed through the proxy on customer hosts). Fine for portraits at beta volume; move to object storage when storage cost or volume justifies it.
+- **Publishing is free in the beta.** The publish dialog states it plainly instead of showing a checkout. Lemon Squeezy, entitlements and the "paused on lapse" switch are the rest of Phase 3. The paused page exists and is driven by `site.status`.
+- **Restore** puts an earlier version live again and loads it into the draft, after a confirmation.
+- **Deviations from the design, on purpose:**
+  - The landing page's testimonials band is hidden until there are real customer quotes; the design shipped placeholders.
+  - Bento's "Download CV" button became "View experience" (there's no CV file to download), and its demo-only "Available across Europe" line is gone.
+  - Two design-file colour bugs were resolved to their intent: Bento's pull-quote text (invisible in the mock) and template figcaptions.
+  - The editor's Hero panel gained "Profile details" (name, title, organisation, location, availability, affiliations, keywords): the templates show these, and the mock had no way to edit them.
+  - Headline rewrite options follow the mock's logic (Sharper, More formal, Shorter) rather than the README's list.
+- **Follow-ups:** Lemon Squeezy checkout and webhooks; delete unreferenced media; email verification before first publish is covered by passwordless sign-in; per-tenant OG images; an "add CV later" import in the editor; claimed-but-never-published addresses could expire after N days.

@@ -1,8 +1,12 @@
 import {
-  defaultTheme,
+  DEFAULT_TEMPLATE_KEY,
   isValidSubdomain,
+  normalizeTemplateKey,
   parseSiteContentForRender,
-  themeSchema,
+  parseThemeSettingsForRender,
+  resolveSiteColors,
+  siteDescription,
+  siteTitle,
 } from "@ceomaker/schema";
 import { monogramIconDataUri, SiteRenderer } from "@ceomaker/templates";
 import type { Metadata } from "next";
@@ -10,7 +14,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
 import { routingConfigFromEnv, siteUrl } from "@/lib/routing";
-import { getPublishedSite } from "@/lib/sites";
+import { getTenantSite } from "@/lib/sites";
+import { SiteStatus } from "../../site-status";
 
 type Params = PageProps<"/s/[subdomain]">["params"];
 
@@ -25,34 +30,40 @@ export async function generateStaticParams() {
 
 async function loadSite(subdomain: string) {
   if (!isValidSubdomain(subdomain)) return null;
-  return getPublishedSite(subdomain);
+  return getTenantSite(subdomain);
 }
+
+const NOT_LIVE: Metadata = {
+  title: "Site not found",
+  robots: { index: false, follow: false },
+  icons: { icon: PLATFORM_ICON_DATA_URI },
+};
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { subdomain } = await params;
-  const site = await loadSite(subdomain);
-  if (!site) {
-    return {
-      title: "Site not found",
-      robots: { index: false, follow: false },
-      icons: { icon: PLATFORM_ICON_DATA_URI },
-    };
+  const tenant = await loadSite(subdomain);
+  if (tenant?.status === "paused") {
+    return { ...NOT_LIVE, title: "This site is taking a break" };
   }
+  if (tenant?.status !== "published") return NOT_LIVE;
 
-  const { meta } = parseSiteContentForRender(site.content);
-  const title = meta?.title ?? meta?.name ?? subdomain;
-  const theme = themeSchema.safeParse(site.theme);
+  const { site } = tenant;
+  const { meta, sections } = parseSiteContentForRender(site.content);
+  const hero = sections.find((section) => section.type === "hero");
+  const name = meta?.name ?? subdomain;
+  const title = meta ? siteTitle(meta, hero) : subdomain;
+  const description = meta ? siteDescription(meta, hero) : undefined;
+  const key = normalizeTemplateKey(site.templateKey) ?? DEFAULT_TEMPLATE_KEY;
+  const colors = resolveSiteColors(parseThemeSettingsForRender(site.theme), key);
   const routing = routingConfigFromEnv();
   const url = siteUrl(subdomain, routing);
   return {
-    title,
-    description: meta?.description,
+    title: { absolute: title },
+    description,
     alternates: { canonical: url },
-    icons: {
-      icon: monogramIconDataUri(meta?.name ?? subdomain, theme.success ? theme.data : defaultTheme),
-    },
-    openGraph: { type: "profile", title, description: meta?.description, url },
-    twitter: { card: "summary", title, description: meta?.description },
+    icons: { icon: monogramIconDataUri(name, colors) },
+    openGraph: { type: "profile", title, description, url },
+    twitter: { card: "summary", title, description },
     // Path-mode addresses (e.g. on *.vercel.app) are temporary. Keeping them out of search
     // indexes avoids duplicates competing with the real domain after launch.
     ...(routing.mode === "path" ? { robots: { index: false, follow: false } } : {}),
@@ -61,9 +72,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 async function TenantSite({ params }: { params: Params }) {
   const { subdomain } = await params;
-  const site = await loadSite(subdomain);
-  if (!site) notFound();
+  const tenant = await loadSite(subdomain);
+  // Unpublished and unclaimed addresses look the same, so drafts can't be discovered.
+  if (!tenant || tenant.status === "draft") notFound();
+  if (tenant.status === "paused") return <SiteStatus variant="paused" />;
 
+  const { site } = tenant;
   return (
     <SiteRenderer
       templateKey={site.templateKey}

@@ -1,6 +1,12 @@
 import "server-only";
 import { z } from "zod";
 
+const optional = z
+  .string()
+  .trim()
+  .transform((value) => value || undefined)
+  .optional();
+
 const serverEnvSchema = z.object({
   DATABASE_URL: z.url(),
   BETTER_AUTH_SECRET: z
@@ -10,6 +16,14 @@ const serverEnvSchema = z.object({
   APP_URL: z.url().optional(),
   // Optional: unset means path mode, with customer sites at /sites/<name>.
   ROOT_DOMAIN: z.string().min(1).optional(),
+  // Sign-in emails. Without a key, development prints sign-in links to the server console.
+  RESEND_API_KEY: optional,
+  EMAIL_FROM: optional,
+  // "Continue with Google" appears only when both are set.
+  GOOGLE_CLIENT_ID: optional,
+  GOOGLE_CLIENT_SECRET: optional,
+  // AI drafting. Without a key, drafts are built from the answers alone and rewrites are off.
+  ANTHROPIC_API_KEY: optional,
 });
 
 export type ServerEnv = z.output<typeof serverEnvSchema>;
@@ -27,4 +41,8 @@ export function serverEnv(): ServerEnv {
     cached = result.data;
   }
   return cached;
+}
+
+export function googleSignInEnabled(env: ServerEnv = serverEnv()): boolean {
+  return Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 }

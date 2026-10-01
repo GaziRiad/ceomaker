@@ -1,97 +1,217 @@
-import { getDb, listSitesForUser } from "@ceomaker/db";
+import { getDb, getPrimarySiteId, getSiteForOwner, listPublishedVersions } from "@ceomaker/db";
+import { parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
+import { getTemplate, TemplateView } from "@ceomaker/templates";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { CSSProperties, ReactNode } from "react";
 import { Suspense } from "react";
+import { RevealOnScroll } from "@/components/reveal";
+import { ScaledFrame } from "@/components/scaled-frame";
+import { ArrowRight, Avatar, Blueprint, Wordmark } from "@/components/ui";
 import { getSession } from "@/lib/auth";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
-import { Container, Wordmark } from "../components";
-import { ClaimSiteForm } from "./claim-form";
+import { initialsFor, toEditableDraft } from "@/lib/site-data";
 import { SignOutButton } from "./sign-out-button";
+import { VersionsTable } from "./versions-table";
 
 export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
 
-const STATUS_LABELS = {
-  draft: { label: "Draft", className: "bg-ink/5 text-stone" },
-  published: { label: "Live", className: "bg-emerald-50 text-emerald-800" },
-  paused: { label: "Paused", className: "bg-amber-50 text-amber-800" },
-} as const;
+const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
+
+function delay(ms: number): CSSProperties {
+  return { "--delay": `${ms}ms` } as CSSProperties;
+}
+
+function Shell({
+  email,
+  initials,
+  children,
+}: {
+  email: string;
+  initials: string;
+  children: ReactNode;
+}) {
+  return (
+    <>
+      <header className="border-b border-divider bg-neutral-100">
+        <div
+          className="mx-auto flex h-16 max-w-[1200px] items-center gap-5 text-[15px]"
+          style={{ paddingInline: "clamp(20px,3vw,32px)" }}
+        >
+          <Link href="/" className="text-text no-underline hover:text-text">
+            <Wordmark />
+          </Link>
+          <span className="ml-auto hidden text-sm text-neutral-700 sm:inline">{email}</span>
+          <SignOutButton />
+          <Avatar initials={initials} />
+        </div>
+      </header>
+      <main
+        className="mx-auto flex max-w-[1200px] flex-col gap-8"
+        style={{ padding: "48px clamp(20px,3vw,32px) 96px" }}
+      >
+        {children}
+      </main>
+      <RevealOnScroll />
+    </>
+  );
+}
+
+function SideCard({
+  kicker,
+  title,
+  children,
+  delayMs,
+}: {
+  kicker: string;
+  title: string;
+  children: ReactNode;
+  delayMs: number;
+}) {
+  return (
+    <Blueprint className="cm-rise flex flex-col gap-1.5 p-5" style={delay(delayMs)}>
+      <span className="kicker">{kicker}</span>
+      <span className="font-heading text-[28px] leading-tight font-semibold uppercase">
+        {title}
+      </span>
+      {children}
+    </Blueprint>
+  );
+}
 
 async function Dashboard() {
   const session = await getSession();
   if (!session) redirect("/sign-in");
+  const db = getDb();
+  const userId = session.user.id;
+  const siteId = await getPrimarySiteId(db, userId);
+  const site = siteId ? await getSiteForOwner(db, { userId, siteId }) : null;
 
+  const name = site?.answers?.name || session.user.name;
+  const first = name.trim().split(/\s+/)[0] || "there";
+  const initials = initialsFor(name, session.user.email);
+  const heading = (
+    <div className="cm-rise flex flex-col gap-1.5">
+      <span className="kicker">Welcome back, {first}</span>
+      <h1 className="m-0 font-heading text-[clamp(40px,4.5vw,56px)] leading-none font-semibold uppercase">
+        Your site
+      </h1>
+    </div>
+  );
+
+  if (!site) {
+    return (
+      <Shell email={session.user.email} initials={initials}>
+        {heading}
+        <Blueprint
+          className="cm-rise flex max-w-[640px] flex-col gap-4 bg-neutral-100 p-8"
+          style={delay(80)}
+        >
+          <span className="font-heading text-[28px] font-semibold uppercase">No site yet</span>
+          <span className="text-neutral-800">
+            Answer a few questions and CEOMaker drafts your site in your voice. It stays private
+            until you publish.
+          </span>
+          <Link
+            href="/start"
+            className="btn btn-primary self-start"
+            style={{ minWidth: 240, justifyContent: "space-between", padding: "12px 16px" }}
+          >
+            Start building <ArrowRight />
+          </Link>
+        </Blueprint>
+      </Shell>
+    );
+  }
+
+  const versions = await listPublishedVersions(db, { userId, siteId: site.id });
+  const shown = toEditableDraft(site.published ?? site.draft);
   const address = siteAddressParts();
-  const sites = await listSitesForUser(getDb(), session.user.id);
+  const live = site.status === "published";
+  const url = siteUrl(site.subdomain);
+  const statusLabel = live ? "Live" : site.status === "paused" ? "Paused" : "Draft";
+  const words = name.toLowerCase().match(/\p{L}+/gu) ?? [];
 
   return (
-    <>
-      <header className="border-b border-line/70 bg-white">
-        <Container className="flex h-16 items-center justify-between gap-4">
-          <Wordmark />
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-stone sm:inline">{session.user.email}</span>
-            <SignOutButton />
-          </div>
-        </Container>
-      </header>
-      <main className="py-12 sm:py-16">
-        <Container className="max-w-3xl">
-          <h1 className="font-display text-3xl font-semibold">
-            {sites.length === 0 ? "Claim your address" : "Your site"}
-          </h1>
-
-          {sites.length === 0 ? (
-            <div className="mt-8 rounded-xl border border-line bg-white p-6 sm:p-8">
-              <p className="mb-6 leading-relaxed text-stone">
-                Choose the address your site will live at. You can build and preview for free.
-              </p>
-              <ClaimSiteForm prefix={address.prefix} suffix={address.suffix} />
+    <Shell email={session.user.email} initials={initials}>
+      {heading}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,340px),1fr))] gap-6">
+        <Blueprint
+          className="cm-rise flex min-w-0 flex-col bg-neutral-100 md:col-span-2"
+          style={delay(80)}
+        >
+          <ScaledFrame
+            initialZoom={0.5}
+            className="border-b border-divider"
+            style={{ height: 280 }}
+          >
+            <TemplateView
+              templateKey={shown.templateKey}
+              colors={resolveSiteColors(shown.theme, shown.templateKey)}
+              content={parseSiteContentForRender(shown.content)}
+              publishedAt={PREVIEW_DATE}
+              preview
+              still
+            />
+          </ScaledFrame>
+          <div className="flex flex-wrap items-center gap-3" style={{ padding: "16px 18px" }}>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="truncate text-[17px] font-medium">
+                {address.prefix}
+                {site.subdomain}
+                {address.suffix}
+              </span>
+              <span className="flex items-center gap-2 text-[13px] text-accent-700">
+                <span className={`size-[7px] rounded-full bg-accent ${live ? "cm-pulse" : ""}`} />
+                {statusLabel} · {getTemplate(shown.templateKey).name} template
+              </span>
             </div>
-          ) : (
-            <ul className="mt-8 space-y-4">
-              {sites.map((site) => {
-                const url = siteUrl(site.subdomain);
-                const status = STATUS_LABELS[site.status];
-                return (
-                  <li
-                    key={site.id}
-                    className="flex flex-col gap-5 rounded-xl border border-line bg-white p-6 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">
-                        {address.prefix}
-                        {site.subdomain}
-                        {address.suffix}
-                      </p>
-                      <span
-                        className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${status.className}`}
-                      >
-                        {status.label}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {site.status === "published" ? (
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex min-h-11 items-center rounded-md border border-line px-4 text-sm font-semibold hover:border-ink/30"
-                        >
-                          View site
-                        </a>
-                      ) : null}
-                      <span className="inline-flex min-h-11 items-center rounded-md bg-ink/5 px-4 text-sm text-stone">
-                        Editor arrives in the next release
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </Container>
-      </main>
-    </>
+            <Link href={`/dashboard/sites/${site.id}/edit`} className="btn btn-secondary">
+              Edit site
+            </Link>
+            {live ? (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+                style={{ gap: 10 }}
+              >
+                View site <ArrowRight />
+              </a>
+            ) : null}
+          </div>
+        </Blueprint>
+        <div className="flex flex-col gap-6">
+          <SideCard kicker="Plan" title="Beta · Free" delayMs={160}>
+            <span className="text-sm text-neutral-700">
+              Billing starts after the private beta. We&apos;ll email you before anything changes.
+            </span>
+          </SideCard>
+          <SideCard kicker="Custom domain" title="Coming soon" delayMs={240}>
+            <span className="text-sm text-neutral-700">
+              Connect a domain you own, like {words.length ? words.join("") : "yourname"}.com.
+            </span>
+          </SideCard>
+        </div>
+      </div>
+      <section data-reveal="" className="flex flex-col gap-3" style={delay(120)}>
+        <h2 className="m-0 font-heading text-[28px] leading-none font-semibold uppercase">
+          Published versions
+        </h2>
+        <VersionsTable
+          siteId={site.id}
+          rows={versions.map((version) => ({
+            id: version.id,
+            number: version.number,
+            publishedAt: version.publishedAt.toISOString(),
+            templateName: getTemplate(version.templateKey).name,
+            isCurrent: version.isCurrent,
+          }))}
+        />
+      </section>
+    </Shell>
   );
 }
 

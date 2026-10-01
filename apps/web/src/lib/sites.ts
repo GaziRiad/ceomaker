@@ -1,19 +1,19 @@
-import { getDb, getPublishedSiteBySubdomain } from "@ceomaker/db";
+import { getDb, getTenantSiteBySubdomain } from "@ceomaker/db";
 import { cacheLife, cacheTag } from "next/cache";
 
-/** Cache tag for everything rendered from one tenant's published site. */
+/** Cache tag for everything rendered from one tenant's public address. */
 export function siteCacheTag(subdomain: string) {
   return `site:${subdomain}`;
 }
 
 /**
- * Published site lookup for the public renderer. Cached until the site is republished or
- * paused (which call updateTag/revalidateTag with siteCacheTag), so steady-state traffic to a
- * customer's site does not touch the database.
+ * Public lookup for the renderer: the live version, or why there isn't one. Cached until the
+ * site is published, restored, renamed or paused (each calls updateTag with siteCacheTag), so
+ * steady-state traffic to a customer's site never touches the database.
  */
-export async function getPublishedSite(subdomain: string) {
+export async function getTenantSite(subdomain: string) {
   "use cache";
   cacheTag(siteCacheTag(subdomain));
   cacheLife("max");
-  return getPublishedSiteBySubdomain(getDb(), subdomain);
+  return getTenantSiteBySubdomain(getDb(), subdomain);
 }

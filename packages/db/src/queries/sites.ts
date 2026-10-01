@@ -1,20 +1,32 @@
 import {
+  buildStarterContent,
+  contrastRatio,
   CURRENT_SCHEMA_VERSION,
+  DEFAULT_TEMPLATE_KEY,
+  emptyThemeSettings,
+  isPublishableColors,
   parseSiteContent,
+  randomSubdomain,
+  resolveSiteColors,
   subdomainSchema,
+  suggestSubdomains,
   templateKeySchema,
-  themeSchema,
+  themeSettingsSchema,
+  type OnboardingAnswers,
   type SiteContentInput,
   type TemplateKey,
-  type Theme,
+  type ThemeSettingsInput,
 } from "@ceomaker/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, count, eq, inArray, ne, or } from "drizzle-orm";
 import type { Database } from "../client";
 import {
+  AddressLockedError,
   InvalidSiteDataError,
   isUniqueViolation,
+  LowContrastError,
   SiteNotFoundError,
   SubdomainTakenError,
+  VersionNotFoundError,
 } from "../errors";
 import { site, siteVersion } from "../schema";
 
@@ -26,19 +38,24 @@ export interface PublishedSite {
   subdomain: string;
   versionId: string;
   templateKey: string;
-  /** Raw stored JSON. Render through parseSiteContentForRender and themeSchema, never trust it. */
+  /** Raw stored JSON. Render through the tolerant parsers in @ceomaker/schema, never trust it. */
   theme: unknown;
   content: unknown;
   publishedAt: Date;
 }
 
-/** Public read for the renderer. Returns null unless the site is live. */
-export async function getPublishedSiteBySubdomain(
+/** What a public address should show: the live version, or why there isn't one. */
+export type TenantSite =
+  { status: "published"; site: PublishedSite } | { status: "draft" } | { status: "paused" };
+
+/** Public read for the renderer. Null when no site has this address. */
+export async function getTenantSiteBySubdomain(
   db: Database,
   subdomain: string,
-): Promise<PublishedSite | null> {
+): Promise<TenantSite | null> {
   const [row] = await db
     .select({
+      status: site.status,
       siteId: site.id,
       subdomain: site.subdomain,
       versionId: siteVersion.id,
@@ -48,15 +65,29 @@ export async function getPublishedSiteBySubdomain(
       publishedAt: siteVersion.publishedAt,
     })
     .from(site)
-    .innerJoin(
+    .leftJoin(
       siteVersion,
       and(eq(siteVersion.id, site.publishedVersionId), eq(siteVersion.siteId, site.id)),
     )
-    .where(and(eq(site.subdomain, subdomain), eq(site.status, "published")))
+    .where(eq(site.subdomain, subdomain))
     .limit(1);
 
-  if (!row?.publishedAt) return null;
-  return { ...row, publishedAt: row.publishedAt };
+  if (!row) return null;
+  if (row.status === "draft") return { status: "draft" };
+  if (row.status === "paused") return { status: "paused" };
+  if (!row.versionId || !row.publishedAt || !row.templateKey) return { status: "draft" };
+  return {
+    status: "published",
+    site: {
+      siteId: row.siteId,
+      subdomain: row.subdomain,
+      versionId: row.versionId,
+      templateKey: row.templateKey,
+      theme: row.theme,
+      content: row.content,
+      publishedAt: row.publishedAt,
+    },
+  };
 }
 
 export async function listSitesForUser(db: Database, userId: string) {
@@ -69,18 +100,109 @@ export async function listSitesForUser(db: Database, userId: string) {
     })
     .from(site)
     .where(eq(site.userId, userId))
-    .orderBy(desc(site.createdAt));
+    .orderBy(asc(site.createdAt));
+}
+
+/** The site the dashboard shows. Users have one site for now; this is their first. */
+export async function getPrimarySiteId(db: Database, userId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ id: site.id })
+    .from(site)
+    .where(eq(site.userId, userId))
+    .orderBy(asc(site.createdAt))
+    .limit(1);
+  return row?.id ?? null;
+}
+
+export interface OwnedSite {
+  id: string;
+  subdomain: string;
+  status: "draft" | "published" | "paused";
+  answers: OnboardingAnswers | null;
+  createdAt: Date;
+  /** Raw stored JSON; parse before use. */
+  draft: { templateKey: string; theme: unknown; content: unknown; updatedAt: Date };
+  published: {
+    id: string;
+    templateKey: string;
+    theme: unknown;
+    content: unknown;
+    publishedAt: Date;
+  } | null;
+  /** Number of published versions ever made. */
+  versionCount: number;
+}
+
+/** Everything the editor and dashboard need about one site, or null if the user doesn't own it. */
+export async function getSiteForOwner(
+  db: Database,
+  input: { userId: string; siteId: string },
+): Promise<OwnedSite | null> {
+  const [owned] = await db
+    .select()
+    .from(site)
+    .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+    .limit(1);
+  if (!owned) return null;
+
+  // The draft, plus the live version when there is one.
+  const versions = await db
+    .select()
+    .from(siteVersion)
+    .where(
+      and(
+        eq(siteVersion.siteId, owned.id),
+        owned.publishedVersionId
+          ? or(eq(siteVersion.kind, "draft"), eq(siteVersion.id, owned.publishedVersionId))
+          : eq(siteVersion.kind, "draft"),
+      ),
+    );
+  const draftRow = versions.find((version) => version.kind === "draft");
+  if (!draftRow) return null;
+  const publishedRow = versions.find(
+    (version) => version.kind === "published" && version.id === owned.publishedVersionId,
+  );
+
+  const [{ value: versionCount } = { value: 0 }] = await db
+    .select({ value: count() })
+    .from(siteVersion)
+    .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "published")));
+
+  return {
+    id: owned.id,
+    subdomain: owned.subdomain,
+    status: owned.status,
+    answers: owned.answers ?? null,
+    createdAt: owned.createdAt,
+    draft: {
+      templateKey: draftRow.templateKey,
+      theme: draftRow.theme,
+      content: draftRow.content,
+      updatedAt: draftRow.updatedAt,
+    },
+    published:
+      publishedRow?.publishedAt != null
+        ? {
+            id: publishedRow.id,
+            templateKey: publishedRow.templateKey,
+            theme: publishedRow.theme,
+            content: publishedRow.content,
+            publishedAt: publishedRow.publishedAt,
+          }
+        : null,
+    versionCount,
+  };
 }
 
 interface DraftInput {
-  templateKey: TemplateKey;
-  theme: Theme;
+  templateKey: TemplateKey | string;
+  theme: ThemeSettingsInput;
   content: SiteContentInput;
 }
 
 function validateDraft(input: DraftInput) {
   const templateKey = templateKeySchema.safeParse(input.templateKey);
-  const theme = themeSchema.safeParse(input.theme);
+  const theme = themeSettingsSchema.safeParse(input.theme);
   const content = parseSiteContent(input.content);
   const issues = [
     ...(templateKey.error?.issues ?? []),
@@ -96,7 +218,7 @@ function validateDraft(input: DraftInput) {
 /** Creates a site with its initial draft. The subdomain is validated and claimed atomically. */
 export async function createSite(
   db: Database,
-  input: DraftInput & { userId: string; subdomain: string },
+  input: DraftInput & { userId: string; subdomain: string; answers?: OnboardingAnswers },
 ) {
   const subdomain = subdomainSchema.safeParse(input.subdomain);
   if (!subdomain.success) throw new InvalidSiteDataError(subdomain.error.issues);
@@ -106,7 +228,7 @@ export async function createSite(
     return await db.transaction(async (tx) => {
       const [created] = await tx
         .insert(site)
-        .values({ userId: input.userId, subdomain: subdomain.data })
+        .values({ userId: input.userId, subdomain: subdomain.data, answers: input.answers })
         .returning({ id: site.id, subdomain: site.subdomain });
       if (!created) throw new Error("Site insert returned no row");
 
@@ -127,6 +249,60 @@ export async function createSite(
   }
 }
 
+/**
+ * Creates a user's site from their guided answers, with an honest starter draft and the best
+ * free address derived from their name ("amelia", then "amelia-hart", ...).
+ */
+export async function createSiteFromAnswers(
+  db: Database,
+  input: { userId: string; answers: OnboardingAnswers; email?: string },
+) {
+  const draft = {
+    templateKey: DEFAULT_TEMPLATE_KEY,
+    theme: emptyThemeSettings,
+    content: buildStarterContent(input.answers, { email: input.email }),
+  };
+  const suggestions = suggestSubdomains(input.answers.name);
+  const taken = suggestions.length
+    ? new Set(
+        (
+          await db
+            .select({ subdomain: site.subdomain })
+            .from(site)
+            .where(inArray(site.subdomain, suggestions))
+        ).map((row) => row.subdomain),
+      )
+    : new Set<string>();
+  const candidates = [
+    ...suggestions.filter((candidate) => !taken.has(candidate)),
+    randomSubdomain(input.answers.name),
+    randomSubdomain(input.answers.name),
+  ];
+
+  // Another sign-up can claim a free name between the check and the insert; move on if so.
+  for (const subdomain of candidates) {
+    try {
+      return await createSite(db, { ...draft, ...input, subdomain });
+    } catch (error) {
+      if (!(error instanceof SubdomainTakenError)) throw error;
+    }
+  }
+  throw new SubdomainTakenError(candidates.at(-1) ?? "");
+}
+
+/** Records new guided answers on a site the user owns. The draft is left as it is. */
+export async function saveSiteAnswers(
+  db: Database,
+  input: { userId: string; siteId: string; answers: OnboardingAnswers },
+) {
+  const [updated] = await db
+    .update(site)
+    .set({ answers: input.answers })
+    .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+    .returning({ id: site.id });
+  if (!updated) throw new SiteNotFoundError();
+}
+
 /** Replaces the draft of a site the user owns. Published versions are untouched. */
 export async function saveDraft(
   db: Database,
@@ -144,15 +320,15 @@ export async function saveDraft(
     .update(siteVersion)
     .set({ ...draft, schemaVersion: CURRENT_SCHEMA_VERSION, createdBy: input.userId })
     .where(and(eq(siteVersion.siteId, input.siteId), eq(siteVersion.kind, "draft")))
-    .returning({ id: siteVersion.id });
+    .returning({ id: siteVersion.id, updatedAt: siteVersion.updatedAt });
   if (!updated) throw new SiteNotFoundError();
   return updated;
 }
 
 /**
  * Snapshots the current draft into a new immutable published version and makes it live.
- * The draft is re-validated so nothing that bypassed the editor can go live.
- * Billing entitlement is checked by the caller before this runs.
+ * The draft is re-validated so nothing that bypassed the editor can go live, and its colours
+ * must give readable text. Billing entitlement is checked by the caller before this runs.
  */
 export async function publishSite(db: Database, input: { userId: string; siteId: string }) {
   return db.transaction(async (tx) => {
@@ -176,6 +352,10 @@ export async function publishSite(db: Database, input: { userId: string; siteId:
       theme: draft.theme,
       content: draft.content,
     });
+    const colors = resolveSiteColors(validated.theme, validated.templateKey);
+    if (!isPublishableColors(colors)) {
+      throw new LowContrastError(contrastRatio(colors.ink, colors.bg));
+    }
 
     const [published] = await tx
       .insert(siteVersion)
@@ -195,6 +375,165 @@ export async function publishSite(db: Database, input: { userId: string; siteId:
       .set({ status: "published", publishedVersionId: published.id })
       .where(eq(site.id, owned.id));
 
-    return { siteId: owned.id, subdomain: owned.subdomain, versionId: published.id };
+    const [{ value: versionNumber } = { value: 1 }] = await tx
+      .select({ value: count() })
+      .from(siteVersion)
+      .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "published")));
+
+    return {
+      siteId: owned.id,
+      subdomain: owned.subdomain,
+      versionId: published.id,
+      versionNumber,
+    };
   });
+}
+
+export interface PublishedVersionSummary {
+  id: string;
+  /** 1 for the first publish, counting up. */
+  number: number;
+  templateKey: string;
+  publishedAt: Date;
+  isCurrent: boolean;
+}
+
+/** Newest first. */
+export async function listPublishedVersions(
+  db: Database,
+  input: { userId: string; siteId: string },
+): Promise<PublishedVersionSummary[]> {
+  const [owned] = await db
+    .select({ publishedVersionId: site.publishedVersionId, status: site.status })
+    .from(site)
+    .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+    .limit(1);
+  if (!owned) throw new SiteNotFoundError();
+
+  const rows = await db
+    .select({
+      id: siteVersion.id,
+      templateKey: siteVersion.templateKey,
+      publishedAt: siteVersion.publishedAt,
+    })
+    .from(siteVersion)
+    .where(and(eq(siteVersion.siteId, input.siteId), eq(siteVersion.kind, "published")))
+    .orderBy(asc(siteVersion.createdAt), asc(siteVersion.id));
+
+  return rows
+    .map((row, index) => ({
+      id: row.id,
+      number: index + 1,
+      templateKey: row.templateKey,
+      publishedAt: row.publishedAt ?? new Date(0),
+      isCurrent: owned.status === "published" && row.id === owned.publishedVersionId,
+    }))
+    .reverse();
+}
+
+/**
+ * Puts an earlier version back live and loads it into the draft, so the editor and the live
+ * site match again. Unpublished draft edits are replaced; the caller confirms that first.
+ */
+export async function restoreVersion(
+  db: Database,
+  input: { userId: string; siteId: string; versionId: string },
+) {
+  return db.transaction(async (tx) => {
+    const [owned] = await tx
+      .select({ id: site.id, subdomain: site.subdomain })
+      .from(site)
+      .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+      .for("update")
+      .limit(1);
+    if (!owned) throw new SiteNotFoundError();
+
+    const [version] = await tx
+      .select()
+      .from(siteVersion)
+      .where(
+        and(
+          eq(siteVersion.id, input.versionId),
+          eq(siteVersion.siteId, owned.id),
+          eq(siteVersion.kind, "published"),
+        ),
+      )
+      .limit(1);
+    if (!version) throw new VersionNotFoundError();
+
+    await tx
+      .update(siteVersion)
+      .set({
+        templateKey: templateKeySchema.parse(version.templateKey),
+        theme: themeSettingsSchema.safeParse(version.theme).data ?? emptyThemeSettings,
+        content: version.content,
+        schemaVersion: version.schemaVersion,
+        createdBy: input.userId,
+      })
+      .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "draft")));
+
+    await tx
+      .update(site)
+      .set({ status: "published", publishedVersionId: version.id })
+      .where(eq(site.id, owned.id));
+
+    return { subdomain: owned.subdomain };
+  });
+}
+
+/** True when the address is valid and no other site holds it. */
+export async function isSubdomainAvailable(
+  db: Database,
+  subdomain: string,
+  options: { exceptSiteId?: string } = {},
+): Promise<boolean> {
+  const parsed = subdomainSchema.safeParse(subdomain);
+  if (!parsed.success || parsed.data !== subdomain) return false;
+  const [row] = await db
+    .select({ id: site.id })
+    .from(site)
+    .where(
+      options.exceptSiteId
+        ? and(eq(site.subdomain, subdomain), ne(site.id, options.exceptSiteId))
+        : eq(site.subdomain, subdomain),
+    )
+    .limit(1);
+  return !row;
+}
+
+/** Renames a site's address. Only allowed before its first publish. */
+export async function changeSubdomain(
+  db: Database,
+  input: { userId: string; siteId: string; subdomain: string },
+) {
+  const subdomain = subdomainSchema.safeParse(input.subdomain);
+  if (!subdomain.success) throw new InvalidSiteDataError(subdomain.error.issues);
+
+  try {
+    return await db.transaction(async (tx) => {
+      const [owned] = await tx
+        .select({ id: site.id, subdomain: site.subdomain, status: site.status })
+        .from(site)
+        .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+        .for("update")
+        .limit(1);
+      if (!owned) throw new SiteNotFoundError();
+      if (owned.subdomain === subdomain.data) return { subdomain: owned.subdomain };
+
+      const [published] = await tx
+        .select({ id: siteVersion.id })
+        .from(siteVersion)
+        .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "published")))
+        .limit(1);
+      if (owned.status !== "draft" || published) throw new AddressLockedError();
+
+      await tx.update(site).set({ subdomain: subdomain.data }).where(eq(site.id, owned.id));
+      return { subdomain: subdomain.data };
+    });
+  } catch (error) {
+    if (isUniqueViolation(error, "site_subdomain_unique")) {
+      throw new SubdomainTakenError(subdomain.data);
+    }
+    throw error;
+  }
 }

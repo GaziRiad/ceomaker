@@ -1,4 +1,4 @@
-import type { SiteContent, TemplateKey, Theme } from "@ceomaker/schema";
+import type { OnboardingAnswers, SiteContent, TemplateKey, ThemeSettings } from "@ceomaker/schema";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -31,6 +31,8 @@ export const site = pgTable(
     subdomain: text("subdomain").notNull().unique(),
     status: siteStatus("status").notNull().default("draft"),
     publishedVersionId: uuid("published_version_id"),
+    /** The guided-question answers the site was drafted from. Input for AI rewrites. */
+    answers: jsonb("answers").$type<OnboardingAnswers>(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
@@ -72,7 +74,7 @@ export const siteVersion = pgTable(
     kind: siteVersionKind("kind").notNull(),
     schemaVersion: integer("schema_version").notNull(),
     templateKey: text("template_key").$type<TemplateKey>().notNull(),
-    theme: jsonb("theme").$type<Theme>().notNull(),
+    theme: jsonb("theme").$type<ThemeSettings>().notNull(),
     content: jsonb("content").$type<SiteContent>().notNull(),
     createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

@@ -3,9 +3,14 @@ import { getDb, tables } from "@ceomaker/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { magicLink } from "better-auth/plugins";
 import { headers } from "next/headers";
-import { serverEnv } from "./env";
+import { sendSignInEmail } from "./email";
+import { googleSignInEnabled, serverEnv } from "./env";
 import { appUrl } from "./routing";
+
+/** How long a sign-in link stays valid. Links are single-use either way. */
+export const MAGIC_LINK_MINUTES = 15;
 
 /**
  * Origins allowed to call the auth API. A Vercel preview is reachable at both its branch URL and
@@ -39,12 +44,17 @@ function createAuth() {
         rateLimit: tables.rateLimit,
       },
     }),
-    emailAndPassword: {
-      enabled: true,
-      minPasswordLength: 12,
-      maxPasswordLength: 128,
-      autoSignIn: true,
-    },
+    // Passwordless only: a sign-in link by email, or Google. No passwords to leak or reset.
+    emailAndPassword: { enabled: false },
+    socialProviders: googleSignInEnabled(env)
+      ? {
+          google: {
+            clientId: env.GOOGLE_CLIENT_ID!,
+            clientSecret: env.GOOGLE_CLIENT_SECRET!,
+            prompt: "select_account",
+          },
+        }
+      : {},
     session: {
       expiresIn: 60 * 60 * 24 * 14,
       updateAge: 60 * 60 * 24,
@@ -58,8 +68,8 @@ function createAuth() {
       window: 60,
       max: 100,
       customRules: {
-        "/sign-in/email": { window: 60, max: 5 },
-        "/sign-up/email": { window: 60 * 60, max: 5 },
+        // Each request sends an email: keep it tight per IP.
+        "/sign-in/magic-link": { window: 60, max: 3 },
       },
     },
     advanced: {
@@ -68,7 +78,15 @@ function createAuth() {
       crossSubDomainCookies: { enabled: false },
       useSecureCookies: baseUrl.startsWith("https://"),
     },
-    plugins: [nextCookies()],
+    plugins: [
+      magicLink({
+        expiresIn: MAGIC_LINK_MINUTES * 60,
+        // Only a hash is stored, so a database leak can't be replayed as sign-in links.
+        storeToken: "hashed",
+        sendMagicLink: async ({ email, url }) => sendSignInEmail(email, url),
+      }),
+      nextCookies(),
+    ],
   });
 }
 

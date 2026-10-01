@@ -1,18 +1,106 @@
 /*
- * Design tokens for customer sites. Each site sets the --site-* variables from its theme
- * (see themeToStyle); these utilities read them, so one stylesheet serves every tenant.
- * Import this after `@import "tailwindcss"` in the stylesheet that renders sites.
+ * Styles for customer sites and their previews. Each site sets --site-bg/ink/accent/on/surface
+ * from its colours (see themeToStyle); everything else derives from those here, so one
+ * stylesheet serves every tenant. Import this after `@import "tailwindcss"`.
  */
 @source "./";
 
 @theme inline {
   --color-site-bg: var(--site-bg);
-  --color-site-fg: var(--site-fg);
-  --color-site-primary: var(--site-primary);
-  --color-site-on-primary: var(--site-on-primary);
+  --color-site-ink: var(--site-ink);
   --color-site-accent: var(--site-accent);
+  --color-site-on: var(--site-on);
+  --color-site-surface: var(--site-surface);
   --color-site-muted: var(--site-muted);
-  --font-site-heading: var(--site-font-heading);
-  --font-site-body: var(--site-font-body);
-  --radius-site: var(--site-radius);
+  --color-site-line: var(--site-line);
+  --color-site-soft: var(--site-soft);
+  --color-site-accent-soft: var(--site-accent-soft);
+  --color-site-accent-deep: var(--site-accent-deep);
+}
+
+.ceomaker-site {
+  --site-muted: color-mix(in srgb, var(--site-ink) 62%, var(--site-bg));
+  --site-line: color-mix(in srgb, var(--site-ink) 15%, var(--site-bg));
+  --site-soft: color-mix(in srgb, var(--site-ink) 5%, var(--site-bg));
+  --site-accent-soft: color-mix(in srgb, var(--site-accent) 12%, var(--site-bg));
+  --site-accent-deep: color-mix(in srgb, var(--site-accent) 62%, #000);
+  container-type: inline-size;
+  background: var(--site-bg);
+  color: var(--site-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.ceomaker-site *,
+.ceomaker-site *::before,
+.ceomaker-site *::after {
+  box-sizing: border-box;
+}
+
+.ceomaker-site a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ceomaker-site :focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 3px;
+}
+
+@keyframes pt-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pt-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(40px, -30px, 0) scale(1.08);
+  }
+}
+
+@keyframes pt-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+}
+
+.pt-marquee {
+  animation: pt-marquee var(--pt-duration, 40s) linear infinite;
+}
+
+.pt-float {
+  animation: pt-float var(--pt-duration, 16s) ease-in-out infinite alternate;
+}
+
+.pt-float-reverse {
+  animation: pt-float var(--pt-duration, 16s) ease-in-out infinite alternate-reverse;
+}
+
+.pt-ping {
+  animation: pt-ping 1.8s ease-out infinite;
+}
+
+/* Thumbnails and previews that should not move (template picker, dashboard cards). */
+.ceomaker-site[data-still] *,
+.ceomaker-site[data-still] *::before,
+.ceomaker-site[data-still] *::after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ceomaker-site *,
+  .ceomaker-site *::before,
+  .ceomaker-site *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

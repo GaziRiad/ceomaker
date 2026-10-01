@@ -1,14 +1,24 @@
 import type { SiteContentInput } from "../site";
-import { defaultTheme, type Theme } from "../theme";
+import { emptyThemeSettings, type ThemeSettings } from "../theme";
 
 /** A fictional executive used for local development, previews and tests. */
 export const demoSiteContent = {
   schemaVersion: 1,
   meta: {
     name: "Amelia Hart",
-    title: "Amelia Hart, CEO of Meridian Freight Group",
-    description:
-      "Amelia Hart leads Meridian Freight Group, a 2,400-person logistics company operating in 31 countries.",
+    role: "Chief Executive Officer",
+    company: "Meridian Freight Group",
+    location: "Rotterdam",
+    availability: "Open to board and advisory roles",
+    availabilityShort: "Board and advisory roles",
+    affiliations: [
+      "Meridian Freight Group",
+      "European Freight Council",
+      "Alder & Crane Logistics",
+      "Northgate Capital",
+      "Industrial Founders Network",
+    ],
+    keywords: ["Operator", "Board member", "Speaker", "Mentor"],
   },
   sections: [
     {
@@ -21,14 +31,23 @@ export const demoSiteContent = {
       primaryCta: { label: "Get in touch", href: "#contact" },
     },
     {
+      id: "impact",
+      type: "achievements",
+      items: [
+        { value: "€780M", label: "Annual revenue, up from €310M" },
+        { value: "31", label: "Countries served" },
+        { value: "2,400", label: "People across the group" },
+        { value: "42%", label: "Reduction in delivery variance" },
+      ],
+    },
+    {
       id: "about",
       type: "about",
-      heading: "About",
       body: [
         {
           spans: [
             { text: "I joined Meridian as COO in 2015, when it was a regional carrier with " },
-            { text: "thin margins and no shared planning system", bold: true },
+            { text: "thin margins and no shared planning system", italic: true },
             {
               text: ". Six years later we run one of Europe's most reliable mid-sized freight networks.",
             },
@@ -44,20 +63,8 @@ export const demoSiteContent = {
       ],
     },
     {
-      id: "impact",
-      type: "achievements",
-      heading: "Impact",
-      items: [
-        { value: "€780M", label: "Annual revenue, up from €310M" },
-        { value: "31", label: "Countries served" },
-        { value: "2,400", label: "People across the group" },
-        { value: "42%", label: "Reduction in delivery variance" },
-      ],
-    },
-    {
       id: "experience",
       type: "experience",
-      heading: "Experience",
       items: [
         {
           role: "Chief Executive Officer",
@@ -88,9 +95,38 @@ export const demoSiteContent = {
       ],
     },
     {
+      id: "work",
+      type: "portfolio",
+      items: [
+        {
+          kind: "Keynote",
+          title: "Resilient networks for a volatile decade",
+          meta: "European Freight Forum",
+          year: "2025",
+        },
+        {
+          kind: "Essay",
+          title: "Why planning beats forecasting",
+          meta: "Op-ed, logistics trade press",
+          year: "2024",
+        },
+        {
+          kind: "Board",
+          title: "European Freight Council",
+          meta: "Non-executive director",
+          year: "Since 2021",
+        },
+        {
+          kind: "Mentoring",
+          title: "Industrial founders programme",
+          meta: "Mentor to first-time founders",
+          year: "Since 2019",
+        },
+      ],
+    },
+    {
       id: "testimonials",
       type: "testimonials",
-      heading: "What colleagues say",
       items: [
         {
           quote:
@@ -108,15 +144,14 @@ export const demoSiteContent = {
     {
       id: "contact",
       type: "contact",
-      heading: "Let's talk",
       blurb: "For speaking, board and advisory enquiries.",
       email: "office@example.com",
       links: [
-        { kind: "linkedin", href: "https://www.linkedin.com/" },
-        { kind: "website", href: "https://example.com/", label: "Meridian Freight Group" },
+        { label: "LinkedIn", href: "https://www.linkedin.com/", kind: "linkedin" },
+        { label: "Meridian Freight Group", href: "https://example.com/", kind: "website" },
       ],
     },
   ],
 } satisfies SiteContentInput;
 
-export const demoTheme: Theme = defaultTheme;
+export const demoThemeSettings: ThemeSettings = emptyThemeSettings;

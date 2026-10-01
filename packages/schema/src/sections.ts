@@ -15,10 +15,16 @@ const base = {
   visible: z.boolean().default(true),
 };
 
+/**
+ * Optional on every section. Templates label sections themselves ("01 — About", "The record"),
+ * so this only survives from older content and for a future custom-heading feature.
+ */
+const heading = text(80).optional();
+
 export const heroSection = z.object({
   ...base,
   type: z.literal("hero"),
-  eyebrow: text(60).optional(),
+  eyebrow: text(80).optional(),
   headline: requiredText(120),
   subheadline: longText(280).optional(),
   primaryCta: callToAction.optional(),
@@ -28,7 +34,8 @@ export const heroSection = z.object({
 export const aboutSection = z.object({
   ...base,
   type: z.literal("about"),
-  heading: requiredText(80),
+  heading,
+  /** First paragraph is the large lead; emphasized spans are the template's highlight. */
   body: richText,
   image: imageRef.optional(),
 });
@@ -37,16 +44,18 @@ export const experienceItem = z.object({
   role: requiredText(100),
   organization: requiredText(100),
   location: text(80).optional(),
-  start: requiredText(20),
+  start: text(20).optional(),
   end: text(20).optional(),
   summary: longText(500).optional(),
 });
 
+// List sections may be empty: a new site keeps them hidden and empty until the user adds
+// something true. Templates never render an empty list.
 export const experienceSection = z.object({
   ...base,
   type: z.literal("experience"),
-  heading: requiredText(80),
-  items: z.array(experienceItem).min(1).max(20),
+  heading,
+  items: z.array(experienceItem).max(20),
 });
 
 export const achievementItem = z.object({
@@ -57,12 +66,17 @@ export const achievementItem = z.object({
 export const achievementsSection = z.object({
   ...base,
   type: z.literal("achievements"),
-  heading: requiredText(80),
-  items: z.array(achievementItem).min(1).max(8),
+  heading,
+  items: z.array(achievementItem).max(8),
 });
 
 export const portfolioItem = z.object({
-  title: requiredText(100),
+  title: requiredText(120),
+  /** Short category label: "Keynote", "Essay", "Board". */
+  kind: text(30).optional(),
+  /** One line of context: venue, publication or role. */
+  meta: text(120).optional(),
+  year: text(20).optional(),
   description: longText(300).optional(),
   href: safeLinkUrl.optional(),
   image: imageRef.optional(),
@@ -71,8 +85,8 @@ export const portfolioItem = z.object({
 export const portfolioSection = z.object({
   ...base,
   type: z.literal("portfolio"),
-  heading: requiredText(80),
-  items: z.array(portfolioItem).min(1).max(12),
+  heading,
+  items: z.array(portfolioItem).max(12),
 });
 
 export const testimonialItem = z.object({
@@ -84,8 +98,8 @@ export const testimonialItem = z.object({
 export const testimonialsSection = z.object({
   ...base,
   type: z.literal("testimonials"),
-  heading: requiredText(80),
-  items: z.array(testimonialItem).min(1).max(10),
+  heading,
+  items: z.array(testimonialItem).max(10),
 });
 
 export const SOCIAL_KINDS = [
@@ -97,22 +111,26 @@ export const SOCIAL_KINDS = [
   "youtube",
   "other",
 ] as const;
+export type SocialKind = (typeof SOCIAL_KINDS)[number];
 
 export const socialLink = z.object({
-  kind: z.enum(SOCIAL_KINDS),
-  href: safeLinkUrl,
+  /** What the visitor reads. When missing, templates fall back to the kind or the host name. */
   label: text(40).optional(),
+  href: safeLinkUrl,
+  kind: z.enum(SOCIAL_KINDS).optional(),
 });
 
 export const contactSection = z.object({
   ...base,
   type: z.literal("contact"),
-  heading: requiredText(80),
+  heading,
+  /** The invitation line, shown as the section's headline. */
   blurb: longText(280).optional(),
   email: z.email().max(254).optional(),
   links: z.array(socialLink).max(10).default([]),
 });
 
+/** Kept so older content stays valid; the current templates do not render it. */
 export const ctaSection = z.object({
   ...base,
   type: z.literal("cta"),
@@ -136,6 +154,11 @@ export type Section = z.output<typeof sectionSchema>;
 export type SectionInput = z.input<typeof sectionSchema>;
 export type SectionType = Section["type"];
 export type SectionOf<T extends SectionType> = Extract<Section, { type: T }>;
+export type ExperienceItem = z.output<typeof experienceItem>;
+export type AchievementItem = z.output<typeof achievementItem>;
+export type PortfolioItem = z.output<typeof portfolioItem>;
+export type TestimonialItem = z.output<typeof testimonialItem>;
+export type SocialLink = z.output<typeof socialLink>;
 
 export const SECTION_TYPES = [
   "hero",
@@ -147,3 +170,19 @@ export const SECTION_TYPES = [
   "contact",
   "cta",
 ] as const satisfies readonly SectionType[];
+
+/** Sections the editor offers, in the default order of a new site. Hero and contact are fixed. */
+export const EDITABLE_SECTION_TYPES = [
+  "hero",
+  "achievements",
+  "about",
+  "experience",
+  "portfolio",
+  "testimonials",
+  "contact",
+] as const satisfies readonly SectionType[];
+
+export type EditableSectionType = (typeof EDITABLE_SECTION_TYPES)[number];
+
+/** Pinned at the top and bottom of every site; they can't be hidden or moved. */
+export const FIXED_SECTION_TYPES: ReadonlySet<SectionType> = new Set(["hero", "contact"]);

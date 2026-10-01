@@ -13,6 +13,9 @@ import {
 /** Paths that need a signed-in user. */
 const PROTECTED_PREFIXES = ["/dashboard"];
 
+/** Uploaded images are served by the app on every host, including customer sites. */
+const MEDIA_PREFIX = "/media/";
+
 function notFound(request: NextRequest) {
   return NextResponse.rewrite(new URL(NOT_FOUND_PATH, request.url));
 }
@@ -31,8 +34,11 @@ function rewriteToTenant(request: NextRequest, subdomain: string, rest: string) 
 function serveApp(request: NextRequest) {
   // Optimistic check on cookie presence only, so signed-out visitors get a real redirect
   // instead of a streamed one. Pages and server actions still verify the session itself.
-  if (isProtected(request.nextUrl.pathname) && !getSessionCookie(request)) {
-    return NextResponse.redirect(new URL("/sign-in", request.url), 307);
+  const { pathname, search } = request.nextUrl;
+  if (isProtected(pathname) && !getSessionCookie(request)) {
+    const signIn = new URL("/sign-in", request.url);
+    signIn.searchParams.set("callbackURL", `${pathname}${search}`);
+    return NextResponse.redirect(signIn, 307);
   }
   return NextResponse.next();
 }
@@ -85,7 +91,8 @@ export function proxy(request: NextRequest) {
       }
       return serveApp(request);
     case "tenant":
-      // Tenant hosts serve published pages only: no API, auth or dashboard surface.
+      // Tenant hosts serve published pages and their images only: no API, auth or dashboard.
+      if (pathname.startsWith(MEDIA_PREFIX)) return NextResponse.next();
       if (pathname.startsWith("/api/")) return notFound(request);
       return rewriteToTenant(request, resolution.subdomain, pathname === "/" ? "" : pathname);
     case "not-found":

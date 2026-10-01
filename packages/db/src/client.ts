@@ -11,10 +11,28 @@ export interface DatabaseOptions {
 /**
  * libpq options that postgres.js does not understand. postgres.js forwards unknown URL parameters
  * to the server as settings, which Postgres rejects, and Neon's copy-paste connection strings
- * include `channel_binding=require`. TLS is still enforced through `sslmode`.
+ * include `channel_binding=require`.
  */
 const CLIENT_ONLY_PARAMS = ["channel_binding"];
 
+/** sslmode values under which postgres.js encrypts but does not verify the server certificate. */
+const UNVERIFIED_SSL_MODES = new Set(["require", "prefer", "allow"]);
+
+function isLocalHost(hostname: string): boolean {
+  const host = hostname.replace(/^\[|\]$/g, "");
+  return (
+    host === "localhost" || host === "127.0.0.1" || host === "::1" || host.endsWith(".localhost")
+  );
+}
+
+/**
+ * Makes copy-pasted connection strings safe for postgres.js:
+ * - drops client-only libpq parameters it would forward to the server;
+ * - for remote hosts, upgrades a missing or unverified sslmode to `verify-full`. postgres.js
+ *   treats `sslmode=require` as "encrypt, but accept any certificate", which lets anyone on
+ *   the network path impersonate the database. Explicit `disable`, `verify-ca` and
+ *   `verify-full` are respected, and local hosts are left alone so Docker and CI work.
+ */
 export function normalizeConnectionString(url: string): string {
   const parsed = new URL(url);
   let changed = false;
@@ -23,6 +41,11 @@ export function normalizeConnectionString(url: string): string {
       parsed.searchParams.delete(name);
       changed = true;
     }
+  }
+  const sslmode = parsed.searchParams.get("sslmode");
+  if (!isLocalHost(parsed.hostname) && (sslmode === null || UNVERIFIED_SSL_MODES.has(sslmode))) {
+    parsed.searchParams.set("sslmode", "verify-full");
+    changed = true;
   }
   return changed ? parsed.toString() : url;
 }

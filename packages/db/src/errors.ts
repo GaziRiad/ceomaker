@@ -29,3 +29,26 @@ export function isUniqueViolation(error: unknown, constraint: string): boolean {
   }
   return false;
 }
+
+export class VersionNotFoundError extends Error {
+  constructor() {
+    super("Version not found");
+    this.name = "VersionNotFoundError";
+  }
+}
+
+/** Publishing needs readable text: ink on background of at least MIN_TEXT_CONTRAST. */
+export class LowContrastError extends Error {
+  constructor(readonly ratio: number) {
+    super(`Text contrast is ${ratio.toFixed(1)}:1; publishing needs at least 4.5:1`);
+    this.name = "LowContrastError";
+  }
+}
+
+/** The address of a site that has been live can't change: people may have shared it. */
+export class AddressLockedError extends Error {
+  constructor() {
+    super("The address can't change after a site has been published");
+    this.name = "AddressLockedError";
+  }
+}
