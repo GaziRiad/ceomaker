@@ -42,7 +42,14 @@ export function ScaledFrame({
   }, [maxZoom]);
 
   return (
-    <div ref={frame} className={className} style={{ overflow: "hidden", ...style }}>
+    // Paint containment makes the frame the containing block for everything inside, so positioned
+    // parts of a template (a form's hidden field, a skip link) are clipped with the rest instead
+    // of stretching the page around the preview.
+    <div
+      ref={frame}
+      className={className}
+      style={{ position: "relative", overflow: "hidden", contain: "paint", ...style }}
+    >
       <div
         inert={!interactive}
         style={{ width: DESIGN_WIDTH, zoom, pointerEvents: interactive ? undefined : "none" }}
