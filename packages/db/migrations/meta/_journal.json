@@ -43,6 +43,13 @@
       "when": 1790888380655,
       "tag": "0005_template_version",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790891736562,
+      "tag": "0006_dashboard",
+      "breakpoints": true
     }
   ]
 }

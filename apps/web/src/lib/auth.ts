@@ -5,12 +5,15 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins";
 import { headers } from "next/headers";
-import { sendSignInEmail } from "./email";
+import { sendEmailChangeLink, sendSignInEmail } from "./email";
 import { googleSignInEnabled, serverEnv } from "./env";
 import { appUrl } from "./routing";
 
 /** How long a sign-in link stays valid. Links are single-use either way. */
 export const MAGIC_LINK_MINUTES = 15;
+
+/** How long the link that confirms a new email address stays valid. */
+export const EMAIL_CHANGE_HOURS = 24;
 
 /**
  * Origins allowed to call the auth API. A Vercel preview is reachable at both its branch URL and
@@ -46,6 +49,17 @@ function createAuth() {
     }),
     // Passwordless only: a sign-in link by email, or Google. No passwords to leak or reset.
     emailAndPassword: { enabled: false },
+    user: {
+      // A new address is confirmed by a link sent to it; nothing changes until it's opened.
+      changeEmail: { enabled: true },
+      // Accounts are removed by our own action (it keeps live addresses on hold), not this API.
+      deleteUser: { enabled: false },
+    },
+    emailVerification: {
+      expiresIn: EMAIL_CHANGE_HOURS * 60 * 60,
+      // Only used for email changes: magic links and Google already verify the address.
+      sendVerificationEmail: async ({ user, url }) => sendEmailChangeLink(user.email, url),
+    },
     socialProviders: googleSignInEnabled(env)
       ? {
           google: {

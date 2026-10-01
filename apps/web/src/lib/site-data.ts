@@ -82,6 +82,11 @@ export async function loadOwnedSite(
   };
 }
 
+/** The name to greet someone by: their account name, else the one they gave us, else their email. */
+export function displayName(user: { name: string; email: string }, given?: string | null): string {
+  return user.name.trim() || given?.trim() || user.email.split("@")[0] || "there";
+}
+
 export function initialsFor(name: string, email: string): string {
   const words = (name || email.split("@")[0] || "").match(/\p{L}+/gu) ?? [];
   return (

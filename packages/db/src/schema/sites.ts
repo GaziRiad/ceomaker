@@ -1,6 +1,7 @@
 import type { OnboardingAnswers, SiteContent, TemplateKey, ThemeSettings } from "@ceomaker/schema";
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   foreignKey,
   index,
@@ -33,6 +34,8 @@ export const site = pgTable(
     publishedVersionId: uuid("published_version_id"),
     /** The guided-question answers the site was drafted from. Input for AI rewrites. */
     answers: jsonb("answers").$type<OnboardingAnswers>(),
+    /** Email the owner when someone writes through the contact form (once email is set up). */
+    notifyMessages: boolean("notify_messages").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()

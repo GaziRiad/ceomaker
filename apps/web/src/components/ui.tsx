@@ -45,14 +45,14 @@ export function Wordmark({ size = 22, className = "" }: { size?: number; classNa
   );
 }
 
-interface IconProps {
+export interface IconProps {
   size?: number;
   strokeWidth?: number;
   className?: string;
   color?: string;
 }
 
-function Icon({
+export function Icon({
   size = 18,
   strokeWidth = 1.5,
   className,

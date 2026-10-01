@@ -1,6 +1,6 @@
 "use server";
 
-import { getDb, saveContactMessage } from "@ceomaker/db";
+import { getDb, getMessageAlertAddress, saveContactMessage } from "@ceomaker/db";
 import {
   CONTACT_MESSAGE_LIMITS,
   contactMessageSchema,
@@ -11,8 +11,11 @@ import {
 } from "@ceomaker/schema";
 import { getTemplate } from "@ceomaker/templates";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { createHmac } from "node:crypto";
+import { emailConfigured, sendMessageNotification } from "@/lib/email";
 import { serverEnv } from "@/lib/env";
+import { appUrl } from "@/lib/routing";
 import { getTenantSite } from "@/lib/sites";
 
 // The contact form on a live site. Anyone can call this, so it trusts nothing: the site must be
@@ -77,13 +80,14 @@ export async function sendContactMessage(
   }
 
   const topics = form?.topics ?? [];
+  const message = {
+    ...parsed.data,
+    // Only topics the site offers; anything else is noise from a scripted request.
+    topic: topics.includes(parsed.data.topic) ? parsed.data.topic : "",
+  };
   const saved = await saveContactMessage(getDb(), {
     siteId: tenant.site.siteId,
-    message: {
-      ...parsed.data,
-      // Only topics the site offers; anything else is noise from a scripted request.
-      topic: topics.includes(parsed.data.topic) ? parsed.data.topic : "",
-    },
+    message,
     senderKey: await senderKey(),
   });
   if (!saved.ok) {
@@ -92,5 +96,31 @@ export async function sendContactMessage(
       error: "Too many messages from here for now. Please try again in an hour.",
     };
   }
+  after(() => alertOwner(tenant.site.siteId, saved.id, message));
   return { ok: true };
+}
+
+/**
+ * Emails the owner about a new message, after the sender has their answer. The message is saved
+ * either way, so a failed email is logged, never shown to the sender. Skipped in production until
+ * an email provider is set up; development prints the email instead.
+ */
+async function alertOwner(
+  siteId: string,
+  messageId: string,
+  message: { name: string; topic: string },
+): Promise<void> {
+  if (!emailConfigured() && process.env.NODE_ENV === "production") return;
+  try {
+    const to = await getMessageAlertAddress(getDb(), siteId);
+    if (!to) return;
+    await sendMessageNotification({
+      to,
+      sender: message.name,
+      topic: message.topic,
+      url: `${appUrl()}/dashboard/messages?open=${encodeURIComponent(messageId)}`,
+    });
+  } catch (error) {
+    console.error("Couldn't email the site owner about a new message", error);
+  }
 }

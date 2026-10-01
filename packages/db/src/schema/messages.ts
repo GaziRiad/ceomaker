@@ -19,6 +19,8 @@ export const contactMessage = pgTable(
     topic: text("topic"),
     message: text("message").notNull(),
     senderKey: text("sender_key"),
+    /** When the owner opened it; null while it's new. */
+    readAt: timestamp("read_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index("contact_message_site_id_created_at_idx").on(table.siteId, table.createdAt)],

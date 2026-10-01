@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/styles.css">
+<script src="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--color-bg)}
+:root{--color-danger:#a4402a;--color-danger-soft:#fbeae6;--color-warning:#7a4b0c;--color-warning-soft:#fdf3e2}
+[data-dash] a{color:var(--color-accent-700)}
+[data-dash] a:hover{color:var(--color-accent-600)}
+@keyframes db-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes db-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes db-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){[data-dash] *{animation:none !important;transition:none !important}}</style>
+</helmet>
+<div data-dash="" ref="{{ rootRef }}" style="position:relative;min-height:{{ L.minH }};background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:{{ L.body }};line-height:1.5">
+
+<header style="position:sticky;top:0;z-index:20;background:var(--color-neutral-100);border-bottom:1px solid var(--color-divider)">
+  <div style="max-width:1200px;margin:0 auto;padding:0 {{ L.pad }};height:{{ L.headH }};display:flex;align-items:center;gap:20px">
+    <span style="flex:1;font-family:var(--font-heading);font-weight:600;font-size:22px;letter-spacing:0.02em;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+    <sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;color:var(--color-neutral-700)">{{ me.email }}</span></sc-if>
+    <div style="position:relative">
+      <button onClick="{{ toggleMenu }}" aria-haspopup="menu" aria-expanded="{{ menu.open }}" style="border:0;background:none;padding:4px;margin:-4px;font:inherit;color:var(--color-text);cursor:pointer;display:flex;align-items:center;gap:6px;min-height:44px">
+        <span style="width:34px;height:34px;border-radius:50%;background:var(--color-accent-200);color:var(--color-accent-800);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500">{{ me.initials }}</span>
+        <span style="display:flex;color:var(--color-neutral-700);transform:{{ menu.chev }};transition:transform .25s">{{ ic.chevron }}</span>
+      </button>
+      <sc-if value="{{ menu.open }}" hint-placeholder-val="{{ false }}">
+        <div data-menu="" role="menu" class="blueprint" style="position:absolute;right:0;top:calc(100% + 10px);width:248px;background:var(--color-neutral-100);box-shadow:var(--shadow-md);display:flex;flex-direction:column;padding:6px 0;z-index:30">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="padding:10px 16px 12px;border-bottom:1px solid var(--color-divider);display:flex;flex-direction:column"><span style="font-weight:500">{{ me.name }}</span><span style="font-size:13px;color:var(--color-neutral-700);overflow-wrap:anywhere">{{ me.email }}</span></div>
+          <sc-for list="{{ menu.items }}" as="mi" hint-placeholder-count="3"><button role="menuitem" onClick="{{ mi.go }}" style="border:0;background:none;font:inherit;font-size:15px;color:var(--color-text);text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px;min-height:44px;transition:background .15s" style-hover="background:var(--color-neutral-200)"><span style="display:flex;color:var(--color-neutral-700)">{{ mi.icon }}</span>{{ mi.label }}</button></sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <nav aria-label="Dashboard" style="max-width:1200px;margin:0 auto;padding:0 {{ L.pad }};display:flex;gap:{{ L.tabGap }}">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+      <button onClick="{{ t.go }}" aria-current="{{ t.cur }}" style="border:0;background:none;padding:0;font:inherit;font-size:15px;font-weight:500;cursor:pointer;height:46px;display:flex;align-items:center;gap:8px;color:{{ t.color }};box-shadow:inset 0 -2px 0 {{ t.line }};transition:color .2s,box-shadow .25s" style-hover="color:var(--color-text)">{{ t.label }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="padding:1px 7px;font-size:12px">{{ t.badge }}</span></sc-if></button>
+    </sc-for>
+  </nav>
+</header>
+
+<!-- ============ OVERVIEW ============ -->
+<sc-if value="{{ is.overview }}" hint-placeholder-val="{{ true }}">
+<main style="max-width:1200px;margin:0 auto;padding:{{ L.mainPad }};display:flex;flex-direction:column;gap:{{ L.gap }}">
+  <div data-rise="" style="display:flex;flex-direction:column;gap:6px">
+    <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Welcome back, {{ me.first }}</span>
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:{{ L.h1 }}">Your site</h1>
+  </div>
+
+  <sc-if value="{{ is.ovLoading }}" hint-placeholder-val="{{ false }}">
+    <div aria-busy="true" aria-label="Loading" style="display:grid;grid-template-columns:{{ L.ovCols }};gap:24px">
+      <div style="display:flex;flex-direction:column;gap:14px"><div style="height:{{ L.pvH }};background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div><div style="height:18px;width:46%;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div><div style="height:12px;width:30%;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div></div>
+      <div style="display:flex;flex-direction:column;gap:24px"><div style="height:150px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div><div style="height:150px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div></div>
+    </div>
+    <div style="height:260px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div>
+  </sc-if>
+
+  <sc-if value="{{ is.ovReady }}" hint-placeholder-val="{{ true }}">
+  <div style="display:grid;grid-template-columns:{{ L.ovCols }};gap:24px;align-items:start">
+    <div data-rise="" class="blueprint" style="min-width:0;background:var(--color-neutral-100);display:flex;flex-direction:column">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div ref="{{ pvRef }}" style="position:relative;height:{{ L.pvH }};overflow:hidden;border-bottom:1px solid var(--color-divider);background:#fbfbfa">
+        <div style="width:1280px;zoom:{{ L.pvZ }};pointer-events:none;filter:{{ site.pvFilter }};transition:filter .4s"><dc-import name="Meridian" device="desktop" sample="full" only="hero" motion="{{ false }}" hint-size="1280px,760px"></dc-import></div>
+        <sc-if value="{{ site.pvTag }}" hint-placeholder-val="{{ false }}"><span class="tag tag-neutral" style="position:absolute;left:14px;top:14px;box-shadow:var(--shadow-sm)">{{ site.pvTagLabel }}</span></sc-if>
+      </div>
+      <div style="padding:{{ L.cardPad }};display:flex;flex-wrap:wrap;align-items:center;gap:16px">
+        <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:19px;font-weight:500;overflow-wrap:anywhere">{{ site.address }}</span>
+          <span style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--color-neutral-800)"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ site.dot }};animation:{{ site.pulse }}"></span>{{ site.line }}<sc-if value="{{ site.hasTag }}" hint-placeholder-val="{{ false }}"><span class="tag" style="background:var(--color-warning-soft);color:var(--color-warning)">{{ site.tag }}</span></sc-if></span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;width:{{ L.btnRowW }}">
+          <sc-for list="{{ site.btns }}" as="b" hint-placeholder-count="2"><button class="{{ b.cls }}" onClick="{{ b.go }}" style="flex:{{ L.btnFlex }};min-height:{{ L.hit }};gap:10px;padding:0 16px">{{ b.label }}{{ b.icon }}</button></sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ site.hasNotice }}" hint-placeholder-val="{{ false }}">
+        <div data-notice="" style="margin:0 {{ L.cardPadX }} {{ L.cardPadX }};padding:14px 16px;background:var(--color-accent-100);border:1px solid var(--color-accent-200);display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 12px">
+          <span style="display:flex;color:var(--color-accent-700);padding-top:2px">{{ ic.sparkles }}</span>
+          <span style="flex:1 1 220px;font-size:15px;line-height:1.5;color:var(--color-accent-900);text-wrap:pretty">{{ site.notice }}</span>
+          <sc-if value="{{ site.noticeBtn }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ toEditor }}" style="min-height:{{ L.hit }};margin:-6px 0;color:var(--color-accent-700)">Preview in editor</button></sc-if>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="min-width:0;display:flex;flex-direction:column;gap:24px">
+      <div data-rise="" class="blueprint" style="padding:22px;display:flex;flex-direction:column;gap:8px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Plan</span><sc-if value="{{ bill.hasTag }}" hint-placeholder-val="{{ true }}"><span class="tag" style="background:{{ bill.tagBg }};color:{{ bill.tagFg }}">{{ bill.tag }}</span></sc-if></span>
+        <span style="font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">{{ bill.short }}</span>
+        <span style="font-size:15px;color:var(--color-neutral-800);text-wrap:pretty">{{ bill.shortText }}</span>
+        <sc-if value="{{ bill.hasShortBtn }}" hint-placeholder-val="{{ false }}"><button class="{{ bill.shortBtnCls }}" onClick="{{ toBilling }}" style="align-self:flex-start;margin-top:6px;min-height:{{ L.hit }};padding:0 16px">{{ bill.shortBtn }}</button></sc-if>
+        <sc-if value="{{ bill.hasShortLink }}" hint-placeholder-val="{{ true }}"><button class="btn btn-ghost" onClick="{{ toBilling }}" style="align-self:flex-start;padding-left:0;min-height:{{ L.hit }};color:var(--color-accent-700)">Billing settings</button></sc-if>
+      </div>
+      <div data-rise="" class="blueprint" style="padding:22px;display:flex;flex-direction:column;gap:8px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Custom domain</span><span class="tag tag-neutral">Coming soon</span></span>
+        <span style="font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Your own domain</span>
+        <span style="font-size:15px;color:var(--color-neutral-800)">Connect a domain you own, like ameliahart.com.</span>
+      </div>
+    </div>
+  </div>
+
+  <section data-rise="" aria-label="Messages" class="blueprint" style="background:var(--color-neutral-100)">
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <div style="padding:{{ L.cardPad }};display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;border-bottom:1px solid var(--color-divider)">
+      <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">Messages</h2>
+      <sc-if value="{{ inbox.hasCount }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px;color:var(--color-neutral-700)">{{ inbox.count }}</span></sc-if>
+      <sc-if value="{{ inbox.hasRows }}" hint-placeholder-val="{{ true }}"><button class="btn btn-ghost" onClick="{{ toMessages }}" style="margin-left:auto;min-height:{{ L.hit }};gap:8px;color:var(--color-accent-700)">View all messages{{ ic.arrow }}</button></sc-if>
+    </div>
+    <sc-if value="{{ inbox.hasRows }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ inbox.rows }}" as="r" hint-placeholder-count="3">
+          <button onClick="{{ r.open }}" style="border:0;border-top:{{ r.bt }};background:none;font:inherit;color:var(--color-text);text-align:left;cursor:pointer;display:grid;grid-template-columns:{{ L.rowCols }};grid-template-areas:{{ L.rowAreas }};align-items:center;gap:4px 14px;padding:{{ L.rowPad }};transition:background .15s" style-hover="background:var(--color-neutral-200)">
+            <span aria-label="{{ r.dotLabel }}" style="grid-area:dot;width:8px;height:8px;border-radius:50%;background:var(--color-accent);opacity:{{ r.dotOp }}"></span>
+            <span style="grid-area:who;min-width:0;display:flex;align-items:center;gap:10px"><span style="font-weight:{{ r.fw }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><sc-if value="{{ r.hasTopic }}" hint-placeholder-val="{{ true }}"><span class="tag tag-accent" style="flex:none;white-space:nowrap">{{ r.topic }}</span></sc-if></span>
+            <span style="grid-area:text;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--color-neutral-800);font-size:15px">{{ r.snippet }}</span>
+            <span style="grid-area:time;justify-self:end;font-size:13px;color:var(--color-neutral-700);white-space:nowrap">{{ r.rel }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ inbox.isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:{{ L.emptyPad }};display:flex;flex-wrap:wrap;align-items:center;gap:16px 20px">
+        <span style="display:flex;color:var(--color-accent-700)">{{ ic.inbox }}</span>
+        <span style="flex:1 1 260px;max-width:620px;color:var(--color-neutral-800);text-wrap:pretty">{{ empty.text }}</span>
+        <sc-if value="{{ empty.hasBtn }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" onClick="{{ empty.go }}" style="min-height:{{ L.hit }};padding:0 16px">{{ empty.btn }}</button></sc-if>
+      </div>
+    </sc-if>
+  </section>
+
+  <section data-rise="" aria-label="Published versions" style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">Published versions</h2>
+    <sc-if value="{{ ver.has }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}">
+        <table class="table" style="font-size:15px">
+          <thead><tr><th>Version</th><th>Published</th><th>Template</th><th style="text-align:right"><span style="position:absolute;width:1px;height:1px;overflow:hidden">Action</span></th></tr></thead>
+          <tbody><sc-for list="{{ ver.rows }}" as="v" hint-placeholder-count="4"><tr><td style="padding:14px 8px">{{ v.n }}</td><td style="color:var(--color-neutral-700)">{{ v.date }}</td><td style="color:var(--color-neutral-700)">{{ v.tpl }}</td><td style="text-align:right"><sc-if value="{{ v.cur }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">Current</span></sc-if><sc-if value="{{ v.notCur }}" hint-placeholder-val="{{ true }}"><a href="#" style="font-size:14px">View</a></sc-if></td></tr></sc-for></tbody>
+        </table>
+      </sc-if>
+      <sc-if value="{{ L.phone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider)">
+          <sc-for list="{{ ver.rows }}" as="v" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid color-mix(in srgb,var(--color-text) 8%,transparent)">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:500">{{ v.n }}</span><span style="font-size:14px;color:var(--color-neutral-700)">{{ v.date }} · {{ v.tpl }}</span></div>
+              <sc-if value="{{ v.cur }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">Current</span></sc-if><sc-if value="{{ v.notCur }}" hint-placeholder-val="{{ true }}"><a href="#" style="font-size:15px;min-height:44px;display:flex;align-items:center;padding:0 4px">View</a></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ ver.more }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" style="align-self:flex-start;padding-left:0;color:var(--color-accent-700)">Show all versions</button></sc-if>
+    </sc-if>
+    <sc-if value="{{ ver.none }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-neutral-800)">Nothing published yet. A version is saved each time you publish, so you can go back to it.</p></sc-if>
+  </section>
+  </sc-if>
+</main>
+</sc-if>
+
+<!-- ============ MESSAGES ============ -->
+<sc-if value="{{ is.messages }}" hint-placeholder-val="{{ false }}">
+<main style="max-width:1200px;margin:0 auto;padding:{{ L.mainPad }};display:flex;flex-direction:column;gap:24px">
+  <div data-rise="" style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px">
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:{{ L.h1 }}">Messages</h1>
+    <sc-if value="{{ inbox.hasCount }}" hint-placeholder-val="{{ true }}"><span style="font-size:16px;color:var(--color-neutral-700)">{{ inbox.count }}</span></sc-if>
+  </div>
+  <sc-if value="{{ inbox.hasChips }}" hint-placeholder-val="{{ true }}">
+    <div data-rise="" role="group" aria-label="Filter by topic" style="display:flex;flex-wrap:{{ L.chipWrap }};gap:8px;overflow-x:auto;margin:0 {{ L.chipBleed }};padding:2px {{ L.chipInset }} 6px;scrollbar-width:none">
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="7"><button onClick="{{ c.pick }}" aria-pressed="{{ c.on }}" style="flex:none;min-height:{{ L.chipH }};padding:0 14px;display:flex;align-items:center;gap:8px;border:1px solid {{ c.bc }};background:{{ c.bg }};color:var(--color-text);border-radius:4px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap;transition:border-color .2s,background .2s,transform .2s" style-hover="border-color:var(--color-accent);transform:translateY(-2px)">{{ c.label }}<span style="font-size:13px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ c.n }}</span></button></sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.msgLoading }}" hint-placeholder-val="{{ false }}">
+    <div aria-busy="true" aria-label="Loading messages" class="blueprint" style="background:var(--color-neutral-100)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <sc-for list="{{ skel }}" as="k" hint-placeholder-count="4"><div style="padding:{{ L.msgPad }};border-top:{{ k.bt }};display:flex;flex-direction:column;gap:12px"><div style="display:flex;gap:12px;align-items:center"><span style="height:14px;width:140px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></span><span style="height:18px;width:90px;border-radius:3px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></span><span style="margin-left:auto;height:12px;width:80px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></span></div><span style="height:12px;width:{{ k.w1 }};background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></span><span style="height:12px;width:{{ k.w2 }};background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></span></div></sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ inbox.isEmpty }}" hint-placeholder-val="{{ false }}">
+    <div data-rise="" class="blueprint" style="padding:{{ L.bigEmptyPad }};display:flex;flex-direction:column;align-items:flex-start;gap:16px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <span style="display:flex;color:var(--color-accent-700)">{{ ic.inboxLg }}</span>
+      <span style="max-width:560px;font-size:19px;line-height:1.5;text-wrap:pretty">{{ empty.text }}</span>
+      <sc-if value="{{ empty.hasBtn }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" onClick="{{ empty.go }}" style="min-height:{{ L.hit }};padding:0 16px">{{ empty.btn }}</button></sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ inbox.filteredEmpty }}" hint-placeholder-val="{{ false }}">
+    <div data-rise="" class="blueprint" style="padding:{{ L.bigEmptyPad }};display:flex;flex-direction:column;align-items:flex-start;gap:16px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <span style="max-width:560px;font-size:19px;line-height:1.5">No messages about {{ inbox.filter }} yet.</span>
+      <button class="btn btn-secondary" onClick="{{ clearFilter }}" style="min-height:{{ L.hit }};padding:0 16px">Show all messages</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ inbox.hasList }}" hint-placeholder-val="{{ true }}">
+    <div class="blueprint" style="background:var(--color-neutral-100)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <sc-for list="{{ list }}" as="m" hint-placeholder-count="4">
+        <article data-msg="{{ m.id }}" aria-label="{{ m.aria }}" style="padding:{{ L.msgPad }};border-top:{{ m.bt }};display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px">
+            <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:none;background:var(--color-accent);opacity:{{ m.dotOp }};transition:opacity .3s;margin-left:{{ L.dotMl }}"></span>
+            <span style="font-size:17px;font-weight:{{ m.fw }}">{{ m.name }}</span>
+            <sc-if value="{{ m.hasOrg }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-neutral-700);font-size:15px">{{ m.org }}</span></sc-if>
+            <sc-if value="{{ m.hasTopic }}" hint-placeholder-val="{{ true }}"><span class="tag tag-accent">{{ m.topic }}</span></sc-if>
+            <span style="margin-left:auto;font-size:13px;color:var(--color-neutral-700);white-space:nowrap">{{ m.when }}</span>
+          </div>
+          <p onClick="{{ m.markRead }}" style="margin:0;padding-left:{{ L.msgIndent }};max-width:780px;white-space:pre-line;overflow-wrap:anywhere;line-height:1.6;color:var(--color-text);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:{{ m.clamp }};overflow:hidden;max-height:{{ m.maxH }}">{{ m.text }}</p>
+          <sc-if value="{{ m.canMore }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ m.toggle }}" aria-expanded="{{ m.open }}" style="align-self:flex-start;margin:-6px 0 0 {{ L.msgIndentNeg }};min-height:{{ L.hit }};color:var(--color-accent-700)">{{ m.moreLabel }}</button></sc-if>
+          <div style="padding-left:{{ L.msgIndent }};display:flex;flex-wrap:wrap;align-items:center;gap:8px 4px">
+            <a class="btn btn-secondary" href="{{ m.mailto }}" onClick="{{ m.markRead }}" style="min-height:{{ L.hit }};padding:0 14px;gap:8px;color:var(--color-text);max-width:100%;margin-right:8px"><span style="display:flex;flex:none">{{ ic.reply }}</span><span style="overflow-wrap:anywhere;text-align:left">Reply to {{ m.email }}</span></a>
+            <button class="btn btn-ghost" onClick="{{ m.toggleRead }}" style="min-height:{{ L.hit }};color:var(--color-accent-700)">{{ m.readLabel }}</button>
+            <button class="btn btn-ghost" onClick="{{ m.del }}" style="min-height:{{ L.hit }};gap:6px;color:var(--color-neutral-800)"><span style="display:flex">{{ ic.trash }}</span>Delete</button>
+          </div>
+        </article>
+      </sc-for>
+      <sc-if value="{{ older.loading }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2"><div style="padding:{{ L.msgPad }};border-top:1px solid var(--color-divider);display:flex;flex-direction:column;gap:12px"><span style="height:14px;width:160px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></span><span style="height:12px;width:{{ k.w1 }};background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></span></div></sc-for>
+      </sc-if>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px">
+      <sc-if value="{{ older.can }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" onClick="{{ older.load }}" disabled="{{ older.loading }}" style="min-height:{{ L.hit }};padding:0 18px">Load older messages</button></sc-if>
+      <span style="font-size:14px;color:var(--color-neutral-700)">{{ older.note }}</span>
+    </div>
+  </sc-if>
+</main>
+</sc-if>
+
+<!-- ============ SETTINGS ============ -->
+<sc-if value="{{ is.settings }}" hint-placeholder-val="{{ false }}">
+<main style="max-width:1200px;margin:0 auto;padding:{{ L.mainPad }};display:grid;grid-template-columns:{{ L.setCols }};gap:{{ L.setGap }};align-items:start">
+  <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+    <h1 data-rise="" style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:{{ L.h1 }}">Settings</h1>
+    <sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}">
+      <nav aria-label="Settings" data-rise="" style="display:flex;flex-direction:column;gap:2px">
+        <sc-for list="{{ subs }}" as="s" hint-placeholder-count="3"><button onClick="{{ s.go }}" aria-current="{{ s.cur }}" style="border:0;font:inherit;font-size:16px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 14px;min-height:44px;background:{{ s.bg }};color:{{ s.color }};transition:background .2s,color .2s" style-hover="background:var(--color-neutral-200)"><span style="display:flex">{{ s.icon }}</span>{{ s.label }}</button></sc-for>
+      </nav>
+    </sc-if>
+    <sc-if value="{{ L.phone }}" hint-placeholder-val="{{ false }}">
+      <div class="seg" role="tablist" aria-label="Settings" style="display:grid;grid-template-columns:repeat(3,1fr);width:100%">
+        <sc-for list="{{ subs }}" as="s" hint-placeholder-count="3"><label class="seg-opt" style="justify-content:center;min-height:44px;font-size:15px"><input type="radio" name="{{ segName }}" checked="{{ s.on }}" onChange="{{ s.go }}">{{ s.label }}</label></sc-for>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="min-width:0;display:flex;flex-direction:column;gap:24px;padding-top:{{ L.setTop }}">
+    <!-- SITE -->
+    <sc-if value="{{ sub.site }}" hint-placeholder-val="{{ true }}">
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:14px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Address</h2>
+        <sc-if value="{{ addr.locked }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px">
+            <span style="display:flex;align-items:center;gap:10px;font-size:19px;font-weight:500;overflow-wrap:anywhere"><span style="display:flex;color:var(--color-neutral-700)">{{ ic.lock }}</span>{{ site.address }}</span>
+            <a href="#" style="font-size:15px;display:flex;align-items:center;gap:6px;min-height:44px">View site{{ ic.ext }}</a>
+          </div>
+          <p style="margin:0;max-width:600px;color:var(--color-neutral-800);text-wrap:pretty">Locked since your first publish on 2 September 2026. Links to it may already be shared in emails, profiles and print, so it stays the same.</p>
+        </sc-if>
+        <sc-if value="{{ addr.editable }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0;max-width:600px;color:var(--color-neutral-800)">You can change your address until you publish for the first time. After that it's locked.</p>
+          <div class="field" style="max-width:560px">
+            <label for="{{ addr.id }}">Address</label>
+            <div style="display:flex;align-items:stretch">
+              <input id="{{ addr.id }}" class="input" value="{{ addr.value }}" onChange="{{ addr.onChange }}" autoComplete="off" spellCheck="false" aria-describedby="{{ addr.msgId }}" style="flex:1;min-width:0;min-height:48px;font-size:16px;border-radius:4px 0 0 4px;border-color:{{ addr.bc }}">
+              <span style="flex:none;display:flex;align-items:center;padding:0 14px;border:1px solid var(--color-divider);border-left:0;border-radius:0 4px 4px 0;background:var(--color-neutral-200);font-size:15px;color:var(--color-neutral-800)">.ceomaker.com</span>
+            </div>
+          </div>
+          <span id="{{ addr.msgId }}" role="status" style="display:flex;align-items:center;gap:8px;font-size:14px;color:{{ addr.msgColor }};min-height:20px"><span style="display:flex">{{ addr.icon }}</span>{{ addr.msg }}</span>
+          <button class="btn btn-primary" disabled="{{ addr.saveOff }}" onClick="{{ addr.save }}" style="align-self:flex-start;min-height:{{ L.hit }};padding:0 18px">Save address</button>
+        </sc-if>
+      </section>
+
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:10px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Custom domain</h2><span class="tag tag-neutral">Coming soon</span></div>
+        <p style="margin:0;max-width:600px;color:var(--color-neutral-800)">Connect a domain you own, like ameliahart.com. Your ceomaker.com address will keep working alongside it.</p>
+      </section>
+
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:16px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Notifications</h2>
+        <div style="display:flex;align-items:center;gap:20px">
+          <label for="{{ sw.id }}" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;cursor:pointer"><span style="font-weight:500">Email me when someone sends a message</span><span style="font-size:14px;color:var(--color-neutral-700);overflow-wrap:anywhere">To {{ me.email }}</span></label>
+          <button id="{{ sw.id }}" role="switch" aria-checked="{{ sw.aria }}" onClick="{{ sw.toggle }}" style="flex:none;position:relative;width:48px;height:28px;border:0;border-radius:14px;padding:0;background:{{ sw.bg }};cursor:pointer;transition:background .25s"><span style="position:absolute;top:3px;left:{{ sw.x }};width:22px;height:22px;border-radius:50%;background:var(--color-neutral-100);box-shadow:var(--shadow-sm);transition:left .25s cubic-bezier(.2,.7,.2,1)"></span></button>
+        </div>
+        <sc-if value="{{ sw.notReady }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--color-neutral-200)">
+            <span style="display:flex;color:var(--color-neutral-700);padding-top:2px">{{ ic.info }}</span>
+            <div style="display:flex;flex-direction:column;gap:4px"><span class="tag tag-neutral" style="align-self:flex-start;background:var(--color-neutral-100)">Not available yet</span><span style="font-size:15px;color:var(--color-neutral-800);text-wrap:pretty">Message emails start once email sending is set up. Your choice is saved, and new messages always appear here in the meantime.</span></div>
+          </div>
+        </sc-if>
+      </section>
+
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:12px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-danger)">Danger zone</span>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Delete site</h2>
+        <p style="margin:0;max-width:620px;color:var(--color-neutral-800);text-wrap:pretty">Takes {{ site.address }} offline and deletes the draft, published versions and photos. Your account stays.</p>
+        <button class="btn" onClick="{{ open.deleteSite }}" style="align-self:flex-start;min-height:{{ L.hit }};padding:0 16px;gap:8px;border:1px solid var(--color-danger);color:var(--color-danger)" style-hover="background:var(--color-danger-soft)"><span style="display:flex">{{ ic.trash }}</span>Delete site</button>
+      </section>
+    </sc-if>
+
+    <!-- ACCOUNT -->
+    <sc-if value="{{ sub.account }}" hint-placeholder-val="{{ false }}">
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:18px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Profile</h2>
+        <div class="field" style="max-width:480px"><label for="{{ prof.id }}">Full name</label><input id="{{ prof.id }}" class="input" autoComplete="name" value="{{ prof.name }}" onChange="{{ prof.onName }}" style="min-height:48px;font-size:16px"></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:color-mix(in srgb,var(--color-text) 70%,transparent)">Email</span><div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px"><span style="font-size:17px;overflow-wrap:anywhere">{{ me.email }}</span><button class="btn btn-ghost" onClick="{{ open.changeEmail }}" style="min-height:{{ L.hit }};color:var(--color-accent-700)">Change email</button></div><span style="font-size:14px;color:var(--color-neutral-700)">Messages from your site and sign-in links go here.</span></div>
+        <button class="btn btn-primary" disabled="{{ prof.saveOff }}" onClick="{{ prof.save }}" style="align-self:flex-start;min-height:{{ L.hit }};padding:0 18px">Save changes</button>
+      </section>
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:14px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Sign-in methods</h2>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--color-divider)"><span style="width:36px;height:36px;flex:none;border:1px solid var(--color-divider);display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:600;font-size:18px">G</span><div style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:500">Google</span><span style="font-size:14px;color:var(--color-neutral-700);overflow-wrap:anywhere">{{ me.email }}</span></div><span class="tag tag-accent">Connected</span></div>
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--color-divider)"><span style="width:36px;height:36px;flex:none;border:1px solid var(--color-divider);display:flex;align-items:center;justify-content:center;color:var(--color-neutral-800)">{{ ic.mail }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-weight:500">Email link</span><span style="font-size:14px;color:var(--color-neutral-700)">We email you a link to sign in. There are no passwords.</span></div><span class="tag tag-neutral">Always on</span></div>
+        </div>
+      </section>
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:12px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Sessions</h2>
+        <p style="margin:0;max-width:600px;color:var(--color-neutral-800)">Signs you out on every phone, tablet and computer, including this one.</p>
+        <button class="btn btn-secondary" onClick="{{ signOutAll }}" style="align-self:flex-start;min-height:{{ L.hit }};padding:0 16px;gap:8px"><span style="display:flex">{{ ic.logout }}</span>Sign out on all devices</button>
+      </section>
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:12px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-danger)">Danger zone</span>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Delete account</h2>
+        <p style="margin:0;max-width:620px;color:var(--color-neutral-800);text-wrap:pretty">Deletes your account and your site, {{ site.address }}, with its versions, photos and messages.</p>
+        <button class="btn" onClick="{{ open.deleteAccount }}" style="align-self:flex-start;min-height:{{ L.hit }};padding:0 16px;gap:8px;border:1px solid var(--color-danger);color:var(--color-danger)" style-hover="background:var(--color-danger-soft)"><span style="display:flex">{{ ic.trash }}</span>Delete account</button>
+      </section>
+    </sc-if>
+
+    <!-- BILLING -->
+    <sc-if value="{{ sub.billing }}" hint-placeholder-val="{{ false }}">
+      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:16px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Plan</span><span class="tag" style="background:{{ bill.tagBg }};color:{{ bill.tagFg }}">{{ bill.tag }}</span></div>
+        <div data-plan="" style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:{{ L.planH }};line-height:1;text-transform:uppercase">{{ bill.title }}</span>
+          <sc-if value="{{ bill.hasPer }}" hint-placeholder-val="{{ false }}"><span style="font-size:15px;color:var(--color-neutral-700)">{{ bill.per }}</span></sc-if>
+        </div>
+        <p style="margin:0;max-width:620px;font-size:17px;text-wrap:pretty">{{ bill.text }}</p>
+        <sc-if value="{{ bill.hasRows }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider);max-width:620px">
+            <sc-for list="{{ bill.rows }}" as="br" hint-placeholder-count="2"><div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--color-divider)"><span style="color:var(--color-neutral-700)">{{ br.k }}</span><span style="font-weight:500">{{ br.v }}</span></div></sc-for>
+          </div>
+        </sc-if>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px">
+          <sc-for list="{{ bill.btns }}" as="b" hint-placeholder-count="2"><button class="{{ b.cls }}" onClick="{{ b.go }}" style="flex:{{ L.btnFlex }};min-height:{{ L.hit }};padding:0 18px;gap:10px">{{ b.label }}{{ b.icon }}</button></sc-for>
+        </div>
+        <sc-if value="{{ bill.hasCancel }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" onClick="{{ open.cancel }}" style="align-self:flex-start;padding-left:0;min-height:{{ L.hit }};color:var(--color-neutral-800)">Cancel plan</button></sc-if>
+        <sc-if value="{{ bill.hasFoot }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--color-neutral-700)">{{ bill.foot }}</span></sc-if>
+      </section>
+    </sc-if>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ TOAST ============ -->
+<sc-if value="{{ toast.show }}" hint-placeholder-val="{{ false }}">
+  <div data-toast="" role="status" aria-live="polite" style="position:absolute;z-index:50;top:{{ L.toastTop }};right:{{ L.toastR }};left:{{ L.toastL }};max-width:420px;margin-left:auto;background:var(--color-neutral-900);color:var(--color-neutral-100);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px">
+    <span style="display:flex;color:{{ toast.iconColor }}">{{ toast.icon }}</span>
+    <span style="flex:1;font-size:15px">{{ toast.text }}</span>
+    <sc-if value="{{ toast.hasAction }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toast.act }}" style="border:0;background:none;font:inherit;font-size:15px;font-weight:500;color:var(--color-accent-300);cursor:pointer;min-height:40px;padding:0 6px">{{ toast.action }}</button></sc-if>
+    <button onClick="{{ toast.close }}" aria-label="Dismiss" style="border:0;background:none;color:var(--color-neutral-400);cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px">{{ ic.x }}</button>
+  </div>
+</sc-if>
+
+<!-- ============ DIALOGS ============ -->
+<sc-if value="{{ dlg.open }}" hint-placeholder-val="{{ false }}">
+  <div class="dialog-backdrop" onClick="{{ dlg.close }}" style="position:absolute;inset:0;z-index:60;display:flex;justify-content:center;align-items:flex-start;padding:{{ L.dlgPad }};background:color-mix(in srgb,var(--color-neutral-900) 40%,transparent);backdrop-filter:blur(3px)">
+    <div data-dlg="" role="dialog" aria-modal="true" aria-labelledby="{{ dlg.titleId }}" class="dialog blueprint" onClick="{{ stop }}" style="width:min(520px,100%);box-sizing:border-box;border-radius:0;padding:{{ L.dlgInner }};gap:18px;background:var(--color-neutral-100)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+      <sc-if value="{{ dlg.deleteMsg }}" hint-placeholder-val="{{ false }}">
+        <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Delete this message?</h2>
+        <p style="margin:0;color:var(--color-neutral-800)">It's deleted for good. Reply first if you still need it.</p>
+        <sc-if value="{{ dlg.hasMsg }}" hint-placeholder-val="{{ true }}"><div style="padding:12px 14px;border:1px solid var(--color-divider);display:flex;flex-direction:column;gap:2px"><span style="font-weight:500">{{ dlg.msgName }}</span><span style="font-size:14px;color:var(--color-neutral-700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ dlg.msgSnippet }}</span></div></sc-if>
+        <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-secondary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }}">Keep it</button><button class="btn" onClick="{{ dlg.confirmMsg }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }};background:var(--color-danger);color:var(--color-neutral-100)" style-hover="background:color-mix(in srgb,var(--color-danger) 85%,#000)">Delete message</button></div>
+      </sc-if>
+
+      <sc-if value="{{ dlg.deleteSite }}" hint-placeholder-val="{{ false }}">
+        <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Delete your site?</h2>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ dlg.siteFacts }}" as="f" hint-placeholder-count="4"><li style="display:flex;gap:10px;align-items:flex-start;font-size:16px"><span style="flex:none;width:5px;height:5px;margin-top:10px;background:var(--color-neutral-700)"></span><span>{{ f }}</span></li></sc-for>
+        </ul>
+        <div class="field"><label for="{{ dlg.inputId }}">Type {{ site.address }} to confirm</label><input id="{{ dlg.inputId }}" class="input" value="{{ dlg.typed }}" onChange="{{ dlg.onType }}" autoComplete="off" spellCheck="false" style="min-height:48px;font-size:16px"></div>
+        <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-secondary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }}">Keep my site</button><button class="btn" disabled="{{ dlg.siteOff }}" onClick="{{ dlg.confirmSite }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }};background:var(--color-danger);color:var(--color-neutral-100)">Delete site</button></div>
+      </sc-if>
+
+      <sc-if value="{{ dlg.deleteAccount }}" hint-placeholder-val="{{ false }}">
+        <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Delete your account?</h2>
+        <p style="margin:0;color:var(--color-neutral-800);text-wrap:pretty">This deletes your account and your site, {{ site.address }}, at once: the draft, every published version, your photos and your messages. It can't be undone.</p>
+        <div class="field"><label for="{{ dlg.inputId }}">Type {{ me.email }} to confirm</label><input id="{{ dlg.inputId }}" class="input" type="email" value="{{ dlg.typed }}" onChange="{{ dlg.onType }}" autoComplete="off" spellCheck="false" style="min-height:48px;font-size:16px"></div>
+        <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-secondary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }}">Keep my account</button><button class="btn" disabled="{{ dlg.acctOff }}" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }};background:var(--color-danger);color:var(--color-neutral-100)">Delete account</button></div>
+      </sc-if>
+
+      <sc-if value="{{ dlg.changeEmail }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ dlg.emailForm }}" hint-placeholder-val="{{ true }}">
+          <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Change email</h2>
+          <p style="margin:0;color:var(--color-neutral-800)">We'll send a link to the new address. Your email changes when you open it.</p>
+          <div class="field"><label for="{{ dlg.inputId }}">New email</label><input id="{{ dlg.inputId }}" class="input" type="email" inputMode="email" autoComplete="email" value="{{ dlg.newEmail }}" onChange="{{ dlg.onEmail }}" style="min-height:48px;font-size:16px"></div>
+          <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-secondary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }}">Cancel</button><button class="btn btn-primary" disabled="{{ dlg.emailOff }}" onClick="{{ dlg.sendLink }}" style="min-height:{{ L.hit }};padding:0 16px;gap:10px;flex:{{ L.btnFlex }}">{{ dlg.sendLabel }}{{ dlg.sendIcon }}</button></div>
+        </sc-if>
+        <sc-if value="{{ dlg.emailSent }}" hint-placeholder-val="{{ false }}">
+          <span style="width:52px;height:52px;border:1px solid var(--color-accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--color-accent-700)">{{ ic.mailLg }}</span>
+          <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Check your inbox</h2>
+          <p style="margin:0;color:var(--color-neutral-800);overflow-wrap:anywhere;text-wrap:pretty">We sent a link to <strong style="font-weight:500;color:var(--color-text)">{{ dlg.newEmailShown }}</strong>. Open it within 24 hours to confirm. Until then, you keep signing in with {{ me.email }}.</p>
+          <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-ghost" onClick="{{ dlg.resend }}" style="min-height:{{ L.hit }};color:var(--color-accent-700);margin-right:auto">Send the link again</button><button class="btn btn-primary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 18px">Done</button></div>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ dlg.cancel }}" hint-placeholder-val="{{ false }}">
+        <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Cancel your plan?</h2>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ dlg.cancelFacts }}" as="f" hint-placeholder-count="3"><li style="display:flex;gap:12px;align-items:flex-start;font-size:16px"><span style="display:flex;flex:none;color:var(--color-accent-700);padding-top:2px">{{ f.icon }}</span><span>{{ f.t }}</span></li></sc-for>
+        </ul>
+        <fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:10px"><legend style="padding:0;margin-bottom:10px;font-size:15px;font-weight:500">Why are you leaving? <span style="font-weight:400;color:var(--color-neutral-700)">· Optional</span></legend>
+          <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ dlg.reasons }}" as="r" hint-placeholder-count="5"><button onClick="{{ r.pick }}" aria-pressed="{{ r.on }}" style="min-height:{{ L.chipH }};padding:0 12px;border:1px solid {{ r.bc }};background:{{ r.bg }};border-radius:4px;font:inherit;font-size:14px;color:var(--color-text);cursor:pointer;transition:border-color .2s,background .2s" style-hover="border-color:var(--color-accent)">{{ r.label }}</button></sc-for></div>
+        </fieldset>
+        <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-primary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }}">Keep my plan</button><button class="btn" onClick="{{ dlg.confirmCancel }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }};border:1px solid var(--color-danger);color:var(--color-danger)" style-hover="background:var(--color-danger-soft)">Cancel plan</button></div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:1000},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;overview&quot;,&quot;messages&quot;,&quot;site&quot;,&quot;account&quot;,&quot;billing&quot;],&quot;default&quot;:&quot;overview&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;status&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;draft&quot;,&quot;live&quot;,&quot;changes&quot;,&quot;paused&quot;],&quot;default&quot;:&quot;live&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;billing&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;beta&quot;,&quot;active&quot;,&quot;cancelling&quot;,&quot;pastdue&quot;,&quot;paused&quot;],&quot;default&quot;:&quot;beta&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;notice&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;newDesign&quot;,&quot;draftNew&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;msgs&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;many&quot;,&quot;one&quot;,&quot;loading&quot;,&quot;notlive&quot;,&quot;off&quot;,&quot;noform&quot;,&quot;none&quot;],&quot;default&quot;:&quot;many&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;plan&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;dialog&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;toast&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;menu&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;filter&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;address&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;typed&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;emailStage&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;newEmail&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;reason&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;loading&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;expand&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;},&quot;failDelete&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;emailReady&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;motion&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;shownAll&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const T = ["Speaking", "Board and advisory", "Investors", "Press", "Careers", "Something else"];
+const LONG = [
+  "Dear Amelia,",
+  "I hope you don't mind a long note. I'm a partner at Vanderhoeven Partners in Amsterdam, and for the past eighteen months we have been building a thesis around mid-sized freight operators in northern Europe: companies large enough to have real network effects, but small enough that a single planning decision still moves the whole business. Your name has come up in almost every conversation we have had, usually in connection with the weekly operating review you introduced at Meridian, and more than once from people who used to compete with you.",
+  "Some context on where we are. We closed our second fund in June at €420M, with a mandate for six to eight platform investments over four years. Two are done: a temperature-controlled carrier in Belgium and a customs software business in Hamburg. Both are growing, and both are now running into the same problem, which is that their planning still happens in spreadsheets owned by two or three people who would be very hard to replace. We have tried bringing in consultants. The slide decks were good; the habits didn't stick.",
+  "What we are looking for is not a consultant. We would like to find one or two senior operators who would be willing to sit on the boards of these companies, or act as an operating partner across the portfolio, for perhaps two to three days a month. The role would involve quarterly board meetings, a monthly call with each management team, and occasional site visits when something important is changing. We would expect to compensate this properly, in cash and with co-investment rights, and we are flexible on structure.",
+  "I want to be clear about what we are not asking. We know you have a full-time role, and we have no interest in anything that would conflict with your duties to Meridian or its shareholders. Neither of our portfolio companies competes with Meridian today, and we would share a full list of our holdings and pipeline before any conversation went further, so that you and your chair could assess it properly. If the answer is that the timing is wrong, or that this isn't something you would ever consider, I would understand completely.",
+  "If it is of interest, I would suggest a first conversation of about forty-five minutes, either by video or in Rotterdam, where I am most weeks. I can send a short summary of the two businesses beforehand: revenue, headcount, the state of their planning today, and what we think good would look like in three years. I would also be happy to introduce you to the two chief executives directly, without us in the room, so you can form your own view of them. Neither has been told your name; I wanted to ask you first.",
+  "Finally, a more personal note. I read your essay on planning versus forecasting when it came out last year and shared it with both management teams. One of them now starts every Monday with the three questions you described, and their on-time rate has gone from 88 to 94 percent in two quarters. Whatever you decide, thank you for writing it.",
+  "PS. We would not need an answer on the role itself for several months. The first company's next board meeting is in February and the second in April, so a first conversation before Christmas would leave plenty of time to meet the teams, look at the numbers and talk to your own advisors. We have also prepared a one-page note on how we handle conflicts, confidentiality and time commitments for operating partners. I can send it along with the summaries.",
+  "With kind regards,\nPieter van Dam\nPartner, Vanderhoeven Partners\n+31 20 555 0142"
+].join("\n\n");
+const RAW = [
+  ["Jonas Weber", "Northgate Capital", 1, "Today, 10:22", "1 h ago", 1, "Hello Amelia, we're putting together the board for a European cold-chain platform we backed last spring. Your work on the planning model at Meridian came up three times in our diligence calls. Would you have 30 minutes in the next two weeks for an informal conversation?"],
+  ["Sofia Lindqvist", "European Freight Forum", 0, "Today, 08:05", "3 h ago", 1, "Dear Amelia,\n\nWe'd love you to open day two of the European Freight Forum in Rotterdam.\n\nDate: 12 March 2027\nSlot: 25-minute keynote, 09:30\nAudience: about 900 operators and shippers\n\nTravel and accommodation are covered. Could you let me know by the end of October?\n\nBest,\nSofia"],
+  ["Hannah Brooks", "Logistics Weekly", 3, "Yesterday, 14:12", "Yesterday", 1, "I'm writing a feature on how mid-sized carriers handled the Red Sea disruption and would like to include Meridian's experience. Could we do a 20-minute call this week? My deadline is Monday."],
+  ["Pieter van Dam", "Vanderhoeven Partners", 2, "Mon 28 Sep, 09:14", "3 days ago", 0, LONG],
+  ["Tom Avery", "", 5, "Sun 27 Sep, 21:03", "4 days ago", 0, "Thanks."],
+  ["Leila Haddad", "Railcore", 2, "Fri 25 Sep, 11:30", "6 days ago", 0, "We're raising a Series B for Railcore and would value you as an angel or advisor. I can send the deck in a follow-up if you're open to it."],
+  ["Marcus Feld", "Supply Lines podcast", 0, "Thu 24 Sep, 16:45", "1 week ago", 0, "Would you join us for an episode on running a weekly operating review? Recording is remote and takes about an hour."],
+  ["Inês Duarte", "", -1, "Tue 22 Sep, 08:20", "1 week ago", 0, "I'm a final-year logistics student in Porto. Your essay on planning versus forecasting changed how I think about my thesis. Could I ask you two questions by email?"],
+  ["Clara Hoffmann", "Hoffmann & Partner", 1, "Mon 21 Sep, 13:02", "10 days ago", 0, "A family-owned 3PL client is looking for a non-executive chair. This is a discreet enquiry; I'm happy to share details on a call."],
+  ["Ravi Menon", "The Operator", 3, "Fri 18 Sep, 10:10", "2 weeks ago", 0, "Could we quote your op-ed in our quarterly briefing? We'd link back to your site."],
+  ["Emma Clarke", "", 0, "Wed 16 Sep, 19:48", "2 weeks ago", 0, "Our women in operations network meets monthly in Amsterdam. Would you speak at our January evening? It's informal, about 40 people."],
+  ["Yusuf Kaya", "Anatolia Freight", 2, "Tue 15 Sep, 07:55", "2 weeks ago", 0, "We're exploring a minority investment from a European operator. Your name came up as someone who knows the market well. Would you be open to a short call?"],
+  ["Lucas Martin", "European Freight Council", 1, "Fri 11 Sep, 15:20", "3 weeks ago", 0, "A reminder that nominations for the council's 2027 board close on 30 September. We'd be glad to see your name on the list again."],
+  ["Ana Petrović", "", 5, "Wed 9 Sep, 12:41", "3 weeks ago", 0, "Is the Industrial founders programme still taking mentees this year?"],
+  ["Oliver Grant", "Grant Search", 1, "Mon 7 Sep, 09:03", "3 weeks ago", 0, "We're running a chair search for a listed Nordic logistics group. Confidential, but I think the profile fits closely. Could I send a short brief?"],
+  ["Sarah Kim", "Freight Tech Summit", 0, "Fri 4 Sep, 17:30", "4 weeks ago", 0, "We're building the programme for Singapore in May and would love a fireside chat on resilient networks."],
+  ["Jakob Nilsen", "", -1, "Wed 2 Sep, 20:15", "4 weeks ago", 0, "Congratulations on the logistics leader award. Well deserved."],
+  ["Mei Chen", "Harbour Ventures", 2, "Sun 30 Aug, 10:00", "1 month ago", 0, "We back early industrial software teams and are looking for operator LPs. Happy to share our fund deck."],
+  ["Felix Braun", "Trade Review", 3, "Thu 27 Aug, 14:48", "1 month ago", 0, "Would you comment for our piece on European rail freight capacity? Three or four questions, by email is fine."],
+  ["Nora Ahmed", "", 0, "Tue 25 Aug, 08:36", "1 month ago", 0, "Could you speak to our MBA operations class in November? It's 60 students and a 45-minute slot."],
+  ["Paul Dubois", "Dubois Logistique", 1, "Fri 21 Aug, 16:02", "1 month ago", 0, "We're forming an advisory board ahead of our expansion into the Benelux. Would you consider joining?"],
+  ["Greta Larsen", "", 5, "Wed 19 Aug, 11:11", "1 month ago", 0, "We met at the Hamburg dinner in June. I'd still like to introduce you to our COO when you have a moment."],
+  ["Ben Harris", "Northwind Capital", 2, "Fri 14 Aug, 09:27", "2 months ago", 0, "Following up on our call in July. The co-investment window is open until the end of October."],
+  ["Chloé Bernard", "Le Fret", 3, "Wed 12 Aug, 13:55", "2 months ago", 0, "We're preparing a profile of women leading European freight companies. May we include you?"],
+  ["Ahmed Saleh", "", 0, "Sat 8 Aug, 18:40", "2 months ago", 0, "Would you record a short video message for our graduating supply chain cohort?"],
+  ["Maria Rossi", "Rossi Trasporti", 1, "Wed 5 Aug, 10:19", "2 months ago", 0, "Our family board would value an independent voice as we plan succession. Could we talk in September?"],
+  ["Karl Weiss", "", 5, "Mon 3 Aug, 07:50", "2 months ago", 0, "Is there a recording of your Forum keynote from last year?"]
+];
+const slug = n => n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z ]/g, "").trim().split(/\s+/).join(".");
+const ALL = RAW.map(([name, org, t, when, rel, unread, text], i) => ({ id: i + 1, name, org, topic: t >= 0 ? T[t] : "", when, rel, unread: !!unread, text, email: slug(name) + "@example.com" }));
+const VERSIONS = [["Version 4", "28 Sep 2026, 16:10", "Meridian · design 1"], ["Version 3", "21 Sep 2026, 09:42", "Meridian · design 1"], ["Version 2", "9 Sep 2026, 18:05", "Meridian · design 1"], ["Version 1", "2 Sep 2026, 11:30", "Aurora · design 1"]];
+const REASONS = ["Too expensive", "Not using it enough", "Missing something I need", "Moving to another service", "Just taking a break", "Something else"];
+const TAKEN = ["amelia", "ahart", "hart-group", "admin", "www"];
+const EASE = "cubic-bezier(.2,.7,.2,1)";
+const PATHS = {
+  arrow: [["path", { d: "M5 12h14" }], ["path", { d: "m12 5 7 7-7 7" }]],
+  ext: [["path", { d: "M15 3h6v6" }], ["path", { d: "M10 14 21 3" }], ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }]],
+  chevron: [["path", { d: "m6 9 6 6 6-6" }]],
+  reply: [["polyline", { points: "9 17 4 12 9 7" }], ["path", { d: "M20 18v-2a4 4 0 0 0-4-4H4" }]],
+  trash: [["path", { d: "M3 6h18" }], ["path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" }], ["path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" }]],
+  lock: [["rect", { x: 3, y: 11, width: 18, height: 11, rx: 2 }], ["path", { d: "M7 11V7a5 5 0 0 1 10 0v4" }]],
+  check: [["path", { d: "M20 6 9 17l-5-5" }]],
+  x: [["path", { d: "M18 6 6 18" }], ["path", { d: "m6 6 12 12" }]],
+  info: [["circle", { cx: 12, cy: 12, r: 10 }], ["path", { d: "M12 16v-4" }], ["path", { d: "M12 8h.01" }]],
+  alert: [["path", { d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" }], ["path", { d: "M12 9v4" }], ["path", { d: "M12 17h.01" }]],
+  sparkles: [["path", { d: "M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z" }]],
+  inbox: [["polyline", { points: "22 12 16 12 14 15 10 15 8 12 2 12" }], ["path", { d: "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" }]],
+  mail: [["rect", { x: 2, y: 4, width: 20, height: 16, rx: 2 }], ["path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" }]],
+  logout: [["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" }], ["polyline", { points: "16 17 21 12 16 7" }], ["path", { d: "M21 12H9" }]],
+  user: [["circle", { cx: 12, cy: 8, r: 4 }], ["path", { d: "M4 21a8 8 0 0 1 16 0" }]],
+  card: [["rect", { x: 2, y: 5, width: 20, height: 14, rx: 2 }], ["path", { d: "M2 10h20" }]],
+  globe: [["circle", { cx: 12, cy: 12, r: 10 }], ["path", { d: "M2 12h20" }], ["path", { d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" }]],
+  pause: [["circle", { cx: 12, cy: 12, r: 10 }], ["path", { d: "M10 15V9" }], ["path", { d: "M14 15V9" }]],
+  rotate: [["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }], ["path", { d: "M3 3v5h5" }]]
+};
+const icon = (n, s) => React.createElement("svg", { width: s || 18, height: s || 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true }, PATHS[n].map(([t, a], i) => React.createElement(t, { key: i, ...a })));
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p = props || {};
+    const v = p.view || "overview";
+    const sub = ["site", "account", "billing"].includes(v) ? v : "site";
+    const ms = p.msgs || "many";
+    let msgs = ALL.map(m => ({ ...m }));
+    if (ms === "one") msgs = [{ ...ALL[0] }];
+    this.state = {
+      w: 0, tab: ["site", "account", "billing"].includes(v) ? "settings" : v, sub,
+      msgs, open: p.expand ? { [p.expand]: true } : {}, filter: p.filter || "All", shown: p.shownAll ? 99 : 12, olderLoading: false,
+      dialog: p.dialog || null, dlgId: p.dialog === "deleteMsg" ? 4 : null, typed: p.typed || "", emailStage: p.emailStage || "form", newEmail: p.newEmail || "",
+      reason: p.reason || null, billing: p.billing || "beta", plan: p.plan || "monthly", notify: true,
+      addr: p.address === "taken" ? "amelia" : "hart", addrCheck: p.address === "taken" ? "taken" : "available", addrSaved: "hart",
+      name: "Amelia Hart", nameSaved: "Amelia Hart", menu: !!p.menu, toast: p.toast || null, sending: false
+    };
+    this.uid = "db" + Math.random().toString(36).slice(2, 7);
+  }
+  rootRef = el => {
+    this.root = el;
+    if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    const d = this.props.device;
+    if (!el || (d && d !== "auto")) return;
+    this._ro = new ResizeObserver(() => { const w = el.offsetWidth; if (w && Math.abs(w - (this.state.w || 0)) > 4) this.setState({ w }); });
+    this._ro.observe(el);
+    requestAnimationFrame(() => { const w = el.offsetWidth; if (w && w !== this.state.w) this.setState({ w }); });
+  };
+  pvRef = el => {
+    if (this._pro) { this._pro.disconnect(); this._pro = null; }
+    if (!el) return;
+    const upd = () => { if (!this.root) return; const w = el.clientWidth; if (w && Math.abs(w - (this.state.pvW || 0)) > 1) this.setState({ pvW: w }); };
+    this._pro = new ResizeObserver(upd); this._pro.observe(el); upd();
+  };
+  motionOK() { return (this.props.motion ?? true) && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  anim(sel, kf, dur, delay, step) {
+    if (!this.motionOK()) return;
+    requestAnimationFrame(() => { const r = this.root; if (!r) return; r.querySelectorAll(sel).forEach((el, i) => el.animate(kf, { duration: dur, delay: (delay || 0) + i * (step || 0), easing: EASE, fill: "backwards" })); });
+  }
+  rise() { this.anim("[data-rise]", [{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }], 560, 40, 60); }
+  componentDidMount() { this.rise(); }
+  componentDidUpdate(pp, ps) {
+    const s = this.state;
+    if (ps.tab !== s.tab || ps.sub !== s.sub) this.rise();
+    if (!ps.dialog && s.dialog) this.anim("[data-dlg]", [{ opacity: 0, transform: "translateY(14px) scale(.97)" }, { opacity: 1, transform: "none" }], 380);
+    if (ps.dialog && s.dialog && ps.emailStage !== s.emailStage) this.anim("[data-dlg] > *", [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], 360, 0, 40);
+    if (s.toast && ps.toast !== s.toast) this.anim("[data-toast]", [{ opacity: 0, transform: "translateY(-10px)" }, { opacity: 1, transform: "none" }], 380);
+    if (!ps.menu && s.menu) this.anim("[data-menu]", [{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }], 240);
+    if (ps.billing !== s.billing) this.anim("[data-plan]", [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], 420);
+    if (ps.shown < s.shown) this.anim("[data-msg]", [{ opacity: 0 }, { opacity: 1 }], 1, 0, 0);
+  }
+  componentWillUnmount() { this._ro && this._ro.disconnect(); this._pro && this._pro.disconnect(); clearTimeout(this._tt); clearTimeout(this._ac); clearTimeout(this._ol); clearTimeout(this._se); }
+  say(kind, text, action) { clearTimeout(this._tt); this.setState({ toast: { kind, text, action } }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
+  go(tab, sub) { this.setState(st => ({ tab, sub: sub || st.sub, menu: false })); if (this.root && this.root.parentElement) { const sc = this.root.closest("[data-scroll]"); if (sc) sc.scrollTop = 0; } }
+
+  renderVals() {
+    const p = this.props, s = this.state;
+    const dev = p.device && p.device !== "auto" ? p.device : null;
+    const W = dev === "phone" ? 390 : dev === "desktop" ? 1280 : (s.w || 1280);
+    const ph = W < 720, pad = ph ? 20 : 40;
+    const status = p.status || "live";
+    const msgMode = p.msgs || (status === "draft" ? "notlive" : "many");
+    const billing = s.billing, plan = s.plan, annual = plan === "annual";
+    const cardW = ph ? W - 2 * pad : Math.min(W, 1200 + 2 * pad) - 2 * pad - 360 - 24;
+
+    const L = {
+      desk: !ph, phone: ph, pad: pad + "px", body: ph ? "16px" : "17px", headH: ph ? "56px" : "64px", tabGap: ph ? "24px" : "32px",
+      mainPad: (ph ? 24 : 40) + "px " + pad + "px " + (ph ? 64 : 96) + "px", gap: ph ? "28px" : "36px", h1: ph ? "40px" : "56px",
+      ovCols: ph ? "minmax(0,1fr)" : "minmax(0,1fr) 360px", pvH: ph ? "196px" : "300px", pvZ: ((s.pvW || cardW) / 1280).toFixed(4),
+      cardPad: ph ? "18px" : "20px 24px", cardPadX: ph ? "18px" : "24px", hit: ph ? "44px" : "40px", btnRowW: ph ? "100%" : "auto", btnFlex: ph ? "1 1 0" : "none",
+      rowCols: ph ? "8px minmax(0,1fr) auto" : "8px 300px minmax(0,1fr) 96px", rowAreas: ph ? '"dot who time" ". text text"' : '"dot who text time"', rowPad: ph ? "14px 18px" : "14px 24px",
+      emptyPad: ph ? "24px 18px" : "28px 24px", bigEmptyPad: ph ? "28px 20px" : "40px",
+      chipWrap: ph ? "nowrap" : "wrap", chipBleed: ph ? "-20px" : "0", chipInset: ph ? "20px" : "0", chipH: ph ? "44px" : "38px",
+      msgPad: ph ? "20px 18px" : "24px 28px", msgIndent: ph ? "0" : "20px", msgIndentNeg: ph ? "-4px" : "16px", dotMl: "0",
+      setCols: ph ? "minmax(0,1fr)" : "220px minmax(0,1fr)", setGap: ph ? "20px" : "56px", setTop: ph ? "0" : "76px", planH: ph ? "36px" : "44px",
+      toastTop: ph ? "112px" : "126px", toastR: pad + "px", toastL: ph ? pad + "px" : "auto",
+      dlgPad: ph ? "72px 12px 24px" : "120px 24px 40px", dlgInner: ph ? "22px 20px" : "28px", minH: s.dialog ? (ph ? "844px" : "860px") : "0px"
+    };
+
+    const all = s.msgs;
+    const unread = all.filter(m => m.unread).length;
+    const hasMsgs = msgMode === "many" || msgMode === "one";
+    const emptyDefs = {
+      notlive: ["Messages from your contact form appear here once your site is live.", "Continue editing"],
+      off: ["Your contact form is off. Turn it on in the editor, under Contact.", "Open the editor"],
+      noform: ["The Bento template has no contact form. Meridian has one.", "Change template"],
+      none: ["No messages yet. When someone writes through your site, it appears here.", "View site"]
+    };
+    const emptyKey = hasMsgs && !all.length ? "none" : emptyDefs[msgMode] ? msgMode : null;
+    const toEditor = () => this.say("ok", "Opening the editor…");
+    const empty = emptyKey ? { text: emptyDefs[emptyKey][0], btn: emptyDefs[emptyKey][1], hasBtn: true, go: toEditor } : { text: "", btn: "", hasBtn: false, go: null };
+
+    const openMsg = id => this.setState(st => ({ tab: "messages", filter: "All", open: { ...st.open, [id]: true }, msgs: st.msgs.map(m => m.id === id ? { ...m, unread: false } : m) }));
+    const markRead = id => this.setState(st => ({ msgs: st.msgs.map(m => m.id === id ? { ...m, unread: false } : m) }));
+    const filtered = s.filter === "All" ? all : all.filter(m => m.topic === s.filter);
+    const visible = filtered.slice(0, s.shown);
+    const isLong = m => m.text.length > (ph ? 150 : 260) || (m.text.match(/\n/g) || []).length > 2;
+    const list = visible.map((m, i) => {
+      const open = !!s.open[m.id], long = isLong(m);
+      return {
+        id: m.id, name: m.name, org: m.org, hasOrg: !!m.org, topic: m.topic, hasTopic: !!m.topic, when: m.when, text: m.text, email: m.email,
+        aria: (m.unread ? "Unread message from " : "Message from ") + m.name,
+        mailto: "mailto:" + m.email + "?subject=" + encodeURIComponent("Re: " + (m.topic || "your message")),
+        bt: i ? "1px solid var(--color-divider)" : "0", fw: m.unread ? 600 : 400, dotOp: m.unread ? 1 : 0,
+        clamp: open || !long ? "none" : 3, maxH: open || !long ? "none" : "5em", canMore: long, open: open ? "true" : "false", moreLabel: open ? "Show less" : "Show more",
+        toggle: () => this.setState(st => ({ open: { ...st.open, [m.id]: !st.open[m.id] }, msgs: st.msgs.map(x => x.id === m.id ? { ...x, unread: false } : x) })),
+        markRead: () => markRead(m.id),
+        readLabel: m.unread ? "Mark as read" : "Mark as unread",
+        toggleRead: () => this.setState(st => ({ msgs: st.msgs.map(x => x.id === m.id ? { ...x, unread: !x.unread } : x) })),
+        del: () => this.setState({ dialog: "deleteMsg", dlgId: m.id })
+      };
+    });
+    const counts = {}; all.forEach(m => { if (m.topic) counts[m.topic] = (counts[m.topic] || 0) + 1; });
+    const chips = ["All", ...T].map(label => { const on = s.filter === label; return { label, n: label === "All" ? all.length : (counts[label] || 0), on, bc: on ? "var(--color-accent)" : "var(--color-divider)", bg: on ? "var(--color-accent-100)" : "var(--color-bg)", pick: () => this.setState({ filter: label, shown: 12 }) }; });
+    const loading = msgMode === "loading";
+    const inbox = {
+      count: unread ? unread + " new · " + all.length + " total" : all.length + (all.length === 1 ? " message" : " total"),
+      hasCount: hasMsgs && all.length > 0,
+      rows: all.slice(0, 3).map((m, i) => ({ name: m.name, topic: m.topic, hasTopic: !!m.topic && !ph, rel: m.rel, snippet: m.text.replace(/\s+/g, " ").replace(/^(Dear|Hello|Hi) [^,]+,\s*/i, ""), fw: m.unread ? 600 : 400, dotOp: m.unread ? 1 : 0, dotLabel: m.unread ? "Unread" : "", bt: i ? "1px solid var(--color-divider)" : "0", open: () => openMsg(m.id) })),
+      hasRows: hasMsgs && all.length > 0, isEmpty: !!emptyKey && !loading,
+      hasChips: hasMsgs && all.length > 1, hasList: hasMsgs && visible.length > 0, filteredEmpty: hasMsgs && all.length > 0 && filtered.length === 0, filter: s.filter
+    };
+    const older = {
+      can: filtered.length > s.shown && !s.olderLoading, loading: s.olderLoading,
+      note: filtered.length > s.shown ? "Showing " + Math.min(s.shown, filtered.length) + " of " + filtered.length : filtered.length > 1 ? "That's every message · " + filtered.length + " in total" : "",
+      load: () => { this.setState({ olderLoading: true }); clearTimeout(this._ol); this._ol = setTimeout(() => this.setState(st => ({ olderLoading: false, shown: st.shown + 15 })), 800); }
+    };
+
+    const siteDefs = {
+      draft: { line: "Draft · not published yet · Meridian template", dot: "var(--color-neutral-500)", pulse: "none", tag: "" },
+      live: { line: "Live · Meridian template", dot: "var(--color-accent)", pulse: "db-pulse 1.8s ease-in-out infinite", tag: "" },
+      changes: { line: "Live · Meridian template", dot: "var(--color-accent)", pulse: "db-pulse 1.8s ease-in-out infinite", tag: "Unpublished changes" },
+      paused: { line: "Paused · offline since 30 Sep 2026", dot: "var(--color-neutral-500)", pulse: "none", tag: "" }
+    };
+    const sd = siteDefs[status] || siteDefs.live;
+    const arrow = icon("arrow"), ext = icon("ext", 16);
+    const editor = () => this.say("ok", "Opening the editor…");
+    const btns = status === "draft" ? [{ cls: "btn btn-primary", label: "Continue editing", icon: arrow, go: editor }]
+      : status === "paused" ? [{ cls: "btn btn-secondary", label: "Edit site", icon: null, go: editor }, { cls: "btn btn-primary", label: "Restart my plan", icon: arrow, go: () => this.go("settings", "billing") }]
+      : [{ cls: "btn btn-secondary", label: "Edit site", icon: null, go: editor }, { cls: "btn btn-primary", label: "View site", icon: ext, go: () => { } }];
+    const notices = { newDesign: "Meridian has a new design. Preview it in the editor; your site keeps its look until you publish.", draftNew: "Your draft uses the new Meridian design. It goes live when you publish." };
+    const site = {
+      address: (status === "draft" ? s.addrSaved : "hart") + ".ceomaker.com", line: sd.line, dot: sd.dot, pulse: sd.pulse, hasTag: !!sd.tag, tag: sd.tag, btns,
+      pvFilter: status === "paused" ? "grayscale(1) opacity(.5)" : "none", pvTag: status === "draft" || status === "paused", pvTagLabel: status === "draft" ? "Preview of your draft" : "Offline · visitors see a 'taking a break' page",
+      hasNotice: !!notices[p.notice], notice: notices[p.notice] || "", noticeBtn: p.notice === "newDesign"
+    };
+
+    const dateEnd = annual ? "30 September 2027" : "30 October 2026";
+    const tagW = { bg: "var(--color-warning-soft)", fg: "var(--color-warning)" }, tagA = { bg: "var(--color-accent-100)", fg: "var(--color-accent-800)" }, tagN = { bg: "var(--color-neutral-200)", fg: "var(--color-neutral-800)" };
+    const portal = { cls: "btn btn-secondary", label: "Manage billing", icon: ext, go: () => this.say("ok", "Opening the billing portal…") };
+    const B = {
+      beta: { tag: "Private beta", t: tagA, title: "Beta · Free", text: "Free during the private beta. We'll email you before anything changes.", short: "Beta · Free", shortText: "Free during the private beta. We'll email you before anything changes.", btns: [], rows: [] },
+      active: { tag: "Active", t: tagA, title: annual ? "Annual" : "Monthly", per: annual ? "$99 / year · 2 months free" : "$9.99 / month", text: "Your site is live and every feature is included.", short: (annual ? "Annual" : "Monthly") + " · " + (annual ? "$99" : "$9.99"), shortText: "Next charge " + dateEnd + ".", rows: [{ k: "Next charge", v: dateEnd + " · " + (annual ? "$99" : "$9.99") }, { k: "Card and invoices", v: "In the billing portal" }], btns: annual ? [portal] : [portal, { cls: "btn btn-secondary", label: "Switch to annual · 2 months free", icon: null, go: () => this.setState({ plan: "annual" }, () => this.say("ok", "Switched to annual. You'll be charged $99 on 30 October 2026.")) }], cancel: true, foot: "Payments are handled by Lemon Squeezy. VAT is included where it applies." },
+      cancelling: { tag: "Ends " + (annual ? "30 Sep 2027" : "30 Oct 2026"), t: tagW, title: annual ? "Annual" : "Monthly", per: "Cancelled · no further charges", text: "Your plan ends on " + dateEnd + ". Your site stays live until then.", short: "Ends " + (annual ? "30 Sep 2027" : "30 Oct 2026"), shortText: "Your site stays live until then.", shortBtn: "Keep my plan", shortCls: "btn btn-secondary", rows: [], btns: [{ cls: "btn btn-primary", label: "Keep my plan", icon: null, go: () => this.setState({ billing: "active" }, () => this.say("ok", "Your plan continues. Next charge " + dateEnd + ".")) }, portal] },
+      pastdue: { tag: "Payment failed", t: tagW, title: "Payment failed", per: "Monthly · $9.99", text: "We couldn't take your payment on 30 September. Your site stays live until 14 October 2026, then it pauses until the payment goes through.", short: "Payment failed", shortText: "Update your card by 14 October to keep your site live.", shortBtn: "Update payment method", shortCls: "btn btn-primary", rows: [{ k: "Grace period ends", v: "14 October 2026" }, { k: "Amount due", v: "$9.99" }], btns: [{ cls: "btn btn-primary", label: "Update payment method", icon: ext, go: () => this.say("ok", "Opening the billing portal…") }] },
+      paused: { tag: "Paused", t: tagN, title: "Paused", per: "Plan ended 30 September 2026", text: "Your site is offline. Visitors see a short 'taking a break' page. Your content, photos and versions are kept, and restarting brings everything back as it was.", short: "Paused", shortText: "Your site is offline. Your content is kept.", shortBtn: "Restart my plan", shortCls: "btn btn-primary", rows: [], btns: [{ cls: "btn btn-primary", label: "Restart my plan", icon: arrow, go: () => this.say("ok", "Opening checkout…") }] }
+    };
+    const b = B[billing] || B.beta;
+    const bill = {
+      tag: b.tag, tagBg: b.t.bg, tagFg: b.t.fg, hasTag: !!b.tag, title: b.title, per: b.per || "", hasPer: !!b.per, text: b.text,
+      rows: b.rows, hasRows: b.rows.length > 0, btns: b.btns, hasCancel: !!b.cancel, foot: b.foot || "", hasFoot: !!b.foot,
+      short: b.short, shortText: b.shortText, hasShortBtn: !!b.shortBtn, shortBtn: b.shortBtn || "", shortBtnCls: b.shortCls || "btn btn-secondary", hasShortLink: !b.shortBtn
+    };
+
+    const editable = status === "draft";
+    const addrMsg = { available: ["✓ Available", "var(--color-accent-700)"], taken: ["Someone already has this address", "var(--color-danger)"], checking: ["Checking…", "var(--color-neutral-700)"], short: ["Use at least 3 letters or numbers", "var(--color-neutral-700)"], saved: ["Saved", "var(--color-accent-700)"] }[s.addrCheck];
+    const addr = {
+      locked: !editable, editable, id: this.uid + "-addr", msgId: this.uid + "-addrmsg", value: s.addr, msg: addrMsg[0], msgColor: addrMsg[1],
+      icon: s.addrCheck === "taken" ? icon("alert", 16) : null, bc: s.addrCheck === "taken" ? "var(--color-danger)" : "var(--color-divider)",
+      saveOff: s.addrCheck !== "available" || s.addr === s.addrSaved,
+      onChange: e => { const v = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40); this.setState({ addr: v, addrCheck: v.length < 3 ? "short" : "checking" }); clearTimeout(this._ac); if (v.length >= 3) this._ac = setTimeout(() => this.setState({ addrCheck: TAKEN.includes(v) ? "taken" : "available" }), 450); },
+      save: () => this.setState(st => ({ addrSaved: st.addr, addrCheck: "saved" }), () => this.say("ok", "Address saved"))
+    };
+
+    const dItem = all.find(m => m.id === s.dlgId);
+    const closeD = () => this.setState({ dialog: null, typed: "", emailStage: "form", reason: null });
+    const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.newEmail.trim());
+    const dlg = {
+      open: !!s.dialog, titleId: this.uid + "-dt", inputId: this.uid + "-di", close: closeD,
+      deleteMsg: s.dialog === "deleteMsg", deleteSite: s.dialog === "deleteSite", deleteAccount: s.dialog === "deleteAccount", changeEmail: s.dialog === "changeEmail", cancel: s.dialog === "cancel",
+      hasMsg: !!dItem, msgName: dItem ? dItem.name + (dItem.topic ? " · " + dItem.topic : "") : "", msgSnippet: dItem ? dItem.text.replace(/\s+/g, " ") : "",
+      confirmMsg: () => { const id = s.dlgId; if (p.failDelete) { this.setState({ dialog: null }); this.say("err", "Couldn't reach the server. Try again.", "Try again"); return; } this.setState(st => ({ dialog: null, msgs: st.msgs.filter(m => m.id !== id) })); this.say("ok", "Message deleted"); },
+      typed: s.typed, onType: e => this.setState({ typed: e.target.value }),
+      siteOff: s.typed.trim().toLowerCase() !== site.address, acctOff: s.typed.trim().toLowerCase() !== "amelia@example.com",
+      confirmSite: () => { closeD(); this.say("ok", "Site deleted. hart.ceomaker.com is reserved for you for 90 days."); },
+      siteFacts: [site.address + " goes offline at once.", "Your draft, published versions and photos are deleted.", "The address stays reserved for you for 90 days.", "Your account stays, and you can start a new site."],
+      emailForm: s.emailStage !== "sent", emailSent: s.emailStage === "sent", newEmail: s.newEmail, newEmailShown: s.newEmail || "amelia.hart@example.org",
+      onEmail: e => this.setState({ newEmail: e.target.value }), emailOff: !okEmail || s.sending,
+      sendLabel: s.sending ? "Sending…" : "Send link", sendIcon: s.sending ? React.createElement("span", { "aria-hidden": true, style: { width: 14, height: 14, boxSizing: "border-box", borderRadius: "50%", border: "2px solid color-mix(in srgb,var(--color-bg) 40%,transparent)", borderTopColor: "var(--color-bg)", animation: "db-spin .8s linear infinite" } }) : null,
+      sendLink: () => { this.setState({ sending: true }); clearTimeout(this._se); this._se = setTimeout(() => this.setState({ sending: false, emailStage: "sent" }), 900); },
+      resend: () => this.say("ok", "Link sent again"),
+      cancelFacts: [{ icon: icon("check"), t: "Your site stays live until " + dateEnd + "." }, { icon: icon("pause"), t: "Then it pauses. Visitors see a short 'taking a break' page." }, { icon: icon("rotate"), t: "Your content and versions are kept. Restart any time and everything comes back." }],
+      reasons: REASONS.map(label => { const on = s.reason === label; return { label, on, bc: on ? "var(--color-accent)" : "var(--color-divider)", bg: on ? "var(--color-accent-100)" : "var(--color-bg)", pick: () => this.setState({ reason: on ? null : label }) }; }),
+      confirmCancel: () => { this.setState({ dialog: null, billing: "cancelling", reason: null }); this.say("ok", "Plan cancelled. Your site stays live until " + dateEnd + "."); }
+    };
+
+    const t = s.toast;
+    const TOASTS = { deleted: { kind: "ok", text: "Message deleted" }, error: { kind: "err", text: "Couldn't reach the server. Try again.", action: "Try again" }, saved: { kind: "ok", text: "Changes saved" } };
+    const tt = typeof t === "string" ? TOASTS[t] : t;
+    const toast = tt ? { show: true, text: tt.text, icon: tt.kind === "err" ? icon("alert") : icon("check"), iconColor: tt.kind === "err" ? "var(--color-danger-soft)" : "var(--color-accent-300)", hasAction: !!tt.action, action: tt.action || "", act: () => this.setState({ toast: null }), close: () => this.setState({ toast: null }) } : { show: false };
+
+    const tabs = [["overview", "Overview"], ["messages", "Messages"], ["settings", "Settings"]].map(([k, label]) => { const on = s.tab === k; return { label, cur: on ? "page" : "false", color: on ? "var(--color-text)" : "var(--color-neutral-700)", line: on ? "var(--color-accent)" : "transparent", hasBadge: k === "messages" && hasMsgs && unread > 0, badge: String(unread), go: () => this.go(k) }; });
+    const subs = [["site", "Site", "globe"], ["account", "Account", "user"], ["billing", "Billing", "card"]].map(([k, label, ic]) => { const on = s.sub === k; return { label, on, cur: on ? "page" : "false", icon: icon(ic), bg: on ? "var(--color-accent-100)" : "transparent", color: on ? "var(--color-accent-800)" : "var(--color-text)", go: () => this.go("settings", k) }; });
+
+    return {
+      L, ic: { arrow, ext, chevron: icon("chevron", 16), reply: icon("reply", 16), trash: icon("trash", 16), lock: icon("lock"), x: icon("x"), info: icon("info"), sparkles: icon("sparkles"), inbox: icon("inbox", 22), inboxLg: icon("inbox", 32), mail: icon("mail"), mailLg: icon("mail", 24), logout: icon("logout", 16) },
+      me: { name: s.nameSaved, first: s.nameSaved.split(" ")[0], email: "amelia@example.com", initials: "AH" },
+      menu: { open: !!s.menu, chev: s.menu ? "rotate(180deg)" : "none", items: [{ label: "Account", icon: icon("user"), go: () => this.go("settings", "account") }, { label: "Billing", icon: icon("card"), go: () => this.go("settings", "billing") }, { label: "Sign out", icon: icon("logout"), go: () => this.setState({ menu: false }) }] },
+      toggleMenu: () => this.setState(st => ({ menu: !st.menu })),
+      tabs, subs, segName: this.uid + "-seg",
+      is: { overview: s.tab === "overview", messages: s.tab === "messages", settings: s.tab === "settings", ovLoading: p.loading === true, ovReady: p.loading !== true, msgLoading: loading },
+      sub: { site: s.sub === "site", account: s.sub === "account", billing: s.sub === "billing" },
+      site, bill, inbox, empty, list, chips, older, addr, dlg, toast,
+      ver: { has: status !== "draft", none: status === "draft", rows: VERSIONS.slice(0, 5).map(([n, date, tpl], i) => ({ n, date, tpl, cur: i === 0, notCur: i !== 0 })), more: VERSIONS.length > 5 },
+      skel: [["92%", "64%"], ["86%", "40%"], ["95%", "72%"], ["70%", "30%"]].map(([w1, w2], i) => ({ w1, w2, bt: i ? "1px solid var(--color-divider)" : "0" })), skel2: [{ w1: "80%" }, { w1: "60%" }],
+      sw: { id: this.uid + "-sw", aria: s.notify ? "true" : "false", bg: s.notify ? "var(--color-accent)" : "var(--color-neutral-400)", x: s.notify ? "23px" : "3px", toggle: () => this.setState(st => ({ notify: !st.notify })), notReady: !p.emailReady },
+      prof: { id: this.uid + "-name", name: s.name, onName: e => this.setState({ name: e.target.value }), saveOff: !s.name.trim() || s.name === s.nameSaved, save: () => this.setState(st => ({ nameSaved: st.name.trim() }), () => this.say("ok", "Changes saved")) },
+      open: { deleteSite: () => this.setState({ dialog: "deleteSite", typed: "" }), deleteAccount: () => this.setState({ dialog: "deleteAccount", typed: "" }), changeEmail: () => this.setState({ dialog: "changeEmail", emailStage: "form", newEmail: "" }), cancel: () => this.setState({ dialog: "cancel" }) },
+      signOutAll: () => this.say("ok", "Signed out on all other devices"),
+      toMessages: () => this.go("messages"), toBilling: () => this.go("settings", "billing"), toEditor: editor,
+      clearFilter: () => this.setState({ filter: "All" }), stop: e => e.stopPropagation(), rootRef: this.rootRef
+    };
+  }
+}
+</script>
+</body>
+</html>

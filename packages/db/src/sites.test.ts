@@ -21,15 +21,20 @@ import { runMigrations } from "./migrate";
 import { finishAiUsage, startAiUsage } from "./queries/ai-usage";
 import { getMedia, insertMedia } from "./queries/media";
 import {
+  countContactMessages,
+  countUnreadMessages,
   deleteContactMessage,
+  getMessageAlertAddress,
   listContactMessages,
   MESSAGE_LIMITS,
   saveContactMessage,
+  setContactMessageRead,
 } from "./queries/messages";
 import {
   changeSubdomain,
   createSite,
   createSiteFromAnswers,
+  deleteAccount,
   deleteSite,
   getPrimarySiteForOwner,
   getPublishedVersion,
@@ -42,6 +47,7 @@ import {
   copyVersionToDraft,
   publishSite,
   saveDraft,
+  setSiteNotifications,
 } from "./queries/sites";
 import { aiUsage, contactMessage, media, retiredAddress, site, siteVersion, user } from "./schema";
 
@@ -508,10 +514,10 @@ describe.skipIf(!url)("sites (integration)", () => {
       (await saveContactMessage(db, { siteId, message, senderKey: "k1", now: later })).ok,
     ).toBe(true);
 
-    const inbox = await listContactMessages(db, { userId: "alice", siteId });
+    const { rows: inbox } = await listContactMessages(db, { userId: "alice", siteId });
     expect(inbox).toHaveLength(MESSAGE_LIMITS.perSenderPerHour + 2);
-    expect(inbox[0]).toMatchObject({ name: "Jonas Weber", organisation: null });
-    expect(await listContactMessages(db, { userId: "mallory", siteId })).toEqual([]);
+    expect(inbox[0]).toMatchObject({ name: "Jonas Weber", organisation: null, readAt: null });
+    expect((await listContactMessages(db, { userId: "mallory", siteId })).rows).toEqual([]);
 
     expect(await deleteContactMessage(db, { userId: "mallory", messageId: inbox[0]!.id })).toBe(
       false,
@@ -520,5 +526,90 @@ describe.skipIf(!url)("sites (integration)", () => {
 
     await deleteSite(db, { userId: "alice", siteId });
     expect((await db.select().from(contactMessage)).length).toBe(0);
+  });
+
+  it("deletes an account with everything it owns, keeping published addresses held", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    expect(await getMessageAlertAddress(db, id)).toBe("alice@example.com");
+    await setSiteNotifications(db, { userId: "alice", siteId: id, notify: false });
+    expect((await getSiteForOwner(db, { userId: "alice", siteId: id }))?.notifyMessages).toBe(
+      false,
+    );
+    expect(await getMessageAlertAddress(db, id)).toBeNull();
+    await expect(
+      setSiteNotifications(db, { userId: "mallory", siteId: id, notify: true }),
+    ).rejects.toBeInstanceOf(SiteNotFoundError);
+    await publishSite(db, { userId: "alice", siteId: id });
+    await saveContactMessage(db, {
+      siteId: id,
+      senderKey: null,
+      message: { name: "A", email: "a@example.com", organisation: "", topic: "", message: "Hi" },
+    });
+
+    expect(await deleteAccount(db, { userId: "alice" })).toEqual({ heldAddresses: ["alice"] });
+    expect(await db.select().from(user).where(eq(user.id, "alice"))).toEqual([]);
+    expect(await db.select().from(site)).toEqual([]);
+    expect(await db.select().from(contactMessage)).toEqual([]);
+    // Nobody, not even a new account, can take the address during the hold.
+    expect(await isSubdomainAvailable(db, "alice", { userId: "mallory" })).toBe(false);
+    await expect(deleteAccount(db, { userId: "alice" })).rejects.toBeInstanceOf(SiteNotFoundError);
+  });
+
+  it("pages, filters, counts and marks messages for the owner only", async () => {
+    const { id: siteId } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    const base = new Date("2026-06-01T12:00:00Z").getTime();
+    // Seven messages, newest last; two share a timestamp so paging must not skip one.
+    for (let index = 0; index < 7; index += 1) {
+      await saveContactMessage(db, {
+        siteId,
+        senderKey: `sender-${index}`,
+        now: new Date(base + Math.min(index, 5) * 60_000),
+        message: {
+          name: `Sender ${index}`,
+          email: `s${index}@example.com`,
+          organisation: "",
+          topic: index % 2 ? "Speaking" : "",
+          message: `Message ${index}`,
+        },
+      });
+    }
+
+    const first = await listContactMessages(db, { userId: "alice", siteId, limit: 3 });
+    const second = await listContactMessages(db, {
+      userId: "alice",
+      siteId,
+      limit: 3,
+      before: first.nextCursor,
+    });
+    const third = await listContactMessages(db, {
+      userId: "alice",
+      siteId,
+      limit: 3,
+      before: second.nextCursor,
+    });
+    const seen = [...first.rows, ...second.rows, ...third.rows].map((row) => row.name);
+    expect(new Set(seen).size).toBe(7);
+    expect(third.nextCursor).toBeNull();
+    expect(seen.at(-1)).toBe("Sender 0");
+
+    const speaking = await listContactMessages(db, { userId: "alice", siteId, topic: "Speaking" });
+    expect(speaking.rows.map((row) => row.topic)).toEqual(["Speaking", "Speaking", "Speaking"]);
+
+    expect(await countContactMessages(db, { userId: "alice", siteId })).toEqual({
+      total: 7,
+      unread: 7,
+      topics: { Speaking: 3 },
+    });
+    const [newest] = first.rows;
+    expect(
+      await setContactMessageRead(db, { userId: "mallory", messageId: newest!.id, read: true }),
+    ).toBe(false);
+    expect(
+      await setContactMessageRead(db, { userId: "alice", messageId: newest!.id, read: true }),
+    ).toBe(true);
+    expect(await countUnreadMessages(db, "alice")).toBe(6);
+    expect(await countUnreadMessages(db, "mallory")).toBe(0);
+    await setContactMessageRead(db, { userId: "alice", messageId: newest!.id, read: false });
+    expect(await countUnreadMessages(db, "alice")).toBe(7);
   });
 });

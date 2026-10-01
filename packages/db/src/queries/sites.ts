@@ -31,7 +31,7 @@ import {
   SubdomainTakenError,
   VersionNotFoundError,
 } from "../errors";
-import { ADDRESS_HOLD_DAYS, media, retiredAddress, site, siteVersion } from "../schema";
+import { ADDRESS_HOLD_DAYS, media, retiredAddress, site, siteVersion, user } from "../schema";
 
 // Every function that reads or writes a customer's site takes the acting userId and scopes the
 // query to it. Authorization lives here, next to the data, not only in route handlers.
@@ -148,6 +148,8 @@ export interface OwnedSite {
   status: "draft" | "published" | "paused";
   answers: OnboardingAnswers | null;
   createdAt: Date;
+  /** Email the owner about new contact form messages. */
+  notifyMessages: boolean;
   /** Raw stored JSON; parse before use. */
   draft: {
     templateKey: string;
@@ -223,6 +225,7 @@ async function loadOwnedSite(db: Database, userId: string, which: SQL): Promise<
     status: owned.status,
     answers: owned.answers ?? null,
     createdAt: owned.createdAt,
+    notifyMessages: owned.notifyMessages,
     draft: {
       templateKey: draftRow.templateKey,
       templateVersion: draftRow.templateVersion,
@@ -727,5 +730,54 @@ export async function deleteSite(
     await tx.delete(site).where(eq(site.id, owned.id));
     await tx.delete(media).where(eq(media.userId, input.userId));
     return { subdomain: owned.subdomain, addressHeld: Boolean(published) };
+  });
+}
+
+/** Turns message emails on or off for a site the user owns. */
+export async function setSiteNotifications(
+  db: Database,
+  input: { userId: string; siteId: string; notify: boolean },
+) {
+  const [updated] = await db
+    .update(site)
+    .set({ notifyMessages: input.notify })
+    .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+    .returning({ id: site.id });
+  if (!updated) throw new SiteNotFoundError();
+}
+
+/**
+ * Deletes a user and everything they own: sites, versions, messages, images, sessions. Addresses
+ * of sites that were ever published stay held for ADDRESS_HOLD_DAYS (for nobody, since the
+ * account is gone), so no one else can show a page at links that may still be out there.
+ */
+export async function deleteAccount(db: Database, input: { userId: string }) {
+  return db.transaction(async (tx) => {
+    const published = await tx
+      .selectDistinct({ subdomain: site.subdomain })
+      .from(site)
+      .innerJoin(
+        siteVersion,
+        and(eq(siteVersion.siteId, site.id), eq(siteVersion.kind, "published")),
+      )
+      .where(eq(site.userId, input.userId));
+    const retiredAt = new Date();
+    for (const { subdomain } of published) {
+      await tx
+        .insert(retiredAddress)
+        .values({ subdomain, userId: input.userId, retiredAt })
+        .onConflictDoUpdate({
+          target: retiredAddress.subdomain,
+          set: { userId: input.userId, retiredAt },
+        });
+    }
+    // Sites, versions, messages, media, sessions and AI usage go with the user (cascades);
+    // the address holds stay and lose their owner.
+    const deleted = await tx
+      .delete(user)
+      .where(eq(user.id, input.userId))
+      .returning({ id: user.id });
+    if (!deleted.length) throw new SiteNotFoundError();
+    return { heldAddresses: published.map((row) => row.subdomain) };
   });
 }

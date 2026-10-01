@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { isUuid, loadOwnedSite } from "@/lib/site-data";
-import { LocalTime } from "../../../../versions-table";
+import { LocalTime } from "../../../../local-time";
 import { VersionActions } from "./version-actions";
 
 export const metadata: Metadata = { title: "Version", robots: { index: false } };

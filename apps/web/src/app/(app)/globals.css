@@ -297,11 +297,12 @@
   .seg-opt + .seg-opt {
     border-left: 1px solid var(--color-divider);
   }
-  .seg-opt:has(input:checked) {
+  .seg-opt:has(input:checked),
+  .seg-opt[aria-current="page"] {
     background: var(--color-accent);
     color: var(--color-bg);
   }
-  .seg-opt:not(:has(input:checked)):hover {
+  .seg-opt:not(:has(input:checked)):not([aria-current="page"]):hover {
     background: color-mix(in srgb, var(--color-text) 7%, transparent);
   }
   .seg-opt:has(input:focus-visible) {
@@ -435,6 +436,33 @@
   }
 }
 
+/* Dashboard: lighter entrances, menus and toasts that drop in, the live dot, loading blocks. */
+@keyframes cm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes cm-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes cm-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes cm-shimmer {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 .cm-spinner {
   display: inline-block;
   width: 20px;
@@ -485,6 +513,22 @@
   }
   .cm-draw {
     animation: cm-draw 0.7s var(--ease-industry) 0.15s both;
+  }
+  .cm-enter {
+    animation: cm-enter 0.56s var(--ease-industry) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .cm-drop {
+    animation: cm-drop 0.3s var(--ease-industry) both;
+  }
+  .cm-toast {
+    animation: cm-drop 0.38s var(--ease-industry) both;
+  }
+  .cm-blink {
+    animation: cm-blink 1.8s ease-in-out infinite;
+  }
+  .cm-shimmer {
+    animation: cm-shimmer 1.4s ease-in-out infinite;
   }
   /* Scroll reveals: hidden only once the observer has armed them (see Reveal). */
   [data-reveal="armed"] {

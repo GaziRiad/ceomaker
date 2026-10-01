@@ -13,6 +13,7 @@ export function ConfirmDialog({
   children,
   confirmLabel,
   pendingLabel,
+  cancelLabel = "Cancel",
   tone = "primary",
   canConfirm = true,
   pending = false,
@@ -25,6 +26,8 @@ export function ConfirmDialog({
   children: ReactNode;
   confirmLabel: string;
   pendingLabel: string;
+  /** What keeping things as they are is called: "Keep it", "Keep my site". */
+  cancelLabel?: string;
   tone?: "primary" | "danger";
   canConfirm?: boolean;
   pending?: boolean;
@@ -32,8 +35,70 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onClose: () => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  return (
+    <Modal
+      open={open}
+      labelledBy={titleId}
+      locked={pending}
+      onClose={onClose}
+      onSubmit={() => {
+        if (canConfirm && !pending) onConfirm();
+      }}
+    >
+      <h2
+        id={titleId}
+        className="m-0 font-heading text-[28px] leading-[1.05] font-semibold uppercase"
+      >
+        {title}
+      </h2>
+      <div className="flex flex-col gap-2.5 text-base text-neutral-800">{children}</div>
+      {error ? (
+        <p role="alert" className="m-0 text-sm text-danger">
+          {error}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap justify-end gap-2">
+        <button
+          type="button"
+          className="btn btn-secondary min-h-11 flex-1 px-4 sm:min-h-10 sm:flex-none"
+          disabled={pending}
+          onClick={onClose}
+        >
+          {cancelLabel}
+        </button>
+        <button
+          type="submit"
+          className={`btn ${tone === "danger" ? "btn-danger" : "btn-primary"} min-h-11 flex-1 px-4 sm:min-h-10 sm:flex-none`}
+          disabled={!canConfirm || pending}
+        >
+          {pending ? pendingLabel : confirmLabel}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+/**
+ * The dialog frame shared by every dashboard modal: a native <dialog> with a blueprint card
+ * holding a form. Escape and a click outside close it unless `locked` (while work is running).
+ */
+export function Modal({
+  open,
+  labelledBy,
+  locked = false,
+  onClose,
+  onSubmit,
+  children,
+}: {
+  open: boolean;
+  labelledBy: string;
+  locked?: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+  children: ReactNode;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const element = dialog.current;
@@ -43,14 +108,14 @@ export function ConfirmDialog({
   }, [open]);
 
   const close = () => {
-    if (!pending) onClose();
+    if (!locked) onClose();
   };
 
   return (
     <dialog
       ref={dialog}
-      aria-labelledby={titleId}
-      className="m-auto w-[min(500px,calc(100%-32px))] overflow-visible bg-transparent p-0 backdrop:bg-[color-mix(in_srgb,var(--color-neutral-900)_40%,transparent)] backdrop:backdrop-blur-[3px]"
+      aria-labelledby={labelledBy}
+      className="m-auto w-[min(520px,calc(100%-24px))] overflow-visible bg-transparent p-0 backdrop:bg-[color-mix(in_srgb,var(--color-neutral-900)_40%,transparent)] backdrop:backdrop-blur-[3px]"
       onCancel={(event) => {
         event.preventDefault();
         close();
@@ -60,40 +125,16 @@ export function ConfirmDialog({
       }}
     >
       <form
-        className="blueprint cm-rise flex flex-col gap-[18px] bg-surface p-[26px] text-left shadow-lg"
+        className="blueprint cm-rise flex flex-col gap-[18px] bg-neutral-100 px-5 py-[22px] text-left shadow-lg sm:p-7"
         // Entrances elsewhere on the page are staggered; the dialog shouldn't inherit a delay.
         style={{ "--delay": "0ms" } as CSSProperties}
         onSubmit={(event) => {
           event.preventDefault();
-          if (canConfirm && !pending) onConfirm();
+          onSubmit();
         }}
       >
         <Corners />
-        <h2
-          id={titleId}
-          className="m-0 font-heading text-[34px] leading-none font-semibold uppercase"
-        >
-          {title}
-        </h2>
-        <div className="flex flex-col gap-2 text-[15px] text-neutral-800">{children}</div>
-        {error ? (
-          <p role="alert" className="m-0 text-sm text-danger">
-            {error}
-          </p>
-        ) : null}
-        <div className="flex flex-wrap justify-end gap-2">
-          <button type="button" className="btn btn-secondary" disabled={pending} onClick={close}>
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className={`btn ${tone === "danger" ? "btn-danger" : "btn-primary"}`}
-            style={{ padding: "10px 16px" }}
-            disabled={!canConfirm || pending}
-          >
-            {pending ? pendingLabel : confirmLabel}
-          </button>
-        </div>
+        {children}
       </form>
     </dialog>
   );

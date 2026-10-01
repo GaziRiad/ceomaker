@@ -39,7 +39,7 @@ import {
   type RewriteMode,
 } from "@/lib/ai/draft";
 import { getSession } from "@/lib/auth";
-import { siteUrl } from "@/lib/routing";
+import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
 
@@ -225,8 +225,8 @@ export async function openVersionInEditorAction(
 }
 
 /**
- * Deletes the user's site. The confirmation must be the site's address, checked here as well as
- * in the dialog, so no stray request can delete a site.
+ * Deletes the user's site. The confirmation must be the site's address (in full, or just its
+ * name), checked here as well as in the dialog, so no stray request can delete a site.
  */
 export async function deleteSiteAction(
   siteId: string,
@@ -238,7 +238,10 @@ export async function deleteSiteAction(
   const db = getDb();
   const site = await getSiteForOwner(db, { userId, siteId });
   if (!site) return NOT_FOUND;
-  if (String(confirmation).trim().toLowerCase() !== site.subdomain) {
+  const typed = String(confirmation).trim().toLowerCase();
+  const address = siteAddressParts();
+  const full = `${address.prefix}${site.subdomain}${address.suffix}`.toLowerCase();
+  if (typed !== site.subdomain && typed !== full) {
     return { ok: false, error: "Type the address exactly as shown to confirm." };
   }
   try {
