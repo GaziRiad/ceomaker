@@ -9,8 +9,9 @@ import {
   type SiteColors,
   type SiteMeta,
   type TemplateKey,
+  type TemplateRef,
 } from "@ceomaker/schema";
-import { getTemplate, TemplateView } from "@ceomaker/templates";
+import { designOnChoosing, getTemplate, newerDesign, TemplateView } from "@ceomaker/templates";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScaledFrame } from "@/components/scaled-frame";
@@ -23,6 +24,7 @@ import {
   canEditInPlace,
   editInPlace,
   fingerprint,
+  liveFingerprint,
   normalizeForEditing,
   prepareForSave,
   previewContent,
@@ -59,6 +61,7 @@ export function Editor({
   addressSuffix,
   initialDraft,
   publishedFingerprint,
+  liveTemplate,
   status,
   versionCount,
   initials,
@@ -70,6 +73,8 @@ export function Editor({
   addressSuffix: string;
   initialDraft: Draft;
   publishedFingerprint: string | null;
+  /** The design the live site shows, or null before the first publish. */
+  liveTemplate: TemplateRef | null;
   status: "draft" | "published" | "paused";
   versionCount: number;
   initials: string;
@@ -98,6 +103,8 @@ export function Editor({
   const [errors, setErrors] = useState<FieldErrors>(() => new Map());
   const [subdomain, setSubdomain] = useState(initialSubdomain);
   const [livePrint, setLivePrint] = useState(publishedFingerprint);
+  const [live, setLive] = useState(liveTemplate);
+  const [designNoticeSeen, setDesignNoticeSeen] = useState(false);
   const [versions, setVersions] = useState(versionCount);
   const [publishOpen, setPublishOpen] = useState(false);
   const [rewriting, setRewriting] = useState(false);
@@ -130,6 +137,7 @@ export function Editor({
       const started = Date.now();
       const result = await saveDraftAction(siteId, {
         templateKey: target.templateKey,
+        templateVersion: target.templateVersion,
         theme: target.theme,
         content: prepared.content,
       }).catch(() => ({ ok: false as const, error: "We couldn't reach the server." }));
@@ -197,8 +205,19 @@ export function Editor({
       delete palettes[current.templateKey];
       return { ...current, theme: { palettes } };
     });
+  // Switching templates keeps the design the site already uses for that template; moving to a
+  // newer design is its own choice (setDesign), made in the Template tab.
   const setTemplate = (templateKey: TemplateKey) =>
-    setDraft((current) => ({ ...current, templateKey }));
+    setDraft((current) => ({
+      ...current,
+      templateKey,
+      templateVersion: designOnChoosing(templateKey, [
+        live,
+        { key: current.templateKey, version: current.templateVersion },
+      ]),
+    }));
+  const setDesign = (templateVersion: number) =>
+    setDraft((current) => ({ ...current, templateVersion }));
 
   /** A text in the preview was clicked: show its form, and say whether it can be edited there. */
   const startInlineEdit = (path: string) => {
@@ -231,13 +250,14 @@ export function Editor({
     else setRewriteError(result.error);
   };
 
-  const colors = resolveSiteColors(draft.theme, draft.templateKey);
-  const template = getTemplate(draft.templateKey);
+  const colors = resolveSiteColors(draft.theme, draft.templateKey, draft.templateVersion);
+  const template = getTemplate(draft.templateKey, draft.templateVersion);
+  const newer = newerDesign(draft.templateKey, draft.templateVersion);
   const renderable = useMemo(
     () => previewContent(draft.content, state.lastValid),
     [draft.content, state.lastValid],
   );
-  const currentPrint = fingerprint(draft);
+  const currentPrint = liveFingerprint(draft);
   const everPublished = livePrint !== null;
   const statusTag =
     status === "paused"
@@ -264,7 +284,8 @@ export function Editor({
   const onPublished = (result: PublishedResult) => {
     setSubdomain(result.subdomain);
     setVersions(result.versionNumber);
-    setLivePrint(fingerprint(latest.current));
+    setLivePrint(liveFingerprint(latest.current));
+    setLive({ key: latest.current.templateKey, version: latest.current.templateVersion });
   };
 
   const address = `${addressPrefix}${subdomain}${addressSuffix}`;
@@ -355,6 +376,25 @@ export function Editor({
               </button>
             </div>
           ) : null}
+          {newer && !designNoticeSeen && tab !== "design" ? (
+            <div className="m-3 mb-0 flex items-start gap-2 border border-accent bg-accent-100 p-3 text-[13px]">
+              <span className="flex-1">
+                {template.name} has a new design. Your site keeps its current look unless you choose
+                the new one and publish.
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ padding: "0 6px" }}
+                onClick={() => {
+                  setDesignNoticeSeen(true);
+                  setTab("design");
+                }}
+              >
+                See it
+              </button>
+            </div>
+          ) : null}
           {tab === "content" ? (
             <ContentPanel
               content={draft.content}
@@ -374,6 +414,7 @@ export function Editor({
           ) : tab === "brand" ? (
             <BrandPanel
               templateKey={draft.templateKey}
+              templateVersion={draft.templateVersion}
               templateName={template.name}
               colors={colors}
               onColors={setColors}
@@ -381,10 +422,12 @@ export function Editor({
             />
           ) : (
             <TemplatePanel
-              templateKey={draft.templateKey}
+              current={{ key: draft.templateKey, version: draft.templateVersion }}
+              live={live}
               theme={draft.theme}
               content={renderable}
               onChoose={setTemplate}
+              onDesign={setDesign}
             />
           )}
         </aside>
@@ -398,6 +441,7 @@ export function Editor({
               <InlineEditing onStart={startInlineEdit} onCommit={commitInlineEdit}>
                 <TemplateView
                   templateKey={draft.templateKey}
+                  templateVersion={draft.templateVersion}
                   colors={colors}
                   content={renderable}
                   publishedAt={PREVIEW_DATE}

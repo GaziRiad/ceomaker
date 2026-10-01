@@ -5,25 +5,34 @@ import {
   onboardingAnswersSchema,
   parseSiteContentForRender,
   TEMPLATE_KEYS,
+  TEMPLATE_VERSIONS,
   type RenderableSiteContent,
+  type TemplateKey,
   type SectionInput,
   type SiteContentInput,
 } from "@ceomaker/schema";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { buildSiteModel } from "./model";
-import { getTemplate } from "./registry";
+import { getTemplate, latestTemplate, newerDesign, templateList } from "./registry";
 import { SiteRenderer, TemplateView } from "./site-renderer";
 
 const publishedAt = new Date("2026-06-01T00:00:00Z");
 
-function render(key: (typeof TEMPLATE_KEYS)[number], content: unknown) {
+/** Every design of every template: frozen ones must keep working as well as the newest. */
+const DESIGNS: [TemplateKey, number][] = TEMPLATE_KEYS.flatMap((key) =>
+  TEMPLATE_VERSIONS[key].map((version): [TemplateKey, number] => [key, version]),
+);
+
+function render(key: TemplateKey, version: number, content: unknown, editable = false) {
   return renderToStaticMarkup(
     <TemplateView
       templateKey={key}
-      colors={defaultColors(key)}
+      templateVersion={version}
+      colors={defaultColors(key, version)}
       content={parseSiteContentForRender(content)}
       publishedAt={publishedAt}
+      editable={editable}
     />,
   );
 }
@@ -100,9 +109,9 @@ const demoSections: SectionInput[] = demoSiteContent.sections;
 const demoHero = demoSections[0] as Extract<SectionInput, { type: "hero" }>;
 const demoRest = demoSections.slice(1);
 
-describe.each(TEMPLATE_KEYS)("%s template", (key) => {
+describe.each(DESIGNS)("%s v%i template", (key, version) => {
   it("renders the full demo site", () => {
-    const html = render(key, demoSiteContent);
+    const html = render(key, version, demoSiteContent);
     expect(html).toContain("Amelia Hart");
     expect(html).toContain("Building supply chains that hold up under pressure.");
     expect(html).toContain("Chief Operating Officer");
@@ -115,12 +124,12 @@ describe.each(TEMPLATE_KEYS)("%s template", (key) => {
   });
 
   it("opens contact links in a new tab with rel=me and no opener", () => {
-    const html = render(key, demoSiteContent);
+    const html = render(key, version, demoSiteContent);
     expect(html).toMatch(/href="https:\/\/www\.linkedin\.com\/" target="_blank" rel="noopener me"/);
   });
 
   it("renders a minimal starter site without empty sections", () => {
-    const html = render(key, starter);
+    const html = render(key, version, starter);
     expect(html).toContain("Sam");
     expect(html).not.toContain('id="impact"');
     expect(html).not.toContain('id="experience"');
@@ -132,6 +141,7 @@ describe.each(TEMPLATE_KEYS)("%s template", (key) => {
   it("shows an uploaded portrait instead of the initials placeholder", () => {
     const html = render(
       key,
+      version,
       withSections([
         { ...demoHero, image: { src: "/media/0b546125-b657-4ed2-b39f-846f38c86be4", alt: "" } },
         ...demoRest,
@@ -144,6 +154,7 @@ describe.each(TEMPLATE_KEYS)("%s template", (key) => {
   it("escapes markup in content", () => {
     const html = render(
       key,
+      version,
       withSections([{ ...demoHero, headline: "<script>alert(1)</script>" }, ...demoRest]),
     );
     expect(html).not.toContain("<script>");
@@ -152,15 +163,7 @@ describe.each(TEMPLATE_KEYS)("%s template", (key) => {
 
   it("marks each editable text with the content field it shows, in the editor only", () => {
     const content = parseSiteContentForRender(demoSiteContent);
-    const html = renderToStaticMarkup(
-      <TemplateView
-        templateKey={key}
-        colors={defaultColors(key)}
-        content={content}
-        publishedAt={publishedAt}
-        editable
-      />,
-    );
+    const html = render(key, version, demoSiteContent, true);
     const fields = fieldTexts(html);
     for (const [path, text] of fields) {
       expect({ path, text }).toEqual({ path, text: contentText(content, path) });
@@ -169,11 +172,25 @@ describe.each(TEMPLATE_KEYS)("%s template", (key) => {
       expect.arrayContaining(["hero.headline", "about.body.0", "contact.blurb"]),
     );
     expect(fields.length).toBeGreaterThan(20);
-    expect(render(key, demoSiteContent)).not.toContain("data-field");
+    expect(render(key, version, demoSiteContent)).not.toContain("data-field");
+  });
+
+  // A shipped design is frozen: live sites pinned to it must look the same after any change to
+  // shared code. If this fails, fix the change, or (for a deliberate fix to this design) update
+  // the snapshot with `vitest -u` and say why in the commit. Redesigns are a new version.
+  it("renders exactly as it shipped", async () => {
+    // One tag per line, so a diff shows exactly what moved.
+    const lines = (html: string) => `${html.replace(/></g, ">\n<")}\n`;
+    await expect(lines(render(key, version, demoSiteContent))).toMatchFileSnapshot(
+      `./__snapshots__/designs/${key}-v${version}-demo.html`,
+    );
+    await expect(lines(render(key, version, starter))).toMatchFileSnapshot(
+      `./__snapshots__/designs/${key}-v${version}-starter.html`,
+    );
   });
 
   it("copes with a very long name", () => {
-    const html = render(key, {
+    const html = render(key, version, {
       ...demoSiteContent,
       meta: { ...demoSiteContent.meta, name: "Maximiliana Constantinopolous-Wetherington" },
     });
@@ -222,6 +239,7 @@ describe("site renderer", () => {
     const html = renderToStaticMarkup(
       <SiteRenderer
         templateKey="executive"
+        templateVersion={undefined}
         theme={{ palettes: { meridian: { bg: "url(javascript:x)", ink: "#000", accent: "#000" } } }}
         content={demoSiteContent}
         publishedAt={publishedAt}
@@ -229,7 +247,17 @@ describe("site renderer", () => {
     );
     expect(html).toContain("--site-bg:#fbfbfa");
     expect(html).not.toContain("javascript");
-    expect(getTemplate("executive").key).toBe("meridian");
-    expect(getTemplate("nonsense").key).toBe("meridian");
+    expect(getTemplate("executive", 7)).toMatchObject({ key: "meridian", version: 1 });
+    expect(getTemplate("nonsense", 1)).toMatchObject({ key: "meridian", version: 1 });
+  });
+
+  it("renders the design a version was saved with, and offers newer designs", () => {
+    for (const [key, version] of DESIGNS) {
+      expect(getTemplate(key, version)).toMatchObject({ key, version });
+      // A version we no longer have renders the oldest design, never the newest.
+      expect(getTemplate(key, 999).version).toBe(TEMPLATE_VERSIONS[key][0]);
+      expect(newerDesign(key, version)?.version ?? version).toBe(latestTemplate(key).version);
+    }
+    expect(templateList.map((template) => template.key)).toEqual([...TEMPLATE_KEYS]);
   });
 });

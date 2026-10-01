@@ -115,6 +115,7 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
           userId,
           siteId: id,
           templateKey: current.templateKey,
+          templateVersion: current.templateVersion,
           theme: parseThemeSettingsForRender(current.theme),
           content: result.content,
         });

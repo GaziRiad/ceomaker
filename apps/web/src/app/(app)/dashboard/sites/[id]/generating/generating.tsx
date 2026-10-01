@@ -28,6 +28,7 @@ export function GeneratingScreen({
   siteId,
   address,
   templateKey,
+  templateVersion,
   templateName,
   voice,
   colors,
@@ -36,6 +37,7 @@ export function GeneratingScreen({
   siteId: string;
   address: string;
   templateKey: TemplateKey;
+  templateVersion: number;
   templateName: string;
   voice: string;
   colors: SiteColors;
@@ -198,6 +200,7 @@ export function GeneratingScreen({
             <ScaledFrame initialZoom={0.45} style={{ height: 600 }}>
               <TemplateView
                 templateKey={templateKey}
+                templateVersion={templateVersion}
                 colors={colors}
                 content={preview}
                 publishedAt={PREVIEW_DATE}

@@ -5,7 +5,7 @@ import {
   listContactMessages,
 } from "@ceomaker/db";
 import { parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
-import { getTemplate, TemplateView } from "@ceomaker/templates";
+import { getTemplate, newerDesign, TemplateView } from "@ceomaker/templates";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -156,6 +156,14 @@ async function Dashboard() {
   }
 
   const shown = toEditableDraft(site.published ?? site.draft);
+  const template = getTemplate(shown.templateKey, shown.templateVersion);
+  const draft = toEditableDraft(site.draft);
+  // Redesigns never reach a live site on their own; say when there's one to look at.
+  const newer = newerDesign(draft.templateKey, draft.templateVersion);
+  const draftOnNewerDesign =
+    site.published !== null &&
+    draft.templateKey === shown.templateKey &&
+    draft.templateVersion > shown.templateVersion;
   const address = siteAddressParts();
   const live = site.status === "published";
   const url = siteUrl(site.subdomain);
@@ -167,8 +175,8 @@ async function Dashboard() {
   const formOff = shownContact?.type === "contact" && shownContact.form?.enabled === false;
   const inboxEmpty = !live
     ? "Messages from your contact form appear here once your site is live."
-    : !getTemplate(shown.templateKey).contactForm
-      ? `The ${getTemplate(shown.templateKey).name} template has no contact form. Meridian has one: switch in the editor to get messages here.`
+    : !template.contactForm
+      ? `The ${template.name} template has no contact form. Meridian has one: switch in the editor to get messages here.`
       : formOff
         ? "Your contact form is off. Turn it on in the editor, under Contact, to get messages here."
         : "No messages yet. When someone writes through the form on your site, it appears here.";
@@ -189,7 +197,8 @@ async function Dashboard() {
           >
             <TemplateView
               templateKey={shown.templateKey}
-              colors={resolveSiteColors(shown.theme, shown.templateKey)}
+              templateVersion={shown.templateVersion}
+              colors={resolveSiteColors(shown.theme, shown.templateKey, shown.templateVersion)}
               content={parseSiteContentForRender(shown.content)}
               publishedAt={PREVIEW_DATE}
               preview
@@ -205,8 +214,15 @@ async function Dashboard() {
               </span>
               <span className="flex items-center gap-2 text-[13px] text-accent-700">
                 <span className={`size-[7px] rounded-full bg-accent ${live ? "cm-pulse" : ""}`} />
-                {statusLabel} · {getTemplate(shown.templateKey).name} template
+                {statusLabel} · {template.name} template
               </span>
+              {newer || draftOnNewerDesign ? (
+                <span className="text-[13px] text-neutral-700">
+                  {newer
+                    ? `${newer.name} has a new design. Preview it in the editor; your site keeps its look until you publish.`
+                    : `Your draft uses the new ${template.name} design. It goes live when you publish.`}
+                </span>
+              ) : null}
             </div>
             <Link href={`/dashboard/sites/${site.id}/edit`} className="btn btn-secondary">
               Edit site
@@ -255,7 +271,7 @@ async function Dashboard() {
             id: version.id,
             number: version.number,
             publishedAt: version.publishedAt.toISOString(),
-            templateName: getTemplate(version.templateKey).name,
+            templateName: getTemplate(version.templateKey, version.templateVersion).name,
             isCurrent: version.isCurrent,
           }))}
         />

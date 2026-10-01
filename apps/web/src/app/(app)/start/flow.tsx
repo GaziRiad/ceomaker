@@ -5,6 +5,7 @@ import {
   encodeAnswers,
   formTopicsFromGoals,
   GOAL_OPTIONS,
+  latestTemplateVersion,
   INDUSTRY_OPTIONS,
   ONBOARDING_STEP_NAMES,
   onboardingAnswersSchema,
@@ -32,6 +33,8 @@ const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
 const GOALS_STEP = ONBOARDING_STEP_NAMES.indexOf("What the site is for");
 const PREVIEW_HEIGHT = 560;
+/** The preview shows the design a new site starts on. */
+const PREVIEW_TEMPLATE = { key: "meridian", version: latestTemplateVersion("meridian") } as const;
 
 /**
  * The questions screen preview: Meridian in draft mode with only what the person has chosen or
@@ -95,8 +98,9 @@ function DraftPreview({
         style={{ transform: `translateY(${-offset}px)` }}
       >
         <TemplateView
-          templateKey="meridian"
-          colors={defaultColors("meridian")}
+          templateKey={PREVIEW_TEMPLATE.key}
+          templateVersion={PREVIEW_TEMPLATE.version}
+          colors={defaultColors(PREVIEW_TEMPLATE.key, PREVIEW_TEMPLATE.version)}
           content={content}
           publishedAt={PREVIEW_DATE}
           preview

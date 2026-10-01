@@ -1,4 +1,4 @@
-import { demoSiteContent, demoThemeSettings } from "@ceomaker/schema";
+import { demoSiteContent, demoThemeSettings, latestTemplateVersion } from "@ceomaker/schema";
 import { eq } from "drizzle-orm";
 import { isMainModule } from "./cli";
 import { createDatabase, type Database } from "./client";
@@ -23,6 +23,7 @@ export async function seedDemoSite(db: Database) {
 
   const draft = {
     templateKey: "meridian" as const,
+    templateVersion: latestTemplateVersion("meridian"),
     theme: demoThemeSettings,
     content: demoSiteContent,
   };

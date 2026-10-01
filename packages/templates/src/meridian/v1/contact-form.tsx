@@ -7,7 +7,7 @@ import {
   type SendContactMessageResult,
 } from "@ceomaker/schema";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { SendContactMessage } from "../types";
+import type { SendContactMessage } from "../../types";
 
 interface Values {
   name: string;

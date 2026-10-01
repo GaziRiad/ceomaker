@@ -3,6 +3,9 @@ import {
   FIXED_SECTION_TYPES,
   normalizeTemplateKey,
   parseSiteContent,
+  parseThemeSettingsForRender,
+  resolveSiteColors,
+  resolveTemplateRef,
   sectionSchema,
   siteMetaSchema,
   themeSettingsSchema,
@@ -39,6 +42,8 @@ const DEFAULT_IDS: Record<EditableSectionType, string> = {
 
 export interface Draft {
   templateKey: TemplateKey;
+  /** The template's design. Changes only when the owner picks a design, never on its own. */
+  templateVersion: number;
   theme: ThemeSettings;
   content: SiteContent;
 }
@@ -247,20 +252,42 @@ export function previewContent(
   return { meta: meta.success ? meta.data : null, sections, droppedSections: 0 };
 }
 
-/** A canonical form for comparing the draft with the published version. */
+function canonicalContent(raw: unknown): unknown {
+  const content = parseSiteContent(raw);
+  const prepared = content.success ? prepareForSave(normalizeForEditing(content.data)) : null;
+  return prepared?.ok ? prepared.content : raw;
+}
+
+/** A canonical form of everything that's saved, for knowing whether the draft needs saving. */
 export function fingerprint(draft: {
   templateKey: string;
+  templateVersion: unknown;
   theme: unknown;
   content: unknown;
 }): string {
-  const content = parseSiteContent(draft.content);
   const theme = themeSettingsSchema.safeParse(draft.theme);
-  const prepared = content.success ? prepareForSave(normalizeForEditing(content.data)) : null;
   return JSON.stringify([
     normalizeTemplateKey(draft.templateKey),
+    draft.templateVersion,
     theme.success ? theme.data : null,
-    prepared?.ok ? prepared.content : draft.content,
+    canonicalContent(draft.content),
   ]);
+}
+
+/**
+ * What visitors would see, for comparing the draft with the live site: the design, the colours
+ * it renders with and the content. Colours saved for other templates don't show, so they don't
+ * count, and a default written out at publish matches the same default left unset.
+ */
+export function liveFingerprint(draft: {
+  templateKey: string;
+  templateVersion: unknown;
+  theme: unknown;
+  content: unknown;
+}): string {
+  const { key, version } = resolveTemplateRef(draft.templateKey, draft.templateVersion);
+  const colors = resolveSiteColors(parseThemeSettingsForRender(draft.theme), key, version);
+  return JSON.stringify([key, version, colors, canonicalContent(draft.content)]);
 }
 
 export function sectionOf<T extends EditableSectionType>(content: SiteContent, type: T) {

@@ -71,7 +71,8 @@ export async function sendContactMessage(
     (section) => section.type === "contact",
   );
   const form = contact?.type === "contact" ? contact.form : undefined;
-  if (!getTemplate(tenant.site.templateKey).contactForm || form?.enabled === false) {
+  const template = getTemplate(tenant.site.templateKey, tenant.site.templateVersion);
+  if (!template.contactForm || form?.enabled === false) {
     return UNAVAILABLE;
   }
 

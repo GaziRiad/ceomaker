@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import { Blueprint, Wordmark } from "@/components/ui";
 import { draftNoticeText } from "@/lib/ai/events";
 import { siteAddressParts } from "@/lib/routing";
-import { initialsFor, loadOwnedSite } from "@/lib/site-data";
+import { initialsFor, loadOwnedSite, toEditableDraft } from "@/lib/site-data";
 import { Editor } from "./editor";
-import { fingerprint } from "./editor-model";
+import { liveFingerprint } from "./editor-model";
 
 export const metadata: Metadata = { title: "Editor", robots: { index: false } };
 
@@ -20,6 +20,7 @@ async function EditSite({
   const { user, site, draft } = await loadOwnedSite(id, `/dashboard/sites/${id}/edit`);
   const address = siteAddressParts();
   const notice = draftNoticeText(query.notice);
+  const live = site.published ? toEditableDraft(site.published) : null;
   return (
     <Editor
       key={site.id}
@@ -28,7 +29,8 @@ async function EditSite({
       addressPrefix={address.prefix}
       addressSuffix={address.suffix}
       initialDraft={draft}
-      publishedFingerprint={site.published ? fingerprint(site.published) : null}
+      publishedFingerprint={site.published ? liveFingerprint(site.published) : null}
+      liveTemplate={live ? { key: live.templateKey, version: live.templateVersion } : null}
       status={site.status}
       versionCount={site.versionCount}
       initials={initialsFor(draft.content.meta.name || user.name, user.email)}

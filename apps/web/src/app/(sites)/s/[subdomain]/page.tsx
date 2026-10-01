@@ -1,10 +1,9 @@
 import {
-  DEFAULT_TEMPLATE_KEY,
   isValidSubdomain,
-  normalizeTemplateKey,
   parseSiteContentForRender,
   parseThemeSettingsForRender,
   resolveSiteColors,
+  resolveTemplateRef,
   siteDescription,
   siteTitle,
 } from "@ceomaker/schema";
@@ -54,8 +53,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const name = meta?.name ?? subdomain;
   const title = meta ? siteTitle(meta, hero) : subdomain;
   const description = meta ? siteDescription(meta, hero) : undefined;
-  const key = normalizeTemplateKey(site.templateKey) ?? DEFAULT_TEMPLATE_KEY;
-  const colors = resolveSiteColors(parseThemeSettingsForRender(site.theme), key);
+  const { key, version } = resolveTemplateRef(site.templateKey, site.templateVersion);
+  const colors = resolveSiteColors(parseThemeSettingsForRender(site.theme), key, version);
   const routing = routingConfigFromEnv();
   const url = siteUrl(subdomain, routing);
   return {
@@ -82,6 +81,7 @@ async function TenantSite({ params }: { params: Params }) {
   return (
     <SiteRenderer
       templateKey={site.templateKey}
+      templateVersion={site.templateVersion}
       theme={site.theme}
       content={site.content}
       publishedAt={site.publishedAt}

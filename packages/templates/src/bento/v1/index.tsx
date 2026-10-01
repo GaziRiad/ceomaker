@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import { fluid, FONTS } from "../fonts";
-import type { SiteModel } from "../model";
+import { fluid, FONTS } from "../../fonts";
+import type { SiteModel } from "../../model";
 import {
   ANCHORS,
   ContactLink,
@@ -11,8 +11,8 @@ import {
   Portrait,
   SkipLink,
   Spans,
-} from "../shared";
-import type { TemplateProps } from "../types";
+} from "../../shared";
+import type { TemplateProps } from "../../types";
 
 // T5 Bento: the whole profile in a single grid of cards. Scans in seconds.
 // Unlike the other templates it packs everything into one grid in a fixed order.

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import { fluid, FONTS } from "../fonts";
-import type { MiddleKind, SiteModel } from "../model";
+import { fluid, FONTS } from "../../fonts";
+import type { MiddleKind, SiteModel } from "../../model";
 import {
   ANCHORS,
   ContactLink,
@@ -12,8 +12,8 @@ import {
   Portrait,
   SkipLink,
   Spans,
-} from "../shared";
-import type { TemplateProps } from "../types";
+} from "../../shared";
+import type { TemplateProps } from "../../types";
 
 // T2 Aurora: soft light, rounded cards and a floating profile. For founders and tech leaders.
 

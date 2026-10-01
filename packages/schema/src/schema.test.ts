@@ -5,6 +5,7 @@ import {
   contrastLevel,
   contrastRatio,
   decodeAnswers,
+  defaultColors,
   demoSiteContent,
   encodeAnswers,
   formTopicsFromGoals,
@@ -21,6 +22,8 @@ import {
   previewFromAnswers,
   readableTextOn,
   resolveSiteColors,
+  resolveTemplateRef,
+  resolveTemplateVersion,
   richTextFromPlain,
   richTextToPlain,
   safeLinkUrl,
@@ -28,8 +31,11 @@ import {
   siteTitle,
   subdomainSchema,
   TEMPLATE_KEYS,
-  TEMPLATE_PALETTES,
+  TEMPLATE_VERSIONS,
   templateKeySchema,
+  templatePalettes,
+  withResolvedColors,
+  latestTemplateVersion,
   themeSettingsSchema,
   type OnboardingAnswers,
 } from "./index";
@@ -173,26 +179,39 @@ describe("subdomains", () => {
 });
 
 describe("theme", () => {
-  it("ships six readable presets per template, the first being the default", () => {
+  it("ships six readable presets per template design, the first being the default", () => {
     for (const key of TEMPLATE_KEYS) {
-      expect(TEMPLATE_PALETTES[key]).toHaveLength(6);
-      for (const preset of TEMPLATE_PALETTES[key]) {
-        expect(isPublishableColors(preset.colors)).toBe(true);
+      for (const version of TEMPLATE_VERSIONS[key]) {
+        const presets = templatePalettes(key, version);
+        expect(presets).toHaveLength(6);
+        for (const preset of presets) {
+          expect(isPublishableColors(preset.colors)).toBe(true);
+        }
       }
     }
-    expect(resolveSiteColors({ palettes: {} }, "obsidian").bg).toBe("#0b0b0c");
+    expect(resolveSiteColors({ palettes: {} }, "obsidian", 1).bg).toBe("#0b0b0c");
+  });
+
+  it("writes out a design's colours so a later default can't change them", () => {
+    const settings = themeSettingsSchema.parse({
+      palettes: { aurora: { bg: "#ffffff", ink: "#000000", accent: "#123456" } },
+    });
+    const frozen = withResolvedColors(settings, "meridian", 1);
+    expect(frozen.palettes.meridian).toEqual(defaultColors("meridian", 1));
+    expect(frozen.palettes.aurora).toEqual(settings.palettes.aurora);
+    expect(withResolvedColors(frozen, "aurora", 1)).toEqual(frozen);
   });
 
   it("remembers colours per template", () => {
     const settings = themeSettingsSchema.parse({
       palettes: { aurora: { bg: "#FFFFFF", ink: "#000000", accent: "#123456" } },
     });
-    expect(resolveSiteColors(settings, "aurora")).toEqual({
+    expect(resolveSiteColors(settings, "aurora", 1)).toEqual({
       bg: "#ffffff",
       ink: "#000000",
       accent: "#123456",
     });
-    expect(resolveSiteColors(settings, "meridian").accent).toBe("#1f3a5f");
+    expect(resolveSiteColors(settings, "meridian", 1).accent).toBe("#1f3a5f");
   });
 
   it("rejects non-hex colors, which could otherwise smuggle CSS", () => {
@@ -240,6 +259,22 @@ describe("templates", () => {
     expect(normalizeTemplateKey("bento")).toBe("bento");
     expect(normalizeTemplateKey("marquee")).toBeNull();
     expect(templateKeySchema.safeParse("marquee").success).toBe(false);
+  });
+
+  it("renders the stored design, and never upgrades a bad or missing version to the newest", () => {
+    for (const key of TEMPLATE_KEYS) {
+      const [oldest] = TEMPLATE_VERSIONS[key];
+      expect(latestTemplateVersion(key)).toBe(TEMPLATE_VERSIONS[key].at(-1));
+      for (const version of TEMPLATE_VERSIONS[key]) {
+        expect(resolveTemplateVersion(key, version)).toBe(version);
+      }
+      for (const bad of [undefined, null, 0, 999, "1", 1.5]) {
+        expect(resolveTemplateVersion(key, bad)).toBe(oldest);
+      }
+    }
+    expect(resolveTemplateRef("executive", 999)).toEqual({ key: "meridian", version: 1 });
+    expect(resolveTemplateRef("bento", 1)).toEqual({ key: "bento", version: 1 });
+    expect(resolveTemplateRef("marquee", 1)).toEqual({ key: "meridian", version: 1 });
   });
 });
 

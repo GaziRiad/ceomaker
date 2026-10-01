@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { TEMPLATE_KEYS, type TemplateKey } from "./templates";
+import {
+  resolveTemplateVersion,
+  TEMPLATE_KEYS,
+  type TemplateKey,
+  type TemplateVersionOf,
+} from "./templates";
 
 export const hexColor = z
   .string()
@@ -43,65 +48,107 @@ function palette(name: string, bg: string, ink: string, accent: string): NamedPa
   return { name, colors: { bg, ink, accent } };
 }
 
-/** Six presets per template. The first one is the template's default. */
-export const TEMPLATE_PALETTES: Record<TemplateKey, readonly NamedPalette[]> = {
-  meridian: [
-    palette("Navy", "#fbfbfa", "#16181b", "#1f3a5f"),
-    palette("Bottle green", "#fbfbfa", "#161917", "#1e4a3a"),
-    palette("Oxblood", "#fbfaf8", "#1b1717", "#6d2433"),
-    palette("Graphite", "#ffffff", "#111111", "#3b4048"),
-    palette("Ivory", "#f7f4ee", "#1a1a1a", "#7a5f2e"),
-    palette("Night", "#111316", "#ecebe6", "#a9bfdc"),
-  ],
-  aurora: [
-    palette("Indigo", "#fbfbfd", "#0f1222", "#4f46e5"),
-    palette("Ocean", "#f8fbfd", "#0b1b2b", "#0284c7"),
-    palette("Emerald", "#fafcfb", "#0c1f17", "#059669"),
-    palette("Coral", "#fdfbfa", "#1f1210", "#e11d48"),
-    palette("Graphite", "#fafafa", "#111111", "#3f3f46"),
-    palette("Midnight", "#0c0e1a", "#eef0fa", "#818cf8"),
-  ],
-  obsidian: [
-    palette("Champagne", "#0b0b0c", "#f2efe9", "#c9a86a"),
-    palette("Midnight", "#0a0f1c", "#eef1f7", "#8fb3ff"),
-    palette("Bordeaux", "#120a0c", "#f4ece9", "#c2575f"),
-    palette("Emerald night", "#08110e", "#e9f2ee", "#6fcf97"),
-    palette("Platinum", "#0c0c0d", "#f2f2f2", "#bfc3c9"),
-    palette("Daylight", "#f6f3ee", "#141414", "#9a7b45"),
-  ],
-  monument: [
-    palette("Cobalt", "#f2f2ee", "#0a0a0a", "#1f3bff"),
-    palette("Signal", "#f2f2ee", "#0a0a0a", "#ff4d00"),
-    palette("Forest", "#f0f1ec", "#0b120d", "#0f7b3a"),
-    palette("Oxblood", "#efe9df", "#111111", "#b3261e"),
-    palette("Acid night", "#0b0b0b", "#f2f2ee", "#c8ff00"),
-    palette("Mono", "#ffffff", "#000000", "#000000"),
-  ],
-  bento: [
-    palette("Emerald", "#ececef", "#111113", "#0e7a5f"),
-    palette("Sand", "#efebe4", "#1a1714", "#a15c2f"),
-    palette("Ice", "#eaeff3", "#0d1620", "#2563eb"),
-    palette("Plum", "#eeebf0", "#17111a", "#7c3aed"),
-    palette("Carbon", "#0f0f11", "#f2f2f4", "#34d399"),
-    palette("Blush", "#f3eceb", "#1c1414", "#be185d"),
-  ],
-  chronicle: [
-    palette("Evergreen", "#f3efe6", "#22211d", "#2f4a3a"),
-    palette("Terracotta", "#f4eee6", "#2a1f19", "#b5562f"),
-    palette("Ink blue", "#f2f0ea", "#1b2230", "#2d4a7a"),
-    palette("Plum", "#f3eee9", "#261d22", "#6b3a52"),
-    palette("Charcoal", "#ecebe7", "#1c1c1c", "#555048"),
-    palette("Lamplight", "#16140f", "#efe8da", "#d4a55a"),
-  ],
+/**
+ * Six presets per template design. The first one is that design's default. A new design of a
+ * template gets its own list; the old design keeps its defaults.
+ */
+export const TEMPLATE_PALETTES: {
+  [K in TemplateKey]: Record<TemplateVersionOf<K>, readonly NamedPalette[]>;
+} = {
+  meridian: {
+    1: [
+      palette("Navy", "#fbfbfa", "#16181b", "#1f3a5f"),
+      palette("Bottle green", "#fbfbfa", "#161917", "#1e4a3a"),
+      palette("Oxblood", "#fbfaf8", "#1b1717", "#6d2433"),
+      palette("Graphite", "#ffffff", "#111111", "#3b4048"),
+      palette("Ivory", "#f7f4ee", "#1a1a1a", "#7a5f2e"),
+      palette("Night", "#111316", "#ecebe6", "#a9bfdc"),
+    ],
+  },
+  aurora: {
+    1: [
+      palette("Indigo", "#fbfbfd", "#0f1222", "#4f46e5"),
+      palette("Ocean", "#f8fbfd", "#0b1b2b", "#0284c7"),
+      palette("Emerald", "#fafcfb", "#0c1f17", "#059669"),
+      palette("Coral", "#fdfbfa", "#1f1210", "#e11d48"),
+      palette("Graphite", "#fafafa", "#111111", "#3f3f46"),
+      palette("Midnight", "#0c0e1a", "#eef0fa", "#818cf8"),
+    ],
+  },
+  obsidian: {
+    1: [
+      palette("Champagne", "#0b0b0c", "#f2efe9", "#c9a86a"),
+      palette("Midnight", "#0a0f1c", "#eef1f7", "#8fb3ff"),
+      palette("Bordeaux", "#120a0c", "#f4ece9", "#c2575f"),
+      palette("Emerald night", "#08110e", "#e9f2ee", "#6fcf97"),
+      palette("Platinum", "#0c0c0d", "#f2f2f2", "#bfc3c9"),
+      palette("Daylight", "#f6f3ee", "#141414", "#9a7b45"),
+    ],
+  },
+  monument: {
+    1: [
+      palette("Cobalt", "#f2f2ee", "#0a0a0a", "#1f3bff"),
+      palette("Signal", "#f2f2ee", "#0a0a0a", "#ff4d00"),
+      palette("Forest", "#f0f1ec", "#0b120d", "#0f7b3a"),
+      palette("Oxblood", "#efe9df", "#111111", "#b3261e"),
+      palette("Acid night", "#0b0b0b", "#f2f2ee", "#c8ff00"),
+      palette("Mono", "#ffffff", "#000000", "#000000"),
+    ],
+  },
+  bento: {
+    1: [
+      palette("Emerald", "#ececef", "#111113", "#0e7a5f"),
+      palette("Sand", "#efebe4", "#1a1714", "#a15c2f"),
+      palette("Ice", "#eaeff3", "#0d1620", "#2563eb"),
+      palette("Plum", "#eeebf0", "#17111a", "#7c3aed"),
+      palette("Carbon", "#0f0f11", "#f2f2f4", "#34d399"),
+      palette("Blush", "#f3eceb", "#1c1414", "#be185d"),
+    ],
+  },
+  chronicle: {
+    1: [
+      palette("Evergreen", "#f3efe6", "#22211d", "#2f4a3a"),
+      palette("Terracotta", "#f4eee6", "#2a1f19", "#b5562f"),
+      palette("Ink blue", "#f2f0ea", "#1b2230", "#2d4a7a"),
+      palette("Plum", "#f3eee9", "#261d22", "#6b3a52"),
+      palette("Charcoal", "#ecebe7", "#1c1c1c", "#555048"),
+      palette("Lamplight", "#16140f", "#efe8da", "#d4a55a"),
+    ],
+  },
 };
 
-export function defaultColors(template: TemplateKey): SiteColors {
-  return TEMPLATE_PALETTES[template][0]!.colors;
+/** The presets of one design of a template. */
+export function templatePalettes(template: TemplateKey, version: number): readonly NamedPalette[] {
+  const byVersion = TEMPLATE_PALETTES[template] as Record<number, readonly NamedPalette[]>;
+  return byVersion[resolveTemplateVersion(template, version)]!;
 }
 
-/** The colours a template renders with: the user's choice for that template, else its default. */
-export function resolveSiteColors(settings: ThemeSettings, template: TemplateKey): SiteColors {
-  return settings.palettes[template] ?? defaultColors(template);
+export function defaultColors(template: TemplateKey, version: number): SiteColors {
+  return templatePalettes(template, version)[0]!.colors;
+}
+
+/** The colours a design renders with: the user's choice for that template, else its default. */
+export function resolveSiteColors(
+  settings: ThemeSettings,
+  template: TemplateKey,
+  version: number,
+): SiteColors {
+  return settings.palettes[template] ?? defaultColors(template, version);
+}
+
+/**
+ * The settings with the template's colours written out, so they no longer follow a default.
+ * Published versions are stored this way: a later change to a default can't recolour them.
+ */
+export function withResolvedColors(
+  settings: ThemeSettings,
+  template: TemplateKey,
+  version: number,
+): ThemeSettings {
+  return {
+    ...settings,
+    palettes: { ...settings.palettes, [template]: resolveSiteColors(settings, template, version) },
+  };
 }
 
 /**

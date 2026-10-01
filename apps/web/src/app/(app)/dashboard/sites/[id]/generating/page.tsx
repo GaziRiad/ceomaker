@@ -21,9 +21,10 @@ async function Generating({
       siteId={site.id}
       address={`${address.prefix}${site.subdomain}${address.suffix}`}
       templateKey={draft.templateKey}
-      templateName={getTemplate(draft.templateKey).name}
+      templateVersion={draft.templateVersion}
+      templateName={getTemplate(draft.templateKey, draft.templateVersion).name}
       voice={site.answers?.voice ?? "Measured"}
-      colors={resolveSiteColors(draft.theme, draft.templateKey)}
+      colors={resolveSiteColors(draft.theme, draft.templateKey, draft.templateVersion)}
       content={parseSiteContentForRender(draft.content)}
     />
   );

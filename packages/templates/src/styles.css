@@ -3,7 +3,7 @@
  * from its colours (see themeToStyle); everything else derives from those here, so one
  * stylesheet serves every tenant. Import this after `@import "tailwindcss"`.
  */
-@import "./meridian/meridian.css";
+@import "./meridian/v1/meridian.css";
 @source "./";
 
 @theme inline {

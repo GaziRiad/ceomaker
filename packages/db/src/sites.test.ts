@@ -1,8 +1,10 @@
 import {
+  defaultColors,
   demoSiteContent,
   demoThemeSettings,
   onboardingAnswersSchema,
   parseSiteContentForRender,
+  withResolvedColors,
 } from "@ceomaker/schema";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -47,6 +49,7 @@ const url = process.env.TEST_DATABASE_URL;
 
 const draft = {
   templateKey: "meridian" as const,
+  templateVersion: 1,
   theme: demoThemeSettings,
   content: demoSiteContent,
 };
@@ -266,7 +269,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     expect(parseSiteContentForRender(owned?.published?.content).meta?.name).toBe(
       demoSiteContent.meta.name,
     );
-    expect(owned?.published?.theme).toEqual(demoThemeSettings);
+    expect(owned?.published?.theme).toEqual(withResolvedColors(demoThemeSettings, "bento", 1));
     expect(owned?.versions.map((v) => [v.number, v.templateKey, v.isCurrent])).toEqual([
       [2, "bento", true],
       [1, "meridian", false],
@@ -433,6 +436,53 @@ describe.skipIf(!url)("sites (integration)", () => {
     await db.delete(user).where(eq(user.id, "alice"));
     expect(await db.select().from(siteVersion)).toHaveLength(0);
   });
+  it("pins each version to the template design it used", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    await expect(
+      saveDraft(db, { ...draft, templateVersion: 99, userId: "alice", siteId: id }),
+    ).rejects.toBeInstanceOf(InvalidSiteDataError);
+
+    const first = await publishSite(db, { userId: "alice", siteId: id });
+    expect((await getLive(db, "alice"))?.templateVersion).toBe(1);
+    const owned = await getSiteForOwner(db, { userId: "alice", siteId: id });
+    expect(owned?.draft.templateVersion).toBe(1);
+    expect(owned?.published?.templateVersion).toBe(1);
+    expect(owned?.versions[0]?.templateVersion).toBe(1);
+
+    // The draft moves on; the published version and its design stay as they were.
+    await saveDraft(db, { ...draft, templateKey: "bento", userId: "alice", siteId: id });
+    await publishSite(db, { userId: "alice", siteId: id });
+    await makeVersionLive(db, { userId: "alice", siteId: id, versionId: first.versionId });
+    expect(await getLive(db, "alice")).toMatchObject({
+      templateKey: "meridian",
+      templateVersion: 1,
+    });
+    await copyVersionToDraft(db, { userId: "alice", siteId: id, versionId: first.versionId });
+    const back = await getSiteForOwner(db, { userId: "alice", siteId: id });
+    expect(back?.draft).toMatchObject({ templateKey: "meridian", templateVersion: 1 });
+    expect(
+      (await getPublishedVersion(db, { userId: "alice", siteId: id, versionId: first.versionId }))
+        ?.templateVersion,
+    ).toBe(1);
+  });
+
+  it("writes out the colours a site was published with", async () => {
+    const { id } = await createSite(db, {
+      ...draft,
+      theme: { palettes: {} },
+      userId: "alice",
+      subdomain: "alice",
+    });
+    await publishSite(db, { userId: "alice", siteId: id });
+    const live = await getLive(db, "alice");
+    // Not following the default any more: a new default can't recolour the live site.
+    expect((live?.theme as { palettes: Record<string, unknown> }).palettes.meridian).toEqual(
+      defaultColors("meridian", 1),
+    );
+    const owned = await getSiteForOwner(db, { userId: "alice", siteId: id });
+    expect(owned?.draft.theme).toEqual({ palettes: {} });
+  });
+
   it("keeps contact messages for the site's owner, within limits", async () => {
     const { id: siteId } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
     const message = {

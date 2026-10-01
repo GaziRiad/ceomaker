@@ -22,8 +22,10 @@ export interface TemplateProps {
   sendMessage?: SendContactMessage | undefined;
 }
 
+/** One design of a template. Shipped designs are frozen: redesigns are a new version. */
 export interface TemplateDefinition {
   key: TemplateKey;
+  version: number;
   name: string;
   /** Long description, from the template overview board. */
   description: string;

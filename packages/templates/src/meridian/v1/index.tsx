@@ -1,9 +1,9 @@
 import { useId, type CSSProperties, type ReactNode } from "react";
-import { FONTS } from "../fonts";
-import { linkProps } from "../links";
-import type { MiddleKind, ModelQuote, SiteModel } from "../model";
-import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink, Spans } from "../shared";
-import type { SendContactMessage, TemplateProps } from "../types";
+import { FONTS } from "../../fonts";
+import { linkProps } from "../../links";
+import type { MiddleKind, ModelQuote, SiteModel } from "../../model";
+import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink, Spans } from "../../shared";
+import type { SendContactMessage, TemplateProps } from "../../types";
 import { MeridianContactForm } from "./contact-form";
 import { longestWord, meridianRoleStyle, RING_CIRCUMFERENCE, ringText } from "./measure";
 

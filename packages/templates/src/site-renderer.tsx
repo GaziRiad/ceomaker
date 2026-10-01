@@ -1,9 +1,8 @@
 import {
-  DEFAULT_TEMPLATE_KEY,
-  normalizeTemplateKey,
   parseSiteContentForRender,
   parseThemeSettingsForRender,
   resolveSiteColors,
+  resolveTemplateRef,
   type RenderableSiteContent,
   type SiteColors,
   type TemplateKey,
@@ -15,6 +14,8 @@ import type { SendContactMessage } from "./types";
 
 export interface TemplateViewProps {
   templateKey: TemplateKey;
+  /** The design of the template: a stored version keeps the look it was saved with. */
+  templateVersion: number;
   colors: SiteColors;
   content: RenderableSiteContent;
   publishedAt: Date;
@@ -33,6 +34,7 @@ export interface TemplateViewProps {
 /** Renders validated content with a template. Used live and by the editor's previews. */
 export function TemplateView({
   templateKey,
+  templateVersion,
   colors,
   content,
   publishedAt,
@@ -42,7 +44,7 @@ export function TemplateView({
   draft = false,
   sendMessage,
 }: TemplateViewProps) {
-  const Template = getTemplate(templateKey).Component;
+  const Template = getTemplate(templateKey, templateVersion).Component;
   return (
     <div
       className="ceomaker-site"
@@ -61,6 +63,8 @@ export function TemplateView({
 
 export interface SiteRendererProps {
   templateKey: string;
+  /** As stored; an unknown value renders the template's oldest design, never its newest. */
+  templateVersion: unknown;
   /** Raw stored JSON; validated here before anything is rendered. */
   theme: unknown;
   content: unknown;
@@ -74,16 +78,18 @@ export interface SiteRendererProps {
  */
 export function SiteRenderer({
   templateKey,
+  templateVersion,
   theme,
   content,
   publishedAt,
   sendMessage,
 }: SiteRendererProps) {
-  const key = normalizeTemplateKey(templateKey) ?? DEFAULT_TEMPLATE_KEY;
+  const { key, version } = resolveTemplateRef(templateKey, templateVersion);
   return (
     <TemplateView
       templateKey={key}
-      colors={resolveSiteColors(parseThemeSettingsForRender(theme), key)}
+      templateVersion={version}
+      colors={resolveSiteColors(parseThemeSettingsForRender(theme), key, version)}
       content={parseSiteContentForRender(content)}
       publishedAt={publishedAt}
       sendMessage={sendMessage}

@@ -28,6 +28,7 @@ import {
   type SiteContentInput,
   type ThemeSettingsInput,
 } from "@ceomaker/schema";
+import { designOnChoosing } from "@ceomaker/templates";
 import { updateTag } from "next/cache";
 import { z } from "zod";
 import { AI_LIMITS, AI_MODEL, anthropic, DAY_MS, FALLBACK_BETA } from "@/lib/ai/client";
@@ -61,6 +62,7 @@ const MAX_DRAFT_BYTES = 256 * 1024;
 
 export interface DraftPayload {
   templateKey: string;
+  templateVersion: number;
   theme: ThemeSettingsInput;
   content: SiteContentInput;
 }
@@ -87,7 +89,10 @@ export async function saveDraftAction(
   }
 }
 
-/** Template picker: switches the draft's template, keeping content and colours. */
+/**
+ * Template picker: switches the draft's template, keeping content and colours. A template the
+ * site already uses keeps its design; any other starts on its newest.
+ */
 export async function chooseTemplateAction(
   siteId: string,
   templateKey: string,
@@ -101,7 +106,12 @@ export async function chooseTemplateAction(
   const site = await getSiteForOwner(db, { userId, siteId });
   if (!site) return NOT_FOUND;
   const draft = toEditableDraft(site.draft);
-  await saveDraft(db, { userId, siteId, ...draft, templateKey: key.data });
+  const live = site.published ? toEditableDraft(site.published) : null;
+  const templateVersion = designOnChoosing(key.data, [
+    live && { key: live.templateKey, version: live.templateVersion },
+    { key: draft.templateKey, version: draft.templateVersion },
+  ]);
+  await saveDraft(db, { userId, siteId, ...draft, templateKey: key.data, templateVersion });
   return { ok: true };
 }
 

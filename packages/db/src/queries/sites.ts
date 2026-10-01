@@ -5,6 +5,8 @@ import {
   DEFAULT_TEMPLATE_KEY,
   emptyThemeSettings,
   isPublishableColors,
+  isTemplateVersion,
+  latestTemplateVersion,
   parseSiteContent,
   randomSubdomain,
   resolveSiteColors,
@@ -12,6 +14,7 @@ import {
   suggestSubdomains,
   templateKeySchema,
   themeSettingsSchema,
+  withResolvedColors,
   type OnboardingAnswers,
   type SiteContentInput,
   type TemplateKey,
@@ -60,6 +63,7 @@ export interface PublishedSite {
   subdomain: string;
   versionId: string;
   templateKey: string;
+  templateVersion: number;
   /** Raw stored JSON. Render through the tolerant parsers in @ceomaker/schema, never trust it. */
   theme: unknown;
   content: unknown;
@@ -82,6 +86,7 @@ export async function getTenantSiteBySubdomain(
       subdomain: site.subdomain,
       versionId: siteVersion.id,
       templateKey: siteVersion.templateKey,
+      templateVersion: siteVersion.templateVersion,
       theme: siteVersion.theme,
       content: siteVersion.content,
       publishedAt: siteVersion.publishedAt,
@@ -105,6 +110,7 @@ export async function getTenantSiteBySubdomain(
       subdomain: row.subdomain,
       versionId: row.versionId,
       templateKey: row.templateKey,
+      templateVersion: row.templateVersion ?? 1,
       theme: row.theme,
       content: row.content,
       publishedAt: row.publishedAt,
@@ -143,10 +149,17 @@ export interface OwnedSite {
   answers: OnboardingAnswers | null;
   createdAt: Date;
   /** Raw stored JSON; parse before use. */
-  draft: { templateKey: string; theme: unknown; content: unknown; updatedAt: Date };
+  draft: {
+    templateKey: string;
+    templateVersion: number;
+    theme: unknown;
+    content: unknown;
+    updatedAt: Date;
+  };
   published: {
     id: string;
     templateKey: string;
+    templateVersion: number;
     theme: unknown;
     content: unknown;
     publishedAt: Date;
@@ -170,6 +183,7 @@ async function loadOwnedSite(db: Database, userId: string, which: SQL): Promise<
         id: siteVersion.id,
         kind: siteVersion.kind,
         templateKey: siteVersion.templateKey,
+        templateVersion: siteVersion.templateVersion,
         updatedAt: siteVersion.updatedAt,
         publishedAt: siteVersion.publishedAt,
         theme: sql`case when ${carriesContent} then ${siteVersion.theme} end`.mapWith(
@@ -197,6 +211,7 @@ async function loadOwnedSite(db: Database, userId: string, which: SQL): Promise<
       id: version.id,
       number: index + 1,
       templateKey: version.templateKey,
+      templateVersion: version.templateVersion,
       publishedAt: version.publishedAt ?? new Date(0),
       isCurrent: owned.status === "published" && version.id === owned.publishedVersionId,
     }))
@@ -210,6 +225,7 @@ async function loadOwnedSite(db: Database, userId: string, which: SQL): Promise<
     createdAt: owned.createdAt,
     draft: {
       templateKey: draftRow.templateKey,
+      templateVersion: draftRow.templateVersion,
       theme: draftRow.theme,
       content: draftRow.content,
       updatedAt: draftRow.updatedAt,
@@ -219,6 +235,7 @@ async function loadOwnedSite(db: Database, userId: string, which: SQL): Promise<
         ? {
             id: liveRow.id,
             templateKey: liveRow.templateKey,
+            templateVersion: liveRow.templateVersion,
             theme: liveRow.theme,
             content: liveRow.content,
             publishedAt: liveRow.publishedAt,
@@ -253,6 +270,8 @@ export async function getPrimarySiteForOwner(
 
 interface DraftInput {
   templateKey: TemplateKey | string;
+  /** Which design of the template (TEMPLATE_VERSIONS). Always explicit, never assumed. */
+  templateVersion: number;
   theme: ThemeSettingsInput;
   content: SiteContentInput;
 }
@@ -261,15 +280,32 @@ function validateDraft(input: DraftInput) {
   const templateKey = templateKeySchema.safeParse(input.templateKey);
   const theme = themeSettingsSchema.safeParse(input.theme);
   const content = parseSiteContent(input.content);
+  const versionOk =
+    templateKey.success && isTemplateVersion(templateKey.data, input.templateVersion);
   const issues = [
     ...(templateKey.error?.issues ?? []),
+    ...(templateKey.success && !versionOk
+      ? [
+          {
+            code: "custom" as const,
+            message: `Unknown design ${String(input.templateVersion)} of ${templateKey.data}`,
+            path: ["templateVersion"],
+            input: input.templateVersion,
+          },
+        ]
+      : []),
     ...(theme.error?.issues ?? []),
     ...(content.error?.issues ?? []),
   ];
-  if (!templateKey.success || !theme.success || !content.success) {
+  if (!templateKey.success || !versionOk || !theme.success || !content.success) {
     throw new InvalidSiteDataError(issues);
   }
-  return { templateKey: templateKey.data, theme: theme.data, content: content.data };
+  return {
+    templateKey: templateKey.data,
+    templateVersion: input.templateVersion,
+    theme: theme.data,
+    content: content.data,
+  };
 }
 
 /** Creates a site with its initial draft. The subdomain is validated and claimed atomically. */
@@ -321,6 +357,7 @@ export async function createSiteFromAnswers(
 ) {
   const draft = {
     templateKey: DEFAULT_TEMPLATE_KEY,
+    templateVersion: latestTemplateVersion(DEFAULT_TEMPLATE_KEY),
     theme: emptyThemeSettings,
     content: buildStarterContent(input.answers, { email: input.email }),
   };
@@ -411,10 +448,15 @@ export async function publishSite(db: Database, input: { userId: string; siteId:
 
     const validated = validateDraft({
       templateKey: draft.templateKey,
+      templateVersion: draft.templateVersion,
       theme: draft.theme,
       content: draft.content,
     });
-    const colors = resolveSiteColors(validated.theme, validated.templateKey);
+    const colors = resolveSiteColors(
+      validated.theme,
+      validated.templateKey,
+      validated.templateVersion,
+    );
     if (!isPublishableColors(colors)) {
       throw new LowContrastError(contrastRatio(colors.ink, colors.bg));
     }
@@ -428,6 +470,13 @@ export async function publishSite(db: Database, input: { userId: string; siteId:
         createdBy: input.userId,
         publishedAt: new Date(),
         ...validated,
+        // Colours are written out, so a later change to a template's default can't recolour
+        // a published site.
+        theme: withResolvedColors(
+          validated.theme,
+          validated.templateKey,
+          validated.templateVersion,
+        ),
       })
       .returning({ id: siteVersion.id });
     if (!published) throw new Error("Published version insert returned no row");
@@ -456,6 +505,7 @@ export interface PublishedVersionSummary {
   /** 1 for the first publish, counting up. */
   number: number;
   templateKey: string;
+  templateVersion: number;
   publishedAt: Date;
   isCurrent: boolean;
 }
@@ -477,6 +527,7 @@ export async function getPublishedVersion(
 ): Promise<{
   id: string;
   templateKey: string;
+  templateVersion: number;
   theme: unknown;
   content: unknown;
   publishedAt: Date;
@@ -485,6 +536,7 @@ export async function getPublishedVersion(
     .select({
       id: siteVersion.id,
       templateKey: siteVersion.templateKey,
+      templateVersion: siteVersion.templateVersion,
       theme: siteVersion.theme,
       content: siteVersion.content,
       publishedAt: siteVersion.publishedAt,
@@ -562,6 +614,7 @@ export async function copyVersionToDraft(
       .update(siteVersion)
       .set({
         templateKey: templateKeySchema.parse(version.templateKey),
+        templateVersion: version.templateVersion,
         theme: themeSettingsSchema.safeParse(version.theme).data ?? emptyThemeSettings,
         content: version.content,
         schemaVersion: version.schemaVersion,

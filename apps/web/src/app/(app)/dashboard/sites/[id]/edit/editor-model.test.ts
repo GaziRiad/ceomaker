@@ -1,8 +1,15 @@
-import { demoSiteContent, parseSiteContent, type SiteContent } from "@ceomaker/schema";
+import {
+  demoSiteContent,
+  parseSiteContent,
+  withResolvedColors,
+  type SiteContent,
+} from "@ceomaker/schema";
 import { describe, expect, it } from "vitest";
 import {
   canEditInPlace,
   editInPlace,
+  fingerprint,
+  liveFingerprint,
   normalizeForEditing,
   respan,
   sectionIdOfField,
@@ -127,5 +134,34 @@ describe("editInPlace", () => {
     expect(sectionIdOfField(content, "meta.location")).toBe("hero");
     expect(sectionIdOfField(content, "work.items.1.title")).toBe("work");
     expect(sectionIdOfField(content, "nowhere.title")).toBeNull();
+  });
+});
+
+describe("comparing the draft with the live site", () => {
+  const draft = {
+    templateKey: "meridian" as const,
+    templateVersion: 1,
+    theme: { palettes: {} },
+    content: demoSiteContent,
+  };
+
+  it("counts only what visitors see", () => {
+    // Published versions store their colours written out; the same default left unset matches.
+    const published = { ...draft, theme: withResolvedColors(draft.theme, "meridian", 1) };
+    expect(liveFingerprint(published)).toBe(liveFingerprint(draft));
+    // Colours saved for another template don't show on this one.
+    const otherTemplate = {
+      ...draft,
+      theme: { palettes: { aurora: { bg: "#ffffff", ink: "#000000", accent: "#123456" } } },
+    };
+    expect(liveFingerprint(otherTemplate)).toBe(liveFingerprint(draft));
+    expect(fingerprint(otherTemplate)).not.toBe(fingerprint(draft));
+  });
+
+  it("compares the design that would render, and saves the one chosen", () => {
+    // There's no Meridian 99: it renders as the oldest design, so visitors see no change.
+    expect(liveFingerprint({ ...draft, templateVersion: 99 })).toBe(liveFingerprint(draft));
+    expect(liveFingerprint({ ...draft, templateKey: "bento" })).not.toBe(liveFingerprint(draft));
+    expect(fingerprint({ ...draft, templateVersion: 99 })).not.toBe(fingerprint(draft));
   });
 });

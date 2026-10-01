@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import { fluid, FONTS } from "../fonts";
-import { dropCap, type MiddleKind, type SiteModel } from "../model";
+import { fluid, FONTS } from "../../fonts";
+import { dropCap, type MiddleKind, type SiteModel } from "../../model";
 import {
   ANCHORS,
   ContactLink,
@@ -11,8 +11,8 @@ import {
   Portrait,
   SkipLink,
   Spans,
-} from "../shared";
-import type { TemplateProps } from "../types";
+} from "../../shared";
+import type { TemplateProps } from "../../types";
 
 // T6 Chronicle: a warm, long-form letter with a timeline. For writers, advisors and speakers.
 

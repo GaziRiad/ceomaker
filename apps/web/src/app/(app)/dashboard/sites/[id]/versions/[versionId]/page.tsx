@@ -48,7 +48,7 @@ async function VersionView({
             </span>
             <span className="text-[13px] text-neutral-700">
               Published <LocalTime iso={version.publishedAt.toISOString()} /> ·{" "}
-              {getTemplate(version.templateKey).name} template
+              {getTemplate(version.templateKey, version.templateVersion).name} template
             </span>
           </div>
           <VersionActions
@@ -61,6 +61,7 @@ async function VersionView({
       </header>
       <SiteRenderer
         templateKey={version.templateKey}
+        templateVersion={version.templateVersion}
         theme={version.theme}
         content={version.content}
         publishedAt={version.publishedAt}

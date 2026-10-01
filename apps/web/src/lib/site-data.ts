@@ -2,11 +2,10 @@ import "server-only";
 import { getDb, getSiteForOwner, type OwnedSite } from "@ceomaker/db";
 import {
   CURRENT_SCHEMA_VERSION,
-  DEFAULT_TEMPLATE_KEY,
-  normalizeTemplateKey,
   parseSiteContent,
   parseSiteContentForRender,
   parseThemeSettingsForRender,
+  resolveTemplateRef,
   type SiteContent,
   type TemplateKey,
   type ThemeSettings,
@@ -22,6 +21,8 @@ export function isUuid(value: string): boolean {
 
 export interface EditableDraft {
   templateKey: TemplateKey;
+  /** The template's design (TEMPLATE_VERSIONS); kept as stored, never upgraded silently. */
+  templateVersion: number;
   theme: ThemeSettings;
   content: SiteContent;
 }
@@ -32,6 +33,7 @@ export interface EditableDraft {
  */
 export function toEditableDraft(stored: {
   templateKey: string;
+  templateVersion: unknown;
   theme: unknown;
   content: unknown;
 }): EditableDraft {
@@ -47,8 +49,10 @@ export function toEditableDraft(stored: {
       sections: tolerant.sections,
     };
   }
+  const template = resolveTemplateRef(stored.templateKey, stored.templateVersion);
   return {
-    templateKey: normalizeTemplateKey(stored.templateKey) ?? DEFAULT_TEMPLATE_KEY,
+    templateKey: template.key,
+    templateVersion: template.version,
     theme: parseThemeSettingsForRender(stored.theme),
     content,
   };

@@ -2,7 +2,7 @@ import { DOCUMENT_SOURCES, parseSiteContentForRender } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { siteAddressParts } from "@/lib/routing";
-import { initialsFor, loadOwnedSite } from "@/lib/site-data";
+import { initialsFor, loadOwnedSite, toEditableDraft } from "@/lib/site-data";
 import { BuilderHeader } from "../../../builder-header";
 import { TemplatePicker } from "./picker";
 
@@ -33,6 +33,9 @@ async function Picker({
       <TemplatePicker
         siteId={site.id}
         initialTemplate={draft.templateKey}
+        current={[site.published && toEditableDraft(site.published), draft].map(
+          (shown) => shown && { key: shown.templateKey, version: shown.templateVersion },
+        )}
         theme={draft.theme}
         content={parseSiteContentForRender(draft.content)}
         wantsDocument={wantsDocument}

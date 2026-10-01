@@ -74,6 +74,11 @@ export const siteVersion = pgTable(
     kind: siteVersionKind("kind").notNull(),
     schemaVersion: integer("schema_version").notNull(),
     templateKey: text("template_key").$type<TemplateKey>().notNull(),
+    /**
+     * The design of the template this version uses (TEMPLATE_VERSIONS). A published version
+     * keeps showing it after newer designs ship; owners move to one by publishing.
+     */
+    templateVersion: integer("template_version").notNull().default(1),
     theme: jsonb("theme").$type<ThemeSettings>().notNull(),
     content: jsonb("content").$type<SiteContent>().notNull(),
     createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
@@ -90,6 +95,7 @@ export const siteVersion = pgTable(
     uniqueIndex("site_version_one_draft_per_site")
       .on(table.siteId)
       .where(sql`${table.kind} = 'draft'`),
+    check("site_version_template_version", sql`${table.templateVersion} >= 1`),
     check(
       "site_version_published_at",
       sql`(${table.kind} = 'published') = (${table.publishedAt} is not null)`,

@@ -4,7 +4,7 @@ import {
   contrastRatio,
   defaultColors,
   MIN_TEXT_CONTRAST,
-  TEMPLATE_PALETTES,
+  templatePalettes,
   type SiteColors,
   type TemplateKey,
 } from "@ceomaker/schema";
@@ -56,12 +56,14 @@ function HexInput({
 
 export function BrandPanel({
   templateKey,
+  templateVersion,
   templateName,
   colors,
   onColors,
   onReset,
 }: {
   templateKey: TemplateKey;
+  templateVersion: number;
   templateName: string;
   colors: SiteColors;
   onColors: (colors: SiteColors) => void;
@@ -75,7 +77,8 @@ export function BrandPanel({
       : ok
         ? "Good contrast. Meets the readability standard."
         : `Too low to read comfortably. Publishing needs at least ${MIN_TEXT_CONTRAST}:1.`;
-  const isDefault = JSON.stringify(colors) === JSON.stringify(defaultColors(templateKey));
+  const isDefault =
+    JSON.stringify(colors) === JSON.stringify(defaultColors(templateKey, templateVersion));
 
   return (
     <div className="cm-rise flex flex-col gap-[18px]" style={{ padding: "16px 16px 40px" }}>
@@ -86,7 +89,7 @@ export function BrandPanel({
         </span>
       </div>
       <div role="radiogroup" aria-label="Palettes" className="grid grid-cols-2 gap-2">
-        {TEMPLATE_PALETTES[templateKey].map((palette) => {
+        {templatePalettes(templateKey, templateVersion).map((palette) => {
           const selected =
             palette.colors.bg === colors.bg &&
             palette.colors.ink === colors.ink &&

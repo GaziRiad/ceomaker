@@ -2,23 +2,25 @@ import {
   contrastRatio,
   demoSiteContent,
   parseSiteContentForRender,
-  TEMPLATE_PALETTES,
+  templatePalettes,
   type RenderableSiteContent,
   type SectionInput,
   type SiteColors,
 } from "@ceomaker/schema";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { TemplateView } from "../site-renderer";
+import { TemplateView } from "../../site-renderer";
 import { longestWord, meridianRoles, mixHex, RING_CIRCUMFERENCE, ringText } from "./measure";
 
 const publishedAt = new Date("2026-06-01T00:00:00Z");
-const navy = TEMPLATE_PALETTES.meridian[0]!.colors;
+const presets = templatePalettes("meridian", 1);
+const navy = presets[0]!.colors;
 
 function render(content: unknown) {
   return renderToStaticMarkup(
     <TemplateView
       templateKey="meridian"
+      templateVersion={1}
       colors={navy}
       content={parseSiteContentForRender(content)}
       publishedAt={publishedAt}
@@ -52,7 +54,7 @@ function rolesHold(colors: SiteColors) {
 }
 
 describe("Meridian colour roles", () => {
-  it.each(TEMPLATE_PALETTES.meridian.map((preset) => [preset.name, preset.colors] as const))(
+  it.each(presets.map((preset) => [preset.name, preset.colors] as const))(
     "%s keeps small text and field borders readable",
     (_, colors) => {
       const ratios = rolesHold(colors);
@@ -199,6 +201,7 @@ describe("Meridian template", () => {
     const html = renderToStaticMarkup(
       <TemplateView
         templateKey="meridian"
+        templateVersion={1}
         colors={navy}
         content={content}
         publishedAt={publishedAt}

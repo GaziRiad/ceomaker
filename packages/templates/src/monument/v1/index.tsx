@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import { fluid, FONTS } from "../fonts";
-import type { MiddleKind, SiteModel } from "../model";
+import { fluid, FONTS } from "../../fonts";
+import type { MiddleKind, SiteModel } from "../../model";
 import {
   ANCHORS,
   ContactLink,
@@ -13,8 +13,8 @@ import {
   sectionNumbers,
   SkipLink,
   Spans,
-} from "../shared";
-import type { TemplateProps } from "../types";
+} from "../../shared";
+import type { TemplateProps } from "../../types";
 
 // T4 Monument: your name as the headline, in cobalt. For operators who want to be remembered.
 

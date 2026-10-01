@@ -4,9 +4,10 @@ import {
   resolveSiteColors,
   type RenderableSiteContent,
   type TemplateKey,
+  type TemplateRef,
   type ThemeSettings,
 } from "@ceomaker/schema";
-import { templateList, TemplateView } from "@ceomaker/templates";
+import { designOnChoosing, getTemplate, templateList, TemplateView } from "@ceomaker/templates";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { ScaledFrame } from "@/components/scaled-frame";
@@ -19,12 +20,15 @@ const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 export function TemplatePicker({
   siteId,
   initialTemplate,
+  current,
   theme,
   content,
   wantsDocument,
 }: {
   siteId: string;
   initialTemplate: TemplateKey;
+  /** The designs the site uses now, live first: picking one of those templates keeps it. */
+  current: (TemplateRef | null)[];
   theme: ThemeSettings;
   content: RenderableSiteContent;
   wantsDocument: boolean;
@@ -35,7 +39,11 @@ export function TemplatePicker({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const input = useRef<HTMLInputElement>(null);
-  const selectedName = templateList.find((template) => template.key === selected)?.name;
+  // Each card shows the design the site would get: the one it uses, else the newest.
+  const choices = templateList.map((template) =>
+    getTemplate(template.key, designOnChoosing(template.key, current)),
+  );
+  const selectedName = choices.find((template) => template.key === selected)?.name;
 
   const pickFile = (candidate: File | undefined) => {
     setError(null);
@@ -80,7 +88,7 @@ export function TemplatePicker({
           aria-label="Template"
           className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,380px),1fr))] gap-6"
         >
-          {templateList.map((template) => {
+          {choices.map((template) => {
             const isSelected = template.key === selected;
             return (
               // The preview sits beside the radio, not inside it: templates contain their own
@@ -102,7 +110,8 @@ export function TemplatePicker({
                 >
                   <TemplateView
                     templateKey={template.key}
-                    colors={resolveSiteColors(theme, template.key)}
+                    templateVersion={template.version}
+                    colors={resolveSiteColors(theme, template.key, template.version)}
                     content={content}
                     publishedAt={PREVIEW_DATE}
                     preview
