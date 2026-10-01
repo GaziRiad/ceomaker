@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/styles.css">
+<script src="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:var(--color-surface)} a{color:var(--color-accent-700)} a:hover{color:var(--color-accent-600)}</style>
+</helmet>
+<section data-screen-label="Meridian v2 board" style="padding:80px;display:flex;flex-direction:column;gap:128px;width:max-content;font-family:var(--font-body);color:var(--color-text)">
+
+  <div style="display:flex;flex-direction:column;gap:14px;max-width:900px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">CEOMaker · Site template</span>
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:88px;line-height:0.95;text-transform:uppercase">Meridian, v2</h1>
+    <span style="font-size:19px;line-height:1.5;color:var(--color-neutral-800)">Neutral by default: near-white ground, near-black text, one navy accent. The signature is the seal, a ring of the person's name around their initials or photo. Two families, Newsreader and Inter. Every other shade is mixed from the three user colours.</span>
+  </div>
+
+  <!-- STARTER -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Starter</h2><span style="font-size:17px;color:var(--color-neutral-700)">Name, title, one sentence, About and Contact. Most sites begin here.</span></div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <div id="1a" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1a</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Desktop</span><span style="font-size:14px;color:var(--color-neutral-700)">1280</span></div>
+        <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="starter" hint-size="1280px,1700px"></dc-import></div></div>
+      <div id="1b" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1b</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Phone</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="starter" hint-size="390px,2000px"></dc-import></div></div>
+    </div>
+  </div>
+
+  <!-- FULL -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Full</h2><span style="font-size:17px;color:var(--color-neutral-700)">Every section filled. Drop a headshot into the seal to see the photo state.</span></div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <div id="1c" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1c</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Desktop</span><span style="font-size:14px;color:var(--color-neutral-700)">1280 · with photo</span></div>
+        <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" photo-slot="meridian-photo-desktop" hint-size="1280px,4600px"></dc-import></div></div>
+      <div id="1d" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1d</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Phone</span><span style="font-size:14px;color:var(--color-neutral-700)">390 · with photo</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" photo-slot="meridian-photo-phone" hint-size="390px,6000px"></dc-import></div></div>
+    </div>
+  </div>
+
+  <!-- NO PHOTO + NIGHT -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">No photo · Night preset</h2><span style="font-size:17px;color:var(--color-neutral-700)">Without a photo the seal carries the initials and the layout stays the same.</span></div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <div id="1e" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1e</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Desktop · no photo</span><span style="font-size:14px;color:var(--color-neutral-700)">1280 · first screen</span></div>
+        <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" only="hero" hint-size="1280px,800px"></dc-import></div></div>
+      <div id="1f" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1f</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Phone · no photo</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" only="hero" hint-size="390px,800px"></dc-import></div></div>
+      <div id="1g" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1g</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Desktop · Night</span><span style="font-size:14px;color:var(--color-neutral-700)">1280</span></div>
+        <div style="width:1280px;background:#111316;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" preset="night" hint-size="1280px,4600px"></dc-import></div></div>
+      <div id="1h" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1h</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Phone · Night</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#111316;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" preset="night" hint-size="390px,6000px"></dc-import></div></div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Contact &amp; form</h2><span style="font-size:17px;color:var(--color-neutral-700)">The form is optional. Off, email and links take the space. Try submitting 1i empty.</span></div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <div id="1i" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1i</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Form · ready</span><span style="font-size:14px;color:var(--color-neutral-700)">1280 · interactive</span></div>
+        <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" only="contact" hint-size="1280px,900px"></dc-import></div></div>
+      <div id="1j" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1j</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Form · errors</span><span style="font-size:14px;color:var(--color-neutral-700)">1280</span></div>
+        <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" only="contact" form-demo="error" hint-size="1280px,960px"></dc-import></div></div>
+      <div id="1k" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1k</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Form · sent</span><span style="font-size:14px;color:var(--color-neutral-700)">1280</span></div>
+        <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" only="contact" form-demo="sent" hint-size="1280px,800px"></dc-import></div></div>
+    </div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <div id="1l" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1l</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Phone · form</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" only="contact" hint-size="390px,1500px"></dc-import></div></div>
+      <div id="1m" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1m</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Form off</span><span style="font-size:14px;color:var(--color-neutral-700)">1280 and 390</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" only="contact" patch="{{ P.formOff }}" hint-size="1280px,600px"></dc-import></div>
+          <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" only="contact" patch="{{ P.formOff }}" hint-size="390px,600px"></dc-import></div>
+        </div></div>
+    </div>
+  </div>
+
+  <!-- LONG TEXT -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Long and unusual text</h2><span style="font-size:17px;color:var(--color-neutral-700)">The name is sized to its longest word, so nothing overflows. Initials work in any script.</span></div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <div id="1n" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1n</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Long name, two-line title</span><span style="font-size:14px;color:var(--color-neutral-700)">1280</span></div>
+        <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="desktop" sample="full" only="hero" patch="{{ P.long }}" hint-size="1280px,900px"></dc-import></div></div>
+      <div id="1o" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1o</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Long name</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" only="hero" patch="{{ P.long }}" hint-size="390px,900px"></dc-import></div></div>
+      <div id="1p" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1p</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Vietnamese</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" only="hero" patch="{{ P.vi }}" hint-size="390px,800px"></dc-import></div></div>
+      <div id="1q" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1q</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Chinese</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg)"><dc-import name="Meridian" device="phone" sample="full" only="hero" patch="{{ P.zh }}" hint-size="390px,800px"></dc-import></div></div>
+    </div>
+  </div>
+
+  <!-- COUNTS -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">1, 3 and 8 items</h2><span style="font-size:17px;color:var(--color-neutral-700)">Columns follow the count. A single number or quote is set larger.</span></div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <sc-for list="{{ counts }}" as="g" hint-placeholder-count="4">
+        <div id="{{ g.id }}" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">{{ g.id }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">{{ g.title }}</span><span style="font-size:14px;color:var(--color-neutral-700)">1280</span></div>
+          <div style="width:1280px;background:#fff;box-shadow:var(--shadow-lg);display:flex;flex-direction:column">
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+              <div style="background:var(--color-surface);padding:10px 16px;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-700)">{{ r.label }}</div>
+              <dc-import name="Meridian" device="desktop" sample="full" only="{{ g.only }}" patch="{{ r.patch }}" motion="{{ false }}" hint-size="1280px,400px"></dc-import>
+            </sc-for>
+          </div></div>
+      </sc-for>
+      <div id="1v" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1v</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Phone · 8, 3 and 4</span><span style="font-size:14px;color:var(--color-neutral-700)">390</span></div>
+        <div style="width:390px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow-lg);display:flex;flex-direction:column">
+          <sc-for list="{{ phoneCounts }}" as="r" hint-placeholder-count="3">
+            <div style="background:var(--color-surface);padding:10px 16px;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-700)">{{ r.label }}</div>
+            <dc-import name="Meridian" device="phone" sample="full" only="{{ r.only }}" patch="{{ r.patch }}" motion="{{ false }}" hint-size="390px,600px"></dc-import>
+          </sc-for>
+        </div></div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS PREVIEW -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Questions preview</h2><span style="font-size:17px;color:var(--color-neutral-700)">Shows only what the person has chosen or typed. Picking goals fills in the form's topics and glides the preview down to it.</span></div>
+    <div style="display:flex;gap:72px;align-items:flex-start">
+      <sc-for list="{{ qs }}" as="q" hint-placeholder-count="3">
+        <div id="{{ q.id }}" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">{{ q.id }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">{{ q.title }}</span><span style="font-size:14px;color:var(--color-neutral-700)">1280 × 800 · interactive</span></div>
+          <div style="width:1280px;height:800px;overflow:hidden;position:relative;transform:translateZ(0);background:var(--color-bg);box-shadow:var(--shadow-lg)"><dc-import name="CEOMaker Start" view="flow" step="{{ q.step }}" answers="{{ q.answers }}" bare="{{ true }}" hint-size="1280px,800px"></dc-import></div></div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- SYSTEM SHEET -->
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">System sheet</h2><span style="font-size:17px;color:var(--color-neutral-700)">Type, spacing, colour roles and what each field does when it's empty.</span></div>
+    <div id="1z" style="flex:none;display:flex;flex-direction:column;gap:14px"><div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">1z</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Meridian system</span></div>
+      <div style="width:1680px;box-sizing:border-box;background:#fbfbfa;color:#16181b;box-shadow:var(--shadow-lg);padding:72px;font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.55;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:72px 80px">
+
+        <div style="display:flex;flex-direction:column;gap:0">
+          <span style="font-size:12px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#1f3a5f;margin-bottom:20px">Type · Newsreader + Inter</span>
+          <sc-for list="{{ type }}" as="t" hint-placeholder-count="10">
+            <div style="display:grid;grid-template-columns:150px minmax(0,1fr) 210px;gap:24px;align-items:baseline;padding:16px 0;border-top:1px solid #e3e3e3">
+              <span style="font-size:13px;color:#55575b">{{ t.role }}</span>
+              <span style="font-family:{{ t.ff }};font-size:{{ t.size }};font-style:{{ t.fst }};font-weight:{{ t.fw }};letter-spacing:{{ t.ls }};text-transform:{{ t.tt }};line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.sample }}</span>
+              <span style="font-size:13px;color:#16181b;font-variant-numeric:tabular-nums">{{ t.spec }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column">
+          <span style="font-size:12px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#1f3a5f;margin-bottom:20px">Spacing · desktop / phone</span>
+          <sc-for list="{{ space }}" as="sp" hint-placeholder-count="9">
+            <div style="display:grid;grid-template-columns:170px 140px minmax(0,1fr);gap:20px;align-items:center;padding:12px 0;border-top:1px solid #e3e3e3">
+              <span style="font-size:13px;color:#55575b">{{ sp.role }}</span>
+              <span style="font-size:13px;font-variant-numeric:tabular-nums">{{ sp.val }}</span>
+              <span style="height:10px;width:{{ sp.w }};background:#1f3a5f;opacity:0.85"></span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="grid-column:1 / -1;display:flex;flex-direction:column;gap:20px">
+          <span style="font-size:12px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#1f3a5f">Colour roles · three set by the user, the rest mixed from them</span>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px">
+            <sc-for list="{{ roles }}" as="pr" hint-placeholder-count="2">
+              <div style="background:{{ pr.bg }};color:{{ pr.ink }};padding:28px 32px;border:1px solid #e3e3e3;display:flex;flex-direction:column">
+                <span style="font-family:Newsreader,Georgia,serif;font-size:28px;margin-bottom:12px">{{ pr.name }}</span>
+                <sc-for list="{{ pr.rows }}" as="r" hint-placeholder-count="11">
+                  <div style="display:grid;grid-template-columns:44px 150px minmax(0,1fr) 78px 64px;gap:16px;align-items:center;padding:9px 0;border-top:1px solid {{ pr.line }}">
+                    <span style="width:44px;height:28px;background:{{ r.hex }};box-shadow:inset 0 0 0 1px {{ pr.line }}"></span>
+                    <span style="font-size:14px;font-weight:500">{{ r.name }}</span>
+                    <span style="font-size:13px;color:{{ pr.muted }}">{{ r.how }}</span>
+                    <span style="font-size:12px;font-family:ui-monospace,Menlo,monospace;color:{{ pr.muted }}">{{ r.hex }}</span>
+                    <span style="font-size:13px;font-variant-numeric:tabular-nums;text-align:right">{{ r.ratio }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+            <span style="font-size:13px;color:#55575b;margin-right:8px">Presets</span>
+            <sc-for list="{{ presets }}" as="ps" hint-placeholder-count="6"><span style="display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border:1px solid #e3e3e3;background:#fff"><span style="display:flex"><span style="width:22px;height:22px;background:{{ ps.bg }};box-shadow:inset 0 0 0 1px #0000001f"></span><span style="width:22px;height:22px;background:{{ ps.ink }}"></span><span style="width:22px;height:22px;background:{{ ps.ac }}"></span></span><span style="font-size:14px">{{ ps.name }}</span></span></sc-for>
+          </div>
+        </div>
+
+        <div style="grid-column:1 / -1;display:flex;flex-direction:column">
+          <span style="font-size:12px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#1f3a5f;margin-bottom:20px">When a field is empty</span>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:80px">
+            <sc-for list="{{ empties }}" as="em" hint-placeholder-count="14">
+              <div style="display:grid;grid-template-columns:230px minmax(0,1fr);gap:20px;padding:12px 0;border-top:1px solid #e3e3e3">
+                <span style="font-weight:500">{{ em.f }}</span><span style="color:#45474b">{{ em.d }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const STATS8 = [{ v: "€780M", l: "Annual revenue, up from €310M" }, { v: "31", l: "Countries served" }, { v: "2,400", l: "People across the group" }, { v: "42%", l: "Reduction in delivery variance" }, { v: "3", l: "Acquisitions integrated" }, { v: "96.4%", l: "On-time delivery in 2025" }, { v: "€42M", l: "Annual savings from one planning platform" }, { v: "11", l: "Years on the executive team" }];
+const EXP8 = [
+  { role: "Chief Executive Officer", org: "Meridian Freight Group", loc: "Rotterdam", dates: "2019 – Present", summary: "Grew revenue 2.5x while cutting on-time delivery variance by 42%. Led the acquisition and integration of three regional carriers." },
+  { role: "Chief Operating Officer", org: "Meridian Freight Group", loc: "Rotterdam", dates: "2015 – 2019", summary: "Rebuilt the operating model around a single planning platform and a weekly operating review." },
+  { role: "VP Operations", org: "Alder & Crane Logistics", loc: "Hamburg", dates: "2010 – 2015", summary: "Ran network operations for Northern Europe, 600 staff across 9 depots." },
+  { role: "Director, Network Planning", org: "Alder & Crane Logistics", loc: "Hamburg", dates: "2007 – 2010" },
+  { role: "Head of Depot Operations", org: "Nordhaven Shipping", loc: "Gothenburg", dates: "2004 – 2007", summary: "Opened two depots and halved average dwell time." },
+  { role: "Operations Manager", org: "Nordhaven Shipping", loc: "Gothenburg", dates: "2001 – 2004" },
+  { role: "Management Consultant", org: "Lindqvist & Partners", loc: "Stockholm", dates: "1998 – 2001" },
+  { role: "Graduate Engineer", org: "Port of Rotterdam Authority", dates: "1996 – 1998" }
+];
+const WORK8 = [
+  { kind: "Keynote", title: "Resilient networks for a volatile decade", meta: "European Freight Forum", year: "2025", href: "https://example.com/" },
+  { kind: "Essay", title: "Why planning beats forecasting", meta: "Op-ed, logistics trade press", year: "2024", href: "https://example.com/" },
+  { kind: "Board", title: "European Freight Council", meta: "Non-executive director", year: "Since 2021" },
+  { kind: "Mentoring", title: "Industrial founders programme", meta: "Mentor to first-time founders", year: "Since 2019" },
+  { kind: "Podcast", title: "The weekly operating review, explained", meta: "Supply Lines podcast", year: "2024" },
+  { kind: "Report", title: "Freight resilience index", meta: "Co-author", year: "2023" },
+  { kind: "Panel", title: "Decarbonising the last mile", meta: "Port Futures Summit", year: "2023" },
+  { kind: "Award", title: "Logistics leader of the year", meta: "European Transport Awards", year: "2022" }
+];
+const Q4 = [
+  { quote: "Amelia combines operational depth with a rare calm under pressure. She made the hard calls early, and the business is stronger for it.", author: "Jonas Weber", role: "Chair, Meridian Freight Group" },
+  { quote: "The clearest thinker on supply chain resilience I have worked with.", author: "Priya Raman", role: "Partner, Northgate Capital" },
+  { quote: "She builds teams that keep working when she's not in the room.", author: "Lars Eriksen", role: "Former CFO, Alder & Crane Logistics" },
+  { quote: "Generous with her time, and direct when it matters.", author: "Mina Okafor", role: "Founder, Railcore" }
+];
+const LONG = { name: "Maximiliana Constantinopolous-Wetherington", eyebrow: "Group Chief Executive Officer and Executive Vice-Chair of the Supervisory Board, Hanseatic Maritime Holdings", location: "Hamburg", headline: "Steering a 140-year-old shipping group into its second century.", subheadline: "", cta: "" };
+const VI = { name: "Đặng Thị Thu Hà", eyebrow: "Managing Director, Sao Mai Capital", location: "Thành phố Hồ Chí Minh", headline: "Patient capital for Vietnam's next generation of manufacturers.", subheadline: "", cta: "", affiliations: [], lang: "vi" };
+const ZH = { name: "林佳慧", eyebrow: "Founder and Chief Executive, Lumen Biologics", location: "台北 Taipei", headline: "Bringing cell therapies from the lab to the clinic in half the time.", subheadline: "", cta: "", affiliations: [], lang: "zh-Hant" };
+const PRESETS = [["Navy", "#fbfbfa", "#16181b", "#1f3a5f"], ["Bottle green", "#fbfbfa", "#161917", "#1e4a3a"], ["Oxblood", "#fbfaf8", "#1b1717", "#6d2433"], ["Graphite", "#ffffff", "#111111", "#3b4048"], ["Ivory", "#f7f4ee", "#1a1a1a", "#7a5f2e"], ["Night", "#111316", "#ecebe6", "#a9bfdc"]];
+const rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = rgb(a), B = rgb(b); return "#" + A.map((v, i) => Math.round(v * p + B[i] * (1 - p)).toString(16).padStart(2, "0")).join(""); };
+const r1 = (a, b) => ratio(a, b).toFixed(1) + ":1";
+function roleRows(name, bg, ink, ac) {
+  let p2 = 72; while (p2 < 100 && ratio(mix(ink, bg, p2 / 100), bg) < 4.6) p2 += 2;
+  let pf = 40; while (pf < 100 && ratio(mix(ink, bg, pf / 100), bg) < 3.1) pf += 2;
+  let pa = 100; while (pa > 0 && ratio(mix(ac, ink, pa / 100), bg) < 4.6) pa -= 4;
+  const on = ratio(bg, ac) >= ratio(ink, ac) ? bg : ink, act = mix(ac, ink, pa / 100), ink2 = mix(ink, bg, p2 / 100);
+  return {
+    name, bg, ink, line: mix(ink, bg, 0.14), muted: ink2,
+    rows: [
+      { name: "Background", how: "Set by the user", hex: bg, ratio: "" },
+      { name: "Text", how: "Set by the user · body, headings", hex: ink, ratio: r1(ink, bg) },
+      { name: "Accent", how: "Set by the user · button, seal, focus", hex: ac, ratio: r1(ac, bg) },
+      { name: "Secondary text", how: "Text " + p2 + "% into background, the least that clears 4.5:1", hex: ink2, ratio: r1(ink2, bg) },
+      { name: "Accent text", how: pa >= 100 ? "Accent as set (already clears 4.5:1)" : "Accent " + pa + "% into text to clear 4.5:1", hex: act, ratio: r1(act, bg) },
+      { name: "On accent", how: "Background or text, whichever reads better", hex: on, ratio: r1(on, ac) },
+      { name: "Field border", how: "Text " + pf + "% into background, clears 3:1", hex: mix(ink, bg, pf / 100), ratio: r1(mix(ink, bg, pf / 100), bg) },
+      { name: "Hairline", how: "Text 14% into background", hex: mix(ink, bg, 0.14), ratio: "" },
+      { name: "Wash", how: "Text 4% · quotes band, form panel", hex: mix(ink, bg, 0.04), ratio: "" },
+      { name: "Accent tint", how: "Accent 8% · seal, selected topic", hex: mix(ac, bg, 0.08), ratio: "" },
+      { name: "Placeholder line", how: "Text 9% · questions preview only", hex: mix(ink, bg, 0.09), ratio: "" }
+    ]
+  };
+}
+const N = "Newsreader, Georgia, serif", I = "Inter, system-ui, sans-serif";
+const TYPE = [
+  ["Name", "Amelia Hart", N, "64px", "normal", 400, "-0.03em", "none", "132 → fits longest word / 60 · lh 0.98"],
+  ["Statement", "Supply chains that hold.", N, "32px", "normal", 400, "-0.01em", "none", "32 / 23 · lh 1.28"],
+  ["About lede", "I joined Meridian as COO in 2015.", N, "28px", "normal", 400, "-0.01em", "none", "32 (26 if long) / 23 · lh 1.38"],
+  ["Contact line", "For board enquiries.", N, "40px", "normal", 400, "-0.02em", "none", "52 (40 if long) / 32 · lh 1.1"],
+  ["Lead quote", "“The clearest thinker…”", N, "30px", "italic", 400, "-0.01em", "none", "38 (30 if long) / 25 · lh 1.3"],
+  ["List title", "Chief Executive Officer", N, "26px", "normal", 400, "-0.01em", "none", "26 / 21 · lh 1.2"],
+  ["Figure", "€780M", N, "48px", "normal", 400, "-0.02em", "none", "56 (96 if alone) / 40"],
+  ["Intro", "I lead a 2,400-person logistics company.", I, "18px", "normal", 400, "0", "none", "18 / 16 · lh 1.65"],
+  ["Body", "Before Meridian, I spent a decade in operations.", I, "17px", "normal", 400, "0", "none", "17 / 16 · lh 1.7"],
+  ["Meta", "2019 – Present · Rotterdam", I, "14px", "normal", 400, "0", "none", "14–15 · secondary text"],
+  ["Label", "Selected work", I, "12px", "normal", 500, "0.16em", "uppercase", "12–13 · 500 · +16% · accent text"],
+  ["Input, button", "Send message", I, "16px", "normal", 500, "0", "none", "16 · 52 tall · stops iOS zoom"]
+].map(([role, sample, ff, size, fst, fw, ls, tt, spec]) => ({ role, sample, ff, size, fst, fw, ls, tt, spec }));
+const SPACE = [["Page margin", "56 / 22", 56], ["Section gap", "136 / 80", 136], ["Rule → content", "28 / 20", 28], ["Label column", "200 / stacked", 200], ["Hero top", "88 / 32", 88], ["Seal", "300 / 148", 300], ["Form panel padding", "36 / 28", 36], ["Field height", "52", 52], ["Touch target, min", "44", 44], ["Max content width", "1200", 300]].map(([role, val, px]) => ({ role, val, w: Math.min(px, 300) + "px" }));
+const EMPTIES = [
+  ["Name", "Required to publish. The questions preview shows a grey line."],
+  ["Title and organisation", "Line is left out and the name moves up."],
+  ["Location", "Left out of the title line, the seal ring and the footer."],
+  ["Statement", "Left out. The button sits under the name."],
+  ["Introduction", "Left out."],
+  ["Button label", "Shows Contact and scrolls to the contact section."],
+  ["Photo", "The seal shows initials. Nothing else moves."],
+  ["About", "Section hidden. In the questions preview, grey lines."],
+  ["Impact, Experience, Selected work", "Section hidden and its nav link removed."],
+  ["In their words, Affiliations", "Hidden."],
+  ["Summary, meta, year on a list item", "That line is left out of the row."],
+  ["Contact invitation", "Left out. Email, links and form move up."],
+  ["Email", "Left out. The form becomes the way in."],
+  ["Links", "Left out."],
+  ["Form topics", "The topic question is hidden."],
+  ["Contact form off", "Email and links take the full width."],
+  ["Email, links and form all off", "The editor asks for one before publishing."]
+].map(([f, d]) => ({ f, d }));
+const BASE_A = { role: "Chief executive", industry: "Energy", stage: "Mid-size, 500–5,000", goals: ["Board and advisory roles", "Speaking invitations"] };
+
+class Component extends DCLogic {
+  renderVals() {
+    const cnt = (only, key, src, ns, label) => ns.map(n => ({ label: n + " " + label + (n === 1 ? "" : "s"), patch: { [key]: src.slice(0, n) } }));
+    return {
+      P: { formOff: { form: { enabled: false } }, long: LONG, vi: VI, zh: ZH },
+      counts: [
+        { id: "1r", title: "Impact", only: "impact", rows: cnt("impact", "stats", STATS8, [1, 3, 8], "figure") },
+        { id: "1s", title: "Experience", only: "experience", rows: cnt("experience", "experience", EXP8, [1, 3, 8], "role") },
+        { id: "1t", title: "Selected work", only: "work", rows: cnt("work", "work", WORK8, [1, 3, 8], "item") },
+        { id: "1u", title: "In their words", only: "testimonials", rows: cnt("testimonials", "testimonials", Q4, [1, 4], "quote") }
+      ],
+      phoneCounts: [
+        { label: "8 figures", only: "impact", patch: { stats: STATS8 } },
+        { label: "3 roles", only: "experience", patch: { experience: EXP8.slice(0, 3) } },
+        { label: "4 quotes", only: "testimonials", patch: { testimonials: Q4 } }
+      ],
+      qs: [
+        { id: "1w", title: "Step 1 · nothing yet", step: 0, answers: {} },
+        { id: "1x", title: "Step 4 · mid-way", step: 3, answers: BASE_A },
+        { id: "1y", title: "Step 5 · final", step: 4, answers: { ...BASE_A, voice: "Measured", name: "Sofia Brandt", org: "Kestrel Energy" } }
+      ],
+      type: TYPE, space: SPACE, empties: EMPTIES,
+      roles: [roleRows("Navy (default)", "#fbfbfa", "#16181b", "#1f3a5f"), roleRows("Night", "#111316", "#ecebe6", "#a9bfdc")],
+      presets: PRESETS.map(([name, bg, ink, ac]) => ({ name, bg, ink, ac }))
+    };
+  }
+}
+</script>
+</body>
+</html>

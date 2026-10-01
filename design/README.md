@@ -93,9 +93,15 @@ Layout is a two-column grid: questions on the left, a live preview on the right 
   - Optional source chips (CV / LinkedIn / website).
 - Footer: Back (secondary), Next (primary, min-width 220px, disabled until the step is answered), and Skip on optional steps.
 
-**Right column:** the "Your site, taking shape" preview. It is the Meridian template scaled to fit (1280px canvas × zoom), fed by the answers:
-- The headline is built from the industry (`INDUSTRIES` map).
-- The address is a slug of the name.
+**Right column:** the "Your site, taking shape" preview. It renders Meridian in **draft mode** (`draft`), scaled to fit, with **only what the person has chosen or typed**. Nothing is made up and no demo data is shown:
+- Title line = the chosen role (except "Something else") + the typed organisation.
+- Name and initials = the typed name.
+- Contact form topics = the chosen goals (Speaking, Board and advisory, Investors, Press, Careers) + "Something else".
+- Everything else (statement, About, contact line) is soft grey placeholder lines (text 9% into background). Fixed labels such as About, Contact and the form labels stay real.
+- When a value first appears, it fades in (opacity, 8px rise, 3px blur → 0, 600ms).
+- On the goals step, the preview glides down to the contact form (0.9s ease) so the topics are visible; on other steps it sits at the top.
+- The address is a slug of the first name, or "yourname".
+- States: board frames 1w (step 1, nothing yet), 1x (step 4), 1y (step 5).
 
 **Chip states:**
 - Default: divider border, bg `--color-bg`.
@@ -260,24 +266,26 @@ The six presets per template are in the `PALETTES` constant in `CEOMaker Start.d
 ### Per-template specs
 Every template is designed at a 1280px viewport. Make each responsive: collapse grids to one column below about 768px, and scale display type with `clamp()`. Exact values for every element are inline in `PortfolioTemplate.dc.html`; each template is in its own `<!-- N · NAME -->` block.
 
-**T1 Meridian — editorial.** For CEOs and chairs.
-- Fonts: Newsreader for headings, Inter for body.
-- Max width 1200px, padding 56px.
-- Header: 84px, name in Newsreader 22px; the nav ends with an underlined Contact.
-- Hero: a 7fr/5fr grid.
-  - Eyebrow: a 32px accent rule + 12px uppercase text, letter-spacing .18em.
-  - H1: 84px/1.02, -0.025em.
-  - Intro: 19px muted.
-  - Buttons: an ink-filled CTA with 2px radius, plus an underlined "Read the profile".
-  - Portrait: 4:5, accent gradient, with the initials large at 200px in bg colour at 55% opacity. Below it, the name in italics and the location.
-- Stats: 4 columns under a 1px ink top rule; values in 60px Newsreader.
-- Affiliations: italic 22px serif, separated by accent dots.
-- Sections use a 3fr/9fr grid with numbered labels ("01 — About" … "05 — Contact") in 13px uppercase accent.
-  - About: 36px serif with an italic emphasis run.
-  - Experience: rows of dates (170px) + role (30px serif).
-  - Work: a 2-column grid under hairlines, with an accent ↗.
-  - Testimonials: on a soft band, italic quotes at 36px.
-  - Contact: H2 68px, and the email in 30px underlined serif.
+**T1 Meridian, v2 — editorial, neutral.** For CEOs and chairs. Built in `Meridian.dc.html`; every frame is in `Meridian Board.dc.html` (ids 1a–1z).
+- Fonts: Newsreader (name, statement, lede, list titles, figures, quotes) and Inter (labels, body, meta, form). No other families.
+- **Signature: the seal.** A 300px (phone 148px) ring: two accent hairlines, the name and location set around the ring in Inter caps (SVG `textPath`, `textLength` = circumference, repeated to fill), initials in Newsreader italic in the centre on the accent tint. A photo fills the inner circle; without one the initials stay and nothing else moves. Initials: first letter of first and last word (Unicode-aware); for CJK names, the first character. Entrance: fade + ring rotates -40°→0 over 1.8s; on hover the ring turns slowly (48s/turn). Off under reduced motion.
+- **Name is the H1**, sized to its longest word: `size = clamp(min, availableWidth / (longestWord × 0.52em), max)`, max 132 desktop / 60 phone, min 56 / 30. Uppercase counts 1.25, CJK 1.9. Hyphenated words can break after the hyphen. Header name truncates with an ellipsis; the H1 never does.
+- Hero: kicker = title (eyebrow) · location, caps, accent text. Then name, statement (headline), optional intro, one button (label = CTA or the fixed label "Contact", links to #contact). Desktop grid `1fr 300px`; phone stacks with the seal first.
+- Sections: 1px hairline on top, label column 200px (150 under 960px, stacked on phone), content right. Order: hero, affiliations, about, impact, experience, selected work, in their words, contact. Middle sections follow the `order` array via CSS `order`. Empty sections don't render and their nav links disappear.
+- Count rules: Impact columns = n (≤4), 3 (5–6), 4 (7–8); phone 2. One figure is set at 96px with the label beside it. Quotes: first is the lead (38px italic, 30 if over 200 chars); the rest go in up to 3 columns under a hairline. Experience and work are rows, so 1–8 all work. Missing summary/meta/year lines are skipped.
+- Long text: about lede drops 32→26px over 320 chars; contact line 52→40px over 90 chars.
+- **Contact + form.** Invitation (blurb) as a Newsreader line, then email and links on the left, form on the right (phone: form first, full-bleed panel). If there's no blurb, the email becomes the headline line. Form fields: optional topic chips (from `form.topics`, seeded from the onboarding goals + "Something else"), Your name, Email, Organisation (optional), Message, hidden honeypot `website`, Send message. Fields are 52px tall at 16px text (prevents iOS zoom). Validation on submit: "Add your name.", "Add your email so {first} can reply." / "Check the email address.", "Add a short message." Errors get an accent border + inset and a "!" message. States: sending (spinner, fields at 60%), sent ("Message sent", "Thanks, {sender}. {first} will reply to {email}.", "Send another message"). `form.enabled === false` removes it; email and links take the width. The editor's Contact panel has an On/Off control for it.
+- **Phone is a first view**, not a squeeze: 22px margins, 60px sticky header with a 44px Contact button, full-width primary buttons, 48px link rows.
+- **Empty fields:** see the "When a field is empty" table on board frame 1z.
+
+**Colour (Meridian).** Users set three colours; everything else is derived. In CSS these are `color-mix(in srgb, …)` of the three vars; the percentages are computed so contrast holds whatever the user picks:
+- Secondary text = text mixed into background, starting at 72% and raised in 2% steps until it reaches 4.5:1.
+- Accent text = accent, or accent mixed toward text until it reaches 4.5:1.
+- Field border = text from 40% upwards until it reaches 3:1.
+- On accent = background or text, whichever contrasts more with the accent.
+- Hairline = text 14%. Wash = text 4%. Accent tint = accent 8%. Focus ring = accent 24% transparent. Placeholder line = text 9% (questions preview only).
+- Presets (bg / text / accent): Navy #fbfbfa / #16181b / #1f3a5f (default); Bottle green #fbfbfa / #161917 / #1e4a3a; Oxblood #fbfaf8 / #1b1717 / #6d2433; Graphite #ffffff / #111111 / #3b4048; Ivory #f7f4ee / #1a1a1a / #7a5f2e; Night #111316 / #ecebe6 / #a9bfdc.
+- Errors use the accent with an icon and message, not a fourth colour.
 
 **T2 Aurora — soft gradient.** For founders and tech leaders.
 - Font: Manrope throughout.
@@ -386,6 +394,9 @@ Every template is designed at a 1280px viewport. Make each responsive: collapse 
 ## Files in this bundle
 - `CEOMaker Start.dc.html`: all app screens (use the Screens bar to jump between them)
 - `PortfolioTemplate.dc.html`: the six site templates plus their content and theme logic
+- `Meridian.dc.html`: the Meridian v2 template, including the contact form and draft mode. `PortfolioTemplate` delegates to it for `meridian`
+- `Meridian Board.dc.html`: every Meridian frame: starter/full at 1280 and 390, no photo, Night, form states, long text, 1/3/8 items, questions preview and the system sheet
+- `image-slot.js`: drop-a-photo helper used by the board only
 - `Templates.dc.html`: overview board of all six templates (append `?only=aurora` etc. to show one)
 - `support.js`: the runtime that makes the `.dc.html` files open in a browser
 - `_ds/industry-…/styles.css` and `_ds_bundle.js`: app tokens and component classes (`.btn`, `.tag`, `.field`, `.input`, `.seg`, `.table`, `.dialog`, `.blueprint`)

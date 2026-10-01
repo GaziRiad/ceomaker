@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<script src="./image-slot.js"></script>
+<style>body{margin:0}
+[data-meridian] a{color:inherit}
+[data-meridian] a:hover{color:var(--act)}
+[data-meridian] :focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+@keyframes m-spin{to{transform:rotate(360deg)}}</style>
+</helmet>
+<div data-meridian="" ref="{{ rootRef }}" lang="{{ lang }}" style="--bg:{{ th.bg }};--ink:{{ th.ink }};--ac:{{ th.accent }};--ink2:{{ th.ink2 }};--rule:{{ th.rule }};--wash:{{ th.wash }};--field:{{ th.field }};--act:{{ th.act }};--acw:{{ th.acw }};--on:{{ th.on }};--ph:{{ th.ph }};--ring:{{ th.ring }};--ach:{{ th.ach }};background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:{{ L.body }};line-height:1.6;display:flex;flex-direction:column;padding-bottom:{{ L.rootPb }};-webkit-font-smoothing:antialiased">
+
+<sc-if value="{{ show.header }}" hint-placeholder-val="{{ true }}">
+<header style="order:-1;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--rule)">
+  <div style="max-width:1200px;box-sizing:border-box;margin:0 auto;padding:0 {{ L.pad }};height:{{ L.headH }};display:flex;align-items:center;gap:28px">
+    <a href="#top" data-fill="name" style="flex:1;min-width:0;display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none">
+      <span aria-hidden="true" style="flex:none;width:{{ L.mark }};height:{{ L.mark }};box-sizing:border-box;border-radius:50%;border:1px solid var(--ac);display:flex;align-items:center;justify-content:center;font-family:Newsreader,Georgia,serif;font-style:italic;font-size:{{ L.markFs }};line-height:1;color:var(--act)">{{ c.initials }}</span>
+      <sc-if value="{{ has.name }}" hint-placeholder-val="{{ true }}"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Newsreader,Georgia,serif;font-size:{{ L.headName }}">{{ c.name }}</span></sc-if>
+      <sc-if value="{{ pd.name }}" hint-placeholder-val="{{ false }}"><span style="width:140px;height:12px;background:var(--ph);border-radius:2px"></span></sc-if>
+    </a>
+    <sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}">
+      <nav aria-label="Sections" style="display:flex;align-items:center;gap:28px;font-size:14px;color:var(--ink2)">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="3"><a href="{{ n.href }}" style="color:var(--ink2);text-decoration:none;padding:12px 0" style-hover="color:var(--ink)">{{ n.label }}</a></sc-for>
+      </nav>
+    </sc-if>
+    <a href="#contact" style="flex:none;display:flex;align-items:center;min-height:44px;box-sizing:border-box;padding:0 16px;border:1px solid var(--ink);border-radius:2px;font-size:14px;font-weight:500;color:var(--ink);text-decoration:none;transition:background .2s,color .2s" style-hover="background:var(--ink);color:var(--bg)">Contact</a>
+  </div>
+</header>
+</sc-if>
+
+<sc-if value="{{ show.hero }}" hint-placeholder-val="{{ true }}">
+<section id="top" data-sec="hero" style="order:0;width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.heroPad }};display:grid;grid-template-columns:{{ L.heroCols }};gap:{{ L.heroGap }};align-items:center">
+  <div style="min-width:0;display:flex;flex-direction:column">
+    <sc-if value="{{ has.kicker }}" hint-placeholder-val="{{ true }}"><p data-in="" data-fill="title" style="margin:0;max-width:620px;font-size:13px;font-weight:500;letter-spacing:0.14em;line-height:1.65;text-transform:uppercase;color:var(--act);text-wrap:balance">{{ c.kicker }}</p></sc-if>
+    <sc-if value="{{ pd.kicker }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:46%;height:11px;margin:5px 0;background:var(--ph);border-radius:2px"></span></sc-if>
+    <sc-if value="{{ has.name }}" hint-placeholder-val="{{ true }}"><h1 data-in="" data-fill="name" style="margin:{{ L.nameTop }} 0 0;font-family:Newsreader,Georgia,'Noto Serif',serif;font-weight:400;font-size:{{ L.nameSize }};line-height:0.98;letter-spacing:-0.03em;text-wrap:balance;overflow-wrap:break-word">{{ c.name }}</h1></sc-if>
+    <sc-if value="{{ pd.name }}" hint-placeholder-val="{{ false }}"><span style="display:block;margin-top:{{ L.nameTop }};width:64%;height:{{ L.nameBar }};background:var(--ph);border-radius:3px"></span></sc-if>
+    <sc-if value="{{ has.headline }}" hint-placeholder-val="{{ true }}"><p data-in="" data-fill="headline" style="margin:{{ L.stmtTop }} 0 0;max-width:660px;font-family:Newsreader,Georgia,'Noto Serif',serif;font-size:{{ L.stmt }};line-height:1.28;letter-spacing:-0.01em;text-wrap:pretty">{{ c.headline }}</p></sc-if>
+    <sc-if value="{{ pd.headline }}" hint-placeholder-val="{{ false }}"><span style="margin-top:{{ L.stmtTop }};display:flex;flex-direction:column;gap:12px"><span style="width:92%;height:{{ L.stmtBar }};background:var(--ph);border-radius:2px"></span><span style="width:56%;height:{{ L.stmtBar }};background:var(--ph);border-radius:2px"></span></span></sc-if>
+    <sc-if value="{{ has.intro }}" hint-placeholder-val="{{ false }}"><p data-in="" style="margin:20px 0 0;max-width:580px;font-size:{{ L.intro }};line-height:1.65;color:var(--ink2);text-wrap:pretty">{{ c.subheadline }}</p></sc-if>
+    <div data-in="" style="margin-top:{{ L.actTop }};display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px">
+      <a href="{{ c.ctaHref }}" style="width:{{ L.btnW }};box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:32px;height:52px;padding:0 20px 0 22px;background:var(--ac);color:var(--on);border-radius:2px;font-size:16px;font-weight:500;text-decoration:none;transition:background .2s" style-hover="background:var(--ach);color:var(--on)">{{ c.ctaLabel }}<span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+  <div data-seal="" onMouseEnter="{{ sealOn }}" onMouseLeave="{{ sealOff }}" style="order:{{ L.sealOrder }};justify-self:{{ L.sealAlign }};position:relative;width:{{ L.seal }};height:{{ L.seal }}">
+    <svg viewBox="0 0 320 320" width="100%" height="100%" aria-hidden="true" style="position:absolute;inset:0;display:block;overflow:visible">
+      <defs><path id="{{ sealPid }}" d="M 160 160 m -138 0 a 138 138 0 1 1 276 0 a 138 138 0 1 1 -276 0"></path></defs>
+      <circle cx="160" cy="160" r="159.5" fill="none" stroke="var(--ac)" stroke-width="1"></circle>
+      <circle cx="160" cy="160" r="116.5" fill="none" stroke="var(--ac)" stroke-width="1"></circle>
+      <g data-ring="" style="transform-origin:160px 160px">{{ sealText }}</g>
+    </svg>
+    <div data-fill="name" style="position:absolute;inset:13.75%;border-radius:50%;overflow:hidden;background:var(--acw);display:flex;align-items:center;justify-content:center">
+      <span style="font-family:Newsreader,Georgia,'Noto Serif',serif;font-style:italic;font-size:{{ L.sealIni }};line-height:1;letter-spacing:-0.02em;color:var(--act);transform:translateY(-3%)">{{ c.initials }}</span>
+      <sc-if value="{{ has.photo }}" hint-placeholder-val="{{ false }}"><span role="img" aria-label="{{ c.name }}" style="position:absolute;inset:0;background-image:{{ c.photoBg }};background-size:cover;background-position:center 30%"></span></sc-if>
+      <sc-if value="{{ has.slot }}" hint-placeholder-val="{{ false }}"><image-slot id="{{ photoSlot }}" shape="circle" placeholder="Drop a headshot" style="position:absolute;inset:0;width:100%;height:100%"></image-slot></sc-if>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.affiliations }}" hint-placeholder-val="{{ false }}">
+<section data-sec="affiliations" style="order:1;width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.affPad }}">
+  <div style="display:flex;flex-wrap:wrap;align-items:baseline;column-gap:16px;row-gap:4px">
+    <span style="flex:{{ L.affLabel }};margin-right:14px;font-size:12px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--act)">Boards &amp; affiliations</span>
+    <sc-for list="{{ c.affs }}" as="f" hint-placeholder-count="4"><span style="display:inline-flex;align-items:baseline;gap:16px;font-family:Newsreader,Georgia,serif;font-style:italic;font-size:{{ L.aff }};line-height:1.4">{{ f.t }}<sc-if value="{{ f.sep }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="font-style:normal;color:var(--ac)">·</span></sc-if></span></sc-for>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.about }}" hint-placeholder-val="{{ true }}">
+<section id="about" data-sec="about" style="order:{{ ord.about }};width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.secPad }}">
+  <div style="border-top:1px solid var(--rule);padding-top:{{ L.secTop }};display:grid;grid-template-columns:{{ L.secCols }};gap:{{ L.secGap }}">
+    <h2 style="margin:0;font-size:12px;font-weight:500;letter-spacing:0.16em;line-height:1.7;text-transform:uppercase;color:var(--act)">About</h2>
+    <div data-fill="about" style="min-width:0">
+      <sc-if value="{{ has.about }}" hint-placeholder-val="{{ true }}">
+        <p style="margin:0;max-width:820px;font-family:Newsreader,Georgia,'Noto Serif',serif;font-size:{{ L.lede }};line-height:1.38;letter-spacing:-0.01em;text-wrap:pretty">{{ c.aboutA }}<em>{{ c.aboutBold }}</em>{{ c.aboutB }}</p>
+        <sc-if value="{{ has.aboutC }}" hint-placeholder-val="{{ true }}"><p style="margin:28px 0 0;max-width:640px;line-height:1.7;color:var(--ink2);text-wrap:pretty">{{ c.aboutC }}</p></sc-if>
+      </sc-if>
+      <sc-if value="{{ pd.about }}" hint-placeholder-val="{{ false }}">
+        <span style="display:flex;flex-direction:column;gap:14px;max-width:820px"><span style="height:{{ L.ledeBar }};width:100%;background:var(--ph);border-radius:2px"></span><span style="height:{{ L.ledeBar }};width:94%;background:var(--ph);border-radius:2px"></span><span style="height:{{ L.ledeBar }};width:97%;background:var(--ph);border-radius:2px"></span><span style="height:{{ L.ledeBar }};width:48%;background:var(--ph);border-radius:2px"></span></span>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.impact }}" hint-placeholder-val="{{ true }}">
+<section id="impact" data-sec="impact" style="order:{{ ord.impact }};width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.secPad }}">
+  <div style="border-top:1px solid var(--rule);padding-top:{{ L.secTop }};display:grid;grid-template-columns:{{ L.secCols }};gap:{{ L.secGap }}">
+    <h2 style="margin:0;font-size:12px;font-weight:500;letter-spacing:0.16em;line-height:1.7;text-transform:uppercase;color:var(--act)">Impact</h2>
+    <div style="min-width:0;display:grid;grid-template-columns:{{ L.statCols }};gap:{{ L.statGap }}">
+      <sc-for list="{{ c.stats }}" as="s" hint-placeholder-count="4">
+        <div style="min-width:0;border-top:1px solid var(--ink);padding-top:20px;display:flex;flex-direction:{{ L.statDir }};gap:{{ L.statInner }}">
+          <div style="flex:none;font-family:Newsreader,Georgia,serif;font-size:{{ L.statV }};line-height:1;letter-spacing:-0.02em;font-variant-numeric:lining-nums;overflow-wrap:anywhere">{{ s.v }}</div>
+          <div style="max-width:260px;font-size:14px;line-height:1.5;color:var(--ink2);text-wrap:pretty">{{ s.l }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.experience }}" hint-placeholder-val="{{ true }}">
+<section id="experience" data-sec="experience" style="order:{{ ord.experience }};width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.secPad }}">
+  <div style="border-top:1px solid var(--rule);padding-top:{{ L.secTop }};display:grid;grid-template-columns:{{ L.secCols }};gap:{{ L.secGap }}">
+    <h2 style="margin:0;font-size:12px;font-weight:500;letter-spacing:0.16em;line-height:1.7;text-transform:uppercase;color:var(--act)">Experience</h2>
+    <div style="min-width:0;display:flex;flex-direction:column">
+      <sc-for list="{{ c.exp }}" as="e" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:{{ L.expCols }};gap:{{ L.expGap }};padding:{{ e.pad }};border-top:{{ e.bt }}">
+          <div style="font-size:14px;line-height:1.5;color:var(--ink2);font-variant-numeric:tabular-nums;padding-top:{{ L.expDateTop }}">{{ e.dates }}</div>
+          <div style="min-width:0">
+            <div style="font-family:Newsreader,Georgia,serif;font-size:{{ L.expRole }};line-height:1.2;letter-spacing:-0.01em;text-wrap:balance">{{ e.role }}</div>
+            <sc-if value="{{ e.hasOrg }}" hint-placeholder-val="{{ true }}"><div style="margin-top:6px;font-size:15px;line-height:1.5;color:var(--ink2)">{{ e.orgLine }}</div></sc-if>
+            <sc-if value="{{ e.hasSum }}" hint-placeholder-val="{{ true }}"><div style="margin-top:12px;max-width:620px;line-height:1.65;text-wrap:pretty">{{ e.summary }}</div></sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.work }}" hint-placeholder-val="{{ true }}">
+<section id="work" data-sec="work" style="order:{{ ord.work }};width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.secPad }}">
+  <div style="border-top:1px solid var(--rule);padding-top:{{ L.secTop }};display:grid;grid-template-columns:{{ L.secCols }};gap:{{ L.secGap }}">
+    <h2 style="margin:0;font-size:12px;font-weight:500;letter-spacing:0.16em;line-height:1.7;text-transform:uppercase;color:var(--act)">Selected work</h2>
+    <div style="min-width:0;display:flex;flex-direction:column">
+      <sc-for list="{{ c.work }}" as="w" hint-placeholder-count="4">
+        <a href="{{ w.href }}" target="{{ w.target }}" rel="noopener" style="display:grid;grid-template-columns:{{ L.workCols }};grid-template-areas:{{ L.workAreas }};gap:{{ L.workGap }};align-items:baseline;padding:{{ w.pad }};border-top:{{ w.bt }};color:var(--ink);text-decoration:none;cursor:{{ w.cursor }}">
+          <span style="grid-area:kind;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink2)">{{ w.kind }}</span>
+          <span style="grid-area:title;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-family:Newsreader,Georgia,serif;font-size:{{ L.workT }};line-height:1.25;text-wrap:pretty">{{ w.title }}<sc-if value="{{ w.hasHref }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="color:var(--act)"> ↗</span></sc-if></span><sc-if value="{{ w.hasMeta }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;line-height:1.5;color:var(--ink2)">{{ w.meta }}</span></sc-if></span>
+          <span style="grid-area:year;justify-self:end;font-size:14px;color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap">{{ w.year }}</span>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.testimonials }}" hint-placeholder-val="{{ true }}">
+<section id="words" data-sec="testimonials" style="order:{{ ord.testimonials }};margin-top:{{ L.bandTop }};background:var(--wash)">
+  <div style="max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.bandPad }};display:grid;grid-template-columns:{{ L.secCols }};gap:{{ L.secGap }}">
+    <h2 style="margin:0;font-size:12px;font-weight:500;letter-spacing:0.16em;line-height:1.7;text-transform:uppercase;color:var(--act)">In their words</h2>
+    <div style="min-width:0;display:flex;flex-direction:column;gap:{{ L.qGap }}">
+      <figure style="margin:0;max-width:880px">
+        <blockquote style="margin:0;font-family:Newsreader,Georgia,serif;font-style:italic;font-size:{{ L.q1 }};line-height:1.3;letter-spacing:-0.01em;text-wrap:pretty">“{{ q1.quote }}”</blockquote>
+        <figcaption style="margin-top:20px;font-size:14px;line-height:1.5;color:var(--ink)"><span style="font-weight:500">{{ q1.author }}</span><sc-if value="{{ q1.hasRole }}" hint-placeholder-val="{{ true }}"><span style="color:var(--ink2)"> · {{ q1.role }}</span></sc-if></figcaption>
+      </figure>
+      <sc-if value="{{ has.qRest }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:{{ L.qCols }};gap:{{ L.qRestGap }};padding-top:{{ L.qRestTop }};border-top:1px solid var(--rule)">
+          <sc-for list="{{ qRest }}" as="t" hint-placeholder-count="1">
+            <figure style="margin:0;min-width:0;display:flex;flex-direction:column;gap:16px">
+              <blockquote style="margin:0;font-family:Newsreader,Georgia,serif;font-size:{{ L.qr }};line-height:1.42;text-wrap:pretty">“{{ t.quote }}”</blockquote>
+              <figcaption style="margin:0;font-size:14px;line-height:1.5;color:var(--ink)"><span style="font-weight:500">{{ t.author }}</span><sc-if value="{{ t.hasRole }}" hint-placeholder-val="{{ true }}"><span style="color:var(--ink2)"> · {{ t.role }}</span></sc-if></figcaption>
+            </figure>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.contact }}" hint-placeholder-val="{{ true }}">
+<section id="contact" data-sec="contact" style="order:10;width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.conPad }}">
+  <div style="border-top:1px solid var(--rule);padding-top:{{ L.secTop }};display:grid;grid-template-columns:{{ L.secCols }};gap:{{ L.secGap }}">
+    <h2 style="margin:0;font-size:12px;font-weight:500;letter-spacing:0.16em;line-height:1.7;text-transform:uppercase;color:var(--act)">Contact</h2>
+    <div style="min-width:0">
+      <sc-if value="{{ has.blurb }}" hint-placeholder-val="{{ true }}"><p style="margin:0 0 {{ L.blurbGap }};max-width:780px;font-family:Newsreader,Georgia,serif;font-size:{{ L.blurb }};line-height:1.1;letter-spacing:-0.02em;text-wrap:balance">{{ c.blurb }}</p></sc-if>
+      <sc-if value="{{ has.emailHead }}" hint-placeholder-val="{{ false }}"><a href="{{ c.mailto }}" style="display:inline-block;margin:0 0 {{ L.blurbGap }};max-width:100%;font-family:Newsreader,Georgia,serif;font-size:{{ L.emailHead }};line-height:1.15;letter-spacing:-0.015em;color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:8px;text-decoration-color:var(--field);overflow-wrap:anywhere" style-hover="text-decoration-color:var(--ac)">{{ c.email }}</a></sc-if>
+      <sc-if value="{{ pd.blurb }}" hint-placeholder-val="{{ false }}"><span style="margin-bottom:{{ L.blurbGap }};display:flex;flex-direction:column;gap:14px;max-width:780px"><span style="height:{{ L.blurbBar }};width:88%;background:var(--ph);border-radius:2px"></span><span style="height:{{ L.blurbBar }};width:42%;background:var(--ph);border-radius:2px"></span></span></sc-if>
+      <div style="display:grid;grid-template-columns:{{ L.cCols }};gap:{{ L.cGap }};align-items:start">
+        <sc-if value="{{ has.direct }}" hint-placeholder-val="{{ true }}">
+        <div style="order:{{ L.directOrder }};min-width:0;display:flex;flex-direction:column;gap:32px">
+          <sc-if value="{{ has.emailRow }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;color:var(--ink2)">Email</span><a href="{{ c.mailto }}" style="font-family:Newsreader,Georgia,serif;font-size:{{ L.email }};line-height:1.3;color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px;text-decoration-color:var(--field);overflow-wrap:anywhere" style-hover="text-decoration-color:var(--ac)">{{ c.email }}</a></div>
+          </sc-if>
+          <sc-if value="{{ has.links }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column"><span style="font-size:13px;color:var(--ink2);margin-bottom:4px">Elsewhere</span>
+              <sc-for list="{{ c.links }}" as="l" hint-placeholder-count="2"><a href="{{ l.href }}" target="_blank" rel="noopener me" style="min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none;font-size:16px" style-hover="color:var(--act)"><span style="min-width:0;overflow-wrap:anywhere">{{ l.label }}</span><span aria-hidden="true" style="color:var(--act)">↗</span></a></sc-for>
+            </div>
+          </sc-if>
+        </div>
+        </sc-if>
+        <sc-if value="{{ fm.on }}" hint-placeholder-val="{{ true }}">
+        <div data-fill="topics" style="order:1;min-width:0;max-width:{{ L.formMax }}">
+          <sc-if value="{{ fm.form }}" hint-placeholder-val="{{ true }}">
+          <div style="background:var(--wash);padding:{{ L.formPad }};margin:{{ L.formMargin }}">
+            <form onSubmit="{{ fm.submit }}" noValidate="{{ true }}" aria-label="Contact form" style="display:flex;flex-direction:column;gap:22px">
+              <sc-if value="{{ fm.hasTopics }}" hint-placeholder-val="{{ true }}">
+                <fieldset style="margin:0;padding:0;border:0;min-width:0">
+                  <legend style="padding:0;margin-bottom:10px;font-size:14px;font-weight:500">What is it about?</legend>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    <sc-for list="{{ fm.topics }}" as="t" hint-placeholder-count="4"><button type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.on }}" disabled="{{ fm.busy }}" style="min-height:44px;box-sizing:border-box;padding:0 16px;display:flex;align-items:center;gap:8px;border:1px solid {{ t.bc }};background:{{ t.bg }};color:var(--ink);border-radius:2px;font:inherit;font-size:15px;cursor:pointer;transition:border-color .2s,background .2s" style-hover="border-color:var(--ink)"><sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="color:var(--act)">✓</span></sc-if>{{ t.label }}</button></sc-for>
+                  </div>
+                </fieldset>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:{{ L.fCols }};gap:22px 16px">
+                <label style="min-width:0;display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Your name</span><input name="name" autoComplete="name" value="{{ f.name }}" onChange="{{ on.name }}" disabled="{{ fm.busy }}" aria-invalid="{{ fe.name.inv }}" style="height:52px;width:100%;box-sizing:border-box;padding:0 14px;border:1px solid {{ fe.name.bc }};box-shadow:{{ fe.name.sh }};border-radius:2px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;outline:none;opacity:{{ fm.op }};transition:border-color .2s,box-shadow .2s" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--ring)"><sc-if value="{{ fe.name.show }}" hint-placeholder-val="{{ false }}"><span data-err="" role="alert" style="display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.45"><span aria-hidden="true" style="flex:none;width:18px;height:18px;margin-top:1px;border-radius:50%;background:var(--ac);color:var(--on);font-size:12px;font-weight:600;line-height:18px;text-align:center">!</span>{{ fe.name.msg }}</span></sc-if></label>
+                <label style="min-width:0;display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Email</span><input name="email" type="email" inputMode="email" autoComplete="email" value="{{ f.email }}" onChange="{{ on.email }}" disabled="{{ fm.busy }}" aria-invalid="{{ fe.email.inv }}" style="height:52px;width:100%;box-sizing:border-box;padding:0 14px;border:1px solid {{ fe.email.bc }};box-shadow:{{ fe.email.sh }};border-radius:2px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;outline:none;opacity:{{ fm.op }};transition:border-color .2s,box-shadow .2s" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--ring)"><sc-if value="{{ fe.email.show }}" hint-placeholder-val="{{ false }}"><span data-err="" role="alert" style="display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.45"><span aria-hidden="true" style="flex:none;width:18px;height:18px;margin-top:1px;border-radius:50%;background:var(--ac);color:var(--on);font-size:12px;font-weight:600;line-height:18px;text-align:center">!</span>{{ fe.email.msg }}</span></sc-if></label>
+              </div>
+              <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Organisation<span style="font-weight:400;color:var(--ink2)"> · Optional</span></span><input name="organisation" autoComplete="organization" value="{{ f.org }}" onChange="{{ on.org }}" disabled="{{ fm.busy }}" style="height:52px;width:100%;box-sizing:border-box;padding:0 14px;border:1px solid var(--field);border-radius:2px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;outline:none;opacity:{{ fm.op }};transition:border-color .2s,box-shadow .2s" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--ring)"></label>
+              <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Message</span><textarea name="message" rows="5" value="{{ f.msg }}" onChange="{{ on.msg }}" disabled="{{ fm.busy }}" aria-invalid="{{ fe.msg.inv }}" style="min-height:148px;width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid {{ fe.msg.bc }};box-shadow:{{ fe.msg.sh }};border-radius:2px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;line-height:1.55;resize:vertical;outline:none;opacity:{{ fm.op }};transition:border-color .2s,box-shadow .2s" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--ring)"></textarea><sc-if value="{{ fe.msg.show }}" hint-placeholder-val="{{ false }}"><span data-err="" role="alert" style="display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.45"><span aria-hidden="true" style="flex:none;width:18px;height:18px;margin-top:1px;border-radius:50%;background:var(--ac);color:var(--on);font-size:12px;font-weight:600;line-height:18px;text-align:center">!</span>{{ fe.msg.msg }}</span></sc-if></label>
+              <input name="website" tabIndex="-1" autoComplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;margin-top:4px">
+                <button type="submit" disabled="{{ fm.busy }}" style="width:{{ L.btnW }};min-width:220px;height:52px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 20px 0 22px;border:0;border-radius:2px;background:var(--ac);color:var(--on);font:inherit;font-size:16px;font-weight:500;cursor:pointer;transition:background .2s" style-hover="background:var(--ach)">{{ fm.btnLabel }}{{ fm.btnIcon }}</button>
+                <span style="flex:1 1 220px;font-size:13px;line-height:1.5;color:var(--ink2)">{{ fm.note }}</span>
+              </div>
+            </form>
+          </div>
+          </sc-if>
+          <sc-if value="{{ fm.sent }}" hint-placeholder-val="{{ false }}">
+          <div data-sent="" role="status" style="background:var(--wash);padding:{{ L.formPad }};margin:{{ L.formMargin }};min-height:{{ L.sentMin }};box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:14px">
+            <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="23" fill="none" stroke="var(--ac)" stroke-width="1.5"></circle><path data-check="" d="M15 24.5l6 6 12-13" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="30"></path></svg>
+            <span style="font-family:Newsreader,Georgia,serif;font-size:{{ L.sentH }};line-height:1.15;letter-spacing:-0.01em">Message sent</span>
+            <span style="max-width:440px;color:var(--ink2);line-height:1.6">{{ fm.sentLine }}</span>
+            <button type="button" onClick="{{ fm.reset }}" style="min-height:44px;padding:0;border:0;background:none;display:flex;align-items:center;font:inherit;font-size:15px;color:var(--act);text-decoration:underline;text-underline-offset:5px;cursor:pointer">Send another message</button>
+          </div>
+          </sc-if>
+        </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.footer }}" hint-placeholder-val="{{ true }}">
+<footer style="order:11;width:100%;max-width:1200px;box-sizing:border-box;margin:0 auto;padding:{{ L.footPad }}">
+  <div style="border-top:1px solid var(--rule);padding-top:12px;display:grid;grid-template-columns:{{ L.footCols }};align-items:center;column-gap:28px;font-size:13px;line-height:1.5;color:var(--ink2)">
+    <span style="min-width:0">© {{ year }} {{ c.name }}</span>
+    <span style="min-width:0;display:{{ L.footLoc }}">{{ c.location }}</span>
+    <a href="#top" style="justify-self:end;white-space:nowrap;padding:12px 0;color:var(--ink2);text-decoration:none">Back to top ↑</a>
+  </div>
+</footer>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;sample&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;full&quot;,&quot;starter&quot;],&quot;default&quot;:&quot;full&quot;,&quot;tsType&quot;:&quot;\&quot;full\&quot; | \&quot;starter\&quot;&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;navy&quot;,&quot;green&quot;,&quot;oxblood&quot;,&quot;graphite&quot;,&quot;ivory&quot;,&quot;night&quot;],&quot;default&quot;:&quot;navy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;draft&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;content&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;patch&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;theme&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{ bg?: string; ink?: string; accent?: string }&quot;},&quot;hide&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Record&lt;string, boolean&gt;&quot;},&quot;order&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;only&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;formDemo&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;\&quot;error\&quot; | \&quot;sending\&quot; | \&quot;sent\&quot;&quot;},&quot;photoSlot&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;year&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;}}">
+const FULL = {
+  name: "Amelia Hart", eyebrow: "Chief Executive Officer, Meridian Freight Group", location: "Rotterdam",
+  headline: "Building supply chains that hold up under pressure.",
+  subheadline: "I lead a 2,400-person logistics company moving goods across 31 countries, and write and speak about resilient operations and leading through volatility.",
+  cta: "Get in touch", ctaHref: "#contact",
+  aboutA: "I joined Meridian as COO in 2015, when it was a regional carrier with ", aboutBold: "thin margins and no shared planning system", aboutB: ". Six years later we run one of Europe's most reliable mid-sized freight networks.",
+  aboutC: "Before Meridian, I spent a decade in operations at Alder & Crane Logistics in Hamburg. I sit on the board of the European Freight Council and mentor first-time founders in industrial technology.",
+  stats: [{ v: "€780M", l: "Annual revenue, up from €310M" }, { v: "31", l: "Countries served" }, { v: "2,400", l: "People across the group" }, { v: "42%", l: "Reduction in delivery variance" }],
+  affiliations: ["Meridian Freight Group", "European Freight Council", "Alder & Crane Logistics", "Northgate Capital", "Industrial Founders Network"],
+  experience: [
+    { role: "Chief Executive Officer", org: "Meridian Freight Group", loc: "Rotterdam", dates: "2019 – Present", summary: "Grew revenue 2.5x while cutting on-time delivery variance by 42%. Led the acquisition and integration of three regional carriers." },
+    { role: "Chief Operating Officer", org: "Meridian Freight Group", loc: "Rotterdam", dates: "2015 – 2019", summary: "Rebuilt the operating model around a single planning platform and a weekly operating review adopted across all depots." },
+    { role: "VP Operations", org: "Alder & Crane Logistics", loc: "Hamburg", dates: "2010 – 2015", summary: "Ran network operations for Northern Europe, 600 staff across 9 depots." }
+  ],
+  work: [
+    { kind: "Keynote", title: "Resilient networks for a volatile decade", meta: "European Freight Forum", year: "2025", href: "https://example.com/" },
+    { kind: "Essay", title: "Why planning beats forecasting", meta: "Op-ed, logistics trade press", year: "2024", href: "https://example.com/" },
+    { kind: "Board", title: "European Freight Council", meta: "Non-executive director", year: "Since 2021" },
+    { kind: "Mentoring", title: "Industrial founders programme", meta: "Mentor to first-time founders", year: "Since 2019" }
+  ],
+  testimonials: [
+    { quote: "Amelia combines operational depth with a rare calm under pressure. She made the hard calls early, and the business is stronger for it.", author: "Jonas Weber", role: "Chair, Meridian Freight Group" },
+    { quote: "The clearest thinker on supply chain resilience I have worked with.", author: "Priya Raman", role: "Partner, Northgate Capital" }
+  ],
+  blurb: "For speaking, board and advisory enquiries.", email: "office@example.com",
+  links: [{ label: "LinkedIn", href: "https://www.linkedin.com/" }, { label: "Meridian Freight Group", href: "https://example.com/" }],
+  form: { enabled: true, topics: ["Speaking", "Board and advisory", "Press", "Something else"] }
+};
+const STARTER = {
+  name: "Amelia Hart", eyebrow: "Chief Executive Officer, Meridian Freight Group",
+  headline: "Building supply chains that hold up under pressure.",
+  aboutA: "I lead Meridian Freight Group, a logistics company moving goods across 31 countries. Before that I spent a decade running operations in Hamburg, and I still care most about the unglamorous work of making things arrive on time.",
+  email: "office@example.com", form: { enabled: true }
+};
+const SAMPLES = { full: FULL, starter: STARTER };
+const PRESETS = {
+  navy: { bg: "#fbfbfa", ink: "#16181b", accent: "#1f3a5f" },
+  green: { bg: "#fbfbfa", ink: "#161917", accent: "#1e4a3a" },
+  oxblood: { bg: "#fbfaf8", ink: "#1b1717", accent: "#6d2433" },
+  graphite: { bg: "#ffffff", ink: "#111111", accent: "#3b4048" },
+  ivory: { bg: "#f7f4ee", ink: "#1a1a1a", accent: "#7a5f2e" },
+  night: { bg: "#111316", ink: "#ecebe6", accent: "#a9bfdc" }
+};
+const EMPTY_F = { name: "", email: "", org: "", msg: "", topic: null };
+const FORM_DEMO = {
+  error: { f: { name: "Jonas Weber", email: "jonas@northgate", org: "Northgate Capital", msg: "", topic: "Board and advisory" }, err: { email: "Check the email address.", msg: "Add a short message." } },
+  sending: { f: { name: "Jonas Weber", email: "jonas@northgate.example", org: "Northgate Capital", msg: "We're building a board for a European logistics platform and would value a conversation.", topic: "Board and advisory" }, status: "sending" },
+  sent: { f: { name: "Jonas Weber", email: "jonas@northgate.example", org: "Northgate Capital", msg: "We're building a board for a European logistics platform and would value a conversation.", topic: "Board and advisory" }, status: "sent" }
+};
+const EASE = "cubic-bezier(.2,.7,.2,1)";
+const WIDE = /[\u1100-\u11ff\u2e80-\u9fff\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]/;
+const words = s => String(s || "").trim().split(/\s+/).filter(Boolean);
+const rgb = h => { const n = parseInt(String(h || "#000000").replace("#", "").slice(0, 6), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = rgb(a), B = rgb(b); return A.map((v, i) => Math.round(v * p + B[i] * (1 - p))); };
+const cm = (a, p, b) => "color-mix(in srgb,var(" + a + ") " + p + "%,var(" + b + "))";
+function derive({ bg, ink, accent }) {
+  let p2 = 72; while (p2 < 100 && ratio(mix(ink, bg, p2 / 100), bg) < 4.6) p2 += 2;
+  let pf = 40; while (pf < 100 && ratio(mix(ink, bg, pf / 100), bg) < 3.1) pf += 2;
+  let pa = 100; while (pa > 0 && ratio(mix(accent, ink, pa / 100), bg) < 4.6) pa -= 4;
+  return {
+    bg, ink, accent, ink2: cm("--ink", p2, "--bg"), field: cm("--ink", pf, "--bg"),
+    act: pa >= 100 ? "var(--ac)" : cm("--ac", pa, "--ink"),
+    on: ratio(bg, accent) >= ratio(ink, accent) ? "var(--bg)" : "var(--ink)",
+    rule: cm("--ink", 14, "--bg"), wash: cm("--ink", 4, "--bg"), acw: cm("--ac", 8, "--bg"), ph: cm("--ink", 9, "--bg"),
+    ring: "color-mix(in srgb,var(--ac) 24%,transparent)", ach: cm("--ac", 84, "--ink")
+  };
+}
+function initials(name) {
+  const w = words(name); if (!w.length) return "";
+  if (WIDE.test(w[0])) return [...w[0]][0];
+  const L = w.map(x => (x.match(/\p{L}/u) || [""])[0]).filter(Boolean);
+  return (L.length > 1 ? L[0] + L[L.length - 1] : L[0] || "").toLocaleUpperCase();
+}
+function longestUnit(name) {
+  let m = 4;
+  words(name).forEach(w => w.split(/(?<=-)/).forEach(u => { let s = 0; for (const ch of u) s += WIDE.test(ch) ? 1.9 : /\p{Lu}/u.test(ch) ? 1.25 : 1; m = Math.max(m, s); }));
+  return m;
+}
+
+class Component extends DCLogic {
+  state = { w: 0, f: { ...EMPTY_F }, err: {}, status: "idle" };
+  uid = "mseal" + Math.random().toString(36).slice(2, 8);
+  rootRef = el => {
+    this.root = el;
+    if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    const dev = this.props.device;
+    if (!el || (dev && dev !== "auto")) return;
+    this._ro = new ResizeObserver(() => { const w = el.offsetWidth; if (w && Math.abs(w - (this.state.w || 0)) > 4) this.setState({ w }); });
+    this._ro.observe(el);
+  };
+  motionOK() { return (this.props.motion ?? true) && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  anim(sel, kf, dur, delay, step) {
+    if (!this.motionOK()) return;
+    requestAnimationFrame(() => { const r = this.root; if (!r) return; r.querySelectorAll(sel).forEach((el, i) => el.animate(kf, { duration: dur, delay: (delay || 0) + i * (step || 0), easing: EASE, fill: "backwards" })); });
+  }
+  seedForm() { const d = FORM_DEMO[this.props.formDemo]; if (d) this.setState({ f: { ...EMPTY_F, ...d.f }, err: d.err || {}, status: d.status || "idle" }); }
+  componentDidMount() {
+    this._prevHas = this._has; this.seedForm();
+    if (!this.props.draft) {
+      this.anim("[data-in]", [{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }], 800, 60, 90);
+      this.anim("[data-seal]", [{ opacity: 0, transform: "scale(.96)" }, { opacity: 1, transform: "none" }], 1100, 160);
+      this.anim("[data-ring]", [{ transform: "rotate(-40deg)" }, { transform: "rotate(0deg)" }], 1800, 160);
+    }
+  }
+  componentDidUpdate(pp, ps) {
+    const s = this.state;
+    if (pp.formDemo !== this.props.formDemo) this.seedForm();
+    if (ps.status !== s.status && s.status === "sent") { this.anim("[data-sent]", [{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }], 560); this.anim("[data-check]", [{ strokeDashoffset: 30 }, { strokeDashoffset: 0 }], 650, 220); }
+    if (ps.err !== s.err && Object.keys(s.err).some(k => s.err[k] && !ps.err[k])) this.anim("[data-err]", [{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }], 320);
+    if (this.props.draft) {
+      const now = this._has || {}, prev = this._prevHas || {};
+      Object.keys(now).forEach(k => { if (now[k] && !prev[k]) this.anim('[data-fill="' + k + '"]', [{ opacity: 0, transform: "translateY(8px)", filter: "blur(3px)" }, { opacity: 1, transform: "none", filter: "none" }], 600); });
+    }
+    this._prevHas = this._has;
+  }
+  componentWillUnmount() { this._ro && this._ro.disconnect(); clearTimeout(this._st); this._spin && this._spin.cancel(); }
+  sealOn = () => { if (!this.motionOK() || !this.root) return; const g = this.root.querySelector("[data-ring]"); if (!g) return; if (!this._spin) this._spin = g.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], { duration: 48000, iterations: Infinity }); else this._spin.play(); };
+  sealOff = () => { this._spin && this._spin.pause(); };
+
+  renderVals() {
+    const p = this.props, s = this.state, draft = !!p.draft;
+    const src = { ...(p.content ?? SAMPLES[p.sample || "full"] ?? FULL), ...(p.patch || {}) };
+    const dev = p.device && p.device !== "auto" ? p.device : null;
+    const W = dev === "phone" ? 390 : dev === "desktop" ? 1280 : (s.w || 1280);
+    const ph = W < 700, only = p.only || null;
+    const pad = ph ? 22 : W < 960 ? 32 : 56;
+    const sealW = ph ? 148 : W < 1100 ? 232 : 300;
+    const th = derive({ ...(PRESETS[p.preset] || PRESETS.navy), ...(p.theme || {}) });
+
+    const name = String(src.name || "").trim();
+    const first = words(name)[0] || "";
+    const eyebrow = src.eyebrow || [src.role, src.company].filter(Boolean).join(", ");
+    const kicker = [eyebrow, src.location].filter(Boolean).join(" · ");
+    const paraA = (src.aboutA || "") + (src.aboutBold || "") + (src.aboutB || "");
+    const stats = (src.stats || []).filter(x => x && (x.v || x.value)).map(x => ({ v: x.v ?? x.value, l: x.l ?? x.label ?? "" }));
+    const affList = (src.affiliations || []).filter(Boolean);
+    const exp = (src.experience || []).filter(e => e && (e.role || e.org)).map((e, i) => { const orgLine = [e.org || e.organization, e.loc || e.location].filter(Boolean).join(" · "); return { role: e.role || "", dates: e.dates || [e.start, e.end].filter(Boolean).join(" – "), orgLine, hasOrg: !!orgLine, summary: e.summary || "", hasSum: !!e.summary, bt: i ? "1px solid var(--rule)" : "0", pad: i ? (ph ? "20px 0" : "28px 0") : (ph ? "0 0 20px" : "0 0 28px") }; });
+    const work = (src.work || []).filter(w => w && w.title).map((w, i) => ({ kind: w.kind || "", title: w.title, meta: w.meta || "", hasMeta: !!w.meta, year: w.year || "", href: w.href || undefined, hasHref: !!w.href, target: w.href ? "_blank" : undefined, cursor: w.href ? "pointer" : "default", bt: i ? "1px solid var(--rule)" : "0", pad: i ? (ph ? "18px 0" : "22px 0") : (ph ? "0 0 18px" : "0 0 22px") }));
+    const quotes = (src.testimonials || []).filter(q => q && q.quote).map(q => ({ ...q, hasRole: !!q.role }));
+    const links = (src.links || []).filter(l => l && l.label && l.href);
+    const formCfg = src.form || {};
+    const formOn = formCfg.enabled !== false;
+    const topics = (formCfg.topics || []).filter(Boolean);
+
+    const has = {
+      name: !!name, kicker: !!kicker, headline: !!src.headline, intro: !!src.subheadline, photo: !!src.photo, location: !!src.location,
+      about: !!paraA.trim(), aboutC: !!src.aboutC, email: !!src.email, links: links.length > 0, blurb: !!src.blurb, qRest: quotes.length > 1
+    };
+    has.slot = !!p.photoSlot && !has.photo;
+    has.emailHead = !has.blurb && has.email && !draft;
+    has.emailRow = has.email && !has.emailHead;
+    has.direct = has.emailRow || has.links;
+    const pd = { name: draft && !has.name, kicker: draft && !has.kicker, headline: draft && !has.headline, about: draft && !has.about, blurb: draft && !has.blurb };
+    this._has = { name: has.name, title: has.kicker, headline: has.headline, about: has.about, topics: topics.length > 0 };
+
+    const hide = p.hide || {};
+    const want = k => !hide[k] && (!only || only === k || (only === "hero" && k === "affiliations"));
+    const show = {
+      header: !only || only === "hero", footer: !only, hero: !only || only === "hero",
+      affiliations: want("affiliations") && affList.length > 0,
+      about: want("about") && (has.about || draft), impact: want("impact") && stats.length > 0,
+      experience: want("experience") && exp.length > 0, work: want("work") && work.length > 0,
+      testimonials: want("testimonials") && quotes.length > 0, contact: want("contact")
+    };
+    const order = Array.isArray(p.order) && p.order.length ? p.order : ["about", "impact", "experience", "work", "testimonials"];
+    const ord = {}; ["about", "impact", "experience", "work", "testimonials"].forEach((k, i) => { const j = order.indexOf(k); ord[k] = 2 + (j < 0 ? 5 + i : j); });
+    const nav = [["about", "About"], ["experience", "Experience"], ["work", "Selected work"]].filter(([k]) => show[k]).sort((a, b) => ord[a[0]] - ord[b[0]]).map(([k, label]) => ({ href: "#" + k, label }));
+
+    const lw = longestUnit(name || "Your Name");
+    const textW = ph ? W - 2 * pad : Math.min(W, 1200) - 2 * pad - sealW - 64;
+    const nameSize = Math.round(Math.max(ph ? 30 : 56, Math.min(ph ? 60 : W < 1100 ? 96 : 132, textW / (lw * 0.52))));
+
+    const sep = "\u2002·\u2002";
+    const ringBase = name ? (name + (src.location ? sep + src.location : "") + sep).toLocaleUpperCase() : "";
+    const fs = ph ? 19 : 12.5, circ = 2 * Math.PI * 138;
+    const est = [...ringBase].reduce((a, ch) => a + (WIDE.test(ch) ? 1.05 : /\s/.test(ch) ? 0.34 : 0.68), 0) * fs;
+    const reps = est ? Math.max(1, Math.floor(circ / (est * 1.12))) : 0;
+    const fsA = est && est * 1.06 > circ ? fs * circ / (est * 1.06) : fs;
+    const sealText = reps ? React.createElement("text", { style: { fontFamily: "Inter, system-ui, sans-serif", fontWeight: 500, fontSize: fsA, fill: "var(--act)" } }, React.createElement("textPath", { href: "#" + this.uid, textLength: Math.round(circ), lengthAdjust: "spacing" }, ringBase.repeat(reps))) : null;
+
+    const nStat = stats.length, qr = quotes.length - 1;
+    const statCols = nStat === 1 ? "minmax(0,1fr)" : ph ? "repeat(2,minmax(0,1fr))" : "repeat(" + (nStat <= 4 ? nStat : nStat <= 6 ? 3 : 4) + ",minmax(0,1fr))";
+    const longLede = paraA.length > 320, longBlurb = String(src.blurb || "").length > 90, longQ = (quotes[0]?.quote || "").length > 200;
+    const L = {
+      desk: !ph, pad: pad + "px", body: ph ? "16px" : "17px", headH: ph ? "60px" : "84px", mark: ph ? "30px" : "34px", markFs: ph ? "13px" : "14px", headName: ph ? "17px" : "20px",
+      heroPad: ph ? "32px " + pad + "px 0" : (W < 960 ? 56 : 88) + "px " + pad + "px 0",
+      heroCols: ph ? "minmax(0,1fr)" : "minmax(0,1fr) " + sealW + "px", heroGap: ph ? "32px" : "64px",
+      seal: sealW + "px", sealOrder: ph ? -1 : 0, sealAlign: ph ? "start" : "end", sealIni: Math.round(sealW * 0.3) + "px",
+      nameSize: nameSize + "px", nameTop: ph ? "16px" : "26px", nameBar: Math.round(nameSize * 0.7) + "px",
+      stmt: ph ? "23px" : "32px", stmtTop: ph ? "20px" : "32px", stmtBar: ph ? "16px" : "22px",
+      intro: ph ? "16px" : "18px", actTop: ph ? "28px" : "40px", btnW: ph ? "100%" : "auto",
+      affPad: (ph ? 44 : 72) + "px " + pad + "px 0", aff: ph ? "19px" : "22px", affLabel: ph ? "1 0 100%" : "none",
+      secPad: (only ? (ph ? 36 : 64) : (ph ? 80 : 136)) + "px " + pad + "px 0",
+      secTop: ph ? "20px" : "28px", secCols: ph ? "minmax(0,1fr)" : W < 960 ? "150px minmax(0,1fr)" : "200px minmax(0,1fr)", secGap: ph ? "20px" : "48px",
+      lede: ph ? (longLede ? "20px" : "23px") : (longLede ? "26px" : "32px"), ledeBar: ph ? "16px" : "22px",
+      statCols, statGap: ph ? "28px 20px" : "44px 32px", statV: nStat === 1 ? (ph ? "64px" : "96px") : (ph ? "40px" : "56px"),
+      statDir: nStat === 1 && !ph ? "row" : "column", statInner: nStat === 1 && !ph ? "40px" : "12px",
+      expCols: ph ? "minmax(0,1fr)" : "150px minmax(0,1fr)", expGap: ph ? "6px" : "32px", expRole: ph ? "21px" : "26px", expDateTop: ph ? "0" : "6px",
+      workCols: ph ? "minmax(0,1fr) auto" : "150px minmax(0,1fr) auto", workAreas: ph ? '"kind year" "title title"' : '"kind title year"', workGap: ph ? "6px 16px" : "32px", workT: ph ? "20px" : "24px",
+      bandTop: only ? "0px" : ph ? "80px" : "136px", bandPad: ph ? "56px " + pad + "px" : "104px " + pad + "px",
+      q1: ph ? (longQ ? "22px" : "25px") : (longQ ? "30px" : "38px"), qr: ph ? "19px" : "21px", qGap: ph ? "40px" : "56px",
+      qCols: ph || qr <= 1 ? "minmax(0,1fr)" : "repeat(" + Math.min(qr, 3) + ",minmax(0,1fr))", qRestGap: ph ? "36px" : "40px 48px", qRestTop: ph ? "36px" : "48px",
+      conPad: (only ? (ph ? 36 : 64) : (ph ? 80 : 136)) + "px " + pad + "px " + (only ? 0 : ph ? 72 : 120) + "px",
+      blurb: ph ? (longBlurb ? "27px" : "32px") : (longBlurb ? "40px" : "52px"), blurbGap: ph ? "32px" : "48px", blurbBar: ph ? "24px" : "38px",
+      cCols: !ph && formOn && has.direct ? "minmax(0,4fr) minmax(0,6fr)" : "minmax(0,1fr)", cGap: ph ? "40px" : "56px", directOrder: ph ? 2 : 0,
+      email: formOn && has.direct ? (ph ? "21px" : "24px") : (ph ? "24px" : "36px"),
+      emailHead: ph ? "26px" : "40px", formMax: ph || has.direct ? "none" : "760px",
+      formPad: ph ? "28px " + pad + "px" : "36px", formMargin: ph ? "0 -" + pad + "px" : "0", fCols: ph ? "minmax(0,1fr)" : "minmax(0,1fr) minmax(0,1fr)",
+      sentH: ph ? "26px" : "32px", sentMin: ph ? "auto" : "420px",
+      footCols: ph ? "minmax(0,1fr) auto" : "auto auto minmax(0,1fr)", footLoc: ph ? "none" : "block",
+      footPad: "0 " + pad + "px " + (ph ? 32 : 40) + "px", rootPb: only ? (ph ? "48px" : "80px") : "0px"
+    };
+
+    const f = s.f, err = s.err, busy = s.status === "sending";
+    const setF = (k, v) => this.setState(st => ({ f: { ...st.f, [k]: v }, err: st.err[k] ? { ...st.err, [k]: undefined } : st.err }));
+    const fe = {}; ["name", "email", "msg"].forEach(k => { const m = err[k]; fe[k] = { show: !!m, msg: m || "", inv: m ? "true" : "false", bc: m ? "var(--ac)" : "var(--field)", sh: m ? "inset 0 0 0 1px var(--ac)" : "none" }; });
+    const submit = e => {
+      e.preventDefault(); if (this.state.status !== "idle") return;
+      const v = this.state.f, er = {};
+      if (!v.name.trim()) er.name = "Add your name.";
+      if (!v.email.trim()) er.email = first ? "Add your email so " + first + " can reply." : "Add your email so we can reply.";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email.trim())) er.email = "Check the email address.";
+      if (!v.msg.trim()) er.msg = "Add a short message.";
+      if (Object.keys(er).length) { this.setState({ err: er }); return; }
+      this.setState({ status: "sending", err: {} });
+      clearTimeout(this._st); this._st = setTimeout(() => this.setState({ status: "sent" }), 1300);
+    };
+    const spinner = React.createElement("span", { "aria-hidden": true, style: { width: 16, height: 16, boxSizing: "border-box", borderRadius: "50%", border: "2px solid color-mix(in srgb, var(--on) 35%, transparent)", borderTopColor: "var(--on)", animation: "m-spin .8s linear infinite" } });
+    const arrow = React.createElement("span", { "aria-hidden": true }, "→");
+    const sender = words(f.name)[0] || "";
+    const fm = {
+      on: formOn, form: s.status !== "sent", sent: s.status === "sent", busy, op: busy ? 0.6 : 1,
+      hasTopics: topics.length > 0,
+      topics: topics.map(t => { const on = f.topic === t; return { label: t, on, pick: () => setF("topic", on ? null : t), bc: on ? "var(--ac)" : "var(--field)", bg: on ? "var(--acw)" : "var(--bg)" }; }),
+      submit, btnLabel: busy ? "Sending…" : "Send message", btnIcon: busy ? spinner : arrow,
+      note: first ? "Sent privately to " + first + ". Your details aren't shared." : "Sent privately. Your details aren't shared.",
+      sentLine: (sender ? "Thanks, " + sender + ". " : "Thanks. ") + (first ? first + " will reply to " : "You'll get a reply at ") + (f.email.trim() || "your email") + ".",
+      reset: () => this.setState({ status: "idle", f: { ...EMPTY_F }, err: {} })
+    };
+
+    return {
+      th, L, has, pd, show, ord, nav, fm, f, fe, year: p.year ?? new Date().getFullYear(), lang: src.lang || "en",
+      photoSlot: p.photoSlot || "", sealPid: this.uid, sealText, sealOn: this.sealOn, sealOff: this.sealOff, rootRef: this.rootRef,
+      on: { name: e => setF("name", e.target.value), email: e => setF("email", e.target.value), org: e => setF("org", e.target.value), msg: e => setF("msg", e.target.value) },
+      c: {
+        name, initials: initials(name), kicker, headline: src.headline || "", subheadline: src.subheadline || "", location: src.location || "",
+        ctaLabel: src.cta || "Contact", ctaHref: src.ctaHref || "#contact", photoBg: src.photo ? 'url("' + src.photo + '")' : "none",
+        aboutA: src.aboutA || "", aboutBold: src.aboutBold || "", aboutB: src.aboutB || "", aboutC: src.aboutC || "",
+        stats, affs: affList.map((t, i) => ({ t, sep: i < affList.length - 1 })), exp, work,
+        blurb: src.blurb || "", email: src.email || "", mailto: "mailto:" + (src.email || ""), links
+      },
+      q1: quotes[0] || { quote: "", author: "", hasRole: false }, qRest: quotes.slice(1)
+    };
+  }
+}
+</script>
+</body>
+</html>

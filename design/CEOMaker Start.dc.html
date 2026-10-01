@@ -22,7 +22,7 @@
 <div data-screen-label="Landing">
   <header style="position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--color-bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--color-divider)">
     <div style="max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,40px);height:68px;display:flex;align-items:center;gap:28px;font-size:15px">
-      <span style="margin-right:auto;font-family:var(--font-heading);font-weight:600;font-size:24px;letter-spacing:0.02em;text-transform:uppercase">CEO<span style="color:var(--color-accent)">Maker</span></span>
+      <span style="margin-right:auto;font-family:var(--font-heading);font-weight:600;font-size:24px;letter-spacing:0.02em;text-transform:uppercase" data-om-label="logo">CEO<span style="color:var(--color-accent)">Maker</span></span>
       <a href="#how" style="color:var(--color-text);text-decoration:none">How it works</a>
       <a href="#pricing" style="color:var(--color-text);text-decoration:none">Pricing</a>
       <a href="#faq" style="color:var(--color-text);text-decoration:none">FAQ</a>
@@ -106,8 +106,8 @@
             <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;line-height:1.05;text-transform:uppercase">Building supply chains that hold up under pressure.</span>
             <span style="height:6px;width:90%;background:var(--color-neutral-300)"></span><span style="height:6px;width:70%;background:var(--color-neutral-300)"></span>
           </div>
-          <h3 style="margin:0;font-size:28px;text-transform:uppercase">Review your draft</h3>
-          <span style="color:var(--color-neutral-800)">CEOMaker writes a first version in a measured, professional voice. Edit any line, colour or section order.</span>
+          <h3 style="margin:0;font-size:28px;text-transform:uppercase">Review your draft</h3><span style="color:var(--color-neutral-800)">CEOMaker writes a first version in a measured, professional voice. Edit any line, colour or section order.</span>
+          
         </div>
         <div data-reveal="" data-delay="220" class="blueprint" style="background:var(--color-neutral-100);padding:28px;display:flex;flex-direction:column;gap:18px;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md)">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -264,9 +264,9 @@
     <div class="blueprint" style="background:var(--color-neutral-100);box-shadow:var(--shadow-md)">
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
       <div style="height:32px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)">{{ address }}.ceomaker.com</div>
-      <div ref="{{ frameRef }}" style="height:560px;overflow:hidden"><div style="width:1280px;zoom:{{ zoom }};pointer-events:none"><dc-import name="PortfolioTemplate" template="meridian" content="{{ preview }}" hint-size="1280px,1200px"></dc-import></div></div>
+      <div ref="{{ frameRef }}" data-pv="" style="height:560px;overflow:hidden;background:#fbfbfa"><div data-pv-move="" style="transition:transform .9s cubic-bezier(.2,.7,.2,1);transform:translateY({{ pvY }})"><div style="width:1280px;zoom:{{ zoom }};pointer-events:none"><dc-import name="Meridian" device="desktop" draft="{{ true }}" content="{{ draft }}" hint-size="1280px,1400px"></dc-import></div></div></div>
     </div>
-    <span style="font-size:14px;color:var(--color-neutral-700)">A rough preview. The full draft is written after you choose a template.</span>
+    <span style="font-size:14px;color:var(--color-neutral-700)">Only what you've chosen or typed. Grey lines are written for you after you choose a template.</span>
   </div>
 </div>
 </sc-if>
@@ -471,6 +471,11 @@
                 <sc-for list="{{ linkQuick }}" as="q" hint-placeholder-count="4"><button class="btn btn-secondary" style="font-size:12px;padding:4px 10px;background:var(--color-neutral-100)" onClick="{{ q.add }}">+ {{ q.label }}</button></sc-for>
               </div>
             </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:12px;color:var(--color-neutral-700)">Contact form</span>
+              <div class="seg" style="width:100%;display:grid;grid-template-columns:1fr 1fr"><sc-for list="{{ formOpts }}" as="fo" hint-placeholder-count="2"><label class="seg-opt" style="justify-content:center"><input type="radio" name="cform" checked="{{ fo.on }}" onChange="{{ fo.pick }}">{{ fo.label }}</label></sc-for></div>
+              <span style="font-size:12px;color:var(--color-neutral-600)">{{ formHint }}</span>
+            </div>
           </sc-if>
         </div>
       </sc-if>
@@ -614,10 +619,12 @@
 </sc-if>
 
 <!-- prototype screen switcher -->
+<sc-if value="{{ showJumps }}" hint-placeholder-val="{{ true }}">
 <div style="position:fixed;left:12px;bottom:12px;z-index:60;display:flex;align-items:center;gap:2px;padding:4px;background:var(--color-neutral-100);border:1px solid var(--color-divider);box-shadow:var(--shadow-md);font-size:12px;max-width:calc(100vw - 24px);overflow-x:auto">
   <span style="padding:0 8px;color:var(--color-neutral-600);white-space:nowrap">Screens</span>
   <sc-for list="{{ jumps }}" as="j" hint-placeholder-count="10"><button onClick="{{ j.go }}" style="all:unset;cursor:pointer;white-space:nowrap;padding:5px 9px;background:{{ j.bg }};color:{{ j.color }};transition:background .2s">{{ j.label }}</button></sc-for>
 </div>
+</sc-if>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
@@ -631,7 +638,7 @@ const VOICES = [
   { label: "Bold", sample: "Short sentences, strong claims. Suits founders." }
 ];
 const TEMPLATES = [
-  { key: "meridian", name: "Meridian", desc: "Editorial ivory and a serif voice. For chief executives and chairs." },
+  { key: "meridian", name: "Meridian", desc: "A serif masthead on white with a monogram seal. For chief executives and chairs." },
   { key: "aurora", name: "Aurora", desc: "Soft light, rounded cards, a floating profile. For founders." },
   { key: "obsidian", name: "Obsidian", desc: "Black and champagne, a framed portrait. For investors." },
   { key: "monument", name: "Monument", desc: "Your name as the headline, in cobalt. For operators." },
@@ -654,7 +661,7 @@ const DEMO_ANSWERS = { role: "Chief executive", industry: "Logistics", stage: "M
 const JUMPS = [["landing", "Landing"], ["flow", "Questions"], ["login", "Sign in"], ["build", "Templates"], ["generating", "Generating"], ["editor", "Editor"], ["publish", "Publish"], ["dashboard", "Dashboard"], ["notlive", "Not live"], ["paused", "Paused"]];
 const EASE = "cubic-bezier(.2,.7,.2,1)";
 const PALETTES = {
-  meridian: [["Ivory", "#f7f4ee", "#1a1a1a", "#8a6d3b"], ["Navy & brass", "#f5f3ee", "#14213d", "#a47e3b"], ["Oxford", "#f4f1ea", "#1c2b39", "#7a2e2e"], ["Sage", "#f2f1ea", "#1f2a24", "#4d6b53"], ["Stone", "#efece6", "#2a2826", "#6b5b4b"], ["Night edition", "#14120f", "#f1ece3", "#c9a86a"]],
+  meridian: [["Navy", "#fbfbfa", "#16181b", "#1f3a5f"], ["Bottle green", "#fbfbfa", "#161917", "#1e4a3a"], ["Oxblood", "#fbfaf8", "#1b1717", "#6d2433"], ["Graphite", "#ffffff", "#111111", "#3b4048"], ["Ivory", "#f7f4ee", "#1a1a1a", "#7a5f2e"], ["Night", "#111316", "#ecebe6", "#a9bfdc"]],
   aurora: [["Indigo", "#fbfbfd", "#0f1222", "#4f46e5"], ["Ocean", "#f8fbfd", "#0b1b2b", "#0284c7"], ["Emerald", "#fafcfb", "#0c1f17", "#059669"], ["Coral", "#fdfbfa", "#1f1210", "#e11d48"], ["Graphite", "#fafafa", "#111111", "#3f3f46"], ["Midnight", "#0c0e1a", "#eef0fa", "#818cf8"]],
   obsidian: [["Champagne", "#0b0b0c", "#f2efe9", "#c9a86a"], ["Midnight", "#0a0f1c", "#eef1f7", "#8fb3ff"], ["Bordeaux", "#120a0c", "#f4ece9", "#c2575f"], ["Emerald night", "#08110e", "#e9f2ee", "#6fcf97"], ["Platinum", "#0c0c0d", "#f2f2f2", "#bfc3c9"], ["Daylight", "#f6f3ee", "#141414", "#9a7b45"]],
   monument: [["Cobalt", "#f2f2ee", "#0a0a0a", "#1f3bff"], ["Signal", "#f2f2ee", "#0a0a0a", "#ff4d00"], ["Forest", "#f0f1ec", "#0b120d", "#0f7b3a"], ["Oxblood", "#efe9df", "#111111", "#b3261e"], ["Acid night", "#0b0b0b", "#f2f2ee", "#c8ff00"], ["Mono", "#ffffff", "#000000", "#000000"]],
@@ -666,6 +673,7 @@ const lumH = h => { const n = parseInt(h.slice(1), 16), f = v => { v /= 255; ret
 const ratio = (a, b) => { const x = lumH(a), y = lumH(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
 const QUICK = [["LinkedIn", "https://www.linkedin.com/in/"], ["X", "https://x.com/"], ["Company site", "https://"], ["Book a call", "https://"]];
 const linkMsg = h => !h ? ["Add a URL", "var(--color-neutral-600)"] : /^(https?:\/\/[^\s]+\.[^\s]+|mailto:[^\s@]+@[^\s@]+|tel:[+\d][\d\s-]+|#[\w-]+)$/i.test(h) ? ["Opens in a new tab", "var(--color-accent-700)"] : ["Use a full address starting with https://", "#a4402a"];
+const TOPICS = { "Speaking invitations": "Speaking", "Board and advisory roles": "Board and advisory", "Investor relations": "Investors", "Press and media": "Press", "Attracting talent": "Careers" };
 const STEP_NAMES = ["Your role", "Your industry", "Your organisation", "What the site is for", "Voice and details"];
 
 class Component extends DCLogic {
@@ -695,11 +703,32 @@ class Component extends DCLogic {
       root.querySelectorAll("[data-marquee]").forEach(el => { if (el.__mq) return; el.__mq = el.animate([{ transform: "translateX(0)" }, { transform: "translateX(-50%)" }], { duration: 38000, iterations: Infinity }); });
     });
   }
-  componentDidMount() { this.setupMotion(); }
+  componentDidMount() {
+    const p = this.props || {};
+    if (p.view || p.step != null || p.answers) this.setState(st => ({ view: p.view || st.view, step: p.step ?? st.step, a: { ...st.a, ...(p.answers || {}) } }));
+    this.setupMotion();
+    [300, 900, 1800].forEach(ms => setTimeout(() => this.focusPreview(), ms));
+  }
+  focusPreview() {
+    clearTimeout(this._fp);
+    this._fp = setTimeout(() => {
+      const RT = this.rootEl || document, box = RT.querySelector("[data-pv]"), mv = RT.querySelector("[data-pv-move]");
+      if (!box || !mv) return;
+      let y = 0;
+      if (this.state.view === "flow" && this.state.step === 3) {
+        const t = mv.querySelector('[data-sec="contact"]');
+        const k = box.getBoundingClientRect().height / (box.offsetHeight || 1) || 1;
+        if (t) { const mr = mv.getBoundingClientRect(); y = Math.max(0, Math.min((t.getBoundingClientRect().top - mr.top) / k - 20, mr.height / k - box.offsetHeight)); }
+      }
+      const v = -Math.round(y) + "px";
+      if (v !== this.state.pvY) this.setState({ pvY: v });
+    }, 60);
+  }
   componentDidUpdate(pp, ps) {
     const s = this.state;
     this.observeZoom(); clearTimeout(this._zt); this._zt = setTimeout(() => this.observeZoom(), 120);
     if (ps.view !== s.view) { this.setupMotion(); if (s.view === "generating") this.runGen(); }
+    if (ps.step !== s.step || ps.a.goals !== s.a.goals || ps.view !== s.view) this.focusPreview();
     if (ps.step !== s.step && s.view === "flow") this.pop("[data-step]", [{ opacity: 0, transform: "translateX(26px)" }, { opacity: 1, transform: "none" }], 460);
     if (ps.plan !== s.plan) this.pop("[data-price]", [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], 380);
     if (ps.sel !== s.sel || ps.tab !== s.tab) this.pop("[data-panel]", [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], 340);
@@ -720,6 +749,7 @@ class Component extends DCLogic {
     const readPhoto = file => { if (!file || !/^image\//.test(file.type)) return; if (file.size > 8e6) { this.setState({ photoErr: "That image is over 8 MB. Try a smaller one." }); return; } const r = new FileReader(); r.onload = () => { this.setState(st => ({ photoErr: null, dragOver: false, content: { ...(st.content || content), photo: r.result } })); this.saved(); }; r.readAsDataURL(file); };
     const cr = ratio(theme.ink, theme.bg);
     const setC = (k, v) => { this.setState(st => ({ content: { ...(st.content || content), [k]: v } })); this.saved(); };
+    const formOn = !(content.form && content.form.enabled === false);
     const ce = {}; ["eyebrow", "headline", "subheadline", "cta", "ctaHref", "aboutA", "aboutC", "blurb", "email"].forEach(k => ce[k] = e => setC(k, e.target.value));
     const stats = content.stats || DEF.stats;
     const setStat = (i, k, v) => setC("stats", stats.map((x, j) => j === i ? { ...x, [k]: v } : x));
@@ -739,6 +769,8 @@ class Component extends DCLogic {
     };
     return {
       content, ce, hide: s.hide, template: s.template, spinner, theme,
+      formOpts: [["on", "On"], ["off", "Off"]].map(([k, label]) => ({ label, on: (k === "on") === formOn, pick: () => setC("form", { ...(content.form || {}), enabled: k === "on" }) })),
+      formHint: formOn ? "Visitors can write to you without seeing your email address." : "Visitors use your email and links instead.",
       ctaHref: content.ctaHref || "#contact",
       hasPhoto: !!content.photo, photoThumb: content.photo ? "url(\"" + content.photo + "\")" : "none", photoCta: content.photo ? "Replace photo" : "Upload photo",
       photoHint: s.photoErr || (s.dragOver ? "Drop to use this photo" : content.photo ? "Shown wherever the template has a portrait." : "Drag a headshot here. JPG, PNG or WebP, up to 8 MB."),
@@ -815,6 +847,10 @@ class Component extends DCLogic {
       headline: (a.voice === "Bold" ? "I build " : "Building ") + phrase + ".",
       subheadline: "I lead " + (a.stage ? a.stage.toLowerCase().replace("early-stage startup", "an early-stage company").replace(/^(scale-up|mid-size|enterprise)/, "a $1 business") : "a growing organisation") + (a.industry ? " in " + a.industry.toLowerCase() : "") + ". " + (a.goals.length ? "Open to " + a.goals.slice(0, 2).map(g => g.toLowerCase()).join(" and ") + "." : "")
     };
+    const topics = GOALS.filter(g => a.goals.includes(g) && TOPICS[g]).map(g => TOPICS[g]);
+    const form = { enabled: true, topics: topics.length ? [...topics, "Something else"] : [] };
+    preview.form = form;
+    const draft = { name: a.name.trim(), eyebrow: [a.role && a.role !== "Something else" ? a.role : "", a.org.trim()].filter(Boolean).join(", "), form };
     const address = s.address ?? (a.name.trim().split(/\s+/)[0] || "yourname").toLowerCase().replace(/[^a-z0-9-]/g, "");
     const start = () => this.go("flow", { step: 0 });
     return {
@@ -822,7 +858,7 @@ class Component extends DCLogic {
       is: { landing: s.view === "landing", flow: s.view === "flow", login: s.view === "login", build: s.view === "build", generating: s.view === "generating", editor: s.view === "editor", dashboard: s.view === "dashboard", status: s.view === "notlive" || s.view === "paused" },
       heroWords: "A personal website that matches your standing.".split(" ").map((w, i) => ({ t: w, d: 90 + i * 70 })),
       marquee: [0, 1].flatMap(() => ["Chief executives", "Founders", "Board members", "Investors", "Managing partners", "Chief financial officers", "Non-executive directors"]),
-      a, q, preview, address, initials,
+      pvY: s.pvY || "0px", a, q, preview, draft, address, initials, showJumps: !(this.props && this.props.bare),
       start, exit: () => this.go("landing"),
       openLogin: () => this.go("login", { loginMode: "form", fromLanding: true }),
       heroRoles: ROLES.map(l => ({ label: l, pick: () => { this.setA({ role: l }); this.go("flow", { step: 1 }); } })),
