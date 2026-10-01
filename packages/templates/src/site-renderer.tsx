@@ -11,6 +11,7 @@ import {
 import { buildSiteModel } from "./model";
 import { getTemplate } from "./registry";
 import { themeToStyle } from "./theme-style";
+import type { SendContactMessage } from "./types";
 
 export interface TemplateViewProps {
   templateKey: TemplateKey;
@@ -23,6 +24,10 @@ export interface TemplateViewProps {
   still?: boolean;
   /** Mark text for in-place editing (the editor's preview). */
   editable?: boolean;
+  /** Only the person's own answers, with placeholders for the rest (the questions screen). */
+  draft?: boolean;
+  /** Live sites only: delivers contact form messages. */
+  sendMessage?: SendContactMessage | undefined;
 }
 
 /** Renders validated content with a template. Used live and by the editor's previews. */
@@ -34,6 +39,8 @@ export function TemplateView({
   preview = false,
   still = false,
   editable = false,
+  draft = false,
+  sendMessage,
 }: TemplateViewProps) {
   const Template = getTemplate(templateKey).Component;
   return (
@@ -42,7 +49,12 @@ export function TemplateView({
       data-still={still || undefined}
       style={{ ...themeToStyle(colors), minHeight: preview ? undefined : "100dvh" }}
     >
-      <Template model={buildSiteModel(content, { editable })} publishedAt={publishedAt} />
+      <Template
+        model={buildSiteModel(content, { editable, draft })}
+        publishedAt={publishedAt}
+        colors={colors}
+        sendMessage={sendMessage}
+      />
     </div>
   );
 }
@@ -53,13 +65,20 @@ export interface SiteRendererProps {
   theme: unknown;
   content: unknown;
   publishedAt: Date;
+  sendMessage?: SendContactMessage | undefined;
 }
 
 /**
  * Renders a stored site version. Inputs are untrusted database JSON: content is parsed leniently
  * (bad sections are skipped) and invalid colours fall back to the template's defaults.
  */
-export function SiteRenderer({ templateKey, theme, content, publishedAt }: SiteRendererProps) {
+export function SiteRenderer({
+  templateKey,
+  theme,
+  content,
+  publishedAt,
+  sendMessage,
+}: SiteRendererProps) {
   const key = normalizeTemplateKey(templateKey) ?? DEFAULT_TEMPLATE_KEY;
   return (
     <TemplateView
@@ -67,6 +86,7 @@ export function SiteRenderer({ templateKey, theme, content, publishedAt }: SiteR
       colors={resolveSiteColors(parseThemeSettingsForRender(theme), key)}
       content={parseSiteContentForRender(content)}
       publishedAt={publishedAt}
+      sendMessage={sendMessage}
     />
   );
 }

@@ -2,14 +2,13 @@
 
 import {
   defaultColors,
-  demoSiteContent,
   encodeAnswers,
+  formTopicsFromGoals,
   GOAL_OPTIONS,
   INDUSTRY_OPTIONS,
   ONBOARDING_STEP_NAMES,
   onboardingAnswersSchema,
-  parseSiteContentForRender,
-  previewFromAnswers,
+  roleLabel,
   ROLE_OPTIONS,
   SOURCE_OPTIONS,
   STAGE_OPTIONS,
@@ -21,7 +20,7 @@ import {
 import { TemplateView } from "@ceomaker/templates";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from "react";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
 import { finishOnboarding } from "./actions";
@@ -31,24 +30,81 @@ const LAST_STEP = ONBOARDING_STEP_NAMES.length - 1;
 const FRESH_ANSWERS: AnswersDraft = { voice: "Measured", goals: [], sources: [] };
 const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
-/** The questions screen preview: Meridian with the demo body and the user's own hero. */
-function previewContent(answers: AnswersDraft): RenderableSiteContent {
-  const preview = previewFromAnswers(answers);
-  const base = parseSiteContentForRender(demoSiteContent);
+const GOALS_STEP = ONBOARDING_STEP_NAMES.indexOf("What the site is for");
+const PREVIEW_HEIGHT = 560;
+
+/**
+ * The questions screen preview: Meridian in draft mode with only what the person has chosen or
+ * typed. Nothing is made up; everything else is a grey line until the draft is written.
+ */
+function draftContent(answers: AnswersDraft): RenderableSiteContent {
+  const title = [roleLabel(answers.role), answers.org?.trim()].filter(Boolean).join(", ");
   return {
-    ...base,
-    meta: base.meta ? { ...base.meta, name: preview.name, company: preview.company } : null,
-    sections: base.sections.map((section) =>
-      section.type === "hero"
-        ? {
-            ...section,
-            eyebrow: preview.eyebrow,
-            headline: preview.headline,
-            subheadline: preview.subheadline,
-          }
-        : section,
-    ),
+    meta: { name: answers.name?.trim() ?? "", affiliations: [], keywords: [] },
+    sections: [
+      { id: "hero", type: "hero", visible: true, eyebrow: title, headline: "" },
+      {
+        id: "contact",
+        type: "contact",
+        visible: true,
+        links: [],
+        form: { enabled: true, topics: formTopicsFromGoals(answers.goals ?? []) },
+      },
+    ],
+    droppedSections: 0,
   };
+}
+
+/**
+ * Slides the preview so the contact form is in view while goals are picked (they become its
+ * topics), and back to the top on other steps. Offsets are in the template's own 1280px units.
+ */
+function DraftPreview({
+  content,
+  showForm,
+}: {
+  content: RenderableSiteContent;
+  showForm: boolean;
+}) {
+  const move = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState(0);
+
+  useLayoutEffect(() => {
+    const element = move.current;
+    if (!element) return;
+    const measure = () => {
+      const target = element.querySelector<HTMLElement>("#contact");
+      if (!showForm || !target) return setOffset(0);
+      const box = element.getBoundingClientRect();
+      const scale = box.height / element.offsetHeight || 1;
+      const top = (target.getBoundingClientRect().top - box.top) / scale - 20;
+      const bottom = element.offsetHeight - PREVIEW_HEIGHT / scale;
+      setOffset(Math.round(Math.max(0, Math.min(top, bottom))));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [showForm, content]);
+
+  return (
+    <ScaledFrame initialZoom={0.45} style={{ height: PREVIEW_HEIGHT }}>
+      <div
+        ref={move}
+        className="motion-safe:transition-transform motion-safe:duration-[900ms] motion-safe:ease-[cubic-bezier(.2,.7,.2,1)]"
+        style={{ transform: `translateY(${-offset}px)` }}
+      >
+        <TemplateView
+          templateKey="meridian"
+          colors={defaultColors("meridian")}
+          content={content}
+          publishedAt={PREVIEW_DATE}
+          preview
+          draft
+        />
+      </div>
+    </ScaledFrame>
+  );
 }
 
 function Chip({
@@ -186,7 +242,7 @@ export function QuestionsFlow({
   const next = () => (step < LAST_STEP ? setStep(step + 1) : finish());
   const back = () => (step > 0 ? setStep(step - 1) : router.push("/"));
 
-  const preview = useMemo(() => previewContent(answers), [answers]);
+  const preview = useMemo(() => draftContent(answers), [answers]);
   const address = suggestSubdomains(answers.name ?? "")[0] ?? "yourname";
 
   const question = [
@@ -428,18 +484,11 @@ export function QuestionsFlow({
         <span className="kicker">Your site, taking shape</span>
         <Blueprint className="bg-neutral-100 shadow-md">
           <AddressBar address={`${addressPrefix}${address}${addressSuffix}`} />
-          <ScaledFrame initialZoom={0.45} style={{ height: 560 }}>
-            <TemplateView
-              templateKey="meridian"
-              colors={defaultColors("meridian")}
-              content={preview}
-              publishedAt={PREVIEW_DATE}
-              preview
-            />
-          </ScaledFrame>
+          <DraftPreview content={preview} showForm={step === GOALS_STEP} />
         </Blueprint>
         <span className="text-sm text-neutral-700">
-          A rough preview. The full draft is written after you choose a template.
+          Only what you&apos;ve chosen or typed. Grey lines are written for you after you choose a
+          template.
         </span>
       </aside>
     </div>

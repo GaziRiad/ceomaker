@@ -4,6 +4,7 @@ export * from "./templates";
 export * from "./theme";
 export * from "./sections";
 export * from "./site";
+export * from "./contact";
 export * from "./subdomain";
 export * from "./onboarding";
 export * from "./fixtures/demo-site";

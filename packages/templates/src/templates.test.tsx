@@ -227,7 +227,7 @@ describe("site renderer", () => {
         publishedAt={publishedAt}
       />,
     );
-    expect(html).toContain("--site-bg:#f7f4ee");
+    expect(html).toContain("--site-bg:#fbfbfa");
     expect(html).not.toContain("javascript");
     expect(getTemplate("executive").key).toBe("meridian");
     expect(getTemplate("nonsense").key).toBe("meridian");

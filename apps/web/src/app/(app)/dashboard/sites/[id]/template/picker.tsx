@@ -83,13 +83,12 @@ export function TemplatePicker({
           {templateList.map((template) => {
             const isSelected = template.key === selected;
             return (
-              <button
+              // The preview sits beside the radio, not inside it: templates contain their own
+              // buttons and forms, which can't be nested in a button. The radio's overlay makes
+              // the whole card clickable.
+              <div
                 key={template.key}
-                type="button"
-                role="radio"
-                aria-checked={isSelected}
-                onClick={() => setSelected(template.key)}
-                className="blueprint lift flex flex-col bg-neutral-100 text-left"
+                className="blueprint lift relative flex flex-col bg-neutral-100 text-left has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-accent"
                 style={{ borderColor: isSelected ? "var(--color-accent)" : undefined }}
               >
                 <i aria-hidden className="corner tl" />
@@ -110,7 +109,13 @@ export function TemplatePicker({
                     still
                   />
                 </ScaledFrame>
-                <span className="flex items-start gap-3 p-4">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => setSelected(template.key)}
+                  className="flex cursor-pointer items-start gap-3 p-4 text-left outline-none after:absolute after:inset-0 after:content-['']"
+                >
                   <span className="flex flex-1 flex-col gap-0.5">
                     <span className="font-heading text-[22px] font-semibold uppercase">
                       {template.name}
@@ -125,8 +130,8 @@ export function TemplatePicker({
                       background: isSelected ? "var(--color-accent)" : "transparent",
                     }}
                   />
-                </span>
-              </button>
+                </button>
+              </div>
             );
           })}
         </div>

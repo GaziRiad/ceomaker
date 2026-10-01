@@ -13,8 +13,9 @@ export const templates: Record<TemplateKey, TemplateDefinition> = {
     key: "meridian",
     name: "Meridian",
     description:
-      "Editorial ivory, a serif voice and numbered sections. For chief executives and chairs.",
-    tagline: "Editorial ivory and a serif voice. For chief executives and chairs.",
+      "A serif masthead on white with a monogram seal and a private contact form. For chief executives and chairs.",
+    tagline: "A serif masthead on white with a monogram seal. For chief executives and chairs.",
+    contactForm: true,
     Component: MeridianTemplate,
   },
   aurora: {
@@ -22,6 +23,7 @@ export const templates: Record<TemplateKey, TemplateDefinition> = {
     name: "Aurora",
     description: "Soft light, rounded cards and a floating profile. For founders and tech leaders.",
     tagline: "Soft light, rounded cards, a floating profile. For founders.",
+    contactForm: false,
     Component: AuroraTemplate,
   },
   obsidian: {
@@ -29,6 +31,7 @@ export const templates: Record<TemplateKey, TemplateDefinition> = {
     name: "Obsidian",
     description: "Black and champagne, a framed portrait. For investors and private enquiries.",
     tagline: "Black and champagne, a framed portrait. For investors.",
+    contactForm: false,
     Component: ObsidianTemplate,
   },
   monument: {
@@ -36,6 +39,7 @@ export const templates: Record<TemplateKey, TemplateDefinition> = {
     name: "Monument",
     description: "Your name as the headline, in cobalt. For operators who want to be remembered.",
     tagline: "Your name as the headline, in cobalt. For operators.",
+    contactForm: false,
     Component: MonumentTemplate,
   },
   bento: {
@@ -43,6 +47,7 @@ export const templates: Record<TemplateKey, TemplateDefinition> = {
     name: "Bento",
     description: "The whole profile in a single grid of cards. Scans in seconds.",
     tagline: "The whole profile in one grid of cards. Scans in seconds.",
+    contactForm: false,
     Component: BentoTemplate,
   },
   chronicle: {
@@ -50,6 +55,7 @@ export const templates: Record<TemplateKey, TemplateDefinition> = {
     name: "Chronicle",
     description: "A warm, long-form letter with a timeline. For writers, advisors and speakers.",
     tagline: "A warm, long-form letter with a timeline. For advisors and writers.",
+    contactForm: false,
     Component: ChronicleTemplate,
   },
 };

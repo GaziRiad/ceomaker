@@ -19,6 +19,12 @@ import { runMigrations } from "./migrate";
 import { finishAiUsage, startAiUsage } from "./queries/ai-usage";
 import { getMedia, insertMedia } from "./queries/media";
 import {
+  deleteContactMessage,
+  listContactMessages,
+  MESSAGE_LIMITS,
+  saveContactMessage,
+} from "./queries/messages";
+import {
   changeSubdomain,
   createSite,
   createSiteFromAnswers,
@@ -35,7 +41,7 @@ import {
   publishSite,
   saveDraft,
 } from "./queries/sites";
-import { aiUsage, media, retiredAddress, site, siteVersion, user } from "./schema";
+import { aiUsage, contactMessage, media, retiredAddress, site, siteVersion, user } from "./schema";
 
 const url = process.env.TEST_DATABASE_URL;
 
@@ -426,5 +432,43 @@ describe.skipIf(!url)("sites (integration)", () => {
     await publishSite(db, { userId: "alice", siteId: id });
     await db.delete(user).where(eq(user.id, "alice"));
     expect(await db.select().from(siteVersion)).toHaveLength(0);
+  });
+  it("keeps contact messages for the site's owner, within limits", async () => {
+    const { id: siteId } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    const message = {
+      name: "Jonas Weber",
+      email: "jonas@northgate.example",
+      organisation: "",
+      topic: "Board and advisory",
+      message: "Would value a conversation.",
+    };
+    const now = new Date("2026-06-01T12:00:00Z");
+    for (let index = 0; index < MESSAGE_LIMITS.perSenderPerHour; index += 1) {
+      const saved = await saveContactMessage(db, { siteId, message, senderKey: "k1", now });
+      expect(saved.ok).toBe(true);
+    }
+    expect(await saveContactMessage(db, { siteId, message, senderKey: "k1", now })).toEqual({
+      ok: false,
+      reason: "rate-limited",
+    });
+    // Someone else, or the same sender an hour later, still gets through.
+    expect((await saveContactMessage(db, { siteId, message, senderKey: "k2", now })).ok).toBe(true);
+    const later = new Date(now.getTime() + 61 * 60 * 1000);
+    expect(
+      (await saveContactMessage(db, { siteId, message, senderKey: "k1", now: later })).ok,
+    ).toBe(true);
+
+    const inbox = await listContactMessages(db, { userId: "alice", siteId });
+    expect(inbox).toHaveLength(MESSAGE_LIMITS.perSenderPerHour + 2);
+    expect(inbox[0]).toMatchObject({ name: "Jonas Weber", organisation: null });
+    expect(await listContactMessages(db, { userId: "mallory", siteId })).toEqual([]);
+
+    expect(await deleteContactMessage(db, { userId: "mallory", messageId: inbox[0]!.id })).toBe(
+      false,
+    );
+    expect(await deleteContactMessage(db, { userId: "alice", messageId: inbox[0]!.id })).toBe(true);
+
+    await deleteSite(db, { userId: "alice", siteId });
+    expect((await db.select().from(contactMessage)).length).toBe(0);
   });
 });

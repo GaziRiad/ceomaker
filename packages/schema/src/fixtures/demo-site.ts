@@ -150,6 +150,10 @@ export const demoSiteContent = {
         { label: "LinkedIn", href: "https://www.linkedin.com/", kind: "linkedin" },
         { label: "Meridian Freight Group", href: "https://example.com/", kind: "website" },
       ],
+      form: {
+        enabled: true,
+        topics: ["Speaking", "Board and advisory", "Press", "Something else"],
+      },
     },
   ],
 } satisfies SiteContentInput;

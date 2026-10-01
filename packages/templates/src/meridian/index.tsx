@@ -1,652 +1,578 @@
-import type { CSSProperties, ReactNode } from "react";
-import { fluid, FONTS } from "../fonts";
-import type { MiddleKind, SiteModel } from "../model";
-import {
-  ANCHORS,
-  ContactLink,
-  CtaLink,
-  editable,
-  mailto,
-  navItems,
-  Portrait,
-  sectionNumbers,
-  SkipLink,
-  Spans,
-} from "../shared";
-import type { TemplateProps } from "../types";
+import { useId, type CSSProperties, type ReactNode } from "react";
+import { FONTS } from "../fonts";
+import { linkProps } from "../links";
+import type { MiddleKind, ModelQuote, SiteModel } from "../model";
+import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink, Spans } from "../shared";
+import type { SendContactMessage, TemplateProps } from "../types";
+import { MeridianContactForm } from "./contact-form";
+import { longestWord, meridianRoleStyle, RING_CIRCUMFERENCE, ringText } from "./measure";
 
-// T1 Meridian: editorial ivory and a serif voice. For chief executives and chairs.
-
-const serif = FONTS.newsreader;
-const wrap: CSSProperties = {
-  maxWidth: 1200,
-  margin: "0 auto",
-  paddingInline: fluid(20, 56),
-};
-const label: CSSProperties = {
-  fontSize: 13,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "var(--site-accent)",
-};
-const sectionGap = fluid(72, 128);
+// T1 Meridian: editorial and neutral, a serif name and the seal. For chief executives and chairs.
+// Layout values live in styles.css (container queries); this file decides what is shown.
 
 const LABELS: Record<MiddleKind | "contact", string> = {
-  impact: "Impact",
   about: "About",
+  impact: "Impact",
   experience: "Experience",
   work: "Selected work",
   testimonials: "In their words",
   contact: "Contact",
 };
 
-function Numbered({
+/** Sections that get a link in the header, in the order they appear on the page. */
+const NAV_KINDS: readonly MiddleKind[] = ["about", "experience", "work"];
+
+function cx(...names: (string | false | null | undefined)[]): string {
+  return names.filter(Boolean).join(" ");
+}
+
+/** Soft grey line standing in for copy that will be written later (questions preview only). */
+function Placeholder({ className, style }: { className?: string; style?: CSSProperties }) {
+  return <span aria-hidden="true" className={cx("mer-ph", className)} style={style} />;
+}
+
+function PlaceholderLines({ widths, className }: { widths: readonly number[]; className: string }) {
+  return (
+    <span aria-hidden="true" className={cx("mer-ph-lines", className)}>
+      {widths.map((width, index) => (
+        <Placeholder key={index} style={{ width: `${width}%` }} />
+      ))}
+    </span>
+  );
+}
+
+function Header({ model }: { model: SiteModel }) {
+  const nav = model.order.filter((kind) => NAV_KINDS.includes(kind));
+  if (model.draft && !model.about) nav.unshift("about");
+  return (
+    <header className="mer-header">
+      <div className="mer-wrap mer-header-in">
+        <a href={`#${ANCHORS.top}`} className="mer-brand">
+          <span aria-hidden="true" className="mer-mark">
+            {model.initials}
+          </span>
+          {model.name ? (
+            <span
+              {...editable(model, model.fields.name)}
+              className={cx("mer-brand-name", model.draft && "mer-fill")}
+            >
+              {model.name}
+            </span>
+          ) : model.draft ? (
+            <Placeholder className="mer-ph-brand" />
+          ) : null}
+        </a>
+        <nav aria-label="Sections" className="mer-nav">
+          {nav.map((kind) => (
+            <a key={kind} href={`#${ANCHORS[kind]}`}>
+              {LABELS[kind]}
+            </a>
+          ))}
+        </nav>
+        <a href={`#${ANCHORS.contact}`} className="mer-header-cta">
+          Contact
+        </a>
+      </div>
+    </header>
+  );
+}
+
+function RingLine({
   id,
-  number,
-  title,
-  children,
-  style,
+  className,
+  fontSize,
+  text,
 }: {
   id: string;
-  number: string | undefined;
-  title: string;
-  children: ReactNode;
-  style?: CSSProperties;
+  className: string;
+  fontSize: number;
+  text: string;
 }) {
   return (
-    <section
-      id={id}
-      aria-label={title}
-      className="grid grid-cols-1 gap-4 @3xl:grid-cols-[3fr_9fr] @3xl:gap-12"
-      style={{ ...wrap, paddingTop: sectionGap, ...style }}
-    >
-      <div style={label}>{number ? `${number} — ${title}` : title}</div>
-      <div>{children}</div>
-    </section>
+    <text className={className} style={{ fontFamily: FONTS.inter, fontWeight: 500, fontSize }}>
+      <textPath href={`#${id}`} textLength={Math.round(RING_CIRCUMFERENCE)} lengthAdjust="spacing">
+        {text}
+      </textPath>
+    </text>
+  );
+}
+
+/**
+ * The signature: two accent hairlines with the name and location set round the ring, and the
+ * initials (or the photo) in the middle. Phone and desktop set the ring text at different sizes,
+ * so both are rendered and the stylesheet shows one.
+ */
+function Seal({ model }: { model: SiteModel }) {
+  const pathId = `mer-ring-${useId().replace(/[^\w-]/g, "")}`;
+  const phone = ringText(model.name, model.location, 19);
+  const desktop = ringText(model.name, model.location, 12.5);
+  const image = model.hero.image;
+  return (
+    <div className="mer-seal">
+      <svg viewBox="0 0 320 320" aria-hidden="true" focusable="false">
+        <defs>
+          <path id={pathId} d="M 160 160 m -138 0 a 138 138 0 1 1 276 0 a 138 138 0 1 1 -276 0" />
+        </defs>
+        <circle cx="160" cy="160" r="159.5" />
+        <circle cx="160" cy="160" r="116.5" />
+        <g className="mer-ring">
+          <g className="mer-spin">
+            {phone ? <RingLine id={pathId} className="mer-ring-phone" {...phone} /> : null}
+            {desktop ? <RingLine id={pathId} className="mer-ring-desktop" {...desktop} /> : null}
+          </g>
+        </g>
+      </svg>
+      <div
+        // A name appearing in the questions preview replays the fade-in.
+        key={model.name ? "named" : "unnamed"}
+        className={cx("mer-seal-face", model.draft && "mer-fill")}
+      >
+        <span aria-hidden="true" className="mer-seal-initials">
+          {model.initials}
+        </span>
+        {image ? (
+          // Templates are framework-agnostic, so a plain <img> rather than next/image.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={image.src}
+            alt={image.alt}
+            loading="eager"
+            decoding="async"
+            className="mer-seal-photo"
+          />
+        ) : null}
+      </div>
+    </div>
   );
 }
 
 function Hero({ model }: { model: SiteModel }) {
-  const { hero } = model;
+  const { hero, draft } = model;
+  // Without an eyebrow, the title line falls back to role and organisation.
+  const title = hero.eyebrow || [model.role, model.company].filter(Boolean).join(", ");
+  const entrance = draft ? "mer-fill" : "mer-in";
+  let step = 0;
+  const delay = () => ({ "--mer-delay": `${60 + step++ * 90}ms` }) as CSSProperties;
+
   return (
-    <section
-      className="grid grid-cols-1 items-end gap-12 @3xl:grid-cols-[7fr_5fr] @3xl:gap-[72px]"
-      style={{ ...wrap, paddingTop: fluid(32, 56) }}
-    >
-      <div>
-        {hero.eyebrow ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-              fontSize: 12,
-              fontWeight: 500,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--site-accent)",
-            }}
-          >
-            <span
-              aria-hidden
-              style={{ width: 32, height: 1, background: "var(--site-accent)", flex: "none" }}
-            />
-            <span {...editable(model, hero.fields.eyebrow)}>{hero.eyebrow}</span>
-          </div>
+    <section aria-label="Introduction" className="mer-wrap mer-hero">
+      <div className="mer-hero-text">
+        {title || model.location ? (
+          <p className={cx("mer-kicker", entrance)} style={delay()}>
+            {title ? (
+              <span {...(hero.eyebrow ? editable(model, hero.fields.eyebrow) : {})}>{title}</span>
+            ) : null}
+            {title && model.location ? " · " : null}
+            {model.location ? (
+              <span {...editable(model, model.fields.location)}>{model.location}</span>
+            ) : null}
+          </p>
+        ) : draft ? (
+          <Placeholder className="mer-ph-kicker" />
         ) : null}
-        <h1
-          {...editable(model, hero.fields.headline)}
-          style={{
-            margin: "28px 0 0",
-            fontFamily: serif,
-            fontWeight: 400,
-            fontSize: fluid(44, 84),
-            lineHeight: 1.02,
-            letterSpacing: "-0.025em",
-            textWrap: "balance",
-          }}
-        >
-          {hero.headline}
-        </h1>
+        {model.name ? (
+          <h1
+            {...editable(model, model.fields.name)}
+            className={cx("mer-name", entrance)}
+            style={delay()}
+          >
+            {model.name}
+          </h1>
+        ) : draft ? (
+          <Placeholder className="mer-ph-name" />
+        ) : null}
+        {hero.headline ? (
+          <p
+            {...editable(model, hero.fields.headline)}
+            className={cx("mer-statement", entrance)}
+            style={delay()}
+          >
+            {hero.headline}
+          </p>
+        ) : draft ? (
+          <PlaceholderLines widths={[92, 56]} className="mer-ph-statement" />
+        ) : null}
         {hero.subheadline ? (
           <p
             {...editable(model, hero.fields.subheadline)}
-            style={{
-              margin: "32px 0 0",
-              maxWidth: 560,
-              fontSize: fluid(17, 19),
-              lineHeight: 1.6,
-              color: "var(--site-muted)",
-              textWrap: "pretty",
-            }}
+            className={cx("mer-intro", entrance)}
+            style={delay()}
           >
             {hero.subheadline}
           </p>
         ) : null}
-        <div
-          style={{
-            marginTop: 40,
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 28,
-            fontSize: 15,
-          }}
-        >
+        <div className={cx("mer-actions", !draft && "mer-in")} style={delay()}>
           {hero.cta ? (
-            <CtaLink
-              link={hero.cta}
-              className="transition-opacity hover:opacity-85"
-              style={{
-                padding: "16px 26px",
-                background: "var(--site-ink)",
-                color: "var(--site-bg)",
-                borderRadius: 2,
-              }}
-            >
+            <CtaLink link={hero.cta} className="mer-button">
               <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span>
+              <span aria-hidden="true">→</span>
             </CtaLink>
-          ) : null}
-          {model.about ? (
-            <a
-              href={`#${ANCHORS.about}`}
-              style={{ borderBottom: "1px solid var(--site-ink)", paddingBottom: 3 }}
-            >
-              Read the profile
+          ) : (
+            <a href={`#${ANCHORS.contact}`} className="mer-button">
+              Contact<span aria-hidden="true">→</span>
             </a>
-          ) : null}
+          )}
         </div>
       </div>
-      <div className="mx-auto w-full max-w-[420px] @3xl:max-w-none">
-        <Portrait
-          image={hero.image}
-          style={{
-            aspectRatio: "4 / 5",
-            background:
-              "linear-gradient(165deg, color-mix(in srgb, var(--site-accent) 22%, var(--site-bg)), color-mix(in srgb, var(--site-accent) 45%, var(--site-bg)))",
-          }}
-        >
-          <span
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: 28,
-              bottom: 10,
-              fontFamily: serif,
-              fontSize: "clamp(120px, 15.625cqw, 200px)",
-              lineHeight: 1,
-              color: "var(--site-bg)",
-              opacity: 0.55,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            {model.initials}
-          </span>
-        </Portrait>
-        <div
-          style={{
-            marginTop: 14,
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 16,
-            fontSize: 13,
-            color: "var(--site-muted)",
-          }}
-        >
-          <span
-            {...editable(model, model.fields.name)}
-            style={{ fontFamily: serif, fontStyle: "italic", fontSize: 15 }}
-          >
-            {model.name}
-          </span>
-          <span {...editable(model, model.fields.location)}>{model.location}</span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Stats({ model }: { model: SiteModel }) {
-  return (
-    <section id={ANCHORS.impact} aria-label="Impact" style={{ ...wrap, paddingTop: fluid(64, 88) }}>
-      <div
-        className="grid grid-cols-2 gap-x-6 gap-y-2 @3xl:grid-cols-4 @3xl:gap-10"
-        style={{ borderTop: "1px solid var(--site-ink)" }}
-      >
-        {model.stats.map((stat, index) => (
-          <div key={index} style={{ paddingTop: 28 }}>
-            <div
-              {...editable(model, stat.fields.value)}
-              style={{
-                fontFamily: serif,
-                fontSize: fluid(40, 60),
-                lineHeight: 1,
-                letterSpacing: "-0.03em",
-              }}
-            >
-              {stat.value}
-            </div>
-            <div
-              {...editable(model, stat.fields.label)}
-              style={{ marginTop: 12, fontSize: 14, color: "var(--site-muted)", maxWidth: 200 }}
-            >
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
+      <Seal model={model} />
     </section>
   );
 }
 
 function Affiliations({ model }: { model: SiteModel }) {
+  const last = model.affiliations.length - 1;
   return (
-    <section
-      aria-label="Boards and affiliations"
-      style={{
-        ...wrap,
-        paddingTop: fluid(48, 72),
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "baseline",
-        gap: "10px 22px",
-      }}
-    >
-      <span
-        style={{
-          fontSize: 12,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: "var(--site-accent)",
-          marginRight: 12,
-        }}
-      >
-        Boards &amp; affiliations
-      </span>
-      {model.affiliations.map((name, index) => (
-        <span key={index} style={{ display: "contents" }}>
-          <span
-            {...editable(model, model.fields.affiliations[index]!)}
-            style={{
-              fontFamily: serif,
-              fontStyle: "italic",
-              fontSize: fluid(19, 22),
-              color: "var(--site-muted)",
-            }}
-          >
-            {name}
+    <section aria-label="Boards and affiliations" className="mer-wrap mer-affiliations">
+      <div className="mer-affiliations-row">
+        <span className="mer-label mer-affiliations-label">Boards &amp; affiliations</span>
+        {model.affiliations.map((name, index) => (
+          <span key={index} className="mer-affiliation">
+            <span {...editable(model, model.fields.affiliations[index]!)}>{name}</span>
+            {index < last ? (
+              <span aria-hidden="true" className="mer-affiliation-dot">
+                ·
+              </span>
+            ) : null}
           </span>
-          <span
-            aria-hidden
-            style={{ color: "color-mix(in srgb, var(--site-accent) 45%, var(--site-bg))" }}
-          >
-            ·
-          </span>
-        </span>
-      ))}
+        ))}
+      </div>
     </section>
   );
 }
 
-function About({ model, number }: { model: SiteModel; number?: string }) {
-  const about = model.about!;
+function Section({ kind, children }: { kind: MiddleKind | "contact"; children: ReactNode }) {
   return (
-    <Numbered id={ANCHORS.about} number={number} title={LABELS.about}>
+    <section id={ANCHORS[kind]} className={cx("mer-wrap mer-section", `mer-${kind}`)}>
+      <div className="mer-columns mer-section-grid">
+        <h2 className="mer-label">{LABELS[kind]}</h2>
+        <div className="mer-content">{children}</div>
+      </div>
+    </section>
+  );
+}
+
+function About({ model }: { model: SiteModel }) {
+  const about = model.about;
+  if (!about) {
+    return (
+      <Section kind="about">
+        <PlaceholderLines widths={[100, 94, 97, 48]} className="mer-ph-about" />
+      </Section>
+    );
+  }
+  const leadLength = about.lead.reduce((length, span) => length + span.text.length, 0);
+  return (
+    <Section kind="about">
       <p
         {...editable(model, about.fields.lead)}
-        style={{
-          margin: 0,
-          fontFamily: serif,
-          fontSize: fluid(26, 36),
-          lineHeight: 1.32,
-          letterSpacing: "-0.01em",
-          textWrap: "pretty",
-        }}
+        className={cx("mer-lede", model.draft && "mer-fill")}
+        data-long={leadLength > 320 || undefined}
       >
         <Spans spans={about.lead} emphasis={(text, key) => <em key={key}>{text}</em>} />
       </p>
       {about.rest.map((paragraph, index) => (
-        <p
-          key={index}
-          {...editable(model, paragraph.field)}
-          style={{
-            margin: "32px 0 0",
-            maxWidth: 640,
-            fontSize: 17,
-            lineHeight: 1.7,
-            color: "var(--site-muted)",
-          }}
-        >
+        <p key={index} {...editable(model, paragraph.field)} className="mer-body">
           {paragraph.text}
         </p>
       ))}
-    </Numbered>
+    </Section>
   );
 }
 
-function Experience({ model, number }: { model: SiteModel; number?: string }) {
+/** Columns follow the count: all in one row up to four, then three or four per row. */
+function statColumns(count: number): number {
+  if (count <= 4) return count;
+  return count <= 6 ? 3 : 4;
+}
+
+function Impact({ model }: { model: SiteModel }) {
+  const count = model.stats.length;
   return (
-    <Numbered id={ANCHORS.experience} number={number} title={LABELS.experience}>
-      {model.experience.map((item, index) => (
-        <div
-          key={index}
-          className="grid grid-cols-1 gap-2 @3xl:grid-cols-[170px_1fr] @3xl:gap-8"
-          style={{ padding: "30px 0", borderTop: "1px solid var(--site-line)" }}
-        >
-          <div
-            className="@3xl:pt-2"
-            style={{
-              fontSize: 14,
-              color: "var(--site-muted)",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {item.dates}
-          </div>
-          <div>
-            <div
-              {...editable(model, item.fields.role)}
-              style={{ fontFamily: serif, fontSize: fluid(24, 30), lineHeight: 1.15 }}
-            >
-              {item.role}
+    <Section kind="impact">
+      <div
+        className="mer-stats"
+        data-one={count === 1 || undefined}
+        style={{ "--mer-cols": statColumns(count) } as CSSProperties}
+      >
+        {model.stats.map((stat, index) => (
+          <div key={index} className="mer-stat">
+            <div {...editable(model, stat.fields.value)} className="mer-stat-value">
+              {stat.value}
             </div>
-            <div style={{ marginTop: 6, fontSize: 15, color: "var(--site-muted)" }}>
-              <span {...editable(model, item.fields.organization)}>{item.organization}</span>
-              {item.location ? (
-                <>
-                  {" · "}
-                  <span {...editable(model, item.fields.location)}>{item.location}</span>
-                </>
+            <div {...editable(model, stat.fields.label)} className="mer-stat-label">
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function Experience({ model }: { model: SiteModel }) {
+  return (
+    <Section kind="experience">
+      <div className="mer-list">
+        {model.experience.map((item, index) => (
+          <div key={index} className="mer-row mer-experience-row">
+            <div className="mer-dates">{item.dates}</div>
+            <div className="mer-content">
+              <div {...editable(model, item.fields.role)} className="mer-role">
+                {item.role}
+              </div>
+              {item.organization || item.location ? (
+                <div className="mer-org">
+                  {item.organization ? (
+                    <span {...editable(model, item.fields.organization)}>{item.organization}</span>
+                  ) : null}
+                  {item.organization && item.location ? " · " : null}
+                  {item.location ? (
+                    <span {...editable(model, item.fields.location)}>{item.location}</span>
+                  ) : null}
+                </div>
+              ) : null}
+              {item.summary ? (
+                <p {...editable(model, item.fields.summary)} className="mer-summary">
+                  {item.summary}
+                </p>
               ) : null}
             </div>
-            {item.summary ? (
-              <p
-                {...editable(model, item.fields.summary)}
-                style={{
-                  margin: "14px 0 0",
-                  maxWidth: 600,
-                  fontSize: 16,
-                  lineHeight: 1.65,
-                  color: "color-mix(in srgb, var(--site-ink) 85%, var(--site-bg))",
-                }}
-              >
-                {item.summary}
-              </p>
-            ) : null}
           </div>
-        </div>
-      ))}
-    </Numbered>
+        ))}
+      </div>
+    </Section>
   );
 }
 
-function Work({ model, number }: { model: SiteModel; number?: string }) {
+function Work({ model }: { model: SiteModel }) {
   return (
-    <Numbered id={ANCHORS.work} number={number} title={LABELS.work}>
-      <div className="grid grid-cols-1 gap-x-16 gap-y-10 @3xl:grid-cols-2 @3xl:gap-y-12">
+    <Section kind="work">
+      <div className="mer-list">
         {model.work.map((item, index) => {
-          const title = (
-            <span style={{ fontFamily: serif, fontSize: fluid(23, 27), lineHeight: 1.2 }}>
-              <span {...editable(model, item.fields.title)}>{item.title}</span>{" "}
-              <span style={{ color: "var(--site-accent)" }}>↗</span>
-            </span>
+          const cells = (
+            <>
+              <span className="mer-work-kind">
+                {item.kind ? <span {...editable(model, item.fields.kind)}>{item.kind}</span> : null}
+              </span>
+              <span className="mer-work-main">
+                <span className="mer-work-title">
+                  <span {...editable(model, item.fields.title)}>{item.title}</span>
+                  {item.href ? (
+                    <span aria-hidden="true" className="mer-arrow">
+                      {" ↗"}
+                    </span>
+                  ) : null}
+                </span>
+                {item.meta ? (
+                  <span {...editable(model, item.fields.meta)} className="mer-work-meta">
+                    {item.meta}
+                  </span>
+                ) : null}
+              </span>
+              <span className="mer-work-year">
+                {item.year ? <span {...editable(model, item.fields.year)}>{item.year}</span> : null}
+              </span>
+            </>
           );
-          return (
-            <div
-              key={index}
-              style={{
-                borderTop: "1px solid var(--site-line)",
-                paddingTop: 22,
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
-              {item.kind ? (
-                <span
-                  {...editable(model, item.fields.kind)}
-                  style={{
-                    fontSize: 12,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "var(--site-accent)",
-                  }}
-                >
-                  {item.kind}
-                </span>
-              ) : null}
-              {item.href ? (
-                <ContactLink
-                  link={{ label: item.title, href: item.href }}
-                  className="hover:underline"
-                >
-                  {title}
-                </ContactLink>
-              ) : (
-                title
-              )}
-              {item.meta ? (
-                <span
-                  {...editable(model, item.fields.meta)}
-                  style={{ fontSize: 14, color: "var(--site-muted)" }}
-                >
-                  {item.meta}
-                </span>
-              ) : null}
+          return item.href ? (
+            <a key={index} {...linkProps(item.href)} className="mer-row mer-work-row">
+              {cells}
+            </a>
+          ) : (
+            <div key={index} className="mer-row mer-work-row">
+              {cells}
             </div>
           );
         })}
       </div>
-    </Numbered>
+    </Section>
   );
 }
 
-function Testimonials({ model, number }: { model: SiteModel; number?: string }) {
+function Caption({ model, quote }: { model: SiteModel; quote: ModelQuote }) {
   return (
-    <section
-      id={ANCHORS.testimonials}
-      aria-label={LABELS.testimonials}
-      style={{ marginTop: sectionGap, background: "var(--site-soft)" }}
-    >
-      <div
-        className="grid grid-cols-1 gap-4 @3xl:grid-cols-[3fr_9fr] @3xl:gap-12"
-        style={{ ...wrap, paddingBlock: fluid(72, 112) }}
-      >
-        <div style={label}>
-          {number ? `${number} — ${LABELS.testimonials}` : LABELS.testimonials}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 56 }}>
-          {model.testimonials.map((item, index) => (
-            <figure key={index} style={{ margin: 0, maxWidth: 820 }}>
-              <blockquote
-                style={{
-                  margin: 0,
-                  fontFamily: serif,
-                  fontStyle: "italic",
-                  fontSize: fluid(24, 36),
-                  lineHeight: 1.3,
-                  letterSpacing: "-0.01em",
-                  textWrap: "pretty",
-                }}
-              >
-                “<span {...editable(model, item.fields.quote)}>{item.quote}</span>”
-              </blockquote>
-              <figcaption
-                style={{
-                  marginTop: 20,
-                  fontSize: 14,
-                  color: "color-mix(in srgb, var(--site-ink) 55%, transparent)",
-                }}
-              >
-                <span {...editable(model, item.fields.author)} style={{ fontWeight: 500 }}>
-                  {item.author}
-                </span>
-                {item.role ? (
-                  <span style={{ color: "var(--site-muted)" }}>
-                    {" — "}
-                    <span {...editable(model, item.fields.role)}>{item.role}</span>
-                  </span>
-                ) : null}
-              </figcaption>
-            </figure>
-          ))}
+    <figcaption className="mer-caption">
+      <span {...editable(model, quote.fields.author)} className="mer-caption-name">
+        {quote.author}
+      </span>
+      {quote.role ? (
+        <span className="mer-caption-role">
+          {" · "}
+          <span {...editable(model, quote.fields.role)}>{quote.role}</span>
+        </span>
+      ) : null}
+    </figcaption>
+  );
+}
+
+function Testimonials({ model }: { model: SiteModel }) {
+  const [lead, ...rest] = model.testimonials;
+  if (!lead) return null;
+  return (
+    <section id={ANCHORS.testimonials} className="mer-band">
+      <div className="mer-wrap mer-columns mer-band-in">
+        <h2 className="mer-label">{LABELS.testimonials}</h2>
+        <div className="mer-content mer-quotes">
+          <figure className="mer-lead-quote" data-long={lead.quote.length > 200 || undefined}>
+            <blockquote>
+              “<span {...editable(model, lead.fields.quote)}>{lead.quote}</span>”
+            </blockquote>
+            <Caption model={model} quote={lead} />
+          </figure>
+          {rest.length ? (
+            <div
+              className="mer-more-quotes"
+              style={{ "--mer-cols": Math.min(rest.length, 3) } as CSSProperties}
+            >
+              {rest.map((quote, index) => (
+                <figure key={index} className="mer-quote">
+                  <blockquote>
+                    “<span {...editable(model, quote.fields.quote)}>{quote.quote}</span>”
+                  </blockquote>
+                  <Caption model={model} quote={quote} />
+                </figure>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
   );
 }
 
-function Contact({ model, number }: { model: SiteModel; number?: string }) {
-  const { contact } = model;
+function Contact({
+  model,
+  sendMessage,
+}: {
+  model: SiteModel;
+  sendMessage: SendContactMessage | undefined;
+}) {
+  const { contact, draft } = model;
+  const form = contact.form.enabled;
+  // With no invitation, the email address becomes the headline.
+  const emailHeadline = !contact.blurb && Boolean(contact.email) && !draft;
+  const emailRow = Boolean(contact.email) && !emailHeadline;
+  const direct = emailRow || contact.links.length > 0;
+
   return (
-    <Numbered
-      id={ANCHORS.contact}
-      number={number}
-      title={LABELS.contact}
-      style={{ paddingBottom: fluid(80, 112) }}
-    >
-      <h2
-        {...editable(model, contact.fields.blurb)}
-        style={{
-          margin: 0,
-          fontFamily: serif,
-          fontWeight: 400,
-          fontSize: fluid(34, 68),
-          lineHeight: 1.04,
-          letterSpacing: "-0.025em",
-          maxWidth: 820,
-        }}
-      >
-        {contact.blurb || "Get in touch."}
-      </h2>
-      {contact.email ? (
-        <div style={{ marginTop: 36, fontFamily: serif, fontSize: fluid(20, 30) }}>
-          <a
-            href={mailto(contact.email)}
-            style={{
-              textDecoration: "underline",
-              textDecorationThickness: 1,
-              textUnderlineOffset: 8,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {contact.email}
-          </a>
-        </div>
-      ) : null}
-      {contact.links.length ? (
-        <div
-          style={{
-            marginTop: 28,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "12px 28px",
-            fontSize: 14,
-            color: "var(--site-muted)",
-          }}
+    <Section kind="contact">
+      {contact.blurb ? (
+        <p
+          {...editable(model, contact.fields.blurb)}
+          className="mer-invitation"
+          data-long={contact.blurb.length > 90 || undefined}
         >
-          {contact.links.map((link, index) => (
-            <ContactLink key={index} link={link} className="hover:text-site-ink" />
-          ))}
+          {contact.blurb}
+        </p>
+      ) : emailHeadline ? (
+        <a href={mailto(contact.email)} className="mer-email-headline">
+          {contact.email}
+        </a>
+      ) : draft ? (
+        <PlaceholderLines widths={[88, 42]} className="mer-ph-invitation" />
+      ) : null}
+      {direct || form ? (
+        <div className="mer-contact-grid" data-split={(direct && form) || undefined}>
+          {direct ? (
+            <div className="mer-direct">
+              {emailRow ? (
+                <div className="mer-direct-group">
+                  <span className="mer-small">Email</span>
+                  <a
+                    href={mailto(contact.email)}
+                    className="mer-email"
+                    data-large={!form || undefined}
+                  >
+                    {contact.email}
+                  </a>
+                </div>
+              ) : null}
+              {contact.links.length ? (
+                <div className="mer-links">
+                  <span className="mer-small mer-links-label">Elsewhere</span>
+                  {contact.links.map((link, index) => (
+                    <ContactLink key={index} link={link} className="mer-link">
+                      <span className="mer-link-label">{link.label}</span>
+                      <span aria-hidden="true" className="mer-arrow">
+                        ↗
+                      </span>
+                    </ContactLink>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+          {form ? (
+            <div
+              // Topics appearing in the questions preview replay the fade-in.
+              key={draft ? `topics-${contact.form.topics.length > 0}` : "form"}
+              className={cx("mer-form-column", draft && "mer-fill")}
+              data-alone={!direct || undefined}
+            >
+              <MeridianContactForm
+                topics={contact.form.topics}
+                first={model.first}
+                send={sendMessage}
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
-    </Numbered>
+    </Section>
   );
 }
 
-export function MeridianTemplate({ model, publishedAt }: TemplateProps) {
-  const numbers = sectionNumbers(model, ["about", "experience", "work", "testimonials", "contact"]);
-  const nav = navItems(model, { about: "About", experience: "Experience", work: "Selected work" });
+export function MeridianTemplate({ model, publishedAt, colors, sendMessage }: TemplateProps) {
   const renderers: Record<MiddleKind, () => ReactNode> = {
-    impact: () => (
-      <>
-        <Stats model={model} />
-        {model.affiliations.length ? <Affiliations model={model} /> : null}
-      </>
-    ),
-    about: () => <About model={model} number={numbers.about} />,
-    experience: () => <Experience model={model} number={numbers.experience} />,
-    work: () => <Work model={model} number={numbers.work} />,
-    testimonials: () => <Testimonials model={model} number={numbers.testimonials} />,
+    about: () => <About model={model} />,
+    impact: () => <Impact model={model} />,
+    experience: () => <Experience model={model} />,
+    work: () => <Work model={model} />,
+    testimonials: () => <Testimonials model={model} />,
   };
+  // The questions preview shows About as grey lines until it's written.
+  const order: MiddleKind[] = model.draft && !model.about ? ["about", ...model.order] : model.order;
 
   return (
     <div
       id={ANCHORS.top}
-      style={{ fontFamily: FONTS.inter, fontSize: 16, lineHeight: 1.55, minHeight: "inherit" }}
+      className="mer"
+      data-draft={model.draft || undefined}
+      style={
+        {
+          ...meridianRoleStyle(colors),
+          "--mer-measure": String(longestWord(model.name || "Your Name") * 0.52),
+          fontFamily: FONTS.inter,
+          minHeight: "inherit",
+        } as CSSProperties
+      }
     >
       <SkipLink />
-      <header
-        style={{
-          ...wrap,
-          height: 84,
-          display: "flex",
-          alignItems: "center",
-          gap: 36,
-          fontSize: 14,
-          color: "var(--site-muted)",
-        }}
-      >
-        <a
-          href={`#${ANCHORS.top}`}
-          style={{
-            marginRight: "auto",
-            fontFamily: serif,
-            fontSize: 22,
-            fontWeight: 500,
-            color: "var(--site-ink)",
-            letterSpacing: "-0.01em",
-          }}
-        >
-          <span {...editable(model, model.fields.name)}>{model.name}</span>
-        </a>
-        <nav aria-label="Sections" style={{ display: "flex", alignItems: "center", gap: 36 }}>
-          {nav.map((item) => (
-            <a key={item.href} href={item.href} className="hidden hover:text-site-ink @3xl:inline">
-              {item.label}
-            </a>
-          ))}
-          <a
-            href={`#${ANCHORS.contact}`}
-            style={{
-              color: "var(--site-ink)",
-              textDecoration: "underline",
-              textUnderlineOffset: 5,
-            }}
-          >
-            Contact
-          </a>
-        </nav>
-      </header>
+      <Header model={model} />
       <main id="main">
         <Hero model={model} />
-        {model.order.includes("impact") ? null : model.affiliations.length ? (
-          <Affiliations model={model} />
-        ) : null}
-        {model.order.map((kind) => (
+        {model.affiliations.length ? <Affiliations model={model} /> : null}
+        {order.map((kind) => (
           <div key={kind} style={{ display: "contents" }}>
             {renderers[kind]()}
           </div>
         ))}
-        <Contact model={model} number={numbers.contact} />
+        <Contact model={model} sendMessage={sendMessage} />
       </main>
-      <footer
-        style={{
-          ...wrap,
-          paddingBlock: "28px 40px",
-          borderTop: "1px solid var(--site-line)",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          gap: 12,
-          fontSize: 13,
-          color: "var(--site-muted)",
-        }}
-      >
-        <span>
-          © {publishedAt.getUTCFullYear()} {model.name}
-        </span>
-        <span {...editable(model, model.fields.location)}>{model.location}</span>
+      <footer className="mer-wrap mer-footer">
+        <div className="mer-footer-in">
+          <span>
+            © {publishedAt.getUTCFullYear()} {model.name}
+          </span>
+          <span className="mer-footer-location">
+            {model.location ? (
+              <span {...editable(model, model.fields.location)}>{model.location}</span>
+            ) : null}
+          </span>
+          <a href={`#${ANCHORS.top}`} className="mer-top">
+            Back to top ↑
+          </a>
+        </div>
       </footer>
     </div>
   );

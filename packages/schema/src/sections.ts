@@ -120,6 +120,16 @@ export const socialLink = z.object({
   kind: z.enum(SOCIAL_KINDS).optional(),
 });
 
+/**
+ * The form visitors can write through instead of copying an email address. Messages land in the
+ * owner's dashboard. Missing settings mean the form is on, without the topic question.
+ */
+export const contactFormSettings = z.object({
+  enabled: z.boolean().default(true),
+  /** Choices for "What is it about?". Seeded from the onboarding goals plus "Something else". */
+  topics: z.array(requiredText(40)).max(8).default([]),
+});
+
 export const contactSection = z.object({
   ...base,
   type: z.literal("contact"),
@@ -128,6 +138,7 @@ export const contactSection = z.object({
   blurb: longText(280).optional(),
   email: z.email().max(254).optional(),
   links: z.array(socialLink).max(10).default([]),
+  form: contactFormSettings.optional(),
 });
 
 /** Kept so older content stays valid; the current templates do not render it. */
@@ -159,6 +170,7 @@ export type AchievementItem = z.output<typeof achievementItem>;
 export type PortfolioItem = z.output<typeof portfolioItem>;
 export type TestimonialItem = z.output<typeof testimonialItem>;
 export type SocialLink = z.output<typeof socialLink>;
+export type ContactFormSettings = z.output<typeof contactFormSettings>;
 
 export const SECTION_TYPES = [
   "hero",

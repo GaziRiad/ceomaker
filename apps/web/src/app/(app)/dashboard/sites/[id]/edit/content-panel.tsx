@@ -50,6 +50,8 @@ export interface ContentPanelProps {
   rewriteError: string | null;
   /** Bumped when text is edited in the preview, so forms that keep local text re-read it. */
   revision: number;
+  /** The current template, for settings only some templates show (the contact form). */
+  template: { name: string; contactForm: boolean };
   onSelect: (id: string) => void;
   onSections: (sections: Section[]) => void;
   onSection: (id: string, update: (section: Section) => Section) => void;
@@ -227,7 +229,9 @@ function SectionForm(props: ContentPanelProps & { section: Editable }) {
     case "testimonials":
       return <QuotesForm section={section} error={error} update={update} />;
     case "contact":
-      return <ContactForm section={section} error={error} update={update} />;
+      return (
+        <ContactForm section={section} error={error} update={update} template={props.template} />
+      );
   }
 }
 
@@ -825,7 +829,18 @@ function QuotesForm({ section, error, update }: FormProps<"testimonials">) {
   );
 }
 
-function ContactForm({ section, error, update }: FormProps<"contact">) {
+function ContactForm({
+  section,
+  error,
+  update,
+  template,
+}: FormProps<"contact"> & { template: ContentPanelProps["template"] }) {
+  const formOn = section.form?.enabled !== false;
+  const formHint = !template.contactForm
+    ? `${template.name} doesn't show a contact form. Meridian does.`
+    : formOn
+      ? "Visitors can write to you without seeing your email address. Messages arrive in your dashboard."
+      : "Visitors use your email and links instead.";
   const links = section.links;
   const setLinks = (next: typeof links) => update((current) => ({ ...current, links: next }));
   const quick = QUICK_LINKS.filter(([label]) => !links.some((link) => link.label === label));
@@ -931,6 +946,28 @@ function ContactForm({ section, error, update }: FormProps<"contact">) {
             ))}
           </div>
         ) : null}
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-neutral-700">Contact form</span>
+        <div className="seg grid w-full grid-cols-2" role="radiogroup" aria-label="Contact form">
+          {(["on", "off"] as const).map((key) => (
+            <label key={key} className="seg-opt justify-center">
+              <input
+                type="radio"
+                name="contact-form"
+                checked={formOn === (key === "on")}
+                onChange={() =>
+                  update((current) => ({
+                    ...current,
+                    form: { enabled: key === "on", topics: current.form?.topics ?? [] },
+                  }))
+                }
+              />
+              {key === "on" ? "On" : "Off"}
+            </label>
+          ))}
+        </div>
+        <span className="text-xs text-neutral-600">{formHint}</span>
       </div>
     </>
   );

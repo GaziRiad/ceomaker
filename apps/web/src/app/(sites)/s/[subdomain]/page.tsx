@@ -16,6 +16,7 @@ import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
 import { routingConfigFromEnv, siteUrl } from "@/lib/routing";
 import { getTenantSite } from "@/lib/sites";
 import { SiteStatus } from "../../site-status";
+import { sendContactMessage } from "./contact-action";
 
 type Params = PageProps<"/s/[subdomain]">["params"];
 
@@ -84,6 +85,7 @@ async function TenantSite({ params }: { params: Params }) {
       theme={site.theme}
       content={site.content}
       publishedAt={site.publishedAt}
+      sendMessage={sendContactMessage.bind(null, site.subdomain)}
     />
   );
 }

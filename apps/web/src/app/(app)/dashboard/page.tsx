@@ -1,4 +1,9 @@
-import { ADDRESS_HOLD_DAYS, getDb, getPrimarySiteForOwner } from "@ceomaker/db";
+import {
+  ADDRESS_HOLD_DAYS,
+  getDb,
+  getPrimarySiteForOwner,
+  listContactMessages,
+} from "@ceomaker/db";
 import { parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
 import { getTemplate, TemplateView } from "@ceomaker/templates";
 import type { Metadata } from "next";
@@ -14,6 +19,7 @@ import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { initialsFor, toEditableDraft } from "@/lib/site-data";
 import { ForgetStartAnswers } from "../start/forget-answers";
 import { DeleteSite } from "./delete-site";
+import { MessageList } from "./messages";
 import { SignOutButton } from "./sign-out-button";
 import { VersionsTable } from "./versions-table";
 
@@ -87,6 +93,26 @@ function SideCard({
   );
 }
 
+/** Streams in after the site card, so a long inbox never holds up the page. */
+async function Inbox({ userId, siteId, empty }: { userId: string; siteId: string; empty: string }) {
+  const rows = await listContactMessages(getDb(), { userId, siteId });
+  return (
+    <MessageList
+      rows={rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }))}
+      empty={empty}
+    />
+  );
+}
+
+function InboxSkeleton() {
+  return (
+    <Blueprint className="flex flex-col gap-2.5 p-5" aria-busy="true" aria-label="Loading messages">
+      <span className="h-4 w-48 bg-neutral-200 motion-safe:animate-pulse" />
+      <span className="h-3.5 w-full max-w-[520px] bg-neutral-200 motion-safe:animate-pulse" />
+    </Blueprint>
+  );
+}
+
 async function Dashboard() {
   const session = await getSession();
   if (!session) redirect("/sign-in");
@@ -135,6 +161,17 @@ async function Dashboard() {
   const url = siteUrl(site.subdomain);
   const statusLabel = live ? "Live" : site.status === "paused" ? "Paused" : "Draft";
   const words = name.toLowerCase().match(/\p{L}+/gu) ?? [];
+  const shownContact = parseSiteContentForRender(shown.content).sections.find(
+    (section) => section.type === "contact",
+  );
+  const formOff = shownContact?.type === "contact" && shownContact.form?.enabled === false;
+  const inboxEmpty = !live
+    ? "Messages from your contact form appear here once your site is live."
+    : !getTemplate(shown.templateKey).contactForm
+      ? `The ${getTemplate(shown.templateKey).name} template has no contact form. Meridian has one: switch in the editor to get messages here.`
+      : formOff
+        ? "Your contact form is off. Turn it on in the editor, under Contact, to get messages here."
+        : "No messages yet. When someone writes through the form on your site, it appears here.";
 
   return (
     <Shell email={session.user.email} initials={initials}>
@@ -200,6 +237,14 @@ async function Dashboard() {
           </SideCard>
         </div>
       </div>
+      <section id="messages" data-reveal="" className="flex flex-col gap-3" style={delay(100)}>
+        <h2 className="m-0 font-heading text-[28px] leading-none font-semibold uppercase">
+          Messages
+        </h2>
+        <Suspense fallback={<InboxSkeleton />}>
+          <Inbox userId={session.user.id} siteId={site.id} empty={inboxEmpty} />
+        </Suspense>
+      </section>
       <section data-reveal="" className="flex flex-col gap-3" style={delay(120)}>
         <h2 className="m-0 font-heading text-[28px] leading-none font-semibold uppercase">
           Published versions

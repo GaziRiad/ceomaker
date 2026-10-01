@@ -94,6 +94,11 @@ export interface SiteModel {
   keywords: string[];
   /** True in the editor's preview, where templates mark text that can be edited in place. */
   editable: boolean;
+  /**
+   * The questions screen's preview: only what the person has chosen or typed so far. Templates
+   * that support it show soft placeholder lines where copy will be written.
+   */
+  draft: boolean;
   fields: {
     name: FieldPath;
     role: FieldPath;
@@ -125,6 +130,8 @@ export interface SiteModel {
     blurb: string;
     email: string;
     links: ModelLink[];
+    /** The contact form. On unless the owner turned it off; topics may be empty. */
+    form: { enabled: boolean; topics: string[] };
     fields: { blurb: FieldPath };
   };
 }
@@ -210,7 +217,7 @@ function quoteOf(
 
 export function buildSiteModel(
   content: RenderableSiteContent,
-  { editable = false }: { editable?: boolean } = {},
+  { editable = false, draft = false }: { editable?: boolean; draft?: boolean } = {},
 ): SiteModel {
   const { sections } = content;
   const meta = content.meta;
@@ -311,6 +318,7 @@ export function buildSiteModel(
     affiliations: meta?.affiliations ?? [],
     keywords: meta?.keywords ?? [],
     editable,
+    draft,
     fields: {
       name: "meta.name",
       role: "meta.role",
@@ -322,7 +330,8 @@ export function buildSiteModel(
     },
     hero: {
       eyebrow: hero?.eyebrow ?? "",
-      headline: hero?.headline ?? name,
+      // Older templates set the name as the headline; a draft shows a placeholder instead.
+      headline: hero?.headline ?? (draft ? "" : name),
       subheadline: hero?.subheadline ?? "",
       cta: hero?.primaryCta ? { label: hero.primaryCta.label, href: hero.primaryCta.href } : null,
       image: hero?.image ? { src: hero.image.src, alt: hero.image.alt || name } : null,
@@ -344,6 +353,10 @@ export function buildSiteModel(
       blurb: contact?.blurb ?? "",
       email: contact?.email ?? "",
       links: (contact?.links ?? []).map((link) => ({ label: linkLabel(link), href: link.href })),
+      form: {
+        enabled: contact?.form?.enabled ?? true,
+        topics: contact?.form?.topics ?? [],
+      },
       fields: { blurb: `${contact?.id ?? "contact"}.blurb` },
     },
   };

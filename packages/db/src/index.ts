@@ -3,6 +3,7 @@ export * from "./errors";
 export * from "./queries/sites";
 export * from "./queries/media";
 export * from "./queries/ai-usage";
+export * from "./queries/messages";
 export * as tables from "./schema";
 export {
   ADDRESS_HOLD_DAYS,

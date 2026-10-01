@@ -32,13 +32,10 @@ export function TemplatePanel({
       {templateList.map((template) => {
         const selected = template.key === templateKey;
         return (
-          <button
+          // Preview beside the radio, not inside it (templates contain buttons and forms).
+          <div
             key={template.key}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            onClick={() => onChoose(template.key)}
-            className="flex flex-col bg-bg text-left transition-[border-color,transform] duration-[250ms] ease-industry hover:-translate-y-0.5"
+            className="relative flex flex-col bg-bg text-left transition-[border-color,transform] duration-[250ms] ease-industry hover:-translate-y-0.5 has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-accent"
             style={{
               border: `1px solid ${selected ? "var(--color-accent)" : "var(--color-divider)"}`,
             }}
@@ -57,7 +54,13 @@ export function TemplatePanel({
                 still
               />
             </ScaledFrame>
-            <span className="flex items-center justify-between px-3 py-2.5">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChoose(template.key)}
+              className="flex cursor-pointer items-center justify-between px-3 py-2.5 text-left outline-none after:absolute after:inset-0 after:content-['']"
+            >
               <span className="font-heading text-lg font-semibold uppercase">{template.name}</span>
               <span
                 aria-hidden
@@ -67,8 +70,8 @@ export function TemplatePanel({
                   background: selected ? "var(--color-accent)" : "transparent",
                 }}
               />
-            </span>
-          </button>
+            </button>
+          </div>
         );
       })}
     </div>

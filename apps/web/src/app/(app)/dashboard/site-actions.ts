@@ -5,6 +5,7 @@ import {
   AddressLockedError,
   changeSubdomain,
   copyVersionToDraft,
+  deleteContactMessage,
   deleteSite,
   finishAiUsage,
   getDb,
@@ -238,6 +239,15 @@ export async function deleteSiteAction(
     if (error instanceof SiteNotFoundError) return NOT_FOUND;
     throw error;
   }
+}
+
+/** Deletes one message from the owner's inbox. */
+export async function deleteMessageAction(messageId: string): Promise<{ ok: true } | Failure> {
+  const userId = await currentUserId();
+  if (!userId) return SIGNED_OUT;
+  const gone: Failure = { ok: false, error: "This message was already deleted." };
+  if (typeof messageId !== "string" || !isUuid(messageId)) return gone;
+  return (await deleteContactMessage(getDb(), { userId, messageId })) ? { ok: true } : gone;
 }
 
 const rewriteOutput = z.object({ headline: z.string() });

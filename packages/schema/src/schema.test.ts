@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   buildStarterContent,
+  contactMessageSchema,
   contrastLevel,
   contrastRatio,
   decodeAnswers,
   demoSiteContent,
   encodeAnswers,
+  formTopicsFromGoals,
   imageSrc,
   isPublishableColors,
   isValidSubdomain,
@@ -190,7 +192,7 @@ describe("theme", () => {
       ink: "#000000",
       accent: "#123456",
     });
-    expect(resolveSiteColors(settings, "meridian").accent).toBe("#8a6d3b");
+    expect(resolveSiteColors(settings, "meridian").accent).toBe("#1f3a5f");
   });
 
   it("rejects non-hex colors, which could otherwise smuggle CSS", () => {
@@ -332,7 +334,50 @@ describe("onboarding", () => {
     expect(contact).toMatchObject({
       blurb: "For speaking, board and advisory enquiries.",
       email: "amelia@example.com",
+      form: { enabled: true, topics: ["Speaking", "Board and advisory", "Something else"] },
     });
+  });
+
+  it("offers form topics only for goals someone would write about", () => {
+    expect(formTopicsFromGoals(["A credible first result on Google"])).toEqual([]);
+    expect(formTopicsFromGoals(["Attracting talent", "Investor relations"])).toEqual([
+      "Investors",
+      "Careers",
+      "Something else",
+    ]);
+  });
+
+  it("accepts contact messages within limits and rejects bad ones", () => {
+    const message = {
+      name: " Jonas Weber ",
+      email: "jonas@northgate.example",
+      message: "Would value a conversation.",
+    };
+    expect(contactMessageSchema.parse(message)).toEqual({
+      name: "Jonas Weber",
+      email: "jonas@northgate.example",
+      organisation: "",
+      topic: "",
+      message: "Would value a conversation.",
+    });
+    expect(contactMessageSchema.safeParse({ ...message, email: "jonas@northgate" }).success).toBe(
+      false,
+    );
+    expect(contactMessageSchema.safeParse({ ...message, message: "   " }).success).toBe(false);
+    expect(contactMessageSchema.safeParse({ ...message, message: "x".repeat(4001) }).success).toBe(
+      false,
+    );
+  });
+
+  it("keeps older contact sections without form settings valid", () => {
+    const parsed = parseSiteContent({
+      ...demoSiteContent,
+      sections: [
+        ...demoSiteContent.sections.filter((section) => section.type !== "contact"),
+        { id: "contact", type: "contact", email: "office@example.com" },
+      ],
+    });
+    expect(parsed.success).toBe(true);
   });
 
   it("round-trips answers through the sign-in link, including non-Latin names", () => {

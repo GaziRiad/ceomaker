@@ -248,6 +248,24 @@ export function contactInvitation(goals: readonly GoalOption[]): string {
   return nouns.length ? `For ${nouns.join(", ")} enquiries.` : "For enquiries and introductions.";
 }
 
+/** Goal → the topic a visitor picks on the contact form. Null when the goal isn't a reason to write. */
+const GOAL_TOPICS: Record<GoalOption, string | null> = {
+  "Speaking invitations": "Speaking",
+  "Board and advisory roles": "Board and advisory",
+  "Investor relations": "Investors",
+  "Press and media": "Press",
+  "Attracting talent": "Careers",
+  "A credible first result on Google": null,
+};
+
+/** Contact form topics from the goals, in the order the goals are listed, plus "Something else". */
+export function formTopicsFromGoals(goals: readonly GoalOption[]): string[] {
+  const topics = GOAL_OPTIONS.filter((goal) => goals.includes(goal))
+    .map((goal) => GOAL_TOPICS[goal])
+    .filter((topic) => topic !== null);
+  return topics.length ? [...topics, "Something else"] : [];
+}
+
 export function availabilityFromGoals(
   goals: readonly GoalOption[],
 ): { availability: string; availabilityShort: string } | null {
@@ -326,6 +344,7 @@ export function buildStarterContent(
         blurb: contactInvitation(answers.goals),
         ...(options.email ? { email: options.email } : {}),
         links: [],
+        form: { enabled: true, topics: formTopicsFromGoals(answers.goals) },
       },
     ],
   };

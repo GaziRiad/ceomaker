@@ -247,11 +247,19 @@ export function Editor({
         : currentPrint === livePrint
           ? { label: "Live", className: "tag tag-accent" }
           : { label: "Unpublished changes", className: "tag tag-warning" };
+  const contact = draft.content.sections.find((section) => section.type === "contact");
+  const reachable =
+    contact?.type === "contact" &&
+    (Boolean(contact.email?.trim()) ||
+      contact.links.some((link) => link.href.trim()) ||
+      (template.contactForm && contact.form?.enabled !== false));
   const blocker = !isPublishableColors(colors)
     ? `Text contrast is ${contrastRatio(colors.ink, colors.bg).toFixed(1)}:1. Publishing needs at least ${MIN_TEXT_CONTRAST}:1: adjust your colours in Brand.`
     : errors.size
       ? "Some fields need fixing before you can publish. They're highlighted in Content."
-      : null;
+      : !reachable
+        ? "Visitors need a way to reach you. Under Contact, add an email or a link, or turn on the contact form."
+        : null;
 
   const onPublished = (result: PublishedResult) => {
     setSubdomain(result.subdomain);
@@ -356,6 +364,7 @@ export function Editor({
               rewriting={rewriting}
               rewriteError={rewriteError}
               revision={formRevision}
+              template={{ name: template.name, contactForm: template.contactForm }}
               onSelect={setSelectedId}
               onSections={setSections}
               onSection={updateSection}

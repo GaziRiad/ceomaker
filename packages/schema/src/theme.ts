@@ -46,12 +46,12 @@ function palette(name: string, bg: string, ink: string, accent: string): NamedPa
 /** Six presets per template. The first one is the template's default. */
 export const TEMPLATE_PALETTES: Record<TemplateKey, readonly NamedPalette[]> = {
   meridian: [
-    palette("Ivory", "#f7f4ee", "#1a1a1a", "#8a6d3b"),
-    palette("Navy & brass", "#f5f3ee", "#14213d", "#a47e3b"),
-    palette("Oxford", "#f4f1ea", "#1c2b39", "#7a2e2e"),
-    palette("Sage", "#f2f1ea", "#1f2a24", "#4d6b53"),
-    palette("Stone", "#efece6", "#2a2826", "#6b5b4b"),
-    palette("Night edition", "#14120f", "#f1ece3", "#c9a86a"),
+    palette("Navy", "#fbfbfa", "#16181b", "#1f3a5f"),
+    palette("Bottle green", "#fbfbfa", "#161917", "#1e4a3a"),
+    palette("Oxblood", "#fbfaf8", "#1b1717", "#6d2433"),
+    palette("Graphite", "#ffffff", "#111111", "#3b4048"),
+    palette("Ivory", "#f7f4ee", "#1a1a1a", "#7a5f2e"),
+    palette("Night", "#111316", "#ecebe6", "#a9bfdc"),
   ],
   aurora: [
     palette("Indigo", "#fbfbfd", "#0f1222", "#4f46e5"),
