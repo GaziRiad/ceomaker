@@ -17,7 +17,7 @@ import {
   type TemplateKey,
   type ThemeSettingsInput,
 } from "@ceomaker/schema";
-import { and, asc, count, eq, inArray, ne, or } from "drizzle-orm";
+import { and, asc, count, eq, inArray, ne, sql, type SQL } from "drizzle-orm";
 import type { Database } from "../client";
 import {
   AddressLockedError,
@@ -129,44 +129,56 @@ export interface OwnedSite {
     content: unknown;
     publishedAt: Date;
   } | null;
+  /** Every published version, newest first. */
+  versions: PublishedVersionSummary[];
   /** Number of published versions ever made. */
   versionCount: number;
 }
 
-/** Everything the editor and dashboard need about one site, or null if the user doesn't own it. */
-export async function getSiteForOwner(
-  db: Database,
-  input: { userId: string; siteId: string },
-): Promise<OwnedSite | null> {
-  const [owned] = await db
-    .select()
+/**
+ * Loads one owned site with all its versions in a single round trip. Only the draft and the live
+ * version carry their theme and content; older published versions come back as summaries.
+ */
+async function loadOwnedSite(db: Database, userId: string, which: SQL): Promise<OwnedSite | null> {
+  const carriesContent = sql`(${siteVersion.kind} = 'draft' or ${siteVersion.id} = ${site.publishedVersionId})`;
+  const rows = await db
+    .select({
+      site,
+      version: {
+        id: siteVersion.id,
+        kind: siteVersion.kind,
+        templateKey: siteVersion.templateKey,
+        updatedAt: siteVersion.updatedAt,
+        publishedAt: siteVersion.publishedAt,
+        theme: sql`case when ${carriesContent} then ${siteVersion.theme} end`.mapWith(
+          siteVersion.theme,
+        ),
+        content: sql`case when ${carriesContent} then ${siteVersion.content} end`.mapWith(
+          siteVersion.content,
+        ),
+      },
+    })
     .from(site)
-    .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
-    .limit(1);
-  if (!owned) return null;
+    .innerJoin(siteVersion, eq(siteVersion.siteId, site.id))
+    .where(and(eq(site.userId, userId), which))
+    .orderBy(asc(siteVersion.createdAt), asc(siteVersion.id));
 
-  // The draft, plus the live version when there is one.
-  const versions = await db
-    .select()
-    .from(siteVersion)
-    .where(
-      and(
-        eq(siteVersion.siteId, owned.id),
-        owned.publishedVersionId
-          ? or(eq(siteVersion.kind, "draft"), eq(siteVersion.id, owned.publishedVersionId))
-          : eq(siteVersion.kind, "draft"),
-      ),
-    );
-  const draftRow = versions.find((version) => version.kind === "draft");
-  if (!draftRow) return null;
-  const publishedRow = versions.find(
-    (version) => version.kind === "published" && version.id === owned.publishedVersionId,
-  );
-
-  const [{ value: versionCount } = { value: 0 }] = await db
-    .select({ value: count() })
-    .from(siteVersion)
-    .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "published")));
+  const owned = rows[0]?.site;
+  const draftRow = rows.find((row) => row.version.kind === "draft")?.version;
+  if (!owned || !draftRow) return null;
+  const publishedRows = rows
+    .map((row) => row.version)
+    .filter((version) => version.kind === "published");
+  const liveRow = publishedRows.find((version) => version.id === owned.publishedVersionId);
+  const versions = publishedRows
+    .map((version, index) => ({
+      id: version.id,
+      number: index + 1,
+      templateKey: version.templateKey,
+      publishedAt: version.publishedAt ?? new Date(0),
+      isCurrent: owned.status === "published" && version.id === owned.publishedVersionId,
+    }))
+    .reverse();
 
   return {
     id: owned.id,
@@ -181,17 +193,40 @@ export async function getSiteForOwner(
       updatedAt: draftRow.updatedAt,
     },
     published:
-      publishedRow?.publishedAt != null
+      liveRow?.publishedAt != null
         ? {
-            id: publishedRow.id,
-            templateKey: publishedRow.templateKey,
-            theme: publishedRow.theme,
-            content: publishedRow.content,
-            publishedAt: publishedRow.publishedAt,
+            id: liveRow.id,
+            templateKey: liveRow.templateKey,
+            theme: liveRow.theme,
+            content: liveRow.content,
+            publishedAt: liveRow.publishedAt,
           }
         : null,
-    versionCount,
+    versions,
+    versionCount: versions.length,
   };
+}
+
+/** Everything the editor and dashboard need about one site, or null if the user doesn't own it. */
+export async function getSiteForOwner(
+  db: Database,
+  input: { userId: string; siteId: string },
+): Promise<OwnedSite | null> {
+  return loadOwnedSite(db, input.userId, eq(site.id, input.siteId));
+}
+
+/** The user's first site, as getSiteForOwner returns it, or null when they have none yet. */
+export async function getPrimarySiteForOwner(
+  db: Database,
+  userId: string,
+): Promise<OwnedSite | null> {
+  const first = db
+    .select({ id: site.id })
+    .from(site)
+    .where(eq(site.userId, userId))
+    .orderBy(asc(site.createdAt))
+    .limit(1);
+  return loadOwnedSite(db, userId, inArray(site.id, first));
 }
 
 interface DraftInput {
@@ -403,32 +438,9 @@ export async function listPublishedVersions(
   db: Database,
   input: { userId: string; siteId: string },
 ): Promise<PublishedVersionSummary[]> {
-  const [owned] = await db
-    .select({ publishedVersionId: site.publishedVersionId, status: site.status })
-    .from(site)
-    .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
-    .limit(1);
+  const owned = await getSiteForOwner(db, input);
   if (!owned) throw new SiteNotFoundError();
-
-  const rows = await db
-    .select({
-      id: siteVersion.id,
-      templateKey: siteVersion.templateKey,
-      publishedAt: siteVersion.publishedAt,
-    })
-    .from(siteVersion)
-    .where(and(eq(siteVersion.siteId, input.siteId), eq(siteVersion.kind, "published")))
-    .orderBy(asc(siteVersion.createdAt), asc(siteVersion.id));
-
-  return rows
-    .map((row, index) => ({
-      id: row.id,
-      number: index + 1,
-      templateKey: row.templateKey,
-      publishedAt: row.publishedAt ?? new Date(0),
-      isCurrent: owned.status === "published" && row.id === owned.publishedVersionId,
-    }))
-    .reverse();
+  return owned.versions;
 }
 
 /**

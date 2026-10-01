@@ -175,7 +175,7 @@ Production refuses to start an email sign-in without a key, so sign-in links are
 
 Preview deployments get a new URL each time, so Google sign-in works on localhost and production only. When you buy the domain, add `https://ceomaker.com` and `https://ceomaker.com/api/auth/callback/google` to the same client.
 
-A Google account and an email sign-in with the same address end up as one CEOMaker account.
+A Google account and an email sign-in with the same address end up as one CEOMaker account. The exception is an account created before passwordless sign-in: its email was never verified, so Google asks for one email-link sign-in first, and the sign-in page says so.
 
 ### AI drafting (Claude)
 

@@ -21,6 +21,7 @@ import {
   changeSubdomain,
   createSite,
   createSiteFromAnswers,
+  getPrimarySiteForOwner,
   getSiteForOwner,
   getTenantSiteBySubdomain,
   isSubdomainAvailable,
@@ -212,6 +213,32 @@ describe.skipIf(!url)("sites (integration)", () => {
     await expect(
       restoreVersion(db, { userId: "mallory", siteId: id, versionId: v1.versionId }),
     ).rejects.toBeInstanceOf(SiteNotFoundError);
+  });
+
+  it("loads the first site with its draft, live version and history", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    await publishSite(db, { userId: "alice", siteId: id });
+    await saveDraft(db, { ...draft, templateKey: "bento", userId: "alice", siteId: id });
+    const live = await publishSite(db, { userId: "alice", siteId: id });
+    await saveDraft(db, { ...draft, templateKey: "aurora", userId: "alice", siteId: id });
+    await createSite(db, { ...draft, userId: "alice", subdomain: "alice-later" });
+    await createSite(db, { ...draft, userId: "mallory", subdomain: "mallory" });
+
+    const owned = await getPrimarySiteForOwner(db, "alice");
+    expect(owned?.id).toBe(id);
+    expect(owned?.draft.templateKey).toBe("aurora");
+    expect(owned?.published?.id).toBe(live.versionId);
+    expect(owned?.published?.templateKey).toBe("bento");
+    expect(parseSiteContentForRender(owned?.published?.content).meta?.name).toBe(
+      demoSiteContent.meta.name,
+    );
+    expect(owned?.published?.theme).toEqual(demoThemeSettings);
+    expect(owned?.versions.map((v) => [v.number, v.templateKey, v.isCurrent])).toEqual([
+      [2, "bento", true],
+      [1, "meridian", false],
+    ]);
+    expect(owned?.versionCount).toBe(2);
+    expect(await getPrimarySiteForOwner(db, "nobody")).toBeNull();
   });
 
   it("lets the address change only before the first publish", async () => {

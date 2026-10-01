@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { clearFlow } from "../start/storage";
 
 export function SignOutButton() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export function SignOutButton() {
       className="btn btn-ghost"
       onClick={async () => {
         setPending(true);
+        // Answers saved in this browser for the questions belong to whoever was signed in.
+        clearFlow();
         await authClient.signOut();
         router.replace("/");
         router.refresh();

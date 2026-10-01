@@ -5,14 +5,10 @@ import { Suspense } from "react";
 import { getSession } from "@/lib/auth";
 import { googleSignInEnabled } from "@/lib/env";
 import { safeCallbackPath } from "@/lib/redirects";
+import { signInErrorMessage } from "@/lib/sign-in-errors";
 import { SignInCard } from "./sign-in-card";
 
 export const metadata: Metadata = { title: "Sign in", robots: { index: false } };
-
-const ERRORS: Record<string, string> = {
-  link: "That sign-in link has expired or was already used. Ask for a new one below.",
-  google: "Google sign-in didn't complete. Try again, or use your email instead.",
-};
 
 async function SignIn({ searchParams }: { searchParams: PageProps<"/sign-in">["searchParams"] }) {
   const params = await searchParams;
@@ -23,7 +19,7 @@ async function SignIn({ searchParams }: { searchParams: PageProps<"/sign-in">["s
   // New accounts from the questions flow get the name they typed there.
   const encoded = new URL(callbackURL, "https://app.invalid").searchParams.get("a");
   const name = encoded ? (decodeAnswers(encoded)?.name ?? null) : null;
-  const error = typeof params.error === "string" ? (ERRORS[params.error] ?? null) : null;
+  const error = signInErrorMessage(params.via, params.error);
 
   return (
     <SignInCard

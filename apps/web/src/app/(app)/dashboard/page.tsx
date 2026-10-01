@@ -1,4 +1,4 @@
-import { getDb, getPrimarySiteId, getSiteForOwner, listPublishedVersions } from "@ceomaker/db";
+import { getDb, getPrimarySiteForOwner } from "@ceomaker/db";
 import { parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
 import { getTemplate, TemplateView } from "@ceomaker/templates";
 import type { Metadata } from "next";
@@ -12,6 +12,7 @@ import { ArrowRight, Avatar, Blueprint, Wordmark } from "@/components/ui";
 import { getSession } from "@/lib/auth";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { initialsFor, toEditableDraft } from "@/lib/site-data";
+import { ForgetStartAnswers } from "../start/forget-answers";
 import { SignOutButton } from "./sign-out-button";
 import { VersionsTable } from "./versions-table";
 
@@ -28,8 +29,9 @@ function Shell({
   initials,
   children,
 }: {
-  email: string;
-  initials: string;
+  /** Omitted by the loading skeleton, which has no session yet. */
+  email?: string;
+  initials?: string;
   children: ReactNode;
 }) {
   return (
@@ -42,9 +44,13 @@ function Shell({
           <Link href="/" className="text-text no-underline hover:text-text">
             <Wordmark />
           </Link>
-          <span className="ml-auto hidden text-sm text-neutral-700 sm:inline">{email}</span>
-          <SignOutButton />
-          <Avatar initials={initials} />
+          {email && initials ? (
+            <>
+              <span className="ml-auto hidden text-sm text-neutral-700 sm:inline">{email}</span>
+              <SignOutButton />
+              <Avatar initials={initials} />
+            </>
+          ) : null}
         </div>
       </header>
       <main
@@ -83,10 +89,7 @@ function SideCard({
 async function Dashboard() {
   const session = await getSession();
   if (!session) redirect("/sign-in");
-  const db = getDb();
-  const userId = session.user.id;
-  const siteId = await getPrimarySiteId(db, userId);
-  const site = siteId ? await getSiteForOwner(db, { userId, siteId }) : null;
+  const site = await getPrimarySiteForOwner(getDb(), session.user.id);
 
   const name = site?.answers?.name || session.user.name;
   const first = name.trim().split(/\s+/)[0] || "there";
@@ -125,7 +128,6 @@ async function Dashboard() {
     );
   }
 
-  const versions = await listPublishedVersions(db, { userId, siteId: site.id });
   const shown = toEditableDraft(site.published ?? site.draft);
   const address = siteAddressParts();
   const live = site.status === "published";
@@ -135,6 +137,7 @@ async function Dashboard() {
 
   return (
     <Shell email={session.user.email} initials={initials}>
+      <ForgetStartAnswers />
       {heading}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,340px),1fr))] gap-6">
         <Blueprint
@@ -202,7 +205,7 @@ async function Dashboard() {
         </h2>
         <VersionsTable
           siteId={site.id}
-          rows={versions.map((version) => ({
+          rows={site.versions.map((version) => ({
             id: version.id,
             number: version.number,
             publishedAt: version.publishedAt.toISOString(),
@@ -215,9 +218,42 @@ async function Dashboard() {
   );
 }
 
+/** Painted from the static shell while the session and site load. */
+function DashboardSkeleton() {
+  const block = "bg-neutral-200 motion-safe:animate-pulse";
+  return (
+    <Shell>
+      <div className="flex flex-col gap-1.5" aria-busy="true" aria-label="Loading your site">
+        <span className={`${block} h-4 w-40`} />
+        <span className="m-0 font-heading text-[clamp(40px,4.5vw,56px)] leading-none font-semibold uppercase">
+          Your site
+        </span>
+      </div>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,340px),1fr))] gap-6">
+        <Blueprint className="flex min-w-0 flex-col bg-neutral-100 md:col-span-2">
+          <span className={`${block} h-[280px] border-b border-divider`} />
+          <div className="flex flex-col gap-2" style={{ padding: "16px 18px" }}>
+            <span className={`${block} h-5 w-64 max-w-full`} />
+            <span className={`${block} h-3.5 w-40`} />
+          </div>
+        </Blueprint>
+        <div className="flex flex-col gap-6">
+          {[0, 1].map((index) => (
+            <Blueprint key={index} className="flex flex-col gap-2.5 p-5">
+              <span className={`${block} h-3.5 w-24`} />
+              <span className={`${block} h-7 w-40`} />
+              <span className={`${block} h-3.5 w-full`} />
+            </Blueprint>
+          ))}
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-dvh" />}>
+    <Suspense fallback={<DashboardSkeleton />}>
       <Dashboard />
     </Suspense>
   );

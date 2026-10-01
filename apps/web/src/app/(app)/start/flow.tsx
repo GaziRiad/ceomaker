@@ -25,9 +25,10 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
 import { finishOnboarding } from "./actions";
-import { clearFlow, loadFlow, saveFlow } from "./storage";
+import { clearFlow, hasProgress, loadFlow, saveFlow } from "./storage";
 
 const LAST_STEP = ONBOARDING_STEP_NAMES.length - 1;
+const FRESH_ANSWERS: AnswersDraft = { voice: "Measured", goals: [], sources: [] };
 const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
 /** The questions screen preview: Meridian with the demo body and the user's own hero. */
@@ -87,13 +88,10 @@ export function QuestionsFlow({
   addressSuffix: string;
 }) {
   const router = useRouter();
-  const [answers, setAnswers] = useState<AnswersDraft>({
-    voice: "Measured",
-    goals: [],
-    sources: [],
-  });
+  const [answers, setAnswers] = useState<AnswersDraft>(FRESH_ANSWERS);
   const [step, setStep] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const [resumed, setResumed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const advanceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -107,9 +105,10 @@ export function QuestionsFlow({
       setAnswers({ ...(stored?.answers ?? {}), voice: stored?.answers.voice ?? "Measured", role });
       setStep(1);
     } else if (stored) {
-      setAnswers({ voice: "Measured", goals: [], sources: [], ...stored.answers });
+      setAnswers({ ...FRESH_ANSWERS, ...stored.answers });
       setStep(Math.min(Math.max(stored.step, 0), LAST_STEP));
     }
+    setResumed(stored !== null && hasProgress(stored));
     setLoaded(true);
     /* eslint-enable react-hooks/set-state-in-effect */
     return () => clearTimeout(advanceTimer.current);
@@ -173,6 +172,15 @@ export function QuestionsFlow({
         setError("Something in your answers didn't come through. Please check each step.");
       }
     });
+  };
+
+  const startOver = () => {
+    clearTimeout(advanceTimer.current);
+    clearFlow();
+    setAnswers(FRESH_ANSWERS);
+    setStep(0);
+    setResumed(false);
+    setError(null);
   };
 
   const next = () => (step < LAST_STEP ? setStep(step + 1) : finish());
@@ -340,6 +348,17 @@ export function QuestionsFlow({
             Save and exit
           </Link>
         </div>
+        {resumed ? (
+          <div
+            role="status"
+            className="flex max-w-[640px] flex-wrap items-center gap-x-4 gap-y-2 border border-accent bg-accent-100 px-4 py-3 text-[15px]"
+          >
+            <span className="flex-1">Welcome back. We kept your answers from last time.</span>
+            <button type="button" className="btn btn-ghost" onClick={startOver}>
+              Start over
+            </button>
+          </div>
+        ) : null}
         <div className="flex flex-col gap-2.5">
           <div className="flex justify-between text-[13px] tracking-[0.1em] text-accent-700 uppercase">
             <span>Step {step + 1} of 5</span>
