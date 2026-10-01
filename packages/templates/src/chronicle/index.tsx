@@ -5,6 +5,7 @@ import {
   ANCHORS,
   ContactLink,
   CtaLink,
+  editable,
   mailto,
   navItems,
   Portrait,
@@ -69,8 +70,13 @@ function Hero({ model }: { model: SiteModel }) {
       >
         {model.initials}
       </Portrait>
-      {hero.eyebrow ? <span style={kicker}>{hero.eyebrow}</span> : null}
+      {hero.eyebrow ? (
+        <span {...editable(model, hero.fields.eyebrow)} style={kicker}>
+          {hero.eyebrow}
+        </span>
+      ) : null}
       <h1
+        {...editable(model, hero.fields.headline)}
         style={{
           margin: 0,
           fontFamily: serif,
@@ -85,6 +91,7 @@ function Hero({ model }: { model: SiteModel }) {
       </h1>
       {hero.subheadline ? (
         <p
+          {...editable(model, hero.fields.subheadline)}
           style={{
             margin: 0,
             maxWidth: 640,
@@ -111,7 +118,7 @@ function Hero({ model }: { model: SiteModel }) {
             paddingBottom: 3,
           }}
         >
-          {hero.cta.label} →
+          <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span> →
         </CtaLink>
       ) : null}
     </section>
@@ -123,7 +130,10 @@ function About({ model }: { model: SiteModel }) {
   const cap = dropCap(about.lead);
   return (
     <section id={ANCHORS.about} aria-label="About" style={column(720, fluid(64, 96))}>
-      <p style={{ margin: 0, fontSize: fluid(21, 24), lineHeight: 1.6, textWrap: "pretty" }}>
+      <p
+        {...editable(model, about.fields.lead)}
+        style={{ margin: 0, fontSize: fluid(21, 24), lineHeight: 1.6, textWrap: "pretty" }}
+      >
         {cap ? (
           <span
             aria-hidden
@@ -145,8 +155,12 @@ function About({ model }: { model: SiteModel }) {
         />
       </p>
       {about.rest.map((paragraph, index) => (
-        <p key={index} style={{ margin: "24px 0 0", color: "var(--site-muted)" }}>
-          {paragraph}
+        <p
+          key={index}
+          {...editable(model, paragraph.field)}
+          style={{ margin: "24px 0 0", color: "var(--site-muted)" }}
+        >
+          {paragraph.text}
         </p>
       ))}
     </section>
@@ -164,6 +178,7 @@ function Impact({ model }: { model: SiteModel }) {
       {model.stats.map((stat, index) => (
         <div key={index}>
           <div
+            {...editable(model, stat.fields.value)}
             style={{
               fontSize: fluid(40, 52),
               lineHeight: 1,
@@ -174,6 +189,7 @@ function Impact({ model }: { model: SiteModel }) {
             {stat.value}
           </div>
           <div
+            {...editable(model, stat.fields.label)}
             style={{ marginTop: 10, fontStyle: "italic", fontSize: 16, color: "var(--site-muted)" }}
           >
             {stat.label}
@@ -209,12 +225,18 @@ function Record({ model }: { model: SiteModel }) {
               {item.startYear}
             </div>
             <div>
-              <div style={{ fontSize: fluid(24, 28), lineHeight: 1.2 }}>{item.role}</div>
+              <div
+                {...editable(model, item.fields.role)}
+                style={{ fontSize: fluid(24, 28), lineHeight: 1.2 }}
+              >
+                {item.role}
+              </div>
               <div style={{ marginTop: 4, fontStyle: "italic", color: "var(--site-muted)" }}>
                 {[where, item.dates].filter(Boolean).join(" · ")}
               </div>
               {item.summary ? (
                 <p
+                  {...editable(model, item.fields.summary)}
                   style={{
                     margin: "12px 0 0",
                     fontSize: 18,
@@ -244,7 +266,12 @@ function Notes({ model }: { model: SiteModel }) {
       </div>
       {model.work.map((item, index) => {
         const title = (
-          <span style={{ fontSize: fluid(21, 24), lineHeight: 1.3 }}>{item.title}</span>
+          <span
+            {...editable(model, item.fields.title)}
+            style={{ fontSize: fluid(21, 24), lineHeight: 1.3 }}
+          >
+            {item.title}
+          </span>
         );
         return (
           <div
@@ -256,6 +283,7 @@ function Notes({ model }: { model: SiteModel }) {
             }}
           >
             <span
+              {...(item.kind ? editable(model, item.fields.kind) : {})}
               style={{
                 textAlign: "right",
                 fontStyle: "italic",
@@ -276,6 +304,7 @@ function Notes({ model }: { model: SiteModel }) {
               title
             )}
             <span
+              {...(item.year ? editable(model, item.fields.year) : {})}
               className="col-start-2 @3xl:col-start-auto"
               style={{ fontFamily: sans, fontSize: 13, color: "var(--site-muted)" }}
             >
@@ -313,7 +342,7 @@ function Testimonials({ model }: { model: SiteModel }) {
               textWrap: "balance",
             }}
           >
-            “{item.quote}”
+            “<span {...editable(model, item.fields.quote)}>{item.quote}</span>”
           </blockquote>
           <figcaption
             style={{
@@ -325,7 +354,13 @@ function Testimonials({ model }: { model: SiteModel }) {
               color: "var(--site-muted)",
             }}
           >
-            {[item.author, item.role].filter(Boolean).join(" · ")}
+            <span {...editable(model, item.fields.author)}>{item.author}</span>
+            {item.role ? (
+              <>
+                {" · "}
+                <span {...editable(model, item.fields.role)}>{item.role}</span>
+              </>
+            ) : null}
           </figcaption>
         </figure>
       ))}
@@ -350,6 +385,7 @@ function Contact({ model }: { model: SiteModel }) {
     >
       <span style={kicker}>Write to me</span>
       <h2
+        {...editable(model, contact.fields.blurb)}
         style={{
           margin: 0,
           fontFamily: serif,
@@ -430,7 +466,7 @@ export function ChronicleTemplate({ model, publishedAt }: TemplateProps) {
         }}
       >
         <a href={`#${ANCHORS.top}`} style={{ fontStyle: "italic", fontSize: 22 }}>
-          {model.name}
+          <span {...editable(model, model.fields.name)}>{model.name}</span>
         </a>
         <nav
           aria-label="Sections"
@@ -488,7 +524,7 @@ export function ChronicleTemplate({ model, publishedAt }: TemplateProps) {
         <span>
           © {publishedAt.getUTCFullYear()} {model.name}
         </span>
-        <span>{model.location}</span>
+        <span {...editable(model, model.fields.location)}>{model.location}</span>
       </footer>
     </div>
   );

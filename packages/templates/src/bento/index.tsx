@@ -5,6 +5,7 @@ import {
   ANCHORS,
   ContactLink,
   CtaLink,
+  editable,
   mailto,
   navItems,
   Portrait,
@@ -111,6 +112,7 @@ function PortraitCard({ model, className }: { model: SiteModel; className: strin
         </span>
       )}
       <span
+        {...editable(model, model.fields.name)}
         style={{
           position: "relative",
           zIndex: 2,
@@ -122,7 +124,12 @@ function PortraitCard({ model, className }: { model: SiteModel; className: strin
         {model.name}
       </span>
       {model.role ? (
-        <span style={{ position: "relative", zIndex: 2, fontSize: 14 }}>{model.role}</span>
+        <span
+          {...editable(model, model.fields.role)}
+          style={{ position: "relative", zIndex: 2, fontSize: 14 }}
+        >
+          {model.role}
+        </span>
       ) : null}
     </Portrait>
   );
@@ -144,6 +151,7 @@ function HeroCard({ model, className }: { model: SiteModel; className: string })
     >
       {hero.eyebrow ? (
         <span
+          {...editable(model, hero.fields.eyebrow)}
           style={{
             alignSelf: "flex-start",
             padding: "6px 14px",
@@ -158,6 +166,7 @@ function HeroCard({ model, className }: { model: SiteModel; className: string })
         </span>
       ) : null}
       <h1
+        {...editable(model, hero.fields.headline)}
         style={{
           margin: 0,
           fontFamily: FONTS.manrope,
@@ -171,7 +180,12 @@ function HeroCard({ model, className }: { model: SiteModel; className: string })
         {hero.headline}
       </h1>
       {hero.subheadline ? (
-        <p style={{ margin: 0, fontSize: 16, color: "var(--site-muted)" }}>{hero.subheadline}</p>
+        <p
+          {...editable(model, hero.fields.subheadline)}
+          style={{ margin: 0, fontSize: 16, color: "var(--site-muted)" }}
+        >
+          {hero.subheadline}
+        </p>
       ) : null}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
         {hero.cta ? (
@@ -187,7 +201,7 @@ function HeroCard({ model, className }: { model: SiteModel; className: string })
               fontSize: 15,
             }}
           >
-            {hero.cta.label} →
+            <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span> →
           </CtaLink>
         ) : null}
         {model.order.includes("experience") ? (
@@ -239,7 +253,10 @@ function OpenToCard({ model, className }: { model: SiteModel; className: string 
         />
         Open to
       </span>
-      <span style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.25, letterSpacing: "-0.02em" }}>
+      <span
+        {...editable(model, model.fields.availabilityShort)}
+        style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.25, letterSpacing: "-0.02em" }}
+      >
         {model.availabilityShort}
       </span>
     </div>
@@ -261,7 +278,10 @@ function BasedInCard({ model, className }: { model: SiteModel; className: string
       }}
     >
       <span style={{ fontSize: 13, fontWeight: 700, color: "var(--site-accent)" }}>Based in</span>
-      <span style={{ fontWeight: 800, fontSize: 26, letterSpacing: "-0.03em" }}>
+      <span
+        {...editable(model, model.fields.location)}
+        style={{ fontWeight: 800, fontSize: 26, letterSpacing: "-0.03em" }}
+      >
         {model.location}
       </span>
     </div>
@@ -278,6 +298,7 @@ function AboutCard({ model, className }: { model: SiteModel; className: string }
     >
       <span style={cardLabel}>About</span>
       <p
+        {...editable(model, about.fields.lead)}
         style={{
           margin: 0,
           fontWeight: 700,
@@ -289,8 +310,12 @@ function AboutCard({ model, className }: { model: SiteModel; className: string }
         <Spans spans={about.lead} emphasis={(text, key) => <span key={key}>{text}</span>} />
       </p>
       {about.rest.map((paragraph, index) => (
-        <p key={index} style={{ margin: 0, fontSize: 15, color: "var(--site-muted)" }}>
-          {paragraph}
+        <p
+          key={index}
+          {...editable(model, paragraph.field)}
+          style={{ margin: 0, fontSize: 15, color: "var(--site-muted)" }}
+        >
+          {paragraph.text}
         </p>
       ))}
     </div>
@@ -322,6 +347,7 @@ function QuoteCard({ model, className }: { model: SiteModel; className: string }
         “
       </span>
       <blockquote
+        {...editable(model, quote.fields.quote)}
         style={{
           margin: 0,
           fontWeight: 700,
@@ -335,7 +361,13 @@ function QuoteCard({ model, className }: { model: SiteModel; className: string }
       <figcaption
         style={{ fontSize: 14, color: "color-mix(in srgb, var(--site-bg) 65%, transparent)" }}
       >
-        {quote.attribution}
+        <span {...editable(model, quote.fields.author)}>{quote.author}</span>
+        {quote.role ? (
+          <>
+            {", "}
+            <span {...editable(model, quote.fields.role)}>{quote.role}</span>
+          </>
+        ) : null}
       </figcaption>
     </figure>
   );
@@ -378,10 +410,18 @@ function ExperienceCard({ model, className }: { model: SiteModel; className: str
             {item.orgInitials}
           </span>
           <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-            <span style={{ fontWeight: 800, fontSize: 17, letterSpacing: "-0.015em" }}>
+            <span
+              {...editable(model, item.fields.role)}
+              style={{ fontWeight: 800, fontSize: 17, letterSpacing: "-0.015em" }}
+            >
               {item.role}
             </span>
-            <span style={{ fontSize: 14, color: "var(--site-muted)" }}>{item.organization}</span>
+            <span
+              {...editable(model, item.fields.organization)}
+              style={{ fontSize: 14, color: "var(--site-muted)" }}
+            >
+              {item.organization}
+            </span>
           </span>
           {item.dates ? (
             <span
@@ -491,7 +531,7 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
             href={`#${ANCHORS.top}`}
             style={{ fontWeight: 800, fontSize: 17, letterSpacing: "-0.02em" }}
           >
-            {model.name}
+            <span {...editable(model, model.fields.name)}>{model.name}</span>
           </a>
           <nav
             aria-label="Sections"
@@ -577,6 +617,7 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
                   }}
                 >
                   <span
+                    {...editable(model, stat.fields.value)}
                     style={{
                       fontWeight: 800,
                       fontSize: fluid(38, 46),
@@ -586,7 +627,12 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
                   >
                     {stat.value}
                   </span>
-                  <span style={{ fontSize: 14, color: "var(--site-muted)" }}>{stat.label}</span>
+                  <span
+                    {...editable(model, stat.fields.label)}
+                    style={{ fontSize: 14, color: "var(--site-muted)" }}
+                  >
+                    {stat.label}
+                  </span>
                 </div>
               )}
             />
@@ -608,6 +654,7 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
                     <div style={{ height: 110, background: WORK_TINTS[index % 4], padding: 14 }}>
                       {item.kind ? (
                         <span
+                          {...editable(model, item.fields.kind)}
                           style={{
                             padding: "5px 12px",
                             borderRadius: 999,
@@ -629,6 +676,7 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
                       }}
                     >
                       <span
+                        {...editable(model, item.fields.title)}
                         style={{
                           fontWeight: 800,
                           fontSize: 16,
@@ -639,7 +687,10 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
                         {item.title}
                       </span>
                       {item.meta ? (
-                        <span style={{ fontSize: 13, color: "var(--site-muted)" }}>
+                        <span
+                          {...editable(model, item.fields.meta)}
+                          style={{ fontSize: 13, color: "var(--site-muted)" }}
+                        >
                           {item.meta}
                         </span>
                       ) : null}
@@ -689,6 +740,7 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <span style={cardLabel}>Let&apos;s talk</span>
               <h2
+                {...editable(model, model.contact.fields.blurb)}
                 style={{
                   margin: 0,
                   fontFamily: FONTS.manrope,
@@ -734,7 +786,7 @@ export function BentoTemplate({ model, publishedAt }: TemplateProps) {
           <span>
             © {publishedAt.getUTCFullYear()} {model.name}
           </span>
-          <span>{model.location}</span>
+          <span {...editable(model, model.fields.location)}>{model.location}</span>
         </footer>
       </div>
     </div>

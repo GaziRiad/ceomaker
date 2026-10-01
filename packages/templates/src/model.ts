@@ -12,6 +12,13 @@ import { initialsOf } from "./monogram";
 /** The middle sections a template lays out between the hero and the contact block. */
 export type MiddleKind = "impact" | "about" | "experience" | "work" | "testimonials";
 
+/**
+ * Where a piece of displayed text lives in the content, for editing it in place in the editor's
+ * preview: "hero.headline", "work.items.2.title", "about.body.0", "meta.name". Item indexes count
+ * the rendered items; the editor maps them back to its draft.
+ */
+export type FieldPath = string;
+
 export interface ModelLink {
   label: string;
   href: string;
@@ -33,6 +40,7 @@ export interface ModelExperience {
   summary: string;
   /** Monogram for the organization: "MF" for Meridian Freight. */
   orgInitials: string;
+  fields: { role: FieldPath; organization: FieldPath; location: FieldPath; summary: FieldPath };
 }
 
 export interface ModelWork {
@@ -41,6 +49,7 @@ export interface ModelWork {
   meta: string;
   year: string;
   href: string | null;
+  fields: { title: FieldPath; kind: FieldPath; meta: FieldPath; year: FieldPath };
 }
 
 export interface ModelQuote {
@@ -50,13 +59,21 @@ export interface ModelQuote {
   initials: string;
   /** "Jonas Weber, Chair, Meridian Freight Group" */
   attribution: string;
+  fields: { quote: FieldPath; author: FieldPath; role: FieldPath };
+}
+
+export interface ModelStat {
+  value: string;
+  label: string;
+  fields: { value: FieldPath; label: FieldPath };
 }
 
 export interface ModelAbout {
   /** The large first paragraph. Emphasized spans are styled by each template. */
   lead: RichTextSpan[];
   /** Further paragraphs, as plain text. */
-  rest: string[];
+  rest: { text: string; field: FieldPath }[];
+  fields: { lead: FieldPath };
 }
 
 /**
@@ -75,16 +92,29 @@ export interface SiteModel {
   availabilityShort: string;
   affiliations: string[];
   keywords: string[];
+  /** True in the editor's preview, where templates mark text that can be edited in place. */
+  editable: boolean;
+  fields: {
+    name: FieldPath;
+    role: FieldPath;
+    company: FieldPath;
+    location: FieldPath;
+    availability: FieldPath;
+    availabilityShort: FieldPath;
+    /** One per entry of `affiliations`. */
+    affiliations: FieldPath[];
+  };
   hero: {
     eyebrow: string;
     headline: string;
     subheadline: string;
     cta: ModelLink | null;
     image: ModelImage | null;
+    fields: { eyebrow: FieldPath; headline: FieldPath; subheadline: FieldPath; cta: FieldPath };
   };
   /** Visible, non-empty middle sections in the order the user arranged them. */
   order: MiddleKind[];
-  stats: { value: string; label: string }[];
+  stats: ModelStat[];
   about: ModelAbout | null;
   experience: ModelExperience[];
   work: ModelWork[];
@@ -95,6 +125,7 @@ export interface SiteModel {
     blurb: string;
     email: string;
     links: ModelLink[];
+    fields: { blurb: FieldPath };
   };
 }
 
@@ -163,17 +194,24 @@ const MIDDLE_KIND: Partial<Record<Section["type"], MiddleKind>> = {
   testimonials: "testimonials",
 };
 
-function quoteOf(item: { quote: string; author: string; role?: string | undefined }): ModelQuote {
+function quoteOf(
+  item: { quote: string; author: string; role?: string | undefined },
+  at: FieldPath,
+): ModelQuote {
   return {
     quote: item.quote,
     author: item.author,
     role: item.role ?? "",
     initials: initialsOf(item.author),
     attribution: item.role ? `${item.author}, ${item.role}` : item.author,
+    fields: { quote: `${at}.quote`, author: `${at}.author`, role: `${at}.role` },
   };
 }
 
-export function buildSiteModel(content: RenderableSiteContent): SiteModel {
+export function buildSiteModel(
+  content: RenderableSiteContent,
+  { editable = false }: { editable?: boolean } = {},
+): SiteModel {
   const { sections } = content;
   const meta = content.meta;
   const hero = firstOf(sections, "hero");
@@ -186,17 +224,33 @@ export function buildSiteModel(content: RenderableSiteContent): SiteModel {
   const work = firstVisible(sections, "portfolio");
   const testimonials = firstVisible(sections, "testimonials");
   const contact = firstOf(sections, "contact");
+  const heroId = hero?.id ?? "hero";
 
-  const stats = impact?.items.map((item) => ({ value: item.value, label: item.label })) ?? [];
+  const stats: ModelStat[] =
+    impact?.items.map((item, index) => ({
+      value: item.value,
+      label: item.label,
+      fields: {
+        value: `${impact.id}.items.${index}.value`,
+        label: `${impact.id}.items.${index}.label`,
+      },
+    })) ?? [];
   const [leadParagraph, ...restParagraphs] = about?.body ?? [];
-  const aboutModel: ModelAbout | null = leadParagraph
-    ? {
-        lead: leadParagraph.spans,
-        rest: restParagraphs.map(plainText).filter(Boolean),
-      }
-    : null;
+  const aboutModel: ModelAbout | null =
+    about && leadParagraph
+      ? {
+          lead: leadParagraph.spans,
+          rest: restParagraphs
+            .map((paragraph, index) => ({
+              text: plainText(paragraph),
+              field: `${about.id}.body.${index + 1}`,
+            }))
+            .filter((paragraph) => paragraph.text),
+          fields: { lead: `${about.id}.body.0` },
+        }
+      : null;
   const experienceItems: ModelExperience[] =
-    experience?.items.map((item) => ({
+    experience?.items.map((item, index) => ({
       role: item.role,
       organization: item.organization,
       location: item.location ?? "",
@@ -204,16 +258,31 @@ export function buildSiteModel(content: RenderableSiteContent): SiteModel {
       startYear: item.start?.split(/[\s–-]/)[0] ?? "",
       summary: item.summary ?? "",
       orgInitials: orgInitials(item.organization),
+      fields: {
+        role: `${experience.id}.items.${index}.role`,
+        organization: `${experience.id}.items.${index}.organization`,
+        location: `${experience.id}.items.${index}.location`,
+        summary: `${experience.id}.items.${index}.summary`,
+      },
     })) ?? [];
   const workItems: ModelWork[] =
-    work?.items.map((item) => ({
+    work?.items.map((item, index) => ({
       kind: item.kind ?? "",
       title: item.title,
       meta: item.meta || item.description || "",
       year: item.year ?? "",
       href: item.href ?? null,
+      fields: {
+        title: `${work.id}.items.${index}.title`,
+        kind: `${work.id}.items.${index}.kind`,
+        // The line shows the description when there's no meta, so edits go where the text came from.
+        meta: `${work.id}.items.${index}.${!item.meta && item.description ? "description" : "meta"}`,
+        year: `${work.id}.items.${index}.year`,
+      },
     })) ?? [];
-  const quotes = testimonials?.items.map(quoteOf) ?? [];
+  const quotes =
+    testimonials?.items.map((item, index) => quoteOf(item, `${testimonials.id}.items.${index}`)) ??
+    [];
 
   // Hidden or empty sections drop out, so templates never render an empty block.
   const present: Record<MiddleKind, boolean> = {
@@ -241,12 +310,28 @@ export function buildSiteModel(content: RenderableSiteContent): SiteModel {
     availabilityShort: meta?.availabilityShort || meta?.availability || "",
     affiliations: meta?.affiliations ?? [],
     keywords: meta?.keywords ?? [],
+    editable,
+    fields: {
+      name: "meta.name",
+      role: "meta.role",
+      company: "meta.company",
+      location: "meta.location",
+      availability: "meta.availability",
+      availabilityShort: "meta.availabilityShort",
+      affiliations: (meta?.affiliations ?? []).map((_, index) => `meta.affiliations.${index}`),
+    },
     hero: {
       eyebrow: hero?.eyebrow ?? "",
       headline: hero?.headline ?? name,
       subheadline: hero?.subheadline ?? "",
       cta: hero?.primaryCta ? { label: hero.primaryCta.label, href: hero.primaryCta.href } : null,
       image: hero?.image ? { src: hero.image.src, alt: hero.image.alt || name } : null,
+      fields: {
+        eyebrow: `${heroId}.eyebrow`,
+        headline: `${heroId}.headline`,
+        subheadline: `${heroId}.subheadline`,
+        cta: `${heroId}.primaryCta.label`,
+      },
     },
     order,
     stats: present.impact ? stats : [],
@@ -259,6 +344,7 @@ export function buildSiteModel(content: RenderableSiteContent): SiteModel {
       blurb: contact?.blurb ?? "",
       email: contact?.email ?? "",
       links: (contact?.links ?? []).map((link) => ({ label: linkLabel(link), href: link.href })),
+      fields: { blurb: `${contact?.id ?? "contact"}.blurb` },
     },
   };
 }

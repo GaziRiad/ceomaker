@@ -48,6 +48,8 @@ export interface ContentPanelProps {
   initials: string;
   rewriting: boolean;
   rewriteError: string | null;
+  /** Bumped when text is edited in the preview, so forms that keep local text re-read it. */
+  revision: number;
   onSelect: (id: string) => void;
   onSections: (sections: Section[]) => void;
   onSection: (id: string, update: (section: Section) => Section) => void;
@@ -68,7 +70,7 @@ export function ContentPanel(props: ContentPanelProps) {
         style={{ padding: "16px 16px 40px", "--delay": "0ms" } as React.CSSProperties}
       >
         <span className="kicker">{SECTION_LABELS[selected.type]}</span>
-        <SectionForm {...props} section={selected} />
+        <SectionForm key={props.revision} {...props} section={selected} />
       </div>
     </>
   );

@@ -5,13 +5,14 @@ import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode }
 
 /**
  * Lays its content out at the 1280px design width and scales it to fit the frame with CSS zoom,
- * so previews look exactly like the live site at any size. Contents are inert: a preview is a
- * picture, not something to tab into or click through.
+ * so previews look exactly like the live site at any size. Contents are inert (a picture, not
+ * something to tab into or click through) unless the frame is interactive, as in the editor.
  */
 export function ScaledFrame({
   children,
   initialZoom = 0.5,
   maxZoom = 1,
+  interactive = false,
   className,
   style,
 }: {
@@ -19,6 +20,8 @@ export function ScaledFrame({
   /** Used for the server render, before the frame can be measured. */
   initialZoom?: number;
   maxZoom?: number;
+  /** Let the contents take clicks and focus (in-place editing). */
+  interactive?: boolean;
   className?: string;
   style?: CSSProperties;
 }) {
@@ -40,7 +43,10 @@ export function ScaledFrame({
 
   return (
     <div ref={frame} className={className} style={{ overflow: "hidden", ...style }}>
-      <div inert style={{ width: DESIGN_WIDTH, zoom, pointerEvents: "none" }}>
+      <div
+        inert={!interactive}
+        style={{ width: DESIGN_WIDTH, zoom, pointerEvents: interactive ? undefined : "none" }}
+      >
         {children}
       </div>
     </div>

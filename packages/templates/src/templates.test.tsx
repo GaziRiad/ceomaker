@@ -5,6 +5,7 @@ import {
   onboardingAnswersSchema,
   parseSiteContentForRender,
   TEMPLATE_KEYS,
+  type RenderableSiteContent,
   type SectionInput,
   type SiteContentInput,
 } from "@ceomaker/schema";
@@ -25,6 +26,61 @@ function render(key: (typeof TEMPLATE_KEYS)[number], content: unknown) {
       publishedAt={publishedAt}
     />,
   );
+}
+
+const ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#x27;": "'",
+};
+const VOID_TAGS = new Set(["br", "img", "hr", "input", "meta", "link"]);
+
+/**
+ * The text of every element marked data-field in static markup, read the way the editor reads
+ * it: aria-hidden decorations inside the element don't count.
+ */
+function fieldTexts(html: string): [string, string][] {
+  const found: [string, string][] = [];
+  const open: { field: string | null; hidden: boolean; text: string }[] = [];
+  const tokens =
+    /<!--.*?-->|<(\/?)([a-zA-Z][\w-]*)((?:\s+[^\s=>/]+(?:="[^"]*")?)*)\s*(\/?)>|([^<]+)/g;
+  for (const [, closing, tag = "", attrs = "", selfClosing, text] of html.matchAll(tokens)) {
+    if (text !== undefined) {
+      const decoded = text.replace(/&(?:amp|lt|gt|quot|#x27);/g, (entity) => ENTITIES[entity]!);
+      open.forEach((frame, index) => {
+        if (frame.field && !open.slice(index + 1).some((inner) => inner.hidden)) {
+          frame.text += decoded;
+        }
+      });
+    } else if (closing) {
+      const frame = open.pop()!;
+      if (frame.field) found.push([frame.field, frame.text]);
+    } else if (tag && !selfClosing && !VOID_TAGS.has(tag.toLowerCase())) {
+      open.push({
+        field: /\sdata-field="([^"]*)"/.exec(attrs)?.[1] ?? null,
+        hidden: /\saria-hidden="true"/.test(attrs),
+        text: "",
+      });
+    }
+  }
+  return found;
+}
+
+/** What a field path points at in the content, as the editor would write it. */
+function contentText(content: RenderableSiteContent, path: string): string {
+  const [head = "", ...rest] = path.split(".");
+  let value: unknown =
+    head === "meta" ? content.meta : content.sections.find((section) => section.id === head);
+  if (path === "meta.availabilityShort") {
+    return content.meta?.availabilityShort || content.meta?.availability || "";
+  }
+  for (const key of rest) value = (value as Record<string, unknown>)[key];
+  if (value && typeof value === "object" && "spans" in value) {
+    return (value as { spans: { text: string }[] }).spans.map((span) => span.text).join("");
+  }
+  return String(value);
 }
 
 const starter = buildStarterContent(
@@ -92,6 +148,28 @@ describe.each(TEMPLATE_KEYS)("%s template", (key) => {
     );
     expect(html).not.toContain("<script>");
     expect(html).toContain("&lt;script&gt;");
+  });
+
+  it("marks each editable text with the content field it shows, in the editor only", () => {
+    const content = parseSiteContentForRender(demoSiteContent);
+    const html = renderToStaticMarkup(
+      <TemplateView
+        templateKey={key}
+        colors={defaultColors(key)}
+        content={content}
+        publishedAt={publishedAt}
+        editable
+      />,
+    );
+    const fields = fieldTexts(html);
+    for (const [path, text] of fields) {
+      expect({ path, text }).toEqual({ path, text: contentText(content, path) });
+    }
+    expect(fields.map(([path]) => path)).toEqual(
+      expect.arrayContaining(["hero.headline", "about.body.0", "contact.blurb"]),
+    );
+    expect(fields.length).toBeGreaterThan(20);
+    expect(render(key, demoSiteContent)).not.toContain("data-field");
   });
 
   it("copes with a very long name", () => {

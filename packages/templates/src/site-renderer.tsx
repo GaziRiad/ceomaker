@@ -21,6 +21,8 @@ export interface TemplateViewProps {
   preview?: boolean;
   /** Pause animations (thumbnails). */
   still?: boolean;
+  /** Mark text for in-place editing (the editor's preview). */
+  editable?: boolean;
 }
 
 /** Renders validated content with a template. Used live and by the editor's previews. */
@@ -31,6 +33,7 @@ export function TemplateView({
   publishedAt,
   preview = false,
   still = false,
+  editable = false,
 }: TemplateViewProps) {
   const Template = getTemplate(templateKey).Component;
   return (
@@ -39,7 +42,7 @@ export function TemplateView({
       data-still={still || undefined}
       style={{ ...themeToStyle(colors), minHeight: preview ? undefined : "100dvh" }}
     >
-      <Template model={buildSiteModel(content)} publishedAt={publishedAt} />
+      <Template model={buildSiteModel(content, { editable })} publishedAt={publishedAt} />
     </div>
   );
 }

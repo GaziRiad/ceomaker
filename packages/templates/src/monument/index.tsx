@@ -5,6 +5,7 @@ import {
   ANCHORS,
   ContactLink,
   CtaLink,
+  editable,
   loop,
   mailto,
   navItems,
@@ -30,10 +31,13 @@ function SectionLabel({
   number,
   title,
   aside,
+  asideEdit,
 }: {
   number: string | undefined;
   title: string;
   aside?: string;
+  /** From editable(), when the aside is a content field. */
+  asideEdit?: ReturnType<typeof editable>;
 }) {
   return (
     <div
@@ -47,7 +51,11 @@ function SectionLabel({
       }}
     >
       <span>{number ? `(${number}) ${title}` : title}</span>
-      {aside ? <span style={{ textAlign: "right" }}>{aside}</span> : null}
+      {aside ? (
+        <span {...asideEdit} style={{ textAlign: "right" }}>
+          {aside}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -125,7 +133,7 @@ function NameHero({ model }: { model: SiteModel }) {
             {model.location ? (
               <>
                 <br />
-                {model.location}
+                <span {...editable(model, model.fields.location)}>{model.location}</span>
               </>
             ) : null}
           </span>
@@ -144,10 +152,13 @@ function Intro({ model }: { model: SiteModel }) {
     >
       <div style={{ ...caps, display: "flex", flexDirection: "column", gap: 6 }}>
         <span style={{ color: "var(--site-accent)" }}>(Role)</span>
-        <span>{hero.eyebrow || model.role}</span>
+        <span {...editable(model, hero.eyebrow ? hero.fields.eyebrow : model.fields.role)}>
+          {hero.eyebrow || model.role}
+        </span>
       </div>
       <div>
         <h1
+          {...editable(model, hero.fields.headline)}
           style={{
             margin: 0,
             fontFamily: FONTS.inter,
@@ -162,6 +173,7 @@ function Intro({ model }: { model: SiteModel }) {
         </h1>
         {hero.subheadline ? (
           <p
+            {...editable(model, hero.fields.subheadline)}
             style={{
               margin: "22px 0 0",
               maxWidth: 640,
@@ -192,7 +204,8 @@ function Intro({ model }: { model: SiteModel }) {
               letterSpacing: "0.02em",
             }}
           >
-            <span>{hero.cta.label}</span> <span aria-hidden>→</span>
+            <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span>{" "}
+            <span aria-hidden>→</span>
           </CtaLink>
         ) : null}
       </div>
@@ -246,11 +259,17 @@ function Impact({ model, number }: { model: SiteModel; number?: string }) {
       aria-label="Impact"
       style={{ padding: `${fluid(72, 104)} ${pad} 0` }}
     >
-      <SectionLabel number={number} title="Impact" aside={model.company} />
+      <SectionLabel
+        number={number}
+        title="Impact"
+        aside={model.company}
+        asideEdit={editable(model, model.fields.company)}
+      />
       <div className="grid grid-cols-2 gap-6 @3xl:grid-cols-4" style={{ marginTop: 40 }}>
         {model.stats.map((stat, index) => (
           <div key={index}>
             <div
+              {...editable(model, stat.fields.value)}
               style={{
                 fontWeight: 900,
                 fontSize: fluid(52, 84),
@@ -261,7 +280,10 @@ function Impact({ model, number }: { model: SiteModel; number?: string }) {
             >
               {stat.value}
             </div>
-            <div style={{ marginTop: 16, fontSize: 15, fontWeight: 500, maxWidth: 220 }}>
+            <div
+              {...editable(model, stat.fields.label)}
+              style={{ marginTop: 16, fontSize: 15, fontWeight: 500, maxWidth: 220 }}
+            >
               {stat.label}
             </div>
           </div>
@@ -283,6 +305,7 @@ function About({ model, number }: { model: SiteModel; number?: string }) {
         <div />
         <div>
           <p
+            {...editable(model, about.fields.lead)}
             style={{
               margin: 0,
               fontWeight: 700,
@@ -304,6 +327,7 @@ function About({ model, number }: { model: SiteModel; number?: string }) {
           {about.rest.map((paragraph, index) => (
             <p
               key={index}
+              {...editable(model, paragraph.field)}
               style={{
                 margin: "28px 0 0",
                 maxWidth: 640,
@@ -311,7 +335,7 @@ function About({ model, number }: { model: SiteModel; number?: string }) {
                 color: "var(--site-muted)",
               }}
             >
-              {paragraph}
+              {paragraph.text}
             </p>
           ))}
         </div>
@@ -340,6 +364,7 @@ function Experience({ model, number }: { model: SiteModel; number?: string }) {
             </div>
             <div>
               <div
+                {...editable(model, item.fields.role)}
                 style={{
                   fontWeight: 800,
                   fontSize: fluid(24, 30),
@@ -349,12 +374,20 @@ function Experience({ model, number }: { model: SiteModel; number?: string }) {
               >
                 {item.role}
               </div>
-              <div style={{ marginTop: 6, fontSize: 15, color: "var(--site-muted)" }}>
+              <div
+                {...editable(model, item.fields.organization)}
+                style={{ marginTop: 6, fontSize: 15, color: "var(--site-muted)" }}
+              >
                 {item.organization}
               </div>
             </div>
             {item.summary ? (
-              <p style={{ margin: 0, fontSize: 15, color: "var(--site-muted)" }}>{item.summary}</p>
+              <p
+                {...editable(model, item.fields.summary)}
+                style={{ margin: 0, fontSize: 15, color: "var(--site-muted)" }}
+              >
+                {item.summary}
+              </p>
             ) : null}
           </div>
         ))}
@@ -375,8 +408,11 @@ function Work({ model, number }: { model: SiteModel; number?: string }) {
         {model.work.map((item, index) => {
           const row = (
             <>
-              <span style={{ ...caps }}>{item.kind}</span>
+              <span {...(item.kind ? editable(model, item.fields.kind) : {})} style={{ ...caps }}>
+                {item.kind}
+              </span>
               <span
+                {...editable(model, item.fields.title)}
                 style={{
                   fontWeight: 800,
                   fontSize: fluid(28, 40),
@@ -386,7 +422,11 @@ function Work({ model, number }: { model: SiteModel; number?: string }) {
               >
                 {item.title}
               </span>
-              <span className="@3xl:justify-self-end" style={{ fontSize: 15, fontWeight: 600 }}>
+              <span
+                {...(item.year ? editable(model, item.fields.year) : {})}
+                className="@3xl:justify-self-end"
+                style={{ fontSize: 15, fontWeight: 600 }}
+              >
                 {item.year}
               </span>
             </>
@@ -433,7 +473,7 @@ function Testimonials({ model }: { model: SiteModel }) {
               letterSpacing: "-0.035em",
             }}
           >
-            “{item.quote}”
+            “<span {...editable(model, item.fields.quote)}>{item.quote}</span>”
           </blockquote>
           <figcaption
             style={{
@@ -442,11 +482,12 @@ function Testimonials({ model }: { model: SiteModel }) {
               color: "color-mix(in srgb, var(--site-ink) 55%, transparent)",
             }}
           >
-            {item.author}
+            <span {...editable(model, item.fields.author)}>{item.author}</span>
             {item.role ? (
               <>
                 {" "}
-                <span style={{ color: "var(--site-accent)" }}>/</span> {item.role}
+                <span style={{ color: "var(--site-accent)" }}>/</span>{" "}
+                <span {...editable(model, item.fields.role)}>{item.role}</span>
               </>
             ) : null}
           </figcaption>
@@ -464,7 +505,12 @@ function Contact({ model, number, year }: { model: SiteModel; number?: string; y
       aria-label="Contact"
       style={{ padding: `${fluid(96, 144)} ${pad} 48px` }}
     >
-      <SectionLabel number={number} title="Contact" aside={contact.blurb} />
+      <SectionLabel
+        number={number}
+        title="Contact"
+        aside={contact.blurb}
+        asideEdit={editable(model, contact.fields.blurb)}
+      />
       {contact.email ? (
         <div
           style={{
@@ -543,7 +589,7 @@ export function MonumentTemplate({ model, publishedAt }: TemplateProps) {
         }}
       >
         <a href={`#${ANCHORS.top}`} style={{ whiteSpace: "nowrap", overflow: "hidden" }}>
-          {model.name}
+          <span {...editable(model, model.fields.name)}>{model.name}</span>
         </a>
         <span
           className="hidden @3xl:flex"
@@ -561,7 +607,7 @@ export function MonumentTemplate({ model, publishedAt }: TemplateProps) {
                   flex: "none",
                 }}
               />
-              {model.availability}
+              <span {...editable(model, model.fields.availability)}>{model.availability}</span>
             </>
           ) : null}
         </span>

@@ -20,15 +20,19 @@ import { rewriteHeadlineAction, saveDraftAction } from "../../../site-actions";
 import { BrandPanel } from "./brand-panel";
 import { ContentPanel } from "./content-panel";
 import {
+  canEditInPlace,
+  editInPlace,
   fingerprint,
   normalizeForEditing,
   prepareForSave,
   previewContent,
+  sectionIdOfField,
   sectionOf,
   updateLastValid,
   type Draft,
   type FieldErrors,
 } from "./editor-model";
+import { InlineEditing } from "./inline-editing";
 import { PublishDialog, type PublishedResult } from "./publish-dialog";
 import { TemplatePanel } from "./template-panel";
 
@@ -99,6 +103,7 @@ export function Editor({
   const [rewriting, setRewriting] = useState(false);
   const [rewriteError, setRewriteError] = useState<string | null>(null);
   const [banner, setBanner] = useState(notice);
+  const [formRevision, setFormRevision] = useState(0);
 
   const latest = useRef(draft);
   const savedPrint = useRef(fingerprint(initialDraft));
@@ -194,6 +199,23 @@ export function Editor({
     });
   const setTemplate = (templateKey: TemplateKey) =>
     setDraft((current) => ({ ...current, templateKey }));
+
+  /** A text in the preview was clicked: show its form, and say whether it can be edited there. */
+  const startInlineEdit = (path: string) => {
+    const sectionId = sectionIdOfField(latest.current.content, path);
+    if (sectionId) {
+      setTab("content");
+      setSelectedId(sectionId);
+    }
+    return canEditInPlace(latest.current.content, path);
+  };
+  const commitInlineEdit = (path: string, before: string, after: string) => {
+    setDraft((current) => {
+      const content = editInPlace(current.content, path, before, after);
+      return content ? { ...current, content } : current;
+    });
+    setFormRevision((revision) => revision + 1);
+  };
 
   const rewrite = async (mode: RewriteMode) => {
     const hero = sectionOf(draft.content, "hero");
@@ -333,6 +355,7 @@ export function Editor({
               initials={initials}
               rewriting={rewriting}
               rewriteError={rewriteError}
+              revision={formRevision}
               onSelect={setSelectedId}
               onSections={setSections}
               onSection={updateSection}
@@ -357,16 +380,22 @@ export function Editor({
           )}
         </aside>
         <div className="min-h-0 overflow-auto bg-surface p-4 sm:p-7">
+          <p className="mx-auto mt-0 mb-3 max-w-[1280px] text-[13px] text-neutral-700">
+            Click any text on the page to edit it. Enter saves it, Esc cancels.
+          </p>
           <Blueprint className="mx-auto max-w-[1280px] bg-neutral-100 shadow-md">
             <AddressBar address={address} />
-            <ScaledFrame initialZoom={0.7}>
-              <TemplateView
-                templateKey={draft.templateKey}
-                colors={colors}
-                content={renderable}
-                publishedAt={PREVIEW_DATE}
-                preview
-              />
+            <ScaledFrame initialZoom={0.7} interactive>
+              <InlineEditing onStart={startInlineEdit} onCommit={commitInlineEdit}>
+                <TemplateView
+                  templateKey={draft.templateKey}
+                  colors={colors}
+                  content={renderable}
+                  publishedAt={PREVIEW_DATE}
+                  preview
+                  editable
+                />
+              </InlineEditing>
             </ScaledFrame>
           </Blueprint>
         </div>

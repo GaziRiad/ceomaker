@@ -5,6 +5,7 @@ import {
   ANCHORS,
   ContactLink,
   CtaLink,
+  editable,
   mailto,
   navItems,
   Portrait,
@@ -43,10 +44,11 @@ function Hero({ model }: { model: SiteModel }) {
               aria-hidden
               style={{ width: 40, height: 1, background: "var(--site-accent)", flex: "none" }}
             />
-            {model.role}
+            <span {...editable(model, model.fields.role)}>{model.role}</span>
           </div>
         ) : null}
         <h1
+          {...editable(model, hero.fields.headline)}
           style={{
             margin: "30px 0 0",
             fontFamily: display,
@@ -61,6 +63,7 @@ function Hero({ model }: { model: SiteModel }) {
         </h1>
         {hero.subheadline ? (
           <p
+            {...editable(model, hero.fields.subheadline)}
             style={{
               margin: "30px 0 0",
               maxWidth: 540,
@@ -92,7 +95,9 @@ function Hero({ model }: { model: SiteModel }) {
                 color: "var(--site-on)",
                 fontWeight: 600,
               }}
-            />
+            >
+              <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span>
+            </CtaLink>
           ) : null}
           {model.order.includes("experience") ? (
             <a
@@ -167,6 +172,7 @@ function Stats({ model }: { model: SiteModel }) {
           }}
         >
           <div
+            {...editable(model, stat.fields.value)}
             style={{
               fontFamily: display,
               fontSize: fluid(40, 56),
@@ -176,7 +182,10 @@ function Stats({ model }: { model: SiteModel }) {
           >
             {stat.value}
           </div>
-          <div style={{ marginTop: 12, fontSize: 14, color: "var(--site-muted)" }}>
+          <div
+            {...editable(model, stat.fields.label)}
+            style={{ marginTop: 12, fontSize: 14, color: "var(--site-muted)" }}
+          >
             {stat.label}
           </div>
         </div>
@@ -204,7 +213,9 @@ function Affiliations({ model }: { model: SiteModel }) {
       }}
     >
       {model.affiliations.map((name, index) => (
-        <span key={index}>{name}</span>
+        <span key={index} {...editable(model, model.fields.affiliations[index]!)}>
+          {name}
+        </span>
       ))}
     </section>
   );
@@ -225,6 +236,7 @@ function About({ model }: { model: SiteModel }) {
     >
       <div style={kicker}>About</div>
       <p
+        {...editable(model, about.fields.lead)}
         style={{
           margin: "28px 0 0",
           fontFamily: display,
@@ -245,6 +257,7 @@ function About({ model }: { model: SiteModel }) {
       {about.rest.map((paragraph, index) => (
         <p
           key={index}
+          {...editable(model, paragraph.field)}
           style={{
             margin: "32px auto 0",
             maxWidth: 640,
@@ -252,7 +265,7 @@ function About({ model }: { model: SiteModel }) {
             color: "var(--site-muted)",
           }}
         >
-          {paragraph}
+          {paragraph.text}
         </p>
       ))}
     </section>
@@ -283,15 +296,25 @@ function Record({ model }: { model: SiteModel }) {
             {item.dates}
           </div>
           <div>
-            <div style={{ fontFamily: display, fontSize: fluid(26, 32), lineHeight: 1.15 }}>
+            <div
+              {...editable(model, item.fields.role)}
+              style={{ fontFamily: display, fontSize: fluid(26, 32), lineHeight: 1.15 }}
+            >
               {item.role}
             </div>
             <div style={{ marginTop: 6, fontSize: 14, color: "var(--site-muted)" }}>
-              {[item.organization, item.location].filter(Boolean).join(" · ")}
+              <span {...editable(model, item.fields.organization)}>{item.organization}</span>
+              {item.location ? (
+                <>
+                  {" · "}
+                  <span {...editable(model, item.fields.location)}>{item.location}</span>
+                </>
+              ) : null}
             </div>
           </div>
           {item.summary ? (
             <p
+              {...editable(model, item.fields.summary)}
               className="@3xl:pt-2"
               style={{ margin: 0, fontSize: 16, color: "var(--site-muted)" }}
             >
@@ -316,9 +339,15 @@ function Work({ model }: { model: SiteModel }) {
         const body = (
           <>
             {item.kind ? (
-              <span style={{ ...kicker, letterSpacing: "0.22em" }}>{item.kind}</span>
+              <span
+                {...editable(model, item.fields.kind)}
+                style={{ ...kicker, letterSpacing: "0.22em" }}
+              >
+                {item.kind}
+              </span>
             ) : null}
             <span
+              {...editable(model, item.fields.title)}
               style={{
                 marginTop: "auto",
                 fontFamily: display,
@@ -337,7 +366,7 @@ function Work({ model }: { model: SiteModel }) {
                 color: "var(--site-muted)",
               }}
             >
-              <span>{item.meta}</span>
+              <span {...(item.meta ? editable(model, item.fields.meta) : {})}>{item.meta}</span>
               <span style={{ color: "var(--site-accent)" }}>↗</span>
             </span>
           </>
@@ -398,6 +427,7 @@ function PullQuote({ model }: { model: SiteModel }) {
           “
         </div>
         <blockquote
+          {...editable(model, quote.fields.quote)}
           style={{
             margin: "24px 0 0",
             fontFamily: display,
@@ -418,7 +448,13 @@ function PullQuote({ model }: { model: SiteModel }) {
             color: "var(--site-muted)",
           }}
         >
-          {quote.attribution}
+          <span {...editable(model, quote.fields.author)}>{quote.author}</span>
+          {quote.role ? (
+            <>
+              {", "}
+              <span {...editable(model, quote.fields.role)}>{quote.role}</span>
+            </>
+          ) : null}
         </figcaption>
       </figure>
     </section>
@@ -444,6 +480,7 @@ function Contact({ model }: { model: SiteModel }) {
     >
       <div style={kicker}>Private enquiries</div>
       <h2
+        {...editable(model, contact.fields.blurb)}
         style={{
           margin: 0,
           maxWidth: 860,
@@ -550,7 +587,7 @@ export function ObsidianTemplate({ model, publishedAt }: TemplateProps) {
             color: "var(--site-ink)",
           }}
         >
-          {model.name}
+          <span {...editable(model, model.fields.name)}>{model.name}</span>
         </a>
         <nav aria-label="Sections" style={{ display: "flex", alignItems: "center", gap: 36 }}>
           {nav.map((item) => (
@@ -601,7 +638,7 @@ export function ObsidianTemplate({ model, publishedAt }: TemplateProps) {
         <span>
           © {publishedAt.getUTCFullYear()} {model.name}
         </span>
-        <span>{model.location}</span>
+        <span {...editable(model, model.fields.location)}>{model.location}</span>
       </footer>
     </div>
   );

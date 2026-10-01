@@ -20,10 +20,16 @@ export function RevealOnScroll() {
       },
       { threshold: 0.08, rootMargin: "0px 0px -6% 0px" },
     );
-    for (const element of document.querySelectorAll<HTMLElement>('[data-reveal=""]')) {
-      const box = element.getBoundingClientRect();
-      if (box.top < window.innerHeight && box.bottom > 0) continue;
-      element.setAttribute("data-reveal", "armed");
+    // Elements a previous run armed are observed again: Strict Mode (and Fast Refresh) run this
+    // effect twice, and the first run's cleanup disconnects the observer that would reveal them.
+    for (const element of document.querySelectorAll<HTMLElement>(
+      '[data-reveal=""], [data-reveal="armed"]',
+    )) {
+      if (element.getAttribute("data-reveal") === "") {
+        const box = element.getBoundingClientRect();
+        if (box.top < window.innerHeight && box.bottom > 0) continue;
+        element.setAttribute("data-reveal", "armed");
+      }
       observer.observe(element);
     }
     return () => observer.disconnect();

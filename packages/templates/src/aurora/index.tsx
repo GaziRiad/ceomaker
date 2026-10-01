@@ -5,6 +5,7 @@ import {
   ANCHORS,
   ContactLink,
   CtaLink,
+  editable,
   loop,
   mailto,
   navItems,
@@ -150,7 +151,6 @@ function Blobs() {
 
 function Hero({ model }: { model: SiteModel }) {
   const { hero } = model;
-  const position = [model.role, model.company].filter(Boolean).join(" · ");
   return (
     <section
       style={{
@@ -191,10 +191,11 @@ function Hero({ model }: { model: SiteModel }) {
               flex: "none",
             }}
           />
-          {model.availability}
+          <span {...editable(model, model.fields.availability)}>{model.availability}</span>
         </span>
       ) : null}
       <h1
+        {...editable(model, hero.fields.headline)}
         style={{
           margin: 0,
           fontFamily: FONTS.manrope,
@@ -209,6 +210,7 @@ function Hero({ model }: { model: SiteModel }) {
       </h1>
       {hero.subheadline ? (
         <p
+          {...editable(model, hero.fields.subheadline)}
           style={{
             margin: 0,
             maxWidth: 640,
@@ -242,7 +244,7 @@ function Hero({ model }: { model: SiteModel }) {
               boxShadow: "0 10px 24px color-mix(in srgb, var(--site-ink) 20%, transparent)",
             }}
           >
-            {hero.cta.label} →
+            <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span> →
           </CtaLink>
         ) : null}
         {model.order.includes("experience") ? (
@@ -295,9 +297,19 @@ function Hero({ model }: { model: SiteModel }) {
           {model.initials}
         </Portrait>
         <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <span style={{ fontWeight: 800, fontSize: 17 }}>{model.name}</span>
-          {position ? (
-            <span style={{ fontSize: 14, color: "var(--site-muted)" }}>{position}</span>
+          <span {...editable(model, model.fields.name)} style={{ fontWeight: 800, fontSize: 17 }}>
+            {model.name}
+          </span>
+          {model.role || model.company ? (
+            <span style={{ fontSize: 14, color: "var(--site-muted)" }}>
+              {model.role ? (
+                <span {...editable(model, model.fields.role)}>{model.role}</span>
+              ) : null}
+              {model.role && model.company ? " · " : null}
+              {model.company ? (
+                <span {...editable(model, model.fields.company)}>{model.company}</span>
+              ) : null}
+            </span>
           ) : null}
         </span>
         {model.location ? (
@@ -317,7 +329,10 @@ function Hero({ model }: { model: SiteModel }) {
               className="hidden @xl:flex"
               style={{ flexDirection: "column", fontSize: 13, color: "var(--site-muted)" }}
             >
-              <span style={{ fontWeight: 700, color: "var(--site-ink)", fontSize: 15 }}>
+              <span
+                {...editable(model, model.fields.location)}
+                style={{ fontWeight: 700, color: "var(--site-ink)", fontSize: 15 }}
+              >
                 {model.location}
               </span>
               Based in
@@ -398,6 +413,7 @@ function Stats({ model }: { model: SiteModel }) {
           </span>
           <div>
             <div
+              {...editable(model, stat.fields.value)}
               style={{
                 fontWeight: 800,
                 fontSize: fluid(38, 52),
@@ -407,7 +423,12 @@ function Stats({ model }: { model: SiteModel }) {
             >
               {stat.value}
             </div>
-            <div style={{ marginTop: 10, fontSize: 14, opacity: 0.8 }}>{stat.label}</div>
+            <div
+              {...editable(model, stat.fields.label)}
+              style={{ marginTop: 10, fontSize: 14, opacity: 0.8 }}
+            >
+              {stat.label}
+            </div>
           </div>
         </div>
       ))}
@@ -420,6 +441,7 @@ function About({ model }: { model: SiteModel }) {
   return (
     <Split id={ANCHORS.about} title="About">
       <p
+        {...editable(model, about.fields.lead)}
         style={{
           margin: 0,
           fontWeight: 700,
@@ -449,9 +471,10 @@ function About({ model }: { model: SiteModel }) {
       {about.rest.map((paragraph, index) => (
         <p
           key={index}
+          {...editable(model, paragraph.field)}
           style={{ margin: "24px 0 0", maxWidth: 640, fontSize: 17, color: "var(--site-muted)" }}
         >
-          {paragraph}
+          {paragraph.text}
         </p>
       ))}
     </Split>
@@ -493,14 +516,24 @@ function Experience({ model }: { model: SiteModel }) {
               <span className="hidden @xl:block" />
             )}
             <div>
-              <div style={{ fontWeight: 800, fontSize: 21, letterSpacing: "-0.02em" }}>
+              <div
+                {...editable(model, item.fields.role)}
+                style={{ fontWeight: 800, fontSize: 21, letterSpacing: "-0.02em" }}
+              >
                 {item.role}
               </div>
               <div style={{ fontSize: 14, color: "var(--site-muted)" }}>
-                {[item.organization, item.location].filter(Boolean).join(" · ")}
+                <span {...editable(model, item.fields.organization)}>{item.organization}</span>
+                {item.location ? (
+                  <>
+                    {" · "}
+                    <span {...editable(model, item.fields.location)}>{item.location}</span>
+                  </>
+                ) : null}
               </div>
               {item.summary ? (
                 <p
+                  {...editable(model, item.fields.summary)}
                   style={{
                     margin: "10px 0 0",
                     fontSize: 15,
@@ -558,6 +591,7 @@ function Work({ model }: { model: SiteModel }) {
               <div style={{ height: 150, background: WORK_TINTS[index % 4], padding: 16 }}>
                 {item.kind ? (
                   <span
+                    {...editable(model, item.fields.kind)}
                     style={{
                       display: "inline-flex",
                       padding: "5px 12px",
@@ -580,6 +614,7 @@ function Work({ model }: { model: SiteModel }) {
                 }}
               >
                 <span
+                  {...editable(model, item.fields.title)}
                   style={{
                     fontWeight: 800,
                     fontSize: 17,
@@ -590,7 +625,12 @@ function Work({ model }: { model: SiteModel }) {
                   {item.title}
                 </span>
                 {item.meta ? (
-                  <span style={{ fontSize: 13, color: "var(--site-muted)" }}>{item.meta}</span>
+                  <span
+                    {...editable(model, item.fields.meta)}
+                    style={{ fontSize: 13, color: "var(--site-muted)" }}
+                  >
+                    {item.meta}
+                  </span>
                 ) : null}
               </div>
             </>
@@ -657,7 +697,7 @@ function Testimonials({ model }: { model: SiteModel }) {
               letterSpacing: "-0.015em",
             }}
           >
-            “{item.quote}”
+            “<span {...editable(model, item.fields.quote)}>{item.quote}</span>”
           </blockquote>
           <figcaption
             style={{
@@ -687,8 +727,14 @@ function Testimonials({ model }: { model: SiteModel }) {
               {item.initials}
             </span>
             <span style={{ display: "flex", flexDirection: "column", fontSize: 14 }}>
-              <span style={{ fontWeight: 800 }}>{item.author}</span>
-              {item.role ? <span style={{ color: "var(--site-muted)" }}>{item.role}</span> : null}
+              <span {...editable(model, item.fields.author)} style={{ fontWeight: 800 }}>
+                {item.author}
+              </span>
+              {item.role ? (
+                <span {...editable(model, item.fields.role)} style={{ color: "var(--site-muted)" }}>
+                  {item.role}
+                </span>
+              ) : null}
             </span>
           </figcaption>
         </figure>
@@ -730,6 +776,7 @@ function Contact({ model }: { model: SiteModel }) {
           }}
         />
         <h2
+          {...editable(model, contact.fields.blurb)}
           style={{
             position: "relative",
             margin: 0,
@@ -836,7 +883,7 @@ export function AuroraTemplate({ model, publishedAt }: TemplateProps) {
             href={`#${ANCHORS.top}`}
             style={{ fontWeight: 800, color: "var(--site-ink)", fontSize: 15, marginRight: 12 }}
           >
-            {model.name}
+            <span {...editable(model, model.fields.name)}>{model.name}</span>
           </a>
           <nav aria-label="Sections" style={{ display: "contents" }}>
             {nav.map((item) => (
@@ -891,7 +938,7 @@ export function AuroraTemplate({ model, publishedAt }: TemplateProps) {
         <span>
           © {publishedAt.getUTCFullYear()} {model.name}
         </span>
-        <span>{model.location}</span>
+        <span {...editable(model, model.fields.location)}>{model.location}</span>
       </footer>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   themeSettingsSchema,
   type EditableSectionType,
   type RenderableSiteContent,
+  type RichTextSpan,
   type Section,
   type SectionOf,
   type SiteContent,
@@ -100,6 +101,21 @@ export function normalizeForEditing(content: SiteContent): SiteContent {
 const blank = (value: string | undefined) => !value || !value.trim();
 const optional = (value: string | undefined) => (blank(value) ? undefined : value);
 
+type ListType = "achievements" | "experience" | "portfolio" | "testimonials";
+type ItemOf<T extends ListType> = SectionOf<T>["items"][number];
+
+/** Rows with anything typed in them; fully blank rows are dropped before saving and previewing. */
+const KEEP: { [T in ListType]: (item: ItemOf<T>) => boolean } = {
+  achievements: (item) => !blank(item.value) || !blank(item.label),
+  experience: (item) =>
+    [item.role, item.organization, item.start, item.end, item.summary].some(
+      (value) => !blank(value),
+    ),
+  portfolio: (item) =>
+    [item.title, item.kind, item.meta, item.year, item.href].some((value) => !blank(value)),
+  testimonials: (item) => !blank(item.quote) || !blank(item.author),
+};
+
 function cleanSection(section: Section): Section {
   switch (section.type) {
     case "hero": {
@@ -112,48 +128,35 @@ function cleanSection(section: Section): Section {
       };
     }
     case "achievements":
-      return {
-        ...section,
-        items: section.items.filter((item) => !blank(item.value) || !blank(item.label)),
-      };
+      return { ...section, items: section.items.filter(KEEP.achievements) };
     case "experience":
       return {
         ...section,
-        items: section.items
-          .filter((item) =>
-            [item.role, item.organization, item.start, item.end, item.summary].some(
-              (value) => !blank(value),
-            ),
-          )
-          .map((item) => ({
-            ...item,
-            location: optional(item.location),
-            start: optional(item.start),
-            end: optional(item.end),
-            summary: optional(item.summary),
-          })),
+        items: section.items.filter(KEEP.experience).map((item) => ({
+          ...item,
+          location: optional(item.location),
+          start: optional(item.start),
+          end: optional(item.end),
+          summary: optional(item.summary),
+        })),
       };
     case "portfolio":
       return {
         ...section,
-        items: section.items
-          .filter((item) =>
-            [item.title, item.kind, item.meta, item.year, item.href].some((value) => !blank(value)),
-          )
-          .map((item) => ({
-            ...item,
-            kind: optional(item.kind),
-            meta: optional(item.meta),
-            year: optional(item.year),
-            description: optional(item.description),
-            href: optional(item.href),
-          })),
+        items: section.items.filter(KEEP.portfolio).map((item) => ({
+          ...item,
+          kind: optional(item.kind),
+          meta: optional(item.meta),
+          year: optional(item.year),
+          description: optional(item.description),
+          href: optional(item.href),
+        })),
       };
     case "testimonials":
       return {
         ...section,
         items: section.items
-          .filter((item) => !blank(item.quote) || !blank(item.author))
+          .filter(KEEP.testimonials)
           .map((item) => ({ ...item, role: optional(item.role) })),
       };
     case "contact":
@@ -262,4 +265,198 @@ export function fingerprint(draft: {
 
 export function sectionOf<T extends EditableSectionType>(content: SiteContent, type: T) {
   return content.sections.find((section): section is SectionOf<T> => section.type === type);
+}
+
+// In-place editing. Templates mark preview text with the content path it shows (FieldPath in
+// @ceomaker/templates): "hero.headline", "experience.items.2.role", "about.body.0", "meta.name".
+// Item indexes count rendered items, so they're mapped back past blank rows to the draft's.
+
+const ITEM_FIELDS: { [T in ListType]: readonly (keyof ItemOf<T> & string)[] } = {
+  achievements: ["value", "label"],
+  experience: ["role", "organization", "location", "summary"],
+  portfolio: ["title", "kind", "meta", "year", "description"],
+  testimonials: ["quote", "author", "role"],
+};
+const HERO_FIELDS = ["eyebrow", "headline", "subheadline"] as const;
+const META_FIELDS = [
+  "name",
+  "role",
+  "company",
+  "location",
+  "availability",
+  "availabilityShort",
+] as const;
+
+/** Typed text as a single line: pasted line breaks and runs of spaces become one space. */
+function singleLine(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+/** The draft index of the nth row the preview shows, skipping rows it doesn't. */
+function draftIndex<T>(items: readonly T[], keep: (item: T) => boolean, shown: string) {
+  if (!/^\d+$/.test(shown)) return -1;
+  let seen = -1;
+  return items.findIndex((item) => keep(item) && ++seen === Number(shown));
+}
+
+function includes<T extends string>(list: readonly T[], value: string | undefined): value is T {
+  return (list as readonly string[]).includes(value ?? "");
+}
+
+/** The section whose form holds a preview field. Profile details live in the hero's form. */
+export function sectionIdOfField(content: SiteContent, path: string): string | null {
+  const [head] = path.split(".");
+  if (head === "meta") return sectionOf(content, "hero")?.id ?? null;
+  return content.sections.some((section) => section.id === head) ? (head ?? null) : null;
+}
+
+/**
+ * Whether the preview shows this field straight from the draft. A section that doesn't validate
+ * is previewed from its last valid version, whose text and rows can differ from the draft's.
+ */
+export function canEditInPlace(content: SiteContent, path: string): boolean {
+  const [head] = path.split(".");
+  if (head === "meta") return siteMetaSchema.safeParse(cleanMeta(content.meta)).success;
+  const section = content.sections.find((candidate) => candidate.id === head);
+  return !!section && sectionSchema.safeParse(cleanSection(section)).success;
+}
+
+function sameFormat(a: RichTextSpan, b: RichTextSpan) {
+  return !!a.bold === !!b.bold && !!a.italic === !!b.italic && a.href === b.href;
+}
+
+/**
+ * Applies an edit of a paragraph's plain text to its spans. Text outside the changed range keeps
+ * its emphasis and links; new text takes the format of what it replaced, or of the text before
+ * the caret. Returns no spans when the paragraph was emptied.
+ */
+export function respan(spans: RichTextSpan[], before: string, after: string): RichTextSpan[] {
+  if (spans.map((span) => span.text).join("") !== before) {
+    const text = singleLine(after);
+    return text ? [{ text }] : [];
+  }
+  let start = 0;
+  while (start < before.length && start < after.length && before[start] === after[start]) {
+    start += 1;
+  }
+  let end = 0;
+  while (
+    end < before.length - start &&
+    end < after.length - start &&
+    before[before.length - 1 - end] === after[after.length - 1 - end]
+  ) {
+    end += 1;
+  }
+  const cutEnd = before.length - end;
+  const anchor = cutEnd > start ? start : Math.max(0, start - 1);
+  const head: RichTextSpan[] = [];
+  const tail: RichTextSpan[] = [];
+  let format: RichTextSpan = spans[0] ?? { text: "" };
+  let offset = 0;
+  for (const span of spans) {
+    const from = offset;
+    offset += span.text.length;
+    if (anchor >= from && anchor < offset) format = span;
+    if (from < start)
+      head.push({ ...span, text: span.text.slice(0, Math.min(offset, start) - from) });
+    if (offset > cutEnd)
+      tail.push({ ...span, text: span.text.slice(Math.max(from, cutEnd) - from) });
+  }
+  const pieces = [...head, { ...format, text: after.slice(start, after.length - end) }, ...tail];
+  const merged: RichTextSpan[] = [];
+  for (const piece of pieces) {
+    const text = piece.text.replace(/\s+/g, " ");
+    const last = merged.at(-1);
+    if (!text) continue;
+    if (last && sameFormat(last, piece)) last.text += text;
+    else merged.push({ ...piece, text });
+  }
+  const first = merged[0];
+  if (first) first.text = first.text.trimStart();
+  const last = merged.at(-1);
+  if (last) last.text = last.text.trimEnd();
+  return merged.filter((span) => span.text);
+}
+
+function editSection(section: Section, rest: string[], before: string, after: string) {
+  const [field, index, key] = rest;
+  const value = singleLine(after);
+  switch (section.type) {
+    case "hero":
+      if (rest.length === 1 && includes(HERO_FIELDS, field)) return { ...section, [field]: value };
+      if (rest.join(".") === "primaryCta.label" && section.primaryCta) {
+        return { ...section, primaryCta: { ...section.primaryCta, label: value } };
+      }
+      return null;
+    case "contact":
+      return rest.length === 1 && field === "blurb" ? { ...section, blurb: value } : null;
+    case "about": {
+      const paragraph = /^\d+$/.test(index ?? "") ? section.body[Number(index)] : undefined;
+      if (field !== "body" || rest.length !== 2 || !paragraph) return null;
+      const spans = respan(paragraph.spans, before, after);
+      return {
+        ...section,
+        body: spans.length
+          ? section.body.map((current) => (current === paragraph ? { spans } : current))
+          : section.body.filter((current) => current !== paragraph),
+      };
+    }
+    case "achievements":
+    case "experience":
+    case "portfolio":
+    case "testimonials": {
+      const keep = KEEP[section.type] as (item: ItemOf<ListType>) => boolean;
+      const fields = ITEM_FIELDS[section.type] as readonly string[];
+      const at = draftIndex<ItemOf<ListType>>(section.items, keep, index ?? "");
+      if (field !== "items" || rest.length !== 3 || at < 0 || !fields.includes(key ?? "")) {
+        return null;
+      }
+      return {
+        ...section,
+        items: section.items.map((item, i) => (i === at ? { ...item, [key!]: value } : item)),
+      } as Section;
+    }
+    default:
+      return null;
+  }
+}
+
+/**
+ * Applies text typed into the preview to the draft. `before` is the text the element showed when
+ * editing began. Null when the path doesn't map to the draft, so the edit is dropped.
+ */
+export function editInPlace(
+  content: SiteContent,
+  path: string,
+  before: string,
+  after: string,
+): SiteContent | null {
+  if (!canEditInPlace(content, path)) return null;
+  const [head, ...rest] = path.split(".");
+  if (head === "meta") {
+    const [field, index] = rest;
+    const value = singleLine(after);
+    if (rest.length === 1 && includes(META_FIELDS, field)) {
+      return { ...content, meta: { ...content.meta, [field]: value } };
+    }
+    const affiliations = content.meta.affiliations;
+    const at = draftIndex(affiliations, (item) => !blank(item), index ?? "");
+    if (field !== "affiliations" || rest.length !== 2 || at < 0) return null;
+    return {
+      ...content,
+      meta: {
+        ...content.meta,
+        affiliations: value
+          ? affiliations.map((item, i) => (i === at ? value : item))
+          : affiliations.filter((_, i) => i !== at),
+      },
+    };
+  }
+  const section = content.sections.find((candidate) => candidate.id === head);
+  const next = section ? editSection(section, rest, before, after) : null;
+  if (!next) return null;
+  return {
+    ...content,
+    sections: content.sections.map((current) => (current === section ? next : current)),
+  };
 }

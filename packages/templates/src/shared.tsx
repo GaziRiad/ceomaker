@@ -1,7 +1,7 @@
 import type { RichTextSpan } from "@ceomaker/schema";
 import type { CSSProperties, ReactNode } from "react";
 import { linkProps } from "./links";
-import type { MiddleKind, ModelImage, ModelLink, SiteModel } from "./model";
+import type { FieldPath, MiddleKind, ModelImage, ModelLink, SiteModel } from "./model";
 
 /** Section anchors are stable per kind, so nav links and "#contact" buttons always resolve. */
 export const ANCHORS: Record<MiddleKind | "contact" | "top", string> = {
@@ -13,6 +13,14 @@ export const ANCHORS: Record<MiddleKind | "contact" | "top", string> = {
   testimonials: "testimonials",
   contact: "contact",
 };
+
+/**
+ * Marks an element whose text is exactly one content field, so the editor's preview can edit it
+ * in place. Decorations inside it must be aria-hidden. Live sites get no attribute.
+ */
+export function editable(model: SiteModel, field: FieldPath): { "data-field"?: FieldPath } {
+  return model.editable ? { "data-field": field } : {};
+}
 
 /** Keyboard users jump past the header straight to the content. */
 export function SkipLink() {
