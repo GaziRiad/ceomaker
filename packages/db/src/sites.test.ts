@@ -13,6 +13,7 @@ import {
   LowContrastError,
   SiteNotFoundError,
   SubdomainTakenError,
+  VersionNotFoundError,
 } from "./errors";
 import { runMigrations } from "./migrate";
 import { finishAiUsage, startAiUsage } from "./queries/ai-usage";
@@ -23,13 +24,15 @@ import {
   createSiteFromAnswers,
   deleteSite,
   getPrimarySiteForOwner,
+  getPublishedVersion,
   getSiteForOwner,
   getTenantSiteBySubdomain,
   isSubdomainAvailable,
   listPublishedVersions,
   listSitesForUser,
+  makeVersionLive,
+  copyVersionToDraft,
   publishSite,
-  restoreVersion,
   saveDraft,
 } from "./queries/sites";
 import { aiUsage, media, retiredAddress, site, siteVersion, user } from "./schema";
@@ -193,7 +196,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     );
   });
 
-  it("numbers versions and restores an earlier one to live and draft", async () => {
+  it("numbers versions, previews one, and restores it live or into the draft", async () => {
     const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
     const v1 = await publishSite(db, { userId: "alice", siteId: id });
     await saveDraft(db, { ...draft, templateKey: "bento", userId: "alice", siteId: id });
@@ -206,14 +209,38 @@ describe.skipIf(!url)("sites (integration)", () => {
       [1, "meridian", false],
     ]);
 
-    await restoreVersion(db, { userId: "alice", siteId: id, versionId: v1.versionId });
+    const first = await getPublishedVersion(db, {
+      userId: "alice",
+      siteId: id,
+      versionId: v1.versionId,
+    });
+    expect(first?.templateKey).toBe("meridian");
+    expect(parseSiteContentForRender(first?.content).meta?.name).toBe(demoSiteContent.meta.name);
+    expect(
+      await getPublishedVersion(db, { userId: "mallory", siteId: id, versionId: v1.versionId }),
+    ).toBeNull();
+
+    // Live goes back; the draft keeps the latest edits.
+    await makeVersionLive(db, { userId: "alice", siteId: id, versionId: v1.versionId });
     expect((await getLive(db, "alice"))?.versionId).toBe(v1.versionId);
+    expect((await getSiteForOwner(db, { userId: "alice", siteId: id }))?.draft.templateKey).toBe(
+      "bento",
+    );
+
+    // The draft goes back; live stays where it is.
+    await makeVersionLive(db, { userId: "alice", siteId: id, versionId: v2.versionId });
+    await copyVersionToDraft(db, { userId: "alice", siteId: id, versionId: v1.versionId });
     const owned = await getSiteForOwner(db, { userId: "alice", siteId: id });
     expect(owned?.draft.templateKey).toBe("meridian");
+    expect((await getLive(db, "alice"))?.versionId).toBe(v2.versionId);
     expect(owned?.versionCount).toBe(2);
+
     await expect(
-      restoreVersion(db, { userId: "mallory", siteId: id, versionId: v1.versionId }),
+      makeVersionLive(db, { userId: "mallory", siteId: id, versionId: v1.versionId }),
     ).rejects.toBeInstanceOf(SiteNotFoundError);
+    await expect(
+      copyVersionToDraft(db, { userId: "alice", siteId: id, versionId: id }),
+    ).rejects.toBeInstanceOf(VersionNotFoundError);
   });
 
   it("loads the first site with its draft, live version and history", async () => {

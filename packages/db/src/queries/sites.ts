@@ -470,36 +470,94 @@ export async function listPublishedVersions(
   return owned.versions;
 }
 
+/** One published version of a site the user owns, as stored, or null. */
+export async function getPublishedVersion(
+  db: Database,
+  input: { userId: string; siteId: string; versionId: string },
+): Promise<{
+  id: string;
+  templateKey: string;
+  theme: unknown;
+  content: unknown;
+  publishedAt: Date;
+} | null> {
+  const [row] = await db
+    .select({
+      id: siteVersion.id,
+      templateKey: siteVersion.templateKey,
+      theme: siteVersion.theme,
+      content: siteVersion.content,
+      publishedAt: siteVersion.publishedAt,
+    })
+    .from(siteVersion)
+    .innerJoin(site, eq(site.id, siteVersion.siteId))
+    .where(
+      and(
+        eq(siteVersion.id, input.versionId),
+        eq(siteVersion.siteId, input.siteId),
+        eq(siteVersion.kind, "published"),
+        eq(site.userId, input.userId),
+      ),
+    )
+    .limit(1);
+  return row ? { ...row, publishedAt: row.publishedAt ?? new Date(0) } : null;
+}
+
+type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
+
+/** Locks the user's site and finds one of its published versions, or throws. */
+async function lockOwnedVersion(
+  tx: Transaction,
+  input: { userId: string; siteId: string; versionId: string },
+) {
+  const [owned] = await tx
+    .select({ id: site.id, subdomain: site.subdomain })
+    .from(site)
+    .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+    .for("update")
+    .limit(1);
+  if (!owned) throw new SiteNotFoundError();
+
+  const [version] = await tx
+    .select()
+    .from(siteVersion)
+    .where(
+      and(
+        eq(siteVersion.id, input.versionId),
+        eq(siteVersion.siteId, owned.id),
+        eq(siteVersion.kind, "published"),
+      ),
+    )
+    .limit(1);
+  if (!version) throw new VersionNotFoundError();
+  return { owned, version };
+}
+
 /**
- * Puts an earlier version back live and loads it into the draft, so the editor and the live
- * site match again. Unpublished draft edits are replaced; the caller confirms that first.
+ * Puts an earlier published version live again, at once. The draft keeps the user's latest
+ * edits, so the editor then shows them as unpublished changes.
  */
-export async function restoreVersion(
+export async function makeVersionLive(
   db: Database,
   input: { userId: string; siteId: string; versionId: string },
 ) {
   return db.transaction(async (tx) => {
-    const [owned] = await tx
-      .select({ id: site.id, subdomain: site.subdomain })
-      .from(site)
-      .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
-      .for("update")
-      .limit(1);
-    if (!owned) throw new SiteNotFoundError();
+    const { owned, version } = await lockOwnedVersion(tx, input);
+    await tx
+      .update(site)
+      .set({ status: "published", publishedVersionId: version.id })
+      .where(eq(site.id, owned.id));
+    return { subdomain: owned.subdomain };
+  });
+}
 
-    const [version] = await tx
-      .select()
-      .from(siteVersion)
-      .where(
-        and(
-          eq(siteVersion.id, input.versionId),
-          eq(siteVersion.siteId, owned.id),
-          eq(siteVersion.kind, "published"),
-        ),
-      )
-      .limit(1);
-    if (!version) throw new VersionNotFoundError();
-
+/** Loads a published version into the draft to keep working from it. The live site is untouched. */
+export async function copyVersionToDraft(
+  db: Database,
+  input: { userId: string; siteId: string; versionId: string },
+) {
+  return db.transaction(async (tx) => {
+    const { owned, version } = await lockOwnedVersion(tx, input);
     await tx
       .update(siteVersion)
       .set({
@@ -510,13 +568,6 @@ export async function restoreVersion(
         createdBy: input.userId,
       })
       .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "draft")));
-
-    await tx
-      .update(site)
-      .set({ status: "published", publishedVersionId: version.id })
-      .where(eq(site.id, owned.id));
-
-    return { subdomain: owned.subdomain };
   });
 }
 

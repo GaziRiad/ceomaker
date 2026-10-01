@@ -4,6 +4,7 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import {
   AddressLockedError,
   changeSubdomain,
+  copyVersionToDraft,
   deleteSite,
   finishAiUsage,
   getDb,
@@ -11,8 +12,8 @@ import {
   InvalidSiteDataError,
   isSubdomainAvailable,
   LowContrastError,
+  makeVersionLive,
   publishSite,
-  restoreVersion,
   saveDraft,
   SiteNotFoundError,
   startAiUsage,
@@ -171,20 +172,42 @@ export async function publishAction(
   }
 }
 
-export async function restoreVersionAction(
+const VERSION_GONE: Failure = { ok: false, error: "That version no longer exists." };
+
+/** Puts an earlier version live at once. The draft keeps the latest edits. */
+export async function makeVersionLiveAction(
   siteId: string,
   versionId: string,
 ): Promise<{ ok: true } | Failure> {
   const userId = await currentUserId();
   if (!userId) return SIGNED_OUT;
-  if (!isUuid(siteId) || !isUuid(versionId)) return NOT_FOUND;
+  if (!isUuid(siteId) || !isUuid(versionId)) return VERSION_GONE;
   try {
-    const { subdomain } = await restoreVersion(getDb(), { userId, siteId, versionId });
+    const { subdomain } = await makeVersionLive(getDb(), { userId, siteId, versionId });
     updateTag(siteCacheTag(subdomain));
     return { ok: true };
   } catch (error) {
     if (error instanceof SiteNotFoundError || error instanceof VersionNotFoundError) {
-      return { ok: false, error: "That version no longer exists." };
+      return VERSION_GONE;
+    }
+    throw error;
+  }
+}
+
+/** Replaces the draft with an earlier version to keep working from it. Live is untouched. */
+export async function openVersionInEditorAction(
+  siteId: string,
+  versionId: string,
+): Promise<{ ok: true } | Failure> {
+  const userId = await currentUserId();
+  if (!userId) return SIGNED_OUT;
+  if (!isUuid(siteId) || !isUuid(versionId)) return VERSION_GONE;
+  try {
+    await copyVersionToDraft(getDb(), { userId, siteId, versionId });
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof SiteNotFoundError || error instanceof VersionNotFoundError) {
+      return VERSION_GONE;
     }
     throw error;
   }
