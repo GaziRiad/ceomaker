@@ -1,7 +1,9 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import { Suspense, type CSSProperties } from "react";
 import { RevealOnScroll } from "@/components/reveal";
 import { Blueprint, Check, Wordmark } from "@/components/ui";
+import { getSession } from "@/lib/auth";
+import { SignOutButton } from "./dashboard/sign-out-button";
 import {
   audiences,
   compare,
@@ -26,6 +28,45 @@ function startHref(role: string) {
   return `/start?role=${encodeURIComponent(role)}`;
 }
 
+const primaryHeaderButton: CSSProperties = { padding: "10px 16px" };
+
+/** Sign in and Start free, or Dashboard and Sign out for someone already signed in. */
+async function AccountActions() {
+  const session = await getSession();
+  if (session) {
+    return (
+      <>
+        <SignOutButton />
+        <Link href="/dashboard" className="btn btn-primary" style={primaryHeaderButton}>
+          Dashboard
+        </Link>
+      </>
+    );
+  }
+  return (
+    <>
+      <Link href="/sign-in" className="btn btn-ghost">
+        Sign in
+      </Link>
+      <Link href="/start" className="btn btn-primary" style={primaryHeaderButton}>
+        Start free
+      </Link>
+    </>
+  );
+}
+
+/** Holds the buttons' space while the session is checked, so nothing shows the wrong state. */
+function AccountActionsPlaceholder() {
+  return (
+    <span aria-hidden className="invisible flex items-center gap-7">
+      <span className="btn btn-ghost">Sign in</span>
+      <span className="btn btn-primary" style={primaryHeaderButton}>
+        Start free
+      </span>
+    </span>
+  );
+}
+
 function Header() {
   return (
     <header className="sticky top-0 z-10 border-b border-divider bg-bg/88 backdrop-blur-[10px]">
@@ -47,12 +88,9 @@ function Header() {
             FAQ
           </a>
         </nav>
-        <Link href="/sign-in" className="btn btn-ghost">
-          Sign in
-        </Link>
-        <Link href="/start" className="btn btn-primary" style={{ padding: "10px 16px" }}>
-          Start free
-        </Link>
+        <Suspense fallback={<AccountActionsPlaceholder />}>
+          <AccountActions />
+        </Suspense>
       </div>
     </header>
   );

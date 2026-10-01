@@ -1,4 +1,4 @@
-import { getDb, getPrimarySiteForOwner } from "@ceomaker/db";
+import { ADDRESS_HOLD_DAYS, getDb, getPrimarySiteForOwner } from "@ceomaker/db";
 import { parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
 import { getTemplate, TemplateView } from "@ceomaker/templates";
 import type { Metadata } from "next";
@@ -13,6 +13,7 @@ import { getSession } from "@/lib/auth";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { initialsFor, toEditableDraft } from "@/lib/site-data";
 import { ForgetStartAnswers } from "../start/forget-answers";
+import { DeleteSite } from "./delete-site";
 import { SignOutButton } from "./sign-out-button";
 import { VersionsTable } from "./versions-table";
 
@@ -213,6 +214,24 @@ async function Dashboard() {
             isCurrent: version.isCurrent,
           }))}
         />
+      </section>
+      <section data-reveal="" className="flex flex-col gap-3" style={delay(160)}>
+        <h2 className="m-0 font-heading text-[28px] leading-none font-semibold uppercase">
+          Delete site
+        </h2>
+        <Blueprint className="flex flex-wrap items-center gap-4 p-5">
+          <span className="min-w-[240px] flex-1 text-sm text-neutral-700">
+            Takes your site offline and deletes its draft, published versions and photos. Your
+            account stays, and you can start a new site.
+          </span>
+          <DeleteSite
+            siteId={site.id}
+            subdomain={site.subdomain}
+            address={`${address.prefix}${site.subdomain}${address.suffix}`}
+            everPublished={site.versions.length > 0}
+            holdDays={ADDRESS_HOLD_DAYS}
+          />
+        </Blueprint>
       </section>
     </Shell>
   );

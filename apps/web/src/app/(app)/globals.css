@@ -193,6 +193,15 @@
   .btn-secondary:active:not(:disabled) {
     background: color-mix(in srgb, var(--color-text) 14%, transparent);
   }
+  .btn-danger {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-bg);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-danger) 85%, black);
+    color: var(--color-bg);
+  }
   .btn-ghost {
     color: var(--color-accent-700);
     border-color: transparent;

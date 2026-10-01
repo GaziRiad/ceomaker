@@ -21,6 +21,7 @@ import {
   changeSubdomain,
   createSite,
   createSiteFromAnswers,
+  deleteSite,
   getPrimarySiteForOwner,
   getSiteForOwner,
   getTenantSiteBySubdomain,
@@ -31,7 +32,7 @@ import {
   restoreVersion,
   saveDraft,
 } from "./queries/sites";
-import { site, siteVersion, user } from "./schema";
+import { aiUsage, media, retiredAddress, site, siteVersion, user } from "./schema";
 
 const url = process.env.TEST_DATABASE_URL;
 
@@ -239,6 +240,85 @@ describe.skipIf(!url)("sites (integration)", () => {
     ]);
     expect(owned?.versionCount).toBe(2);
     expect(await getPrimarySiteForOwner(db, "nobody")).toBeNull();
+  });
+
+  it("deletes a site with its versions and images, keeping AI usage", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    await publishSite(db, { userId: "alice", siteId: id });
+    await insertMedia(db, {
+      userId: "alice",
+      contentType: "image/jpeg",
+      width: 1,
+      height: 1,
+      sha256: "abc",
+      data: new Uint8Array([1, 2, 3]),
+    });
+    await startAiUsage(db, {
+      userId: "alice",
+      siteId: id,
+      kind: "generate",
+      limit: 10,
+      windowMs: 60_000,
+    });
+
+    await expect(deleteSite(db, { userId: "mallory", siteId: id })).rejects.toBeInstanceOf(
+      SiteNotFoundError,
+    );
+    expect(await deleteSite(db, { userId: "alice", siteId: id })).toEqual({
+      subdomain: "alice",
+      addressHeld: true,
+    });
+
+    expect(await getPrimarySiteForOwner(db, "alice")).toBeNull();
+    expect(await getTenantSiteBySubdomain(db, "alice")).toBeNull();
+    expect(await db.select().from(siteVersion)).toEqual([]);
+    expect(await db.select().from(media)).toEqual([]);
+    const usage = await db.select().from(aiUsage);
+    expect(usage.map((row) => [row.userId, row.siteId])).toEqual([["alice", null]]);
+  });
+
+  it("holds a deleted live site's address for its owner only", async () => {
+    const live = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    await publishSite(db, { userId: "alice", siteId: live.id });
+    await deleteSite(db, { userId: "alice", siteId: live.id });
+
+    await expect(
+      createSite(db, { ...draft, userId: "mallory", subdomain: "alice" }),
+    ).rejects.toBeInstanceOf(SubdomainTakenError);
+    expect(await isSubdomainAvailable(db, "alice")).toBe(false);
+    expect(await isSubdomainAvailable(db, "alice", { userId: "mallory" })).toBe(false);
+    expect(await isSubdomainAvailable(db, "alice", { userId: "alice" })).toBe(true);
+    const mallory = await createSite(db, { ...draft, userId: "mallory", subdomain: "mallory" });
+    await expect(
+      changeSubdomain(db, { userId: "mallory", siteId: mallory.id, subdomain: "alice" }),
+    ).rejects.toBeInstanceOf(SubdomainTakenError);
+
+    // The owner gets it back, and the hold is cleared.
+    const again = await createSiteFromAnswers(db, {
+      userId: "alice",
+      answers: { ...answers, name: "Alice" },
+    });
+    expect(again.subdomain).toBe("alice");
+    expect(await db.select().from(retiredAddress)).toEqual([]);
+  });
+
+  it("frees a never-published address at once, and a held one after the hold", async () => {
+    const draftOnly = await createSite(db, { ...draft, userId: "alice", subdomain: "draft-only" });
+    expect(await deleteSite(db, { userId: "alice", siteId: draftOnly.id })).toEqual({
+      subdomain: "draft-only",
+      addressHeld: false,
+    });
+    expect(await isSubdomainAvailable(db, "draft-only", { userId: "mallory" })).toBe(true);
+
+    const live = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    await publishSite(db, { userId: "alice", siteId: live.id });
+    await deleteSite(db, { userId: "alice", siteId: live.id });
+    await db
+      .update(retiredAddress)
+      .set({ retiredAt: new Date(Date.now() - 91 * 24 * 60 * 60 * 1000) })
+      .where(eq(retiredAddress.subdomain, "alice"));
+    const claimed = await createSite(db, { ...draft, userId: "mallory", subdomain: "alice" });
+    expect(claimed.subdomain).toBe("alice");
   });
 
   it("lets the address change only before the first publish", async () => {

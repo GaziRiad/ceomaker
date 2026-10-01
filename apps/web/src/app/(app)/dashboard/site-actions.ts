@@ -4,6 +4,7 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import {
   AddressLockedError,
   changeSubdomain,
+  deleteSite,
   finishAiUsage,
   getDb,
   getSiteForOwner,
@@ -113,7 +114,10 @@ export async function checkAddressAction(
   if (!parsed.success) {
     return { available: false, message: parsed.error.issues[0]?.message ?? "Not a valid address." };
   }
-  const available = await isSubdomainAvailable(getDb(), parsed.data, { exceptSiteId: siteId });
+  const available = await isSubdomainAvailable(getDb(), parsed.data, {
+    exceptSiteId: siteId,
+    userId,
+  });
   return available
     ? { available: true, message: "Available" }
     : { available: false, message: "Someone already has this address." };
@@ -182,6 +186,33 @@ export async function restoreVersionAction(
     if (error instanceof SiteNotFoundError || error instanceof VersionNotFoundError) {
       return { ok: false, error: "That version no longer exists." };
     }
+    throw error;
+  }
+}
+
+/**
+ * Deletes the user's site. The confirmation must be the site's address, checked here as well as
+ * in the dialog, so no stray request can delete a site.
+ */
+export async function deleteSiteAction(
+  siteId: string,
+  confirmation: string,
+): Promise<{ ok: true } | Failure> {
+  const userId = await currentUserId();
+  if (!userId) return SIGNED_OUT;
+  if (!isUuid(siteId)) return NOT_FOUND;
+  const db = getDb();
+  const site = await getSiteForOwner(db, { userId, siteId });
+  if (!site) return NOT_FOUND;
+  if (String(confirmation).trim().toLowerCase() !== site.subdomain) {
+    return { ok: false, error: "Type the address exactly as shown to confirm." };
+  }
+  try {
+    const deleted = await deleteSite(db, { userId, siteId });
+    updateTag(siteCacheTag(deleted.subdomain));
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof SiteNotFoundError) return NOT_FOUND;
     throw error;
   }
 }

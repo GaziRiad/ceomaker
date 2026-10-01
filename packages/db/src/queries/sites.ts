@@ -17,7 +17,7 @@ import {
   type TemplateKey,
   type ThemeSettingsInput,
 } from "@ceomaker/schema";
-import { and, asc, count, eq, inArray, ne, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, gt, inArray, isNull, ne, or, sql, type SQL } from "drizzle-orm";
 import type { Database } from "../client";
 import {
   AddressLockedError,
@@ -28,10 +28,32 @@ import {
   SubdomainTakenError,
   VersionNotFoundError,
 } from "../errors";
-import { site, siteVersion } from "../schema";
+import { ADDRESS_HOLD_DAYS, media, retiredAddress, site, siteVersion } from "../schema";
 
 // Every function that reads or writes a customer's site takes the acting userId and scopes the
 // query to it. Authorization lives here, next to the data, not only in route handlers.
+
+const HOLD_MS = ADDRESS_HOLD_DAYS * 24 * 60 * 60 * 1000;
+
+/** True when a deleted site's address is still reserved for someone other than this user. */
+async function isHeldForOthers(
+  db: Pick<Database, "select">,
+  subdomain: string,
+  userId: string | null,
+): Promise<boolean> {
+  const [held] = await db
+    .select({ subdomain: retiredAddress.subdomain })
+    .from(retiredAddress)
+    .where(
+      and(
+        eq(retiredAddress.subdomain, subdomain),
+        gt(retiredAddress.retiredAt, new Date(Date.now() - HOLD_MS)),
+        userId ? or(isNull(retiredAddress.userId), ne(retiredAddress.userId, userId)) : undefined,
+      ),
+    )
+    .limit(1);
+  return Boolean(held);
+}
 
 export interface PublishedSite {
   siteId: string;
@@ -261,11 +283,16 @@ export async function createSite(
 
   try {
     return await db.transaction(async (tx) => {
+      if (await isHeldForOthers(tx, subdomain.data, input.userId)) {
+        throw new SubdomainTakenError(subdomain.data);
+      }
       const [created] = await tx
         .insert(site)
         .values({ userId: input.userId, subdomain: subdomain.data, answers: input.answers })
         .returning({ id: site.id, subdomain: site.subdomain });
       if (!created) throw new Error("Site insert returned no row");
+      // The owner took their old address back, or an expired hold is no longer needed.
+      await tx.delete(retiredAddress).where(eq(retiredAddress.subdomain, subdomain.data));
 
       await tx.insert(siteVersion).values({
         siteId: created.id,
@@ -493,14 +520,18 @@ export async function restoreVersion(
   });
 }
 
-/** True when the address is valid and no other site holds it. */
+/**
+ * True when the address is valid, no other site holds it, and it isn't reserved for someone
+ * else after a deletion. Pass the asking user, so their own reserved address counts as free.
+ */
 export async function isSubdomainAvailable(
   db: Database,
   subdomain: string,
-  options: { exceptSiteId?: string } = {},
+  options: { exceptSiteId?: string; userId?: string } = {},
 ): Promise<boolean> {
   const parsed = subdomainSchema.safeParse(subdomain);
   if (!parsed.success || parsed.data !== subdomain) return false;
+  if (await isHeldForOthers(db, subdomain, options.userId ?? null)) return false;
   const [row] = await db
     .select({ id: site.id })
     .from(site)
@@ -538,8 +569,12 @@ export async function changeSubdomain(
         .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "published")))
         .limit(1);
       if (owned.status !== "draft" || published) throw new AddressLockedError();
+      if (await isHeldForOthers(tx, subdomain.data, input.userId)) {
+        throw new SubdomainTakenError(subdomain.data);
+      }
 
       await tx.update(site).set({ subdomain: subdomain.data }).where(eq(site.id, owned.id));
+      await tx.delete(retiredAddress).where(eq(retiredAddress.subdomain, subdomain.data));
       return { subdomain: subdomain.data };
     });
   } catch (error) {
@@ -548,4 +583,45 @@ export async function changeSubdomain(
     }
     throw error;
   }
+}
+
+/**
+ * Deletes a site the user owns, with its draft, every published version and the user's uploaded
+ * images (one site per account). The live page stops at once; callers invalidate its cache.
+ * If the site was ever published, its address is reserved for the owner for ADDRESS_HOLD_DAYS.
+ * AI usage rows stay, so deleting and starting again doesn't reset drafting limits.
+ */
+export async function deleteSite(
+  db: Database,
+  input: { userId: string; siteId: string },
+): Promise<{ subdomain: string; addressHeld: boolean }> {
+  return db.transaction(async (tx) => {
+    const [owned] = await tx
+      .select({ id: site.id, subdomain: site.subdomain })
+      .from(site)
+      .where(and(eq(site.id, input.siteId), eq(site.userId, input.userId)))
+      .for("update")
+      .limit(1);
+    if (!owned) throw new SiteNotFoundError();
+
+    const [published] = await tx
+      .select({ id: siteVersion.id })
+      .from(siteVersion)
+      .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "published")))
+      .limit(1);
+    if (published) {
+      const retiredAt = new Date();
+      await tx
+        .insert(retiredAddress)
+        .values({ subdomain: owned.subdomain, userId: input.userId, retiredAt })
+        .onConflictDoUpdate({
+          target: retiredAddress.subdomain,
+          set: { userId: input.userId, retiredAt },
+        });
+    }
+    // Versions go with the site (foreign key cascade).
+    await tx.delete(site).where(eq(site.id, owned.id));
+    await tx.delete(media).where(eq(media.userId, input.userId));
+    return { subdomain: owned.subdomain, addressHeld: Boolean(published) };
+  });
 }

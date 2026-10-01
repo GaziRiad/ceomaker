@@ -96,3 +96,17 @@ export const siteVersion = pgTable(
     ),
   ],
 );
+
+/** How long the address of a deleted site that was once live stays reserved for its owner. */
+export const ADDRESS_HOLD_DAYS = 90;
+
+/**
+ * Addresses of deleted sites that were once published. Links to them may still be out there
+ * (LinkedIn, email signatures), so for ADDRESS_HOLD_DAYS nobody else can claim one and show their
+ * own page at someone's old link. The owner can take it back. The hold outlives an account deletion.
+ */
+export const retiredAddress = pgTable("retired_address", {
+  subdomain: text("subdomain").primaryKey(),
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  retiredAt: timestamp("retired_at", { withTimezone: true }).notNull().defaultNow(),
+});
