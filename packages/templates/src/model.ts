@@ -24,6 +24,19 @@ export interface ModelLink {
   href: string;
 }
 
+export interface ModelContactLink extends ModelLink {
+  field: FieldPath;
+}
+
+/** Sections with a title of their own: the middle ones and contact. */
+export type HeadingKind = MiddleKind | "contact";
+
+/** A piece of template wording, as the owner wrote it or the template's default. */
+export interface ModelText {
+  text: string;
+  field: FieldPath;
+}
+
 export interface ModelImage {
   src: string;
   alt: string;
@@ -35,12 +48,21 @@ export interface ModelExperience {
   location: string;
   /** "2019 – Present" */
   dates: string;
+  start: string;
+  end: string;
   /** First token of the start date, for timelines: "2019". */
   startYear: string;
   summary: string;
   /** Monogram for the organization: "MF" for Meridian Freight. */
   orgInitials: string;
-  fields: { role: FieldPath; organization: FieldPath; location: FieldPath; summary: FieldPath };
+  fields: {
+    role: FieldPath;
+    organization: FieldPath;
+    location: FieldPath;
+    summary: FieldPath;
+    start: FieldPath;
+    end: FieldPath;
+  };
 }
 
 export interface ModelWork {
@@ -119,6 +141,11 @@ export interface SiteModel {
   };
   /** Visible, non-empty middle sections in the order the user arranged them. */
   order: MiddleKind[];
+  /** Section titles the owner wrote. Empty: the template's own label. */
+  headings: Record<HeadingKind, string>;
+  headingFields: Record<HeadingKind, FieldPath>;
+  /** Template wording the owner rewrote, by key (see label()). */
+  labels: Record<string, string>;
   stats: ModelStat[];
   about: ModelAbout | null;
   experience: ModelExperience[];
@@ -129,10 +156,10 @@ export interface SiteModel {
   contact: {
     blurb: string;
     email: string;
-    links: ModelLink[];
+    links: ModelContactLink[];
     /** The contact form. On unless the owner turned it off; topics may be empty. */
     form: { enabled: boolean; topics: string[] };
-    fields: { blurb: FieldPath };
+    fields: { blurb: FieldPath; topics: FieldPath[] };
   };
 }
 
@@ -262,6 +289,8 @@ export function buildSiteModel(
       organization: item.organization,
       location: item.location ?? "",
       dates: [item.start, item.end].filter(Boolean).join(" – "),
+      start: item.start ?? "",
+      end: item.end ?? "",
       startYear: item.start?.split(/[\s–-]/)[0] ?? "",
       summary: item.summary ?? "",
       orgInitials: orgInitials(item.organization),
@@ -270,6 +299,8 @@ export function buildSiteModel(
         organization: `${experience.id}.items.${index}.organization`,
         location: `${experience.id}.items.${index}.location`,
         summary: `${experience.id}.items.${index}.summary`,
+        start: `${experience.id}.items.${index}.start`,
+        end: `${experience.id}.items.${index}.end`,
       },
     })) ?? [];
   const workItems: ModelWork[] =
@@ -299,6 +330,20 @@ export function buildSiteModel(
     work: workItems.length > 0,
     testimonials: quotes.length > 0,
   };
+  const headed: Record<HeadingKind, { id: string; heading?: string | undefined } | undefined> = {
+    impact,
+    about,
+    experience,
+    work,
+    testimonials,
+    contact,
+  };
+  const headings = {} as Record<HeadingKind, string>;
+  const headingFields = {} as Record<HeadingKind, FieldPath>;
+  for (const [kind, section] of Object.entries(headed) as [HeadingKind, typeof contact][]) {
+    headings[kind] = section?.heading ?? "";
+    headingFields[kind] = `${section?.id ?? kind}.heading`;
+  }
   const order: MiddleKind[] = [];
   for (const section of sections) {
     const kind = MIDDLE_KIND[section.type];
@@ -343,6 +388,9 @@ export function buildSiteModel(
       },
     },
     order,
+    headings,
+    headingFields,
+    labels: meta?.labels ?? {},
     stats: present.impact ? stats : [],
     about: present.about ? aboutModel : null,
     experience: present.experience ? experienceItems : [],
@@ -352,14 +400,33 @@ export function buildSiteModel(
     contact: {
       blurb: contact?.blurb ?? "",
       email: contact?.email ?? "",
-      links: (contact?.links ?? []).map((link) => ({ label: linkLabel(link), href: link.href })),
+      links: (contact?.links ?? []).map((link, index) => ({
+        label: linkLabel(link),
+        href: link.href,
+        field: `${contact?.id ?? "contact"}.links.${index}.label`,
+      })),
       form: {
         enabled: contact?.form?.enabled ?? true,
         topics: contact?.form?.topics ?? [],
       },
-      fields: { blurb: `${contact?.id ?? "contact"}.blurb` },
+      fields: {
+        blurb: `${contact?.id ?? "contact"}.blurb`,
+        topics: (contact?.form?.topics ?? []).map(
+          (_, index) => `${contact?.id ?? "contact"}.form.topics.${index}`,
+        ),
+      },
     },
   };
+}
+
+/** A section's title: the owner's, else the template's own label. */
+export function headingOf(model: SiteModel, kind: HeadingKind, fallback: string): ModelText {
+  return { text: model.headings[kind] || fallback, field: model.headingFields[kind] };
+}
+
+/** Template wording by key: the owner's rewrite, else the template's default. */
+export function label(model: SiteModel, key: string, fallback: string): ModelText {
+  return { text: model.labels[key] || fallback, field: `meta.labels.${key}` };
 }
 
 /** True when the section is visible and has something to show. */

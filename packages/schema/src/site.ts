@@ -4,6 +4,10 @@ import { sectionSchema, type Section } from "./sections";
 
 export const CURRENT_SCHEMA_VERSION = 1;
 
+/** Keys of rewritten template wording: "back-to-top", "form-send". */
+export const LABEL_KEY = /^[a-z][a-z0-9-]{0,39}$/;
+const MAX_LABELS = 40;
+
 /**
  * Who the site is about. Part of the versioned content so publishing updates it too.
  * Everything except the name is optional: templates render cleanly without it.
@@ -27,6 +31,14 @@ export const siteMetaSchema = z.object({
   affiliations: z.array(requiredText(60)).max(12).default([]),
   /** Short descriptors for the Monument marquee: "Operator", "Speaker". */
   keywords: z.array(requiredText(30)).max(8).default([]),
+  /**
+   * Template wording the owner rewrote, by key: { "back-to-top": "Top" }. Keys belong to the
+   * templates; a missing key shows the template's own wording.
+   */
+  labels: z
+    .record(z.string().regex(LABEL_KEY), requiredText(60))
+    .refine((labels) => Object.keys(labels).length <= MAX_LABELS, "Too many labels")
+    .optional(),
 });
 
 export type SiteMeta = z.output<typeof siteMetaSchema>;

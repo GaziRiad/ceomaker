@@ -455,6 +455,8 @@
 
 .mer-section {
   padding-top: var(--mer-gap);
+  /* A section link stops with the section's rule 32px under the sticky 60px header. */
+  scroll-margin-top: calc(92px - var(--mer-gap));
 }
 
 .mer-columns {
@@ -724,6 +726,7 @@
 .mer-band {
   margin-top: var(--mer-gap);
   background: var(--mer-wash);
+  scroll-margin-top: 60px;
 }
 
 .mer-band-in {

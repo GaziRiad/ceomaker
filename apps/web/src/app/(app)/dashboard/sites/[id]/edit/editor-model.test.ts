@@ -11,6 +11,7 @@ import {
   fingerprint,
   liveFingerprint,
   normalizeForEditing,
+  prepareForSave,
   respan,
   sectionIdOfField,
   sectionOf,
@@ -113,6 +114,46 @@ describe("editInPlace", () => {
     expect(canEditInPlace(invalid, "hero.headline")).toBe(true);
   });
 
+  it("rewrites section titles and template wording, and an emptied one goes back", () => {
+    const content = demo();
+    const titled = editInPlace(content, "contact.heading", "Contact", " Let's  talk ")!;
+    expect(sectionOf(titled, "contact")?.heading).toBe("Let's talk");
+    expect(sectionOf(editInPlace(titled, "contact.heading", "", " ")!, "contact")?.heading).toBe(
+      undefined,
+    );
+    const worded = editInPlace(content, "meta.labels.back-to-top", "Back to top", "Top")!;
+    expect(worded.meta.labels).toEqual({ "back-to-top": "Top" });
+    expect(editInPlace(worded, "meta.labels.back-to-top", "Top", "")?.meta.labels).toEqual({});
+    expect(
+      prepareForSave(editInPlace(worded, "meta.labels.back-to-top", "Top", "")!),
+    ).toMatchObject({ ok: true, content: { meta: { labels: undefined } } });
+  });
+
+  it("edits dates, link labels and topics, and gives the hero its own button", () => {
+    const content = demo();
+    const dated = editInPlace(content, "experience.items.0.end", "Present", "Today")!;
+    expect(sectionOf(dated, "experience")?.items[0]?.end).toBe("Today");
+    const linked = editInPlace(content, "contact.links.0.label", "LinkedIn", "My LinkedIn")!;
+    expect(sectionOf(linked, "contact")?.links[0]?.label).toBe("My LinkedIn");
+    const topics = sectionOf(content, "contact")?.form?.topics ?? [];
+    if (topics.length) {
+      const asked = editInPlace(content, "contact.form.topics.0", topics[0]!, "Talks")!;
+      expect(sectionOf(asked, "contact")?.form?.topics[0]).toBe("Talks");
+    }
+    const hero = sectionOf(content, "hero")!;
+    const bare: SiteContent = {
+      ...content,
+      sections: content.sections.map((section) =>
+        section === hero ? { ...hero, primaryCta: undefined } : section,
+      ),
+    };
+    expect(
+      sectionOf(editInPlace(bare, "hero.primaryCta.label", "Contact", "Write to me")!, "hero")
+        ?.primaryCta,
+    ).toEqual({ label: "Write to me", href: "#contact" });
+    expect(editInPlace(bare, "hero.primaryCta.label", "Contact", "")).toBeNull();
+  });
+
   it("ignores paths that don't name an editable text field", () => {
     const content = demo();
     for (const path of [
@@ -124,6 +165,11 @@ describe("editInPlace", () => {
       "nowhere.headline",
       "meta.affiliations.99",
       "about.body.99",
+      "hero.heading",
+      "meta.labels.__proto__",
+      "meta.labels.Bad Key",
+      "contact.links.99.label",
+      "contact.form.topics.99",
     ]) {
       expect(editInPlace(content, path, "", "x"), path).toBeNull();
     }

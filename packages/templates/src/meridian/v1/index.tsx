@@ -1,16 +1,24 @@
 import { useId, type CSSProperties, type ReactNode } from "react";
 import { FONTS } from "../../fonts";
 import { linkProps } from "../../links";
-import type { MiddleKind, ModelQuote, SiteModel } from "../../model";
+import {
+  headingOf,
+  label,
+  type HeadingKind,
+  type MiddleKind,
+  type ModelQuote,
+  type ModelText,
+  type SiteModel,
+} from "../../model";
 import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink, Spans } from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
-import { MeridianContactForm } from "./contact-form";
+import { MeridianContactForm, type FormWords } from "./contact-form";
 import { longestWord, meridianRoleStyle, RING_CIRCUMFERENCE, ringText } from "./measure";
 
 // T1 Meridian: editorial and neutral, a serif name and the seal. For chief executives and chairs.
 // Layout values live in styles.css (container queries); this file decides what is shown.
 
-const LABELS: Record<MiddleKind | "contact", string> = {
+const LABELS: Record<HeadingKind, string> = {
   about: "About",
   impact: "Impact",
   experience: "Experience",
@@ -21,6 +29,16 @@ const LABELS: Record<MiddleKind | "contact", string> = {
 
 /** Sections that get a link in the header, in the order they appear on the page. */
 const NAV_KINDS: readonly MiddleKind[] = ["about", "experience", "work"];
+
+/** Template wording the owner can rewrite in the editor. */
+function Words({ model, text }: { model: SiteModel; text: ModelText }) {
+  return model.editable ? <span data-field={text.field}>{text.text}</span> : text.text;
+}
+
+/** A section's title: the owner's own, else Meridian's label. */
+function title(model: SiteModel, kind: HeadingKind): ModelText {
+  return headingOf(model, kind, LABELS[kind]);
+}
 
 function cx(...names: (string | false | null | undefined)[]): string {
   return names.filter(Boolean).join(" ");
@@ -65,12 +83,12 @@ function Header({ model }: { model: SiteModel }) {
         <nav aria-label="Sections" className="mer-nav">
           {nav.map((kind) => (
             <a key={kind} href={`#${ANCHORS[kind]}`}>
-              {LABELS[kind]}
+              <Words model={model} text={title(model, kind)} />
             </a>
           ))}
         </nav>
         <a href={`#${ANCHORS.contact}`} className="mer-header-cta">
-          Contact
+          <Words model={model} text={title(model, "contact")} />
         </a>
       </div>
     </header>
@@ -149,7 +167,7 @@ function Seal({ model }: { model: SiteModel }) {
 function Hero({ model }: { model: SiteModel }) {
   const { hero, draft } = model;
   // Without an eyebrow, the title line falls back to role and organisation.
-  const title = hero.eyebrow || [model.role, model.company].filter(Boolean).join(", ");
+  const kicker = hero.eyebrow || model.role || model.company;
   const entrance = draft ? "mer-fill" : "mer-in";
   let step = 0;
   const delay = () => ({ "--mer-delay": `${60 + step++ * 90}ms` }) as CSSProperties;
@@ -157,12 +175,22 @@ function Hero({ model }: { model: SiteModel }) {
   return (
     <section aria-label="Introduction" className="mer-wrap mer-hero">
       <div className="mer-hero-text">
-        {title || model.location ? (
+        {kicker || model.location ? (
           <p className={cx("mer-kicker", entrance)} style={delay()}>
-            {title ? (
-              <span {...(hero.eyebrow ? editable(model, hero.fields.eyebrow) : {})}>{title}</span>
+            {hero.eyebrow ? (
+              <span {...editable(model, hero.fields.eyebrow)}>{hero.eyebrow}</span>
+            ) : kicker ? (
+              <>
+                {model.role ? (
+                  <span {...editable(model, model.fields.role)}>{model.role}</span>
+                ) : null}
+                {model.role && model.company ? ", " : null}
+                {model.company ? (
+                  <span {...editable(model, model.fields.company)}>{model.company}</span>
+                ) : null}
+              </>
             ) : null}
-            {title && model.location ? " · " : null}
+            {kicker && model.location ? " · " : null}
             {model.location ? (
               <span {...editable(model, model.fields.location)}>{model.location}</span>
             ) : null}
@@ -209,7 +237,11 @@ function Hero({ model }: { model: SiteModel }) {
             </CtaLink>
           ) : (
             <a href={`#${ANCHORS.contact}`} className="mer-button">
-              Contact<span aria-hidden="true">→</span>
+              <Words
+                model={model}
+                text={{ text: title(model, "contact").text, field: hero.fields.cta }}
+              />
+              <span aria-hidden="true">→</span>
             </a>
           )}
         </div>
@@ -224,7 +256,9 @@ function Affiliations({ model }: { model: SiteModel }) {
   return (
     <section aria-label="Boards and affiliations" className="mer-wrap mer-affiliations">
       <div className="mer-affiliations-row">
-        <span className="mer-label mer-affiliations-label">Boards &amp; affiliations</span>
+        <span className="mer-label mer-affiliations-label">
+          <Words model={model} text={label(model, "affiliations", "Boards & affiliations")} />
+        </span>
         {model.affiliations.map((name, index) => (
           <span key={index} className="mer-affiliation">
             <span {...editable(model, model.fields.affiliations[index]!)}>{name}</span>
@@ -240,11 +274,21 @@ function Affiliations({ model }: { model: SiteModel }) {
   );
 }
 
-function Section({ kind, children }: { kind: MiddleKind | "contact"; children: ReactNode }) {
+function Section({
+  model,
+  kind,
+  children,
+}: {
+  model: SiteModel;
+  kind: HeadingKind;
+  children: ReactNode;
+}) {
   return (
     <section id={ANCHORS[kind]} className={cx("mer-wrap mer-section", `mer-${kind}`)}>
       <div className="mer-columns mer-section-grid">
-        <h2 className="mer-label">{LABELS[kind]}</h2>
+        <h2 className="mer-label">
+          <Words model={model} text={title(model, kind)} />
+        </h2>
         <div className="mer-content">{children}</div>
       </div>
     </section>
@@ -255,14 +299,14 @@ function About({ model }: { model: SiteModel }) {
   const about = model.about;
   if (!about) {
     return (
-      <Section kind="about">
+      <Section model={model} kind="about">
         <PlaceholderLines widths={[100, 94, 97, 48]} className="mer-ph-about" />
       </Section>
     );
   }
   const leadLength = about.lead.reduce((length, span) => length + span.text.length, 0);
   return (
-    <Section kind="about">
+    <Section model={model} kind="about">
       <p
         {...editable(model, about.fields.lead)}
         className={cx("mer-lede", model.draft && "mer-fill")}
@@ -288,7 +332,7 @@ function statColumns(count: number): number {
 function Impact({ model }: { model: SiteModel }) {
   const count = model.stats.length;
   return (
-    <Section kind="impact">
+    <Section model={model} kind="impact">
       <div
         className="mer-stats"
         data-one={count === 1 || undefined}
@@ -311,11 +355,21 @@ function Impact({ model }: { model: SiteModel }) {
 
 function Experience({ model }: { model: SiteModel }) {
   return (
-    <Section kind="experience">
+    <Section model={model} kind="experience">
       <div className="mer-list">
         {model.experience.map((item, index) => (
           <div key={index} className="mer-row mer-experience-row">
-            <div className="mer-dates">{item.dates}</div>
+            <div className="mer-dates">
+              {model.editable ? (
+                <>
+                  {item.start ? <span data-field={item.fields.start}>{item.start}</span> : null}
+                  {item.start && item.end ? " – " : null}
+                  {item.end ? <span data-field={item.fields.end}>{item.end}</span> : null}
+                </>
+              ) : (
+                item.dates
+              )}
+            </div>
             <div className="mer-content">
               <div {...editable(model, item.fields.role)} className="mer-role">
                 {item.role}
@@ -346,7 +400,7 @@ function Experience({ model }: { model: SiteModel }) {
 
 function Work({ model }: { model: SiteModel }) {
   return (
-    <Section kind="work">
+    <Section model={model} kind="work">
       <div className="mer-list">
         {model.work.map((item, index) => {
           const cells = (
@@ -411,7 +465,9 @@ function Testimonials({ model }: { model: SiteModel }) {
   return (
     <section id={ANCHORS.testimonials} className="mer-band">
       <div className="mer-wrap mer-columns mer-band-in">
-        <h2 className="mer-label">{LABELS.testimonials}</h2>
+        <h2 className="mer-label">
+          <Words model={model} text={title(model, "testimonials")} />
+        </h2>
         <div className="mer-content mer-quotes">
           <figure className="mer-lead-quote" data-long={lead.quote.length > 200 || undefined}>
             <blockquote>
@@ -440,6 +496,29 @@ function Testimonials({ model }: { model: SiteModel }) {
   );
 }
 
+/** The form's wording, with each text's field when the preview edits in place. */
+function formWords(model: SiteModel): FormWords {
+  const word = (key: string, fallback: string) => {
+    const text = label(model, key, fallback);
+    return model.editable ? text : { text: text.text, field: "" };
+  };
+  return {
+    question: word("form-question", "What is it about?"),
+    name: word("form-name", "Your name"),
+    email: word("form-email", "Email"),
+    organisation: word("form-organisation", "Organisation"),
+    optional: word("form-optional", "Optional"),
+    message: word("form-message", "Message"),
+    send: word("form-send", "Send message"),
+    note: word(
+      "form-note",
+      model.first
+        ? `Sent privately to ${model.first}. Your details aren't shared.`
+        : "Sent privately. Your details aren't shared.",
+    ),
+  };
+}
+
 function Contact({
   model,
   sendMessage,
@@ -455,7 +534,7 @@ function Contact({
   const direct = emailRow || contact.links.length > 0;
 
   return (
-    <Section kind="contact">
+    <Section model={model} kind="contact">
       {contact.blurb ? (
         <p
           {...editable(model, contact.fields.blurb)}
@@ -477,7 +556,9 @@ function Contact({
             <div className="mer-direct">
               {emailRow ? (
                 <div className="mer-direct-group">
-                  <span className="mer-small">Email</span>
+                  <span className="mer-small">
+                    <Words model={model} text={label(model, "contact-email", "Email")} />
+                  </span>
                   <a
                     href={mailto(contact.email)}
                     className="mer-email"
@@ -489,10 +570,14 @@ function Contact({
               ) : null}
               {contact.links.length ? (
                 <div className="mer-links">
-                  <span className="mer-small mer-links-label">Elsewhere</span>
+                  <span className="mer-small mer-links-label">
+                    <Words model={model} text={label(model, "contact-elsewhere", "Elsewhere")} />
+                  </span>
                   {contact.links.map((link, index) => (
                     <ContactLink key={index} link={link} className="mer-link">
-                      <span className="mer-link-label">{link.label}</span>
+                      <span {...editable(model, link.field)} className="mer-link-label">
+                        {link.label}
+                      </span>
                       <span aria-hidden="true" className="mer-arrow">
                         ↗
                       </span>
@@ -511,6 +596,8 @@ function Contact({
             >
               <MeridianContactForm
                 topics={contact.form.topics}
+                topicFields={model.editable ? contact.fields.topics : []}
+                words={formWords(model)}
                 first={model.first}
                 send={sendMessage}
               />
@@ -562,7 +649,8 @@ export function MeridianTemplate({ model, publishedAt, colors, sendMessage }: Te
       <footer className="mer-wrap mer-footer">
         <div className="mer-footer-in">
           <span>
-            © {publishedAt.getUTCFullYear()} {model.name}
+            © {publishedAt.getUTCFullYear()}{" "}
+            <Words model={model} text={{ text: model.name, field: model.fields.name }} />
           </span>
           <span className="mer-footer-location">
             {model.location ? (
@@ -570,7 +658,14 @@ export function MeridianTemplate({ model, publishedAt, colors, sendMessage }: Te
             ) : null}
           </span>
           <a href={`#${ANCHORS.top}`} className="mer-top">
-            Back to top ↑
+            {model.editable ? (
+              <>
+                <Words model={model} text={label(model, "back-to-top", "Back to top")} />
+                <span aria-hidden="true"> ↑</span>
+              </>
+            ) : (
+              `${label(model, "back-to-top", "Back to top").text} ↑`
+            )}
           </a>
         </div>
       </footer>

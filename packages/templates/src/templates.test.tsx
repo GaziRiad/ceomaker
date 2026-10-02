@@ -85,7 +85,7 @@ function contentText(content: RenderableSiteContent, path: string): string {
   if (path === "meta.availabilityShort") {
     return content.meta?.availabilityShort || content.meta?.availability || "";
   }
-  for (const key of rest) value = (value as Record<string, unknown>)[key];
+  for (const key of rest) value = (value as Record<string, unknown> | undefined)?.[key];
   if (value && typeof value === "object" && "spans" in value) {
     return (value as { spans: { text: string }[] }).spans.map((span) => span.text).join("");
   }
@@ -165,8 +165,12 @@ describe.each(DESIGNS)("%s v%i template", (key, version) => {
     const content = parseSiteContentForRender(demoSiteContent);
     const html = render(key, version, demoSiteContent, true);
     const fields = fieldTexts(html);
+    // Titles and wording the owner hasn't rewritten show the template's own words.
+    const templateWording = /\.heading$|^meta\.labels\.|\.links\.\d+\.label$/;
     for (const [path, text] of fields) {
-      expect({ path, text }).toEqual({ path, text: contentText(content, path) });
+      const expected = contentText(content, path);
+      if (expected === "undefined" && templateWording.test(path)) continue;
+      expect({ path, text }).toEqual({ path, text: expected });
     }
     expect(fields.map(([path]) => path)).toEqual(
       expect.arrayContaining(["hero.headline", "about.body.0", "contact.blurb"]),

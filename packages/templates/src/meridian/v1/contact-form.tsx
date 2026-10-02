@@ -54,12 +54,44 @@ function FieldError({ id, message }: { id: string; message: string | undefined }
  * Meridian's contact form. Validates on submit, then sends through `send` on a live site. In
  * previews there's nothing to send to, so it walks through the same states and says so.
  */
+/** One piece of the form's wording; `field` is set only in the editor's preview. */
+interface Word {
+  text: string;
+  field: string;
+}
+
+export interface FormWords {
+  question: Word;
+  name: Word;
+  email: Word;
+  organisation: Word;
+  optional: Word;
+  message: Word;
+  send: Word;
+  note: Word;
+}
+
+/** Wording the editor's preview can rewrite in place. */
+function Text({ word, className }: { word: Word; className?: string }) {
+  if (!word.field && !className) return word.text;
+  return (
+    <span data-field={word.field || undefined} className={className}>
+      {word.text}
+    </span>
+  );
+}
+
 export function MeridianContactForm({
   topics,
+  topicFields,
+  words,
   first,
   send,
 }: {
   topics: string[];
+  /** Content paths of the topics, in the editor's preview only. */
+  topicFields: string[];
+  words: FormWords;
   /** The owner's first name, for "Add your email so Amelia can reply." */
   first: string;
   send?: SendContactMessage | undefined;
@@ -162,9 +194,11 @@ export function MeridianContactForm({
       <form ref={form} noValidate aria-label="Contact form" className="mer-form" onSubmit={submit}>
         {topics.length ? (
           <fieldset className="mer-fieldset">
-            <legend className="mer-legend">What is it about?</legend>
+            <legend className="mer-legend">
+              <Text word={words.question} />
+            </legend>
             <div className="mer-topics">
-              {topics.map((topic) => {
+              {topics.map((topic, index) => {
                 const on = values.topic === topic;
                 return (
                   <button
@@ -180,7 +214,11 @@ export function MeridianContactForm({
                         ✓
                       </span>
                     ) : null}
-                    {topic}
+                    {topicFields[index] ? (
+                      <span data-field={topicFields[index]}>{topic}</span>
+                    ) : (
+                      topic
+                    )}
                   </button>
                 );
               })}
@@ -189,7 +227,7 @@ export function MeridianContactForm({
         ) : null}
         <div className="mer-fields">
           <label className="mer-field">
-            <span className="mer-field-label">Your name</span>
+            <Text word={words.name} className="mer-field-label" />
             <input
               name="name"
               autoComplete="name"
@@ -204,7 +242,7 @@ export function MeridianContactForm({
             <FieldError id="mer-name-error" message={errors.name} />
           </label>
           <label className="mer-field">
-            <span className="mer-field-label">Email</span>
+            <Text word={words.email} className="mer-field-label" />
             <input
               name="email"
               type="email"
@@ -223,7 +261,11 @@ export function MeridianContactForm({
         </div>
         <label className="mer-field">
           <span className="mer-field-label">
-            Organisation<span className="mer-optional"> · Optional</span>
+            <Text word={words.organisation} />
+            <span className="mer-optional">
+              {" · "}
+              <Text word={words.optional} />
+            </span>
           </span>
           <input
             name="organisation"
@@ -236,7 +278,7 @@ export function MeridianContactForm({
           />
         </label>
         <label className="mer-field">
-          <span className="mer-field-label">Message</span>
+          <Text word={words.message} className="mer-field-label" />
           <textarea
             name="message"
             rows={5}
@@ -268,18 +310,14 @@ export function MeridianContactForm({
         ) : null}
         <div className="mer-submit-row">
           <button type="submit" disabled={busy} className="mer-button mer-submit">
-            {busy ? "Sending…" : "Send message"}
+            {busy ? "Sending…" : <Text word={words.send} />}
             {busy ? (
               <span aria-hidden="true" className="mer-spinner" />
             ) : (
               <span aria-hidden="true">→</span>
             )}
           </button>
-          <span className="mer-note">
-            {first
-              ? `Sent privately to ${first}. Your details aren't shared.`
-              : "Sent privately. Your details aren't shared."}
-          </span>
+          <Text word={words.note} className="mer-note" />
         </div>
       </form>
     </div>

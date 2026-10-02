@@ -2,3 +2,10 @@
 @import "tailwindcss" source(none);
 @import "@ceomaker/templates/styles.css";
 @source "./";
+
+/* Section links glide to their section; visitors who ask their device for less motion still jump. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

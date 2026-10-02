@@ -16,8 +16,8 @@ const base = {
 };
 
 /**
- * Optional on every section. Templates label sections themselves ("01 — About", "The record"),
- * so this only survives from older content and for a future custom-heading feature.
+ * The owner's own title for the section ("Contact us"). Templates that support it show it in
+ * place of their own label and in the navigation; others keep their wording.
  */
 const heading = text(80).optional();
 
