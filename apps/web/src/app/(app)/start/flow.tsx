@@ -21,7 +21,7 @@ import {
 import { TemplateView } from "@ceomaker/templates";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
 import { finishOnboarding } from "./actions";
@@ -31,7 +31,6 @@ const LAST_STEP = ONBOARDING_STEP_NAMES.length - 1;
 const FRESH_ANSWERS: AnswersDraft = { voice: "Measured", goals: [], sources: [] };
 const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
-const GOALS_STEP = ONBOARDING_STEP_NAMES.indexOf("What the site is for");
 const PREVIEW_HEIGHT = 560;
 /** The preview shows the design a new site starts on. */
 const PREVIEW_TEMPLATE = { key: "meridian", version: latestTemplateVersion("meridian") } as const;
@@ -58,55 +57,19 @@ function draftContent(answers: AnswersDraft): RenderableSiteContent {
   };
 }
 
-/**
- * Slides the preview so the contact form is in view while goals are picked (they become its
- * topics), and back to the top on other steps. Offsets are in the template's own 1280px units.
- */
-function DraftPreview({
-  content,
-  showForm,
-}: {
-  content: RenderableSiteContent;
-  showForm: boolean;
-}) {
-  const move = useRef<HTMLDivElement>(null);
-  const [offset, setOffset] = useState(0);
-
-  useLayoutEffect(() => {
-    const element = move.current;
-    if (!element) return;
-    const measure = () => {
-      const target = element.querySelector<HTMLElement>("#contact");
-      if (!showForm || !target) return setOffset(0);
-      const box = element.getBoundingClientRect();
-      const scale = box.height / element.offsetHeight || 1;
-      const top = (target.getBoundingClientRect().top - box.top) / scale - 20;
-      const bottom = element.offsetHeight - PREVIEW_HEIGHT / scale;
-      setOffset(Math.round(Math.max(0, Math.min(top, bottom))));
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [showForm, content]);
-
+/** The template as it takes shape, always from the top of the page. */
+function DraftPreview({ content }: { content: RenderableSiteContent }) {
   return (
     <ScaledFrame initialZoom={0.45} style={{ height: PREVIEW_HEIGHT }}>
-      <div
-        ref={move}
-        className="motion-safe:transition-transform motion-safe:duration-[900ms] motion-safe:ease-[cubic-bezier(.2,.7,.2,1)]"
-        style={{ transform: `translateY(${-offset}px)` }}
-      >
-        <TemplateView
-          templateKey={PREVIEW_TEMPLATE.key}
-          templateVersion={PREVIEW_TEMPLATE.version}
-          colors={defaultColors(PREVIEW_TEMPLATE.key, PREVIEW_TEMPLATE.version)}
-          content={content}
-          publishedAt={PREVIEW_DATE}
-          preview
-          draft
-        />
-      </div>
+      <TemplateView
+        templateKey={PREVIEW_TEMPLATE.key}
+        templateVersion={PREVIEW_TEMPLATE.version}
+        colors={defaultColors(PREVIEW_TEMPLATE.key, PREVIEW_TEMPLATE.version)}
+        content={content}
+        publishedAt={PREVIEW_DATE}
+        preview
+        draft
+      />
     </ScaledFrame>
   );
 }
@@ -488,7 +451,7 @@ export function QuestionsFlow({
         <span className="kicker">Your site, taking shape</span>
         <Blueprint className="bg-neutral-100 shadow-md">
           <AddressBar address={`${addressPrefix}${address}${addressSuffix}`} />
-          <DraftPreview content={preview} showForm={step === GOALS_STEP} />
+          <DraftPreview content={preview} />
         </Blueprint>
         <span className="text-sm text-neutral-700">
           Only what you&apos;ve chosen or typed. Grey lines are written for you after you choose a

@@ -99,9 +99,13 @@ describe("proxy in subdomain mode", () => {
     expect(getRedirectUrl(response)).toBe("https://ceomaker.com/sign-in?next=%2Fdashboard");
   });
 
-  it("does not serve path-mode addresses once subdomains are in use", async () => {
-    const response = await proxy(request("https://ceomaker.com/sites/amelia"));
-    expect(getRewrittenUrl(response)).toBe("https://ceomaker.com/__not-found");
+  it("forwards path-mode addresses from before subdomains to the site's subdomain", async () => {
+    const response = await proxy(request("https://ceomaker.com/sites/Amelia/press?ref=card"));
+    expect(response.status).toBe(308);
+    expect(getRedirectUrl(response)).toBe("https://amelia.ceomaker.com/press?ref=card");
+    expect(getRewrittenUrl(await proxy(request("https://ceomaker.com/sites/app")))).toBe(
+      "https://ceomaker.com/__not-found",
+    );
   });
 
   it("serves a customer's own domain, its images and page views, and nothing else", async () => {

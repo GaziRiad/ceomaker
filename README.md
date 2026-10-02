@@ -201,7 +201,7 @@ Owners connect a domain they bought elsewhere in Settings › Site: they get the
 2. **Project:** Project → Settings → General → Project ID (`prj_…`) as `VERCEL_PROJECT_ID`. If the project belongs to a team, Team Settings → General → Team ID (`team_…`) as `VERCEL_TEAM_ID`.
 3. **Background check:** set `CRON_SECRET` to a long random value. [`apps/web/vercel.json`](apps/web/vercel.json) calls `/api/cron/domains` once a day, the most the Hobby plan allows (a more frequent schedule makes every deployment fail). Owners with Settings open are checked every 30 seconds from the page anyway. On Pro, change the schedule to `*/10 * * * *`; on Hobby, an outside scheduler (for example cron-job.org) can call `https://<app>/api/cron/domains` with the header `Authorization: Bearer <CRON_SECRET>` every 10 minutes.
 4. **Redeploy.** Until the token and project are set, production shows "Not available yet" on the card. Preview deployments never touch the production project's domains. Locally, leave all three unset: development shows Vercel's standard records and checks real DNS, so you can try the whole flow with a domain you control (it just can't go live on localhost).
-5. **Optional, before many customers:** set `CUSTOM_DOMAIN_CNAME` to a hostname of yours (e.g. `sites.ceomaker.co`, itself a CNAME to `cname.vercel-dns.com`). Customers then point `www` at your hostname, so a future move of hosting needs one record changed by you instead of one per customer. Test it with one domain first: Vercel must still recognise the domain as pointed at it.
+5. **Optional, before many customers:** set `CUSTOM_DOMAIN_CNAME` to a hostname of yours (e.g. `sites.ceomaker.app`, itself a CNAME to `cname.vercel-dns.com`). Customers then point `www` at your hostname, so a future move of hosting needs one record changed by you instead of one per customer. Test it with one domain first: Vercel must still recognise the domain as pointed at it.
 
 Unconnected domains are released after 7 days, so nobody can hold a domain they never point here. When the domain goes live, the owner gets an email (once Resend is set up).
 
@@ -211,13 +211,21 @@ Live sites send anonymous page views and clicks on email, phone, LinkedIn and we
 
 ### When you buy the domain
 
-The examples use `ceomaker.co`; use whichever domain you bought.
+The product domain is `ceomaker.app`. Customer sites move from `/sites/<name>` to `<name>.ceomaker.app`; old `/sites/` links forward to the new address.
 
-1. In Vercel, add `ceomaker.co`, `www.ceomaker.co` and `*.ceomaker.co`. Wildcard certificates use a DNS-01 challenge: either move the domain to Vercel's nameservers, or delegate `_acme-challenge.ceomaker.co` to Vercel and add a wildcard CNAME at your DNS provider.
-2. Set `ROOT_DOMAIN=ceomaker.co` and `APP_URL=https://ceomaker.co` for Production, then redeploy. Customer sites move to `<name>.ceomaker.co`, and the `/sites/` addresses stop resolving.
-3. Upgrade to Vercel Pro before charging customers.
+1. **DNS at Vercel.** Wildcard certificates need Vercel to answer DNS challenges, so move the domain to Vercel's nameservers (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`) at the registrar. Re-create any other records you need (email, verification) in Vercel's DNS first.
+2. **Domains** (Vercel → Project → Domains):
+   - `ceomaker.app` → Production, and make it the primary domain.
+   - `www.ceomaker.app` → redirect (308) to `ceomaker.app`. Not the other way round: the app itself sends `www` to the apex, and both redirecting makes a loop.
+   - `*.ceomaker.app` → Production.
+   - Previews: `preview.ceomaker.app` and `*.preview.ceomaker.app`, both assigned to the Git branch you preview.
+3. **Environment variables**, then redeploy:
+   - Production: `ROOT_DOMAIN=ceomaker.app`, `APP_URL=https://ceomaker.app`.
+   - Preview: `ROOT_DOMAIN=preview.ceomaker.app`, `APP_URL=https://preview.ceomaker.app`.
+4. **Google sign-in:** add `https://ceomaker.app` (and the preview address, if you sign in there with Google) to the authorised origins and `/api/auth/callback/google` redirect URIs.
+5. Upgrade to Vercel Pro before charging customers.
 
-Buying the domain early also unblocks email sign-in for everyone (Resend needs a domain you own) and lets Google show your own domain on its consent screen.
+Buying the domain also unblocks email sign-in for everyone (Resend needs a domain you own) and lets Google show your own domain on its consent screen.
 
 If you ever self-host behind a CDN instead of Vercel, the CDN honours the long `s-maxage` on customer pages. Publishing must then also purge the CDN cache for that address, or edits won't show until the cache expires.
 

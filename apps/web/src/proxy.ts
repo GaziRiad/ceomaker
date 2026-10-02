@@ -134,12 +134,19 @@ export async function proxy(request: NextRequest) {
         `${request.nextUrl.protocol}//${routing.rootDomain}${pathname}${search}`,
         308,
       );
-    case "app":
-      // One URL per site: path-mode addresses don't exist once subdomains are in use.
-      if (isInternalTenantPath(pathname) || parseSitesPath(pathname).kind !== "none") {
-        return notFound(request);
+    case "app": {
+      if (isInternalTenantPath(pathname)) return notFound(request);
+      // One URL per site: links to a path-mode address (from before subdomains) forward to it.
+      const site = parseSitesPath(pathname);
+      if (site.kind === "invalid") return notFound(request);
+      if (site.kind === "site") {
+        return NextResponse.redirect(
+          `${request.nextUrl.protocol}//${site.subdomain}.${routing.rootDomain}${site.rest}${search}`,
+          308,
+        );
       }
       return serveApp(request);
+    }
     case "tenant":
       // Tenant hosts serve published pages and their images only: no API, auth or dashboard.
       return serveSiteHost(request, resolution.subdomain, true);
