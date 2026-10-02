@@ -1,6 +1,7 @@
 import {
   EDITABLE_SECTION_TYPES,
   FIXED_SECTION_TYPES,
+  LABEL_KEY,
   normalizeTemplateKey,
   parseSiteContent,
   parseThemeSettingsForRender,
@@ -178,6 +179,12 @@ function cleanSection(section: Section): Section {
   }
 }
 
+/** Rewritten wording without emptied entries; none left is none at all. */
+function kept(labels: SiteMeta["labels"]): SiteMeta["labels"] {
+  const entries = Object.entries(labels ?? {}).filter(([, value]) => !blank(value));
+  return entries.length ? Object.fromEntries(entries) : undefined;
+}
+
 function cleanMeta(meta: SiteMeta): SiteMeta {
   return {
     ...meta,
@@ -190,6 +197,7 @@ function cleanMeta(meta: SiteMeta): SiteMeta {
     availabilityShort: optional(meta.availabilityShort),
     affiliations: meta.affiliations.map((item) => item.trim()).filter(Boolean),
     keywords: meta.keywords.map((item) => item.trim()).filter(Boolean),
+    labels: kept(meta.labels),
   };
 }
 
@@ -300,7 +308,7 @@ export function sectionOf<T extends EditableSectionType>(content: SiteContent, t
 
 const ITEM_FIELDS: { [T in ListType]: readonly (keyof ItemOf<T> & string)[] } = {
   achievements: ["value", "label"],
-  experience: ["role", "organization", "location", "summary"],
+  experience: ["role", "organization", "location", "summary", "start", "end"],
   portfolio: ["title", "kind", "meta", "year", "description"],
   testimonials: ["quote", "author", "role"],
 };
@@ -408,15 +416,56 @@ export function respan(spans: RichTextSpan[], before: string, after: string): Ri
 function editSection(section: Section, rest: string[], before: string, after: string) {
   const [field, index, key] = rest;
   const value = singleLine(after);
+  // A section's own title; emptied, the template's label comes back.
+  if (
+    rest.length === 1 &&
+    field === "heading" &&
+    section.type !== "hero" &&
+    section.type !== "cta"
+  ) {
+    return { ...section, heading: optional(value) };
+  }
   switch (section.type) {
     case "hero":
       if (rest.length === 1 && includes(HERO_FIELDS, field)) return { ...section, [field]: value };
-      if (rest.join(".") === "primaryCta.label" && section.primaryCta) {
-        return { ...section, primaryCta: { ...section.primaryCta, label: value } };
+      if (rest.join(".") === "primaryCta.label") {
+        // Without a button of its own the hero shows one to the contact section; rewording it
+        // makes it the hero's button.
+        if (!section.primaryCta && !value) return null;
+        const cta = section.primaryCta ?? { label: "", href: "#contact" };
+        return { ...section, primaryCta: { ...cta, label: value } };
       }
       return null;
-    case "contact":
-      return rest.length === 1 && field === "blurb" ? { ...section, blurb: value } : null;
+    case "contact": {
+      if (rest.length === 1 && field === "blurb") return { ...section, blurb: value };
+      if (field === "links" && key === "label" && rest.length === 3) {
+        const at = draftIndex(
+          section.links,
+          (link) => !blank(link.label) || !blank(link.href),
+          index ?? "",
+        );
+        if (at < 0) return null;
+        return {
+          ...section,
+          links: section.links.map((link, i) => (i === at ? { ...link, label: value } : link)),
+        };
+      }
+      const topics = section.form?.topics;
+      if (field === "form" && index === "topics" && rest.length === 3 && section.form && topics) {
+        const at = /^\d+$/.test(key ?? "") ? Number(key) : -1;
+        if (at < 0 || at >= topics.length) return null;
+        return {
+          ...section,
+          form: {
+            ...section.form,
+            topics: value
+              ? topics.map((topic, i) => (i === at ? value : topic))
+              : topics.filter((_, i) => i !== at),
+          },
+        };
+      }
+      return null;
+    }
     case "about": {
       const paragraph = /^\d+$/.test(index ?? "") ? section.body[Number(index)] : undefined;
       if (field !== "body" || rest.length !== 2 || !paragraph) return null;
@@ -465,6 +514,14 @@ export function editInPlace(
     const value = singleLine(after);
     if (rest.length === 1 && includes(META_FIELDS, field)) {
       return { ...content, meta: { ...content.meta, [field]: value } };
+    }
+    if (field === "labels" && rest.length === 2 && LABEL_KEY.test(index ?? "")) {
+      // Emptied, the template's own wording comes back.
+      const { [index!]: _previous, ...labels } = content.meta.labels ?? {};
+      return {
+        ...content,
+        meta: { ...content.meta, labels: value ? { ...labels, [index!]: value } : labels },
+      };
     }
     const affiliations = content.meta.affiliations;
     const at = draftIndex(affiliations, (item) => !blank(item), index ?? "");

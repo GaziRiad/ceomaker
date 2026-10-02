@@ -145,6 +145,38 @@ describe("Meridian template", () => {
     );
   });
 
+  it("shows the owner's section titles in the section and the navigation", () => {
+    const html = render({
+      ...demoSiteContent,
+      sections: demoSiteContent.sections.map((section) =>
+        section.type === "contact"
+          ? { ...section, heading: "Let's talk" }
+          : section.type === "about"
+            ? { ...section, heading: "My story" }
+            : section,
+      ),
+    });
+    expect(html).toContain('<a href="#about">My story</a>');
+    expect(html).toContain('<h2 class="mer-label">My story</h2>');
+    expect(html).toContain('<a href="#contact" class="mer-header-cta">Let&#x27;s talk</a>');
+    expect(html).toContain('<h2 class="mer-label">Let&#x27;s talk</h2>');
+    expect(html).toContain('<a href="#experience">Experience</a>');
+  });
+
+  it("shows rewritten wording and keeps the template's for the rest", () => {
+    const html = render({
+      ...demoSiteContent,
+      meta: {
+        ...demoSiteContent.meta,
+        labels: { "back-to-top": "Top", "form-send": "Send", affiliations: "Boards" },
+      },
+    });
+    expect(html).toContain('class="mer-top">Top ↑</a>');
+    expect(html).toContain("Send<span");
+    expect(html).toContain('<span class="mer-label mer-affiliations-label">Boards</span>');
+    expect(html).toContain("What is it about?");
+  });
+
   it("lays out figures by count", () => {
     const withStats = (count: number) =>
       render({

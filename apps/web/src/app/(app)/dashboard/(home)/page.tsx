@@ -84,24 +84,28 @@ function SiteCard({ site, liveDomain }: { site: OwnedSite; liveDomain: string | 
       : `Live · ${template.name} template`;
 
   return (
-    <div {...enter(1)} className="cm-enter">
-      <Blueprint className="flex min-w-0 flex-col bg-neutral-100">
-        <div className="relative border-b border-divider">
-          <ScaledFrame
-            initialZoom={0.6}
-            className="h-[196px] sm:h-[300px]"
-            style={{ filter: paused ? "grayscale(1) opacity(.5)" : undefined }}
-          >
-            <TemplateView
-              templateKey={shown.templateKey}
-              templateVersion={shown.templateVersion}
-              colors={resolveSiteColors(shown.theme, shown.templateKey, shown.templateVersion)}
-              content={parseSiteContentForRender(shown.content)}
-              publishedAt={PREVIEW_DATE}
-              preview
-              still
-            />
-          </ScaledFrame>
+    // Beside the side cards the preview grows to their height, so both columns end together.
+    <div {...enter(1)} className="cm-enter flex flex-col">
+      <Blueprint className="flex min-w-0 flex-1 flex-col bg-neutral-100">
+        <div className="relative border-b border-divider lg:min-h-[300px] lg:flex-1">
+          {/* Out of the flow on wide screens, so the side cards alone set the height. */}
+          <div className="lg:absolute lg:inset-0">
+            <ScaledFrame
+              initialZoom={0.6}
+              className="h-[196px] sm:h-[300px] lg:h-full"
+              style={{ filter: paused ? "grayscale(1) opacity(.5)" : undefined }}
+            >
+              <TemplateView
+                templateKey={shown.templateKey}
+                templateVersion={shown.templateVersion}
+                colors={resolveSiteColors(shown.theme, shown.templateKey, shown.templateVersion)}
+                content={parseSiteContentForRender(shown.content)}
+                publishedAt={PREVIEW_DATE}
+                preview
+                still
+              />
+            </ScaledFrame>
+          </div>
           {isDraft || paused ? (
             <span className="tag tag-neutral absolute top-3.5 left-3.5 shadow-sm">
               {isDraft ? "Preview of your draft" : "Offline · visitors see a 'taking a break' page"}
@@ -485,7 +489,7 @@ async function Overview() {
     <Main>
       <ForgetStartAnswers />
       <Heading first={first} />
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <SiteCard site={site} liveDomain={liveDomain} />
         <SideCards
           visitors={weekly && weekly.visitorsEver > 0 ? weeklyView(weekly) : null}
@@ -552,13 +556,14 @@ function OverviewSkeleton() {
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex flex-col gap-3.5">
-          <Shimmer className="h-[196px] sm:h-[300px]" />
+          <Shimmer className="h-[196px] sm:h-[300px] lg:h-auto lg:flex-1" />
           <Shimmer className="h-[18px] w-[46%]" />
           <Shimmer className="h-3 w-[30%]" />
         </div>
         <div className="flex flex-col gap-6">
-          <Shimmer className="h-[150px]" />
-          <Shimmer className="h-[150px]" />
+          <Shimmer className="h-[170px]" />
+          <Shimmer className="h-[205px]" />
+          <Shimmer className="h-[190px]" />
         </div>
       </div>
       <Shimmer className="h-[260px]" />
