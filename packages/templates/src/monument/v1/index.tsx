@@ -792,7 +792,8 @@ export function MonumentTemplate({ model, publishedAt, colors, sendMessage }: Te
           </a>
         </div>
       </footer>
-      <MonumentMotion />
+      {/* In the editor the owner needs the whole page at once, so sections don't wipe in. */}
+      {model.editable ? null : <MonumentMotion />}
     </div>
   );
 }

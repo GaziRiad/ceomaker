@@ -1712,12 +1712,10 @@
   animation: mon-rise-short 520ms var(--mon-ease) backwards;
 }
 
+/* Hidden with visibility, not a clip: the browser ignores fully clipped elements when it
+   reports what scrolled into view, so a clipped section would never be revealed. */
 .mon [data-wipe="wait"] {
-  clip-path: inset(0 0 100% 0);
-}
-
-.mon [data-wipe="wait"] [data-rise] {
-  opacity: 0;
+  visibility: hidden;
 }
 
 .mon [data-wipe="play"] {
