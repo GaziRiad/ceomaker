@@ -7,12 +7,8 @@ import {
   type TemplateRef,
   type TemplateVersionOf,
 } from "@ceomaker/schema";
-import { AuroraTemplate as AuroraV1 } from "./aurora/v1";
-import { BentoTemplate as BentoV1 } from "./bento/v1";
-import { ChronicleTemplate as ChronicleV1 } from "./chronicle/v1";
 import { MeridianTemplate as MeridianV1 } from "./meridian/v1";
 import { MonumentTemplate as MonumentV1 } from "./monument/v1";
-import { ObsidianTemplate as ObsidianV1 } from "./obsidian/v1";
 import type { TemplateDefinition } from "./types";
 
 type Design = Omit<TemplateDefinition, "key" | "version">;
@@ -33,50 +29,14 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
       Component: MeridianV1,
     },
   },
-  aurora: {
-    1: {
-      name: "Aurora",
-      description:
-        "Soft light, rounded cards and a floating profile. For founders and tech leaders.",
-      tagline: "Soft light, rounded cards, a floating profile. For founders.",
-      contactForm: false,
-      Component: AuroraV1,
-    },
-  },
-  obsidian: {
-    1: {
-      name: "Obsidian",
-      description: "Black and champagne, a framed portrait. For investors and private enquiries.",
-      tagline: "Black and champagne, a framed portrait. For investors.",
-      contactForm: false,
-      Component: ObsidianV1,
-    },
-  },
   monument: {
     1: {
       name: "Monument",
-      description: "Your name as the headline, in cobalt. For operators who want to be remembered.",
-      tagline: "Your name as the headline, in cobalt. For operators.",
-      contactForm: false,
+      description:
+        "Your name stacked edge to edge on a full field of colour, then bold alternating sections. For leaders who want to be remembered.",
+      tagline: "Your name on a full field of colour. For leaders who want to be remembered.",
+      contactForm: true,
       Component: MonumentV1,
-    },
-  },
-  bento: {
-    1: {
-      name: "Bento",
-      description: "The whole profile in a single grid of cards. Scans in seconds.",
-      tagline: "The whole profile in one grid of cards. Scans in seconds.",
-      contactForm: false,
-      Component: BentoV1,
-    },
-  },
-  chronicle: {
-    1: {
-      name: "Chronicle",
-      description: "A warm, long-form letter with a timeline. For writers, advisors and speakers.",
-      tagline: "A warm, long-form letter with a timeline. For advisors and writers.",
-      contactForm: false,
-      Component: ChronicleV1,
     },
   },
 };

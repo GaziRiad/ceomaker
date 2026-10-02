@@ -234,13 +234,13 @@ describe.skipIf(!url)("sites (integration)", () => {
   it("numbers versions, previews one, and restores it live or into the draft", async () => {
     const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
     const v1 = await publishSite(db, { userId: "alice", siteId: id });
-    await saveDraft(db, { ...draft, templateKey: "bento", userId: "alice", siteId: id });
+    await saveDraft(db, { ...draft, templateKey: "monument", userId: "alice", siteId: id });
     const v2 = await publishSite(db, { userId: "alice", siteId: id });
     expect([v1.versionNumber, v2.versionNumber]).toEqual([1, 2]);
 
     const versions = await listPublishedVersions(db, { userId: "alice", siteId: id });
     expect(versions.map((v) => [v.number, v.templateKey, v.isCurrent])).toEqual([
-      [2, "bento", true],
+      [2, "monument", true],
       [1, "meridian", false],
     ]);
 
@@ -259,7 +259,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     await makeVersionLive(db, { userId: "alice", siteId: id, versionId: v1.versionId });
     expect((await getLive(db, "alice"))?.versionId).toBe(v1.versionId);
     expect((await getSiteForOwner(db, { userId: "alice", siteId: id }))?.draft.templateKey).toBe(
-      "bento",
+      "monument",
     );
 
     // The draft goes back; live stays where it is.
@@ -281,23 +281,23 @@ describe.skipIf(!url)("sites (integration)", () => {
   it("loads the first site with its draft, live version and history", async () => {
     const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
     await publishSite(db, { userId: "alice", siteId: id });
-    await saveDraft(db, { ...draft, templateKey: "bento", userId: "alice", siteId: id });
+    await saveDraft(db, { ...draft, templateKey: "monument", userId: "alice", siteId: id });
     const live = await publishSite(db, { userId: "alice", siteId: id });
-    await saveDraft(db, { ...draft, templateKey: "aurora", userId: "alice", siteId: id });
+    await saveDraft(db, { ...draft, templateKey: "meridian", userId: "alice", siteId: id });
     await createSite(db, { ...draft, userId: "alice", subdomain: "alice-later" });
     await createSite(db, { ...draft, userId: "mallory", subdomain: "mallory" });
 
     const owned = await getPrimarySiteForOwner(db, "alice");
     expect(owned?.id).toBe(id);
-    expect(owned?.draft.templateKey).toBe("aurora");
+    expect(owned?.draft.templateKey).toBe("meridian");
     expect(owned?.published?.id).toBe(live.versionId);
-    expect(owned?.published?.templateKey).toBe("bento");
+    expect(owned?.published?.templateKey).toBe("monument");
     expect(parseSiteContentForRender(owned?.published?.content).meta?.name).toBe(
       demoSiteContent.meta.name,
     );
-    expect(owned?.published?.theme).toEqual(withResolvedColors(demoThemeSettings, "bento", 1));
+    expect(owned?.published?.theme).toEqual(withResolvedColors(demoThemeSettings, "monument", 1));
     expect(owned?.versions.map((v) => [v.number, v.templateKey, v.isCurrent])).toEqual([
-      [2, "bento", true],
+      [2, "monument", true],
       [1, "meridian", false],
     ]);
     expect(owned?.versionCount).toBe(2);
@@ -478,7 +478,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     expect(owned?.versions[0]?.templateVersion).toBe(1);
 
     // The draft moves on; the published version and its design stay as they were.
-    await saveDraft(db, { ...draft, templateKey: "bento", userId: "alice", siteId: id });
+    await saveDraft(db, { ...draft, templateKey: "monument", userId: "alice", siteId: id });
     await publishSite(db, { userId: "alice", siteId: id });
     await makeVersionLive(db, { userId: "alice", siteId: id, versionId: first.versionId });
     expect(await getLive(db, "alice")).toMatchObject({

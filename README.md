@@ -1,6 +1,6 @@
 # CEOMaker
 
-Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of six templates, gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Billing ($9.99 a month or $99 a year) comes in Phase 3; publishing is free during the beta.
+Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of two templates (Meridian or Monument), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Billing ($9.99 a month or $99 a year) comes in Phase 3; publishing is free during the beta.
 
 The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 
@@ -35,8 +35,8 @@ apps/web            Next.js app: landing, guided questions, sign-in, builder, ed
                     AI drafting (lib/ai), media uploads, proxy routing, tenant renderer route
 packages/schema     Zod contract: sections, colours, rich text, answers, subdomains, fixtures
 packages/db         Drizzle schema, migrations, owner-scoped queries, seed
-packages/templates  The six site templates (Meridian, Aurora, Obsidian, Monument, Bento,
-                    Chronicle), their shared view model and the registry
+packages/templates  The site templates (Meridian, Monument), their shared view model,
+                    the shared contact form and the registry
 ```
 
 ### Publishing and caching

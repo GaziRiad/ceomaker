@@ -1,6 +1,17 @@
-import type { CSSProperties, ReactNode } from "react";
-import { fluid, FONTS } from "../../fonts";
-import type { MiddleKind, SiteModel } from "../../model";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
+import { ContactForm, type FormWords } from "../../contact-form";
+import { FONTS } from "../../fonts";
+import { linkProps } from "../../links";
+import {
+  headingOf,
+  label,
+  type HeadingKind,
+  type MiddleKind,
+  type ModelImage,
+  type ModelQuote,
+  type ModelText,
+  type SiteModel,
+} from "../../model";
 import {
   ANCHORS,
   ContactLink,
@@ -8,635 +19,781 @@ import {
   editable,
   loop,
   mailto,
-  navItems,
-  Portrait,
-  sectionNumbers,
   SkipLink,
   Spans,
 } from "../../shared";
-import type { TemplateProps } from "../../types";
+import type { SendContactMessage, TemplateProps } from "../../types";
+import { MonumentMenu, MonumentMotion } from "./client";
+import { displayWidth, monumentRoleStyle, nameLines, nameMeasure, titleScale } from "./measure";
 
-// T4 Monument: your name as the headline, in cobalt. For operators who want to be remembered.
+// T4 Monument: the loud one. The name stacked edge to edge on a full accent field, the initials
+// printed tone on tone behind it, then sections that alternate between paper and an inverse
+// field. Layout lives in monument.css (container queries); this file decides what is shown.
 
-const pad = fluid(20, 40);
-const caps: CSSProperties = { fontSize: 13, fontWeight: 600, textTransform: "uppercase" };
-const rule = "1px solid var(--site-ink)";
-const rowRule = "1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)";
-const sectionGap = fluid(72, 120);
+const LABELS: Record<HeadingKind, string> = {
+  about: "About",
+  impact: "Impact",
+  experience: "Experience",
+  work: "Selected work",
+  testimonials: "In their words",
+  contact: "Contact",
+};
 
-/** Width of a heavy uppercase Inter glyph, in em, used to keep long names on screen. */
-const GLYPH_EM = 0.62;
+type Ground = "paper" | "inverse";
 
-function SectionLabel({
-  number,
-  title,
-  aside,
-  asideEdit,
-}: {
-  number: string | undefined;
-  title: string;
-  aside?: string;
-  /** From editable(), when the aside is a content field. */
-  asideEdit?: ReturnType<typeof editable>;
-}) {
+/** Where a middle section sits: its ground, and its number among the visible sections. */
+interface Place {
+  ground: Ground;
+  number: string;
+  total: string;
+}
+
+function cx(...names: (string | false | null | undefined)[]): string {
+  return names.filter(Boolean).join(" ");
+}
+
+/** Template wording the owner can rewrite in the editor. */
+function Words({ model, text }: { model: SiteModel; text: ModelText }) {
+  return model.editable ? <span data-field={text.field}>{text.text}</span> : text.text;
+}
+
+/** A section's title: the owner's own, else Monument's label. */
+function title(model: SiteModel, kind: HeadingKind): ModelText {
+  return headingOf(model, kind, LABELS[kind]);
+}
+
+/** Title size follows its length, so a long title the owner wrote still fits. */
+function titleStyle(text: string): CSSProperties {
+  return { "--mon-ts": titleScale(text) } as CSSProperties;
+}
+
+/** "01 / 05": the section's place among the visible ones. */
+function Count({ place, rise }: { place: Place; rise?: boolean }) {
   return (
-    <div
-      style={{
-        ...caps,
-        borderTop: rule,
-        paddingTop: 14,
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 24,
-      }}
-    >
-      <span>{number ? `(${number}) ${title}` : title}</span>
-      {aside ? (
-        <span {...asideEdit} style={{ textAlign: "right" }}>
-          {aside}
-        </span>
-      ) : null}
-    </div>
+    <span className="mon-count" data-rise={rise || undefined}>
+      <span className="mon-count-n">{place.number}</span>
+      <span aria-hidden="true"> / {place.total}</span>
+    </span>
   );
 }
 
-function NameHero({ model }: { model: SiteModel }) {
-  const first = model.first || model.name;
-  const last = model.last;
-  // One size for both lines: the largest that fits the longer line, capped at the design's 236px.
-  const size = [
-    "236px",
-    `calc((100cqw - 2 * ${pad}) / ${(Math.max(first.length, 1) * GLYPH_EM).toFixed(2)})`,
-    last
-      ? `calc((100cqw - 2 * ${pad} - var(--mn-reserve)) / ${(last.length * GLYPH_EM).toFixed(2)})`
-      : "",
-  ]
-    .filter(Boolean)
-    .join(", ");
-  const nameStyle: CSSProperties = {
-    fontWeight: 900,
-    fontSize: `max(40px, min(${size}))`,
-    lineHeight: 0.8,
-    letterSpacing: "-0.075em",
-    textTransform: "uppercase",
-    whiteSpace: "nowrap",
-  };
+function Picture({ image, className }: { image: ModelImage; className: string }) {
   return (
-    <section
-      className="[--mn-reserve:0px] @3xl:[--mn-reserve:480px]"
-      style={{ padding: `36px ${pad} 0` }}
-    >
-      <div style={{ fontWeight: 900 }}>
-        <span style={{ ...nameStyle, display: "block" }}>{first}</span>
-        <span
-          className="flex flex-wrap items-end gap-6 @3xl:flex-nowrap @3xl:gap-8"
-          style={{ marginTop: 10 }}
-        >
-          {last ? <span style={nameStyle}>{last}</span> : null}
-          <Portrait
-            image={model.hero.image}
-            className="h-[150px] w-[236px] @3xl:h-[190px] @3xl:w-[300px]"
-            style={{
-              flex: "none",
-              background: "linear-gradient(135deg, var(--site-accent), var(--site-accent-deep))",
-              marginBottom: 6,
-            }}
-          >
-            <span
-              style={{
-                position: "absolute",
-                right: 14,
-                bottom: 4,
-                fontWeight: 900,
-                fontSize: fluid(84, 120),
-                lineHeight: 1,
-                color: "color-mix(in srgb, var(--site-on) 16%, transparent)",
-                letterSpacing: "-0.06em",
-              }}
-            >
-              {model.initials}
-            </span>
-          </Portrait>
-          <span
-            style={{
-              flex: 1,
-              fontSize: 14,
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: 0,
-              lineHeight: 1.5,
-              paddingBottom: 8,
-              whiteSpace: "nowrap",
-            }}
-          >
-            (Portrait)
-            {model.location ? (
-              <>
-                <br />
-                <span {...editable(model, model.fields.location)}>{model.location}</span>
-              </>
-            ) : null}
-          </span>
-        </span>
-      </div>
-    </section>
+    // Templates are framework-agnostic, so a plain <img> rather than next/image.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={image.src} alt={image.alt} loading="lazy" decoding="async" className={className} />
   );
 }
 
-function Intro({ model }: { model: SiteModel }) {
-  const { hero } = model;
+function Header({ model }: { model: SiteModel }) {
+  const contact = title(model, "contact");
   return (
-    <section
-      className="grid grid-cols-1 gap-6 @3xl:grid-cols-[4fr_8fr] @3xl:gap-10"
-      style={{ padding: `${fluid(48, 72)} ${pad} ${fluid(64, 88)}` }}
-    >
-      <div style={{ ...caps, display: "flex", flexDirection: "column", gap: 6 }}>
-        <span style={{ color: "var(--site-accent)" }}>(Role)</span>
-        <span {...editable(model, hero.eyebrow ? hero.fields.eyebrow : model.fields.role)}>
-          {hero.eyebrow || model.role}
-        </span>
-      </div>
-      <div>
-        <h1
-          {...editable(model, hero.fields.headline)}
-          style={{
-            margin: 0,
-            fontFamily: FONTS.inter,
-            fontWeight: 700,
-            fontSize: fluid(32, 52),
-            lineHeight: 1.02,
-            letterSpacing: "-0.045em",
-            textWrap: "balance",
-          }}
-        >
-          {hero.headline}
-        </h1>
-        {hero.subheadline ? (
-          <p
-            {...editable(model, hero.fields.subheadline)}
-            style={{
-              margin: "22px 0 0",
-              maxWidth: 640,
-              fontSize: fluid(16, 18),
-              color: "var(--site-muted)",
-            }}
-          >
-            {hero.subheadline}
-          </p>
-        ) : null}
-        {hero.cta ? (
-          <CtaLink
-            link={hero.cta}
-            className="transition-opacity hover:opacity-90"
-            style={{
-              marginTop: 32,
-              display: "inline-flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 24,
-              minWidth: 280,
-              padding: "18px 20px",
-              background: "var(--site-accent)",
-              color: "var(--site-on)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              fontSize: 14,
-              letterSpacing: "0.02em",
-            }}
-          >
-            <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span>{" "}
-            <span aria-hidden>→</span>
-          </CtaLink>
-        ) : null}
-      </div>
-    </section>
-  );
-}
-
-function KeywordMarquee({ keywords }: { keywords: string[] }) {
-  const copies = Math.max(1, Math.ceil(6 / keywords.length));
-  return (
-    <div
-      role="group"
-      aria-label="Keywords"
-      style={{
-        background: "var(--site-accent)",
-        color: "var(--site-on)",
-        overflow: "hidden",
-        padding: "26px 0",
-      }}
-    >
-      <div
-        className="pt-marquee"
-        style={{ display: "flex", width: "max-content", "--pt-duration": "30s" } as CSSProperties}
-      >
-        {loop(keywords, copies * 2).map((keyword, index) => (
-          <span
-            key={index}
-            aria-hidden={index >= keywords.length}
-            style={{
-              padding: "0 28px",
-              fontWeight: 900,
-              fontSize: fluid(40, 64),
-              lineHeight: 1,
-              letterSpacing: "-0.05em",
-              textTransform: "uppercase",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {keyword} <span style={{ color: "var(--site-ink)" }}>✦</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Impact({ model, number }: { model: SiteModel; number?: string }) {
-  return (
-    <section
-      id={ANCHORS.impact}
-      aria-label="Impact"
-      style={{ padding: `${fluid(72, 104)} ${pad} 0` }}
-    >
-      <SectionLabel
-        number={number}
-        title="Impact"
-        aside={model.company}
-        asideEdit={editable(model, model.fields.company)}
-      />
-      <div className="grid grid-cols-2 gap-6 @3xl:grid-cols-4" style={{ marginTop: 40 }}>
-        {model.stats.map((stat, index) => (
-          <div key={index}>
-            <div
-              {...editable(model, stat.fields.value)}
-              style={{
-                fontWeight: 900,
-                fontSize: fluid(52, 84),
-                lineHeight: 0.9,
-                letterSpacing: "-0.06em",
-                color: "var(--site-accent)",
-              }}
-            >
-              {stat.value}
-            </div>
-            <div
-              {...editable(model, stat.fields.label)}
-              style={{ marginTop: 16, fontSize: 15, fontWeight: 500, maxWidth: 220 }}
-            >
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function About({ model, number }: { model: SiteModel; number?: string }) {
-  const about = model.about!;
-  return (
-    <section id={ANCHORS.about} aria-label="About" style={{ padding: `${sectionGap} ${pad} 0` }}>
-      <SectionLabel number={number} title="About" />
-      <div
-        className="grid grid-cols-1 @3xl:grid-cols-[4fr_8fr] @3xl:gap-10"
-        style={{ marginTop: 40 }}
-      >
-        <div />
-        <div>
-          <p
-            {...editable(model, about.fields.lead)}
-            style={{
-              margin: 0,
-              fontWeight: 700,
-              fontSize: fluid(28, 40),
-              lineHeight: 1.14,
-              letterSpacing: "-0.04em",
-              textWrap: "pretty",
-            }}
-          >
-            <Spans
-              spans={about.lead}
-              emphasis={(text, key) => (
-                <span key={key} style={{ color: "var(--site-accent)" }}>
-                  {text}
-                </span>
-              )}
-            />
-          </p>
-          {about.rest.map((paragraph, index) => (
-            <p
-              key={index}
-              {...editable(model, paragraph.field)}
-              style={{
-                margin: "28px 0 0",
-                maxWidth: 640,
-                fontSize: 17,
-                color: "var(--site-muted)",
-              }}
-            >
-              {paragraph.text}
-            </p>
+    <header className="mon-header">
+      <div className="mon-header-in">
+        <a href={`#${ANCHORS.top}`} className="mon-brand">
+          <span {...editable(model, model.fields.name)}>{model.name}</span>
+        </a>
+        <nav aria-label="Sections" className="mon-nav">
+          {model.order.map((kind) => (
+            <a key={kind} href={`#${ANCHORS[kind]}`} className="mon-nav-link">
+              <Words model={model} text={title(model, kind)} />
+            </a>
           ))}
+        </nav>
+        <a href={`#${ANCHORS.contact}`} className="mon-header-cta">
+          <Words model={model} text={contact} />
+        </a>
+        <div className="mon-phone-only">
+          <MonumentMenu
+            name={model.name}
+            items={model.order.map((kind) => ({
+              href: `#${ANCHORS[kind]}`,
+              label: title(model, kind).text,
+            }))}
+            contact={{ href: `#${ANCHORS.contact}`, label: contact.text }}
+            openLabel={label(model, "menu", "Menu").text}
+            closeLabel={label(model, "menu-close", "Close").text}
+          />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/** The eyebrow, unless it only repeats the role and organisation already shown on the field. */
+function eyebrowOf(model: SiteModel): string {
+  const eyebrow = model.hero.eyebrow.trim();
+  const plain = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/[\s,·|]+/g, " ")
+      .trim();
+  const shown = [model.role, model.company].filter(Boolean).join(" ");
+  return eyebrow && plain(eyebrow) !== plain(shown) && plain(eyebrow) !== plain(model.role)
+    ? eyebrow
+    : "";
+}
+
+function Hero({ model }: { model: SiteModel }) {
+  const { hero } = model;
+  const image = hero.image;
+  const eyebrow = eyebrowOf(model);
+  const keywords = model.keywords;
+  // The short availability stands in for the long one when only one is set.
+  const shortIsLong = model.availabilityShort === model.availability;
+  const availabilityLong = model.availability && !shortIsLong ? model.availability : "";
+  const lines = nameLines(model.name);
+
+  return (
+    <section aria-label="Introduction" className="mon-hero" data-photo={image ? "" : undefined}>
+      <div className="mon-stage">
+        {image ? null : (
+          <span aria-hidden="true" className="mon-initials">
+            {model.initials}
+          </span>
+        )}
+        {model.role || model.company || model.location || model.availabilityShort ? (
+          <div className="mon-field-top">
+            {model.role || model.company || model.location ? (
+              <span className="mon-meta">
+                {model.role ? (
+                  <span {...editable(model, model.fields.role)}>{model.role}</span>
+                ) : null}
+                {model.company ? (
+                  <span {...editable(model, model.fields.company)}>{model.company}</span>
+                ) : null}
+                {model.location ? (
+                  <span {...editable(model, model.fields.location)} className="mon-on2">
+                    {model.location}
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
+            {model.availabilityShort ? (
+              <span className="mon-status">
+                <span aria-hidden="true" className="mon-ping">
+                  <span />
+                  <span />
+                </span>
+                <span
+                  {...editable(
+                    model,
+                    shortIsLong ? model.fields.availability : model.fields.availabilityShort,
+                  )}
+                >
+                  {model.availabilityShort}
+                </span>
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+        <div className="mon-name-row">
+          <div className="mon-name-col">
+            <h1 {...editable(model, model.fields.name)} className="mon-name">
+              {lines.map((line, index) => (
+                <Fragment key={index}>
+                  {line.space ? " " : null}
+                  <span className="mon-line" style={{ animationDelay: `${60 + index * 110}ms` }}>
+                    {line.text}
+                  </span>
+                </Fragment>
+              ))}
+            </h1>
+            {keywords.length ? (
+              <ul aria-label="Keywords" className="mon-keywords">
+                {keywords.map((keyword, index) => (
+                  <li key={index}>
+                    <span {...editable(model, model.fields.keywords[index]!)}>{keyword}</span>
+                    {index < keywords.length - 1 ? (
+                      <span aria-hidden="true" className="mon-on2">
+                        /
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+          {image ? (
+            <div className="mon-photo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image.src} alt={image.alt} loading="eager" decoding="async" />
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <div className="mon-below">
+        <div className="mon-headline-col mon-in" style={{ animationDelay: "380ms" }}>
+          {eyebrow ? (
+            <p {...editable(model, hero.fields.eyebrow)} className="mon-eyebrow">
+              {eyebrow}
+            </p>
+          ) : null}
+          {hero.headline ? (
+            <p {...editable(model, hero.fields.headline)} className="mon-headline">
+              {hero.headline}
+            </p>
+          ) : null}
+        </div>
+        <div className="mon-intro-col mon-in" style={{ animationDelay: "450ms" }}>
+          {hero.subheadline ? (
+            <p {...editable(model, hero.fields.subheadline)} className="mon-intro">
+              {hero.subheadline}
+            </p>
+          ) : null}
+          {availabilityLong ? (
+            <p {...editable(model, model.fields.availability)} className="mon-avail">
+              {availabilityLong}
+            </p>
+          ) : null}
+          {hero.cta ? (
+            <CtaLink link={hero.cta} className="mon-button">
+              <span {...editable(model, hero.fields.cta)}>{hero.cta.label}</span>
+              <span aria-hidden="true" className="mon-dot-arrow">
+                →
+              </span>
+            </CtaLink>
+          ) : (
+            <a href={`#${ANCHORS.contact}`} className="mon-button">
+              <Words
+                model={model}
+                text={{ text: title(model, "contact").text, field: hero.fields.cta }}
+              />
+              <span aria-hidden="true" className="mon-dot-arrow">
+                →
+              </span>
+            </a>
+          )}
         </div>
       </div>
     </section>
   );
 }
 
-function Experience({ model, number }: { model: SiteModel; number?: string }) {
+function Affiliations({ model }: { model: SiteModel }) {
+  const names = model.affiliations;
+  const heading = label(model, "affiliations", "Boards & affiliations");
+  // Three or more names run as a slow band; fewer read better as a still line.
+  const band = names.length >= 3;
+  const separator = (
+    <span aria-hidden="true" className="mon-sep">
+      /
+    </span>
+  );
   return (
-    <section
-      id={ANCHORS.experience}
-      aria-label="Experience"
-      style={{ padding: `${sectionGap} ${pad} 0` }}
-    >
-      <SectionLabel number={number} title="Experience" />
-      <div style={{ marginTop: 24 }}>
-        {model.experience.map((item, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-1 gap-3 transition-colors duration-200 hover:bg-site-soft @3xl:grid-cols-3 @3xl:gap-10"
-            style={{ padding: "30px 0", borderBottom: rowRule }}
-          >
-            <div style={{ fontSize: 15, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-              {item.dates}
-            </div>
-            <div>
-              <div
-                {...editable(model, item.fields.role)}
-                style={{
-                  fontWeight: 800,
-                  fontSize: fluid(24, 30),
-                  lineHeight: 1.05,
-                  letterSpacing: "-0.04em",
-                }}
-              >
-                {item.role}
-              </div>
-              <div
-                {...editable(model, item.fields.organization)}
-                style={{ marginTop: 6, fontSize: 15, color: "var(--site-muted)" }}
-              >
-                {item.organization}
-              </div>
-            </div>
-            {item.summary ? (
-              <p
-                {...editable(model, item.fields.summary)}
-                style={{ margin: 0, fontSize: 15, color: "var(--site-muted)" }}
-              >
-                {item.summary}
-              </p>
-            ) : null}
-          </div>
-        ))}
+    <section aria-label={heading.text} className="mon-aff">
+      <div className="mon-aff-label">
+        <Words model={model} text={heading} />
       </div>
+      {band ? (
+        <>
+          <ul className="sr-only">
+            {names.map((name, index) => (
+              <li key={index}>{name}</li>
+            ))}
+          </ul>
+          <div aria-hidden="true" className="mon-band">
+            <div className="mon-track">
+              {loop(
+                names.map((name, index) => ({ name, index })),
+                2 * Math.max(2, Math.ceil(10 / names.length)),
+              ).map((item, position) => (
+                <span key={position} className="mon-band-item">
+                  <span {...editable(model, model.fields.affiliations[item.index]!)}>
+                    {item.name}
+                  </span>
+                  {separator}
+                </span>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : (
+        <ul className="mon-aff-line">
+          {names.map((name, index) => (
+            <li key={index}>
+              <span {...editable(model, model.fields.affiliations[index]!)}>{name}</span>
+              {index < names.length - 1 ? separator : null}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
 
-function Work({ model, number }: { model: SiteModel; number?: string }) {
+function Section({
+  kind,
+  place,
+  className,
+  children,
+}: {
+  kind: MiddleKind;
+  place: Place;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
     <section
-      id={ANCHORS.work}
-      aria-label="Selected work"
-      style={{ padding: `${sectionGap} ${pad} 0` }}
+      id={ANCHORS[kind]}
+      aria-labelledby={`mon-${kind}-h`}
+      className={cx("mon-sec", `mon-${place.ground}`, className)}
+      data-wipe=""
     >
-      <SectionLabel number={number} title="Selected work" />
-      <div style={{ marginTop: 16 }}>
+      {children}
+    </section>
+  );
+}
+
+function About({ model, place }: { model: SiteModel; place: Place }) {
+  const about = model.about;
+  if (!about) return null;
+  const heading = title(model, "about");
+  return (
+    <Section kind="about" place={place} className="mon-about">
+      <Count place={place} rise />
+      <h2
+        id="mon-about-h"
+        data-rise=""
+        className="mon-title mon-title-accent"
+        style={titleStyle(heading.text)}
+      >
+        <Words model={model} text={heading} />
+      </h2>
+      <div className="mon-about-grid" data-image={about.image ? "" : undefined}>
+        {about.image ? (
+          <div data-rise="" className="mon-about-image">
+            <Picture image={about.image} className="mon-grey" />
+          </div>
+        ) : null}
+        <p {...editable(model, about.fields.lead)} data-rise="" className="mon-lead">
+          <Spans spans={about.lead} emphasis={(text, key) => <em key={key}>{text}</em>} />
+        </p>
+        {about.rest.length ? (
+          <div
+            data-rise=""
+            className="mon-rest"
+            data-columns={about.rest.length >= 2 ? "" : undefined}
+          >
+            {about.rest.map((paragraph, index) => (
+              <p key={index} {...editable(model, paragraph.field)}>
+                {paragraph.text}
+              </p>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </Section>
+  );
+}
+
+function Impact({ model, place }: { model: SiteModel; place: Place }) {
+  const heading = title(model, "impact");
+  const count = model.stats.length;
+  return (
+    <Section kind="impact" place={place} className="mon-impact">
+      <div data-rise="" className="mon-impact-head">
+        <h2 id="mon-impact-h" className="mon-title" style={titleStyle(heading.text)}>
+          <Words model={model} text={heading} />
+        </h2>
+        <Count place={place} />
+      </div>
+      <div
+        className="mon-stats"
+        data-count={count >= 4 ? "many" : String(count)}
+        style={{ "--mon-cols": Math.min(count, 4) } as CSSProperties}
+      >
+        {model.stats.map((stat, index) => (
+          <div key={index} data-rise="" className="mon-stat">
+            <span
+              {...editable(model, stat.fields.value)}
+              className="mon-stat-value"
+              style={{ "--mon-w": Math.max(1, displayWidth(stat.value)) } as CSSProperties}
+            >
+              {stat.value}
+            </span>
+            <span {...editable(model, stat.fields.label)} className="mon-stat-label">
+              {stat.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function Experience({ model, place }: { model: SiteModel; place: Place }) {
+  const heading = title(model, "experience");
+  return (
+    <Section kind="experience" place={place} className="mon-experience">
+      <div data-rise="" className="mon-head-row">
+        <h2 id="mon-experience-h" className="mon-title" style={titleStyle(heading.text)}>
+          <Words model={model} text={heading} />
+        </h2>
+        <Count place={place} />
+      </div>
+      <ol className="mon-rows mon-rows-thin">
+        {model.experience.map((item, index) => (
+          <li key={index} data-rise="" tabIndex={0} className="mon-row mon-exp-row">
+            <span className="mon-dates">
+              {item.start ? (
+                <span {...editable(model, item.fields.start)}>{item.start}</span>
+              ) : null}
+              {item.start && item.end ? " – " : null}
+              {item.end ? <span {...editable(model, item.fields.end)}>{item.end}</span> : null}
+            </span>
+            <span className="mon-exp-main">
+              <span {...editable(model, item.fields.role)} className="mon-role">
+                {item.role}
+              </span>
+              {item.organization || item.location ? (
+                <span className="mon-row2">
+                  {item.organization ? (
+                    <span {...editable(model, item.fields.organization)}>{item.organization}</span>
+                  ) : null}
+                  {item.organization && item.location ? " · " : null}
+                  {item.location ? (
+                    <span {...editable(model, item.fields.location)}>{item.location}</span>
+                  ) : null}
+                </span>
+              ) : null}
+            </span>
+            {item.summary ? (
+              <span {...editable(model, item.fields.summary)} className="mon-row2 mon-summary">
+                {item.summary}
+              </span>
+            ) : null}
+          </li>
+        ))}
+      </ol>
+    </Section>
+  );
+}
+
+function Work({ model, place }: { model: SiteModel; place: Place }) {
+  const heading = title(model, "work");
+  const cards = model.work.some((item) => item.image);
+  return (
+    <Section kind="work" place={place} className="mon-work">
+      <Count place={place} rise />
+      <h2 id="mon-work-h" data-rise="" className="mon-title" style={titleStyle(heading.text)}>
+        <Words model={model} text={heading} />
+      </h2>
+      <ol className={cards ? "mon-cards" : "mon-rows"}>
         {model.work.map((item, index) => {
-          const row = (
+          const number = String(index + 1).padStart(2, "0");
+          const kindYear =
+            item.kind || item.year ? (
+              <span className="mon-kind">
+                {item.kind ? <span {...editable(model, item.fields.kind)}>{item.kind}</span> : null}
+                {item.kind && item.year ? <span className="mon-row2"> · </span> : null}
+                {item.year ? (
+                  <span {...editable(model, item.fields.year)} className="mon-row2">
+                    {item.year}
+                  </span>
+                ) : null}
+              </span>
+            ) : null;
+          const heading = (
+            <span className="mon-work-title">
+              <span {...editable(model, item.fields.title)}>{item.title}</span>
+              {item.href ? (
+                <span aria-hidden="true" className="mon-ne">
+                  ↗
+                </span>
+              ) : null}
+            </span>
+          );
+          const context = item.context ? (
+            <span {...editable(model, item.fields.context)} className="mon-context">
+              {item.context}
+            </span>
+          ) : null;
+          const description = item.description ? (
+            <span {...editable(model, item.fields.description)} className="mon-row2 mon-desc">
+              {item.description}
+            </span>
+          ) : null;
+          const body = cards ? (
             <>
-              <span {...(item.kind ? editable(model, item.fields.kind) : {})} style={{ ...caps }}>
-                {item.kind}
+              <span className="mon-card-image">
+                {item.image ? (
+                  <Picture image={item.image} className="mon-grey mon-multiply" />
+                ) : (
+                  <span aria-hidden="true" className="mon-tile">
+                    {number}
+                  </span>
+                )}
               </span>
-              <span
-                {...editable(model, item.fields.title)}
-                style={{
-                  fontWeight: 800,
-                  fontSize: fluid(28, 40),
-                  lineHeight: 1.05,
-                  letterSpacing: "-0.045em",
-                }}
-              >
-                {item.title}
+              {kindYear}
+              {heading}
+              {context}
+              {description}
+            </>
+          ) : (
+            <>
+              <span aria-hidden="true" className="mon-row2 mon-work-n">
+                {number}
               </span>
-              <span
-                {...(item.year ? editable(model, item.fields.year) : {})}
-                className="@3xl:justify-self-end"
-                style={{ fontSize: 15, fontWeight: 600 }}
-              >
-                {item.year}
+              <span className="mon-work-main">
+                {heading}
+                {description}
+              </span>
+              <span className="mon-work-side">
+                {kindYear}
+                {context ? <span className="mon-row2">{context}</span> : null}
               </span>
             </>
           );
-          const className =
-            "grid grid-cols-1 items-baseline gap-2 transition-colors duration-200 hover:text-site-accent @3xl:grid-cols-[4fr_7fr_1fr] @3xl:gap-10";
-          const style: CSSProperties = { padding: "22px 0", borderBottom: rowRule };
-          return item.href ? (
-            <ContactLink
-              key={index}
-              link={{ label: item.title, href: item.href }}
-              className={className}
-              style={style}
-            >
-              {row}
-            </ContactLink>
-          ) : (
-            <div key={index} className={className} style={style}>
-              {row}
-            </div>
+          const className = cards ? "mon-card" : "mon-row mon-work-row";
+          return (
+            <li key={index} data-rise="" className={cards ? undefined : "mon-row-wrap"}>
+              {item.href ? (
+                <a {...linkProps(item.href)} className={className}>
+                  {body}
+                </a>
+              ) : (
+                <div tabIndex={cards ? undefined : 0} className={className}>
+                  {body}
+                </div>
+              )}
+            </li>
           );
         })}
-      </div>
-    </section>
+      </ol>
+    </Section>
   );
 }
 
-function Testimonials({ model }: { model: SiteModel }) {
+function Caption({
+  model,
+  quote,
+  inline,
+}: {
+  model: SiteModel;
+  quote: ModelQuote;
+  inline?: boolean;
+}) {
   return (
-    <section
-      id={ANCHORS.testimonials}
-      aria-label="Testimonials"
-      className="grid grid-cols-1 gap-10 @3xl:grid-cols-2"
-      style={{ padding: `${sectionGap} ${pad} 0` }}
-    >
-      {model.testimonials.map((item, index) => (
-        <figure key={index} style={{ margin: 0, borderTop: rule, paddingTop: 24 }}>
-          <blockquote
-            style={{
-              margin: 0,
-              fontWeight: 700,
-              fontSize: fluid(24, 30),
-              lineHeight: 1.15,
-              letterSpacing: "-0.035em",
-            }}
-          >
-            “<span {...editable(model, item.fields.quote)}>{item.quote}</span>”
-          </blockquote>
-          <figcaption
-            style={{
-              ...caps,
-              marginTop: 22,
-              color: "color-mix(in srgb, var(--site-ink) 55%, transparent)",
-            }}
-          >
-            <span {...editable(model, item.fields.author)}>{item.author}</span>
-            {item.role ? (
-              <>
-                {" "}
-                <span style={{ color: "var(--site-accent)" }}>/</span>{" "}
-                <span {...editable(model, item.fields.role)}>{item.role}</span>
-              </>
-            ) : null}
-          </figcaption>
-        </figure>
-      ))}
-    </section>
+    <figcaption className={inline ? "mon-caption-small" : "mon-caption"}>
+      {inline ? null : <span aria-hidden="true" className="mon-caption-rule" />}
+      <span {...editable(model, quote.fields.author)} className="mon-caption-name">
+        {quote.author}
+      </span>
+      {quote.role ? (
+        <span className="mon-row2">
+          {inline ? " · " : null}
+          <span {...editable(model, quote.fields.role)}>{quote.role}</span>
+        </span>
+      ) : null}
+    </figcaption>
   );
 }
 
-function Contact({ model, number, year }: { model: SiteModel; number?: string; year: number }) {
+function Testimonials({ model, place }: { model: SiteModel; place: Place }) {
+  const [lead, ...rest] = model.testimonials;
+  if (!lead) return null;
+  const heading = title(model, "testimonials");
+  return (
+    <Section kind="testimonials" place={place} className="mon-quotes">
+      <div data-rise="" className="mon-head-row">
+        <h2 id="mon-testimonials-h" className="mon-label-title">
+          <Words model={model} text={heading} />
+        </h2>
+        <Count place={place} />
+      </div>
+      <figure data-rise="" className="mon-lead-quote" data-one={rest.length ? undefined : ""}>
+        <span aria-hidden="true" className="mon-quote-mark">
+          “
+        </span>
+        <div className="mon-lead-quote-body">
+          <blockquote {...editable(model, lead.fields.quote)}>{lead.quote}</blockquote>
+          <Caption model={model} quote={lead} />
+        </div>
+      </figure>
+      {rest.length ? (
+        <div
+          className="mon-more-quotes"
+          style={{ "--mon-cols": rest.length >= 3 ? 3 : 2 } as CSSProperties}
+        >
+          {rest.map((quote, index) => (
+            <figure key={index} data-rise="" className="mon-quote">
+              <blockquote>
+                “<span {...editable(model, quote.fields.quote)}>{quote.quote}</span>”
+              </blockquote>
+              <Caption model={model} quote={quote} inline />
+            </figure>
+          ))}
+        </div>
+      ) : null}
+    </Section>
+  );
+}
+
+/** The form's wording, with each text's field when the preview edits in place. */
+function formWords(model: SiteModel): FormWords {
+  const word = (key: string, fallback: string) => {
+    const text = label(model, key, fallback);
+    return model.editable ? text : { text: text.text, field: "" };
+  };
+  return {
+    question: word("form-question", "Topic"),
+    name: word("form-name", "Your name"),
+    email: word("form-email", "Email"),
+    organisation: word("form-organisation", "Organisation"),
+    optional: word("form-optional", "optional"),
+    message: word("form-message", "Message"),
+    send: word("form-send", "Send message"),
+    note: word(
+      "form-note",
+      model.first
+        ? `Goes straight to ${model.first}. Your details aren't shared.`
+        : "Your details aren't shared.",
+    ),
+  };
+}
+
+function Contact({
+  model,
+  sendMessage,
+}: {
+  model: SiteModel;
+  sendMessage: SendContactMessage | undefined;
+}) {
   const { contact } = model;
+  const heading = title(model, "contact");
+  const form = contact.form.enabled;
+  const direct = Boolean(contact.blurb || contact.email || contact.links.length);
   return (
     <section
       id={ANCHORS.contact}
-      aria-label="Contact"
-      style={{ padding: `${fluid(96, 144)} ${pad} 48px` }}
+      aria-labelledby="mon-contact-h"
+      className="mon-contact"
+      data-wipe=""
+      data-form={form ? "" : undefined}
     >
-      <SectionLabel
-        number={number}
-        title="Contact"
-        aside={contact.blurb}
-        asideEdit={editable(model, contact.fields.blurb)}
-      />
-      {contact.email ? (
-        <div
-          style={{
-            marginTop: 48,
-            fontWeight: 900,
-            fontSize: `min(108px, calc((100cqw - 2 * ${pad}) / ${Math.max(contact.email.length * 0.56, 1).toFixed(2)}))`,
-            lineHeight: 0.9,
-            letterSpacing: "-0.065em",
-            color: "var(--site-accent)",
-          }}
-        >
-          <a
-            href={mailto(contact.email)}
-            style={{
-              textDecoration: "underline",
-              textDecorationThickness: "0.055em",
-              textUnderlineOffset: "0.15em",
-            }}
-          >
-            {contact.email}
-          </a>
+      <h2
+        id="mon-contact-h"
+        data-rise=""
+        className="mon-contact-title"
+        style={titleStyle(heading.text)}
+      >
+        <Words model={model} text={heading} />
+      </h2>
+      {direct || form ? (
+        <div className="mon-contact-grid" data-split={(direct && form) || undefined}>
+          {direct ? (
+            <div data-rise="" className="mon-direct">
+              {contact.blurb ? (
+                <p {...editable(model, contact.fields.blurb)} className="mon-blurb">
+                  {contact.blurb}
+                </p>
+              ) : null}
+              {contact.email ? (
+                <a href={mailto(contact.email)} className="mon-email">
+                  {contact.email}
+                </a>
+              ) : null}
+              {contact.links.length ? (
+                <ul className="mon-links">
+                  {contact.links.map((link, index) => (
+                    <li key={index}>
+                      <ContactLink link={link} className="mon-link">
+                        <span {...editable(model, link.field)} className="mon-link-label">
+                          {link.label}
+                        </span>
+                        <span aria-hidden="true">↗</span>
+                      </ContactLink>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
+          {form ? (
+            <div data-rise="" className="mon-form-column" data-alone={!direct || undefined}>
+              <ContactForm
+                prefix="mon"
+                topics={contact.form.topics}
+                topicFields={model.editable ? contact.fields.topics : []}
+                words={formWords(model)}
+                first={model.first}
+                send={sendMessage}
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
-      <footer
-        style={{
-          ...caps,
-          marginTop: fluid(56, 80),
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          gap: 16,
-        }}
-      >
-        <span>
-          © {year} {model.name}
-        </span>
-        {contact.links.length ? (
-          <span style={{ display: "flex", flexWrap: "wrap", gap: "12px 28px" }}>
-            {contact.links.map((link, index) => (
-              <ContactLink key={index} link={link} className="hover:text-site-accent" />
-            ))}
-          </span>
-        ) : null}
-      </footer>
     </section>
   );
 }
 
-export function MonumentTemplate({ model, publishedAt }: TemplateProps) {
-  const numbers = sectionNumbers(model, ["impact", "about", "experience", "work", "contact"]);
-  const nav = navItems(model, { about: "About", work: "Work" });
-  const renderers: Record<MiddleKind, () => ReactNode> = {
-    impact: () => <Impact model={model} number={numbers.impact} />,
-    about: () => <About model={model} number={numbers.about} />,
-    experience: () => <Experience model={model} number={numbers.experience} />,
-    work: () => <Work model={model} number={numbers.work} />,
-    testimonials: () => <Testimonials model={model} />,
+export function MonumentTemplate({ model, publishedAt, colors, sendMessage }: TemplateProps) {
+  const renderers: Record<MiddleKind, (place: Place) => ReactNode> = {
+    about: (place) => <About model={model} place={place} />,
+    impact: (place) => <Impact model={model} place={place} />,
+    experience: (place) => <Experience model={model} place={place} />,
+    work: (place) => <Work model={model} place={place} />,
+    testimonials: (place) => <Testimonials model={model} place={place} />,
   };
+  const affiliations = model.affiliations.length > 0;
+  const total = String(model.order.length).padStart(2, "0");
 
   return (
     <div
       id={ANCHORS.top}
-      style={{ fontFamily: FONTS.inter, fontSize: 16, lineHeight: 1.5, overflow: "hidden" }}
+      className="mon"
+      style={
+        {
+          ...monumentRoleStyle(colors),
+          "--mon-measure": nameMeasure(model.name || "Name").toFixed(3),
+          fontFamily: FONTS.publicSans,
+          minHeight: "inherit",
+        } as CSSProperties
+      }
     >
       <SkipLink />
-      <header
-        className="grid grid-cols-[1fr_auto] @3xl:grid-cols-3"
-        style={{
-          ...caps,
-          padding: `0 ${pad}`,
-          height: 64,
-          alignItems: "center",
-          gap: 16,
-          borderBottom: rule,
-          letterSpacing: "0.02em",
-        }}
-      >
-        <a href={`#${ANCHORS.top}`} style={{ whiteSpace: "nowrap", overflow: "hidden" }}>
-          <span {...editable(model, model.fields.name)}>{model.name}</span>
-        </a>
-        <span
-          className="hidden @3xl:flex"
-          style={{ alignItems: "center", gap: 10, justifyContent: "center" }}
-        >
-          {model.availability ? (
-            <>
-              <span
-                aria-hidden
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: "var(--site-accent)",
-                  flex: "none",
-                }}
-              />
-              <span {...editable(model, model.fields.availability)}>{model.availability}</span>
-            </>
-          ) : null}
-        </span>
-        <nav aria-label="Sections" style={{ display: "flex", gap: 28, justifyContent: "flex-end" }}>
-          {nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="hidden hover:text-site-accent @xl:inline"
-            >
-              {item.label}
-            </a>
-          ))}
-          <a href={`#${ANCHORS.contact}`} className="hover:text-site-accent">
-            Contact
-          </a>
-        </nav>
-      </header>
+      <Header model={model} />
       <main id="main">
-        <NameHero model={model} />
-        <Intro model={model} />
-        {model.keywords.length ? <KeywordMarquee keywords={model.keywords} /> : null}
-        {model.order.map((kind) => (
-          <div key={kind} style={{ display: "contents" }}>
-            {renderers[kind]()}
-          </div>
+        <Hero model={model} />
+        {affiliations ? <Affiliations model={model} /> : null}
+        {model.order.map((kind, index) => (
+          <Fragment key={kind}>
+            {renderers[kind]({
+              // Grounds alternate down the page; the affiliations band counts as an inverse one.
+              ground: (index + (affiliations ? 1 : 0)) % 2 === 0 ? "inverse" : "paper",
+              number: String(index + 1).padStart(2, "0"),
+              total,
+            })}
+          </Fragment>
         ))}
-        <Contact model={model} number={numbers.contact} year={publishedAt.getUTCFullYear()} />
+        <Contact model={model} sendMessage={sendMessage} />
       </main>
+      <footer className="mon-footer">
+        <div className="mon-footer-in">
+          <span>
+            © {publishedAt.getUTCFullYear()}{" "}
+            <Words model={model} text={{ text: model.name, field: model.fields.name }} />
+          </span>
+          <span className="mon-footer-location">
+            {model.location ? (
+              <span {...editable(model, model.fields.location)}>{model.location}</span>
+            ) : null}
+          </span>
+          <a href={`#${ANCHORS.top}`} className="mon-top">
+            {model.editable ? (
+              <>
+                <Words model={model} text={label(model, "back-to-top", "Back to top")} />
+                <span aria-hidden="true"> ↑</span>
+              </>
+            ) : (
+              `${label(model, "back-to-top", "Back to top").text} ↑`
+            )}
+          </a>
+        </div>
+      </footer>
+      {/* In the editor the owner needs the whole page at once, so sections don't wipe in. */}
+      {model.editable ? null : <MonumentMotion />}
     </div>
   );
 }

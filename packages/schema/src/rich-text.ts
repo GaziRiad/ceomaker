@@ -54,7 +54,7 @@ const EMPHASIS = /\*([^*\n]+)\*/g;
 
 /**
  * Editor convention for one paragraph: a phrase wrapped in *asterisks* is the highlighted run
- * (italic in Meridian, gradient in Aurora, accent in Monument). Links are not editable here.
+ * (italic in Meridian, accent in Monument). Links are not editable here.
  */
 export function paragraphToMarkup(paragraph: RichTextParagraph): string {
   return paragraph.spans

@@ -3,7 +3,7 @@
 # CEOMaker
 
 A website builder for busy, non-technical executives (CEOs, founders, chairs). They answer a few
-questions, AI drafts a personal site in their voice from one of six templates, they edit it in
+questions, AI drafts a personal site in their voice from one of two templates (Meridian, Monument), they edit it in
 place and publish. Live at `ceomaker.vercel.app` (path mode: sites at `/sites/<name>`) until the
 product domain is set up.
 
@@ -43,8 +43,9 @@ Vercel (Hobby, `fra1`).
 
 - `packages/schema`: zod content contract (sites, sections, theme, templates, domains, analytics).
 - `packages/db`: Drizzle schema, migrations, queries, integration tests (need local Postgres).
-- `packages/templates`: `buildSiteModel` (one view model for all templates) and the six templates.
-  Meridian (`meridian/v1`) is the main one; it supports in-place editing of every visible text.
+- `packages/templates`: `buildSiteModel` (one view model for all templates) and the two templates.
+  Meridian (`meridian/v1`, the quiet one) and Monument (`monument/v1`, the loud one) both support
+  in-place editing of every visible text and the contact form. Retired keys render as Meridian.
 - `apps/web`: the app. Customer sites `src/app/(sites)`, dashboard `src/app/(app)/dashboard`,
   editor `dashboard/sites/[id]/edit`, domains `src/lib/domains`, analytics `src/lib/analytics`.
 - `design/`: Claude Design handoff files (reference only).

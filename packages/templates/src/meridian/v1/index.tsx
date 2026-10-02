@@ -10,9 +10,9 @@ import {
   type ModelText,
   type SiteModel,
 } from "../../model";
+import { ContactForm, type FormWords } from "../../contact-form";
 import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink, Spans } from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
-import { MeridianContactForm, type FormWords } from "./contact-form";
 import { longestWord, meridianRoleStyle, RING_CIRCUMFERENCE, ringText } from "./measure";
 
 // T1 Meridian: editorial and neutral, a serif name and the seal. For chief executives and chairs.
@@ -594,7 +594,8 @@ function Contact({
               className={cx("mer-form-column", draft && "mer-fill")}
               data-alone={!direct || undefined}
             >
-              <MeridianContactForm
+              <ContactForm
+                prefix="mer"
                 topics={contact.form.topics}
                 topicFields={model.editable ? contact.fields.topics : []}
                 words={formWords(model)}
