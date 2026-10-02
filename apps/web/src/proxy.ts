@@ -2,15 +2,10 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 import { liveDomainFor, siteForHost } from "./lib/domain-routing";
 import {
-  appHostnames,
-  hostnameOf,
-  isCustomDomainCandidate,
   isInternalTenantPath,
   NOT_FOUND_PATH,
-  parseSitesPath,
   resolveHost,
   routingConfigFromEnv,
-  SITES_PATH_PREFIX,
   TENANT_PATH_PREFIX,
 } from "./lib/routing";
 
@@ -36,7 +31,7 @@ function rewriteToTenant(request: NextRequest, subdomain: string, rest: string) 
   return NextResponse.rewrite(new URL(`${TENANT_PATH_PREFIX}/${subdomain}${rest}`, request.url));
 }
 
-/** Product routes, shared by both routing modes. */
+/** Product routes. */
 function serveApp(request: NextRequest) {
   // Optimistic check on cookie presence only, so signed-out visitors get a real redirect
   // instead of a streamed one. Pages and server actions still verify the session itself.
@@ -88,44 +83,14 @@ async function serveCustomDomain(request: NextRequest, hostname: string) {
 /**
  * Routes each request to the product or to a customer site.
  *
- * - Subdomain mode (ROOT_DOMAIN set): the apex is the product, <name>.<root> is a customer site.
- *   The Host header is trusted because the platform only routes our configured domains here.
- * - Path mode (no ROOT_DOMAIN, e.g. on *.vercel.app): customer sites live at /sites/<name>.
- * - In both, a customer's own domain (added through Settings) serves their site.
- *
- * In every mode the internal /s/* route is unreachable directly.
+ * The root domain (or its www, following APP_URL) is the product, <name>.<root> is a customer
+ * site, and a customer's own domain (added through Settings) serves their site. The Host header
+ * is trusted because the platform only routes our configured domains here. The internal /s/*
+ * route is unreachable directly.
  */
 export async function proxy(request: NextRequest) {
   const routing = routingConfigFromEnv();
   const { pathname, search } = request.nextUrl;
-
-  if (routing.mode === "path") {
-    const hostname = hostnameOf(request.headers.get("host") ?? "");
-    if (isCustomDomainCandidate(hostname) && !appHostnames().has(hostname)) {
-      const custom = await serveCustomDomain(request, hostname);
-      if (custom) return custom;
-    }
-    if (isInternalTenantPath(pathname)) return notFound(request);
-    const site = parseSitesPath(pathname);
-    switch (site.kind) {
-      case "none":
-        return serveApp(request);
-      case "invalid":
-        return notFound(request);
-      case "site": {
-        if (!site.canonical) {
-          const url = new URL(
-            `${SITES_PATH_PREFIX}/${site.subdomain}${site.rest}${search}`,
-            request.url,
-          );
-          return NextResponse.redirect(url, 308);
-        }
-        if (site.rest.startsWith("/api/")) return notFound(request);
-        const forwarded = await forwardToLiveDomain(request, site.subdomain, site.rest);
-        return forwarded ?? rewriteToTenant(request, site.subdomain, site.rest);
-      }
-    }
-  }
 
   const resolution = resolveHost(request.headers.get("host"), routing);
   switch (resolution.kind) {
@@ -133,19 +98,9 @@ export async function proxy(request: NextRequest) {
       const host = routing.appOnWww ? `www.${routing.rootDomain}` : routing.rootDomain;
       return NextResponse.redirect(`${request.nextUrl.protocol}//${host}${pathname}${search}`, 308);
     }
-    case "app": {
+    case "app":
       if (isInternalTenantPath(pathname)) return notFound(request);
-      // One URL per site: links to a path-mode address (from before subdomains) forward to it.
-      const site = parseSitesPath(pathname);
-      if (site.kind === "invalid") return notFound(request);
-      if (site.kind === "site") {
-        return NextResponse.redirect(
-          `${request.nextUrl.protocol}//${site.subdomain}.${routing.rootDomain}${site.rest}${search}`,
-          308,
-        );
-      }
       return serveApp(request);
-    }
     case "tenant":
       // Tenant hosts serve published pages and their images only: no API, auth or dashboard.
       return serveSiteHost(request, resolution.subdomain, true);

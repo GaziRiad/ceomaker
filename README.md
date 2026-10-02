@@ -17,16 +17,17 @@ The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Architecture
 
-One Next.js 16 app serves the product (landing page, auth, dashboard) and every customer site. [`apps/web/src/proxy.ts`](apps/web/src/proxy.ts) decides which one a request is for and rewrites customer requests to the internal `/s/[subdomain]` route, which renders the site's published version from cache. There are two routing modes:
+One Next.js 16 app serves the product (landing page, auth, dashboard) and every customer site. [`apps/web/src/proxy.ts`](apps/web/src/proxy.ts) decides which one a request is for and rewrites customer requests to the internal `/s/[subdomain]` route, which renders the site's published version from cache.
 
-| Mode                                       | Customer site address              | When                                    |
-| ------------------------------------------ | ---------------------------------- | --------------------------------------- |
-| **Path** (`ROOT_DOMAIN` unset)             | `ceomaker.vercel.app/sites/amelia` | Now: free Vercel address, before launch |
-| **Subdomain** (`ROOT_DOMAIN=ceomaker.com`) | `amelia.ceomaker.com`              | After buying the domain                 |
+| Where      | Product                | Customer site                 |
+| ---------- | ---------------------- | ----------------------------- |
+| Production | `www.ceomaker.app`     | `amelia.ceomaker.app`         |
+| Preview    | `preview.ceomaker.app` | `amelia.preview.ceomaker.app` |
+| Local      | `localhost:3000`       | `demo.localhost:3000`         |
 
-Only one mode is active at a time, so a site never has two public URLs. Path-mode pages are marked `noindex`, so the temporary addresses never compete in search with the real domain. Customer addresses expose no API, auth or dashboard routes in either mode.
+`ROOT_DOMAIN` names the domain customer sites live under (unset: the app's own host, which is what local development uses). The product answers on that domain or its `www`, following `APP_URL`. Customer addresses expose no API, auth or dashboard routes.
 
-In both modes an owner can also connect their own domain (Settings › Site). The proxy looks up unknown hosts in `site_domain` (cached in memory for 30 seconds) and serves that site; `www.` forwards to the domain, and once the domain is live the site's own address forwards there too, so only one address is indexed.
+An owner can also connect their own domain (Settings › Site). The proxy looks up unknown hosts in `site_domain` (cached in memory for 30 seconds) and serves that site; `www.` forwards to the domain, and once the domain is live the site's own address forwards there too, so only one address is indexed.
 
 A site is data, not HTML. The Zod contract in [`packages/schema`](packages/schema) defines colours, section types, site content and the guided answers, and every layer uses it: the database layer validates writes against it, the renderer parses stored JSON through it, and the editor and the AI drafting step emit it.
 
@@ -49,7 +50,7 @@ packages/templates  The site templates (Meridian, Monument), their shared view m
 - **Content is data.** User and AI content is validated structured data rendered as escaped text. There is no `dangerouslySetInnerHTML`. Links are restricted to `https`, `http`, `mailto:`, `tel:` and in-page anchors. Theme colors must be `#rrggbb`, so they can't inject CSS.
 - **Tenant isolation.** Queries that touch a site take the acting `userId` and scope to it. A composite foreign key means a site can only point at its own versions, so one tenant's content can never be served on another tenant's domain. Subdomain format is enforced in both the schema and a database `CHECK`.
 - **Sessions.** Sign-in is passwordless: a single-use email link (stored hashed, valid 15 minutes) or Google. Better Auth cookies are host-only on the product domain and are never shared with `*.ceomaker.com`. Customer sites set no cookies. Sign-in requests are rate limited, with counters stored in Postgres.
-- **Uploads and AI.** Portraits are resized and re-encoded in the browser (which drops EXIF data such as GPS position), then checked again on the server by their bytes (JPEG, PNG or WebP only). CVs are sent once to the model to draft the site and never stored. AI drafts and rewrites are rate limited per user, and the model is told to use only facts from the answers and the CV: sections that need numbers, past roles or quotes start hidden and empty instead of invented. In path mode, customer pages share the product's origin until the domain exists. That's acceptable pre-launch because site content can't run scripts and session cookies are HttpOnly, but it's one reason to move to subdomains before real customers arrive.
+- **Uploads and AI.** Portraits are resized and re-encoded in the browser (which drops EXIF data such as GPS position), then checked again on the server by their bytes (JPEG, PNG or WebP only). CVs are sent once to the model to draft the site and never stored. AI drafts and rewrites are rate limited per user, and the model is told to use only facts from the answers and the CV: sections that need numbers, past roles or quotes start hidden and empty instead of invented.
 - **Headers.** CSP, HSTS (with `includeSubDomains`), `nosniff`, `frame-ancestors 'none'`, COOP and Permissions-Policy on every response. Inline scripts are allowed because cached pages can't carry per-request nonces (see `src/lib/security-headers.ts`). The structural guarantee above is the primary XSS defence.
 
 ## Local development (Windows, macOS, Linux)
@@ -101,9 +102,7 @@ pnpm dev
 ```
 
 - Product: http://localhost:3000
-- Demo customer site: http://localhost:3000/sites/demo
-
-To try subdomain mode locally, set `ROOT_DOMAIN=localhost:3000` and open http://demo.localhost:3000. Browsers resolve `*.localhost` to your machine.
+- Demo customer site: http://demo.localhost:3000 (browsers resolve `*.localhost` to your machine)
 
 ### Scripts
 
@@ -147,7 +146,7 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    | `VERCEL_TEAM_ID`               | see Custom domains  | (leave unset)            |
    | `CRON_SECRET`                  | new random value    | (leave unset)            |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
-   - Leave `APP_URL` and `ROOT_DOMAIN` unset: the app derives its address from Vercel's system variables and serves customer sites at `/sites/<name>`.
+   - Set `ROOT_DOMAIN` and `APP_URL` as described in "Domain setup" below. Without a domain, customer sites can't be reached on a `*.vercel.app` address.
 
 3. **Deploy.** The build log shows `Migrations applied` before `next build`.
 4. **Check:**
@@ -179,7 +178,7 @@ Production refuses to start an email sign-in without a key, so sign-in links are
 5. Copy the **Client ID** and **Client secret** right away (or download the JSON). Google shows the secret only once; if you lose it, add a new secret on the client and delete the old one.
 6. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env` and in Vercel (Production), then redeploy. Changes on Google's side can take a few minutes to apply.
 
-Preview deployments get a new URL each time, so Google sign-in works on localhost and production only. When you buy the domain, add `https://ceomaker.com` and `https://ceomaker.com/api/auth/callback/google` to the same client.
+Production is `https://www.ceomaker.app` and previews `https://preview.ceomaker.app`: each needs its origin and `/api/auth/callback/google` redirect URI on the same client.
 
 A Google account and an email sign-in with the same address end up as one CEOMaker account. The exception is an account created before passwordless sign-in: its email was never verified, so Google asks for one email-link sign-in first, and the sign-in page says so.
 
@@ -209,9 +208,9 @@ Unconnected domains are released after 7 days, so nobody can hold a domain they 
 
 Live sites send anonymous page views and clicks on email, phone, LinkedIn and website links to `/api/collect` (no cookies, no stored addresses; a visitor is a keyed hash that changes every day). Country and city come from Vercel's request headers, so they only appear on deployments: locally every visit shows as "Unknown location". Signed-in CEOMaker users and known bots aren't counted.
 
-### When you buy the domain
+### Domain setup
 
-The product domain is `ceomaker.app`. Customer sites move from `/sites/<name>` to `<name>.ceomaker.app`; old `/sites/` links forward to the new address.
+The product domain is `ceomaker.app`, with customer sites at `<name>.ceomaker.app`.
 
 1. **DNS at Vercel.** Wildcard certificates need Vercel to answer DNS challenges, so move the domain to Vercel's nameservers (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`) at the registrar. Re-create any other records you need (email, verification) in Vercel's DNS first.
 2. **Domains** (Vercel → Project → Domains):

@@ -14,7 +14,7 @@ const serverEnvSchema = z.object({
     .min(32, "BETTER_AUTH_SECRET must be at least 32 characters (see .env.example)"),
   // Optional: derived from Vercel's system variables when unset (see appUrl in lib/routing).
   APP_URL: z.url().optional(),
-  // Optional: unset means path mode, with customer sites at /sites/<name>.
+  // Optional: customer sites live at <name>.<ROOT_DOMAIN>; unset means the app's own host.
   ROOT_DOMAIN: z.string().min(1).optional(),
   // Sign-in emails. Without a key, development prints sign-in links to the server console.
   RESEND_API_KEY: optional,

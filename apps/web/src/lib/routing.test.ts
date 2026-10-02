@@ -3,28 +3,25 @@ import {
   appHostnames,
   appUrl,
   isCustomDomainCandidate,
-  parseSitesPath,
   resolveHost,
   routingConfigFromEnv,
   siteAddressParts,
   siteUrl,
-  type SubdomainRoutingConfig,
+  type RoutingConfig,
 } from "./routing";
 
-const prod: SubdomainRoutingConfig = {
-  mode: "subdomain",
+const prod: RoutingConfig = {
   rootDomain: "ceomaker.com",
   unknownHostsServeApp: false,
   appOnWww: false,
 };
-const dev: SubdomainRoutingConfig = {
-  mode: "subdomain",
+const dev: RoutingConfig = {
   rootDomain: "localhost:3000",
   unknownHostsServeApp: true,
   appOnWww: false,
 };
 
-describe("resolveHost (subdomain mode)", () => {
+describe("resolveHost", () => {
   it.each([
     ["ceomaker.com", { kind: "app" }],
     ["CEOMaker.com", { kind: "app" }],
@@ -76,26 +73,8 @@ describe("resolveHost (subdomain mode)", () => {
   });
 });
 
-describe("parseSitesPath (path mode)", () => {
-  it.each([
-    ["/", { kind: "none" }],
-    ["/dashboard", { kind: "none" }],
-    ["/sitesmap", { kind: "none" }],
-    ["/sites", { kind: "invalid" }],
-    ["/sites/", { kind: "invalid" }],
-    ["/sites/ab", { kind: "invalid" }],
-    ["/sites/app", { kind: "invalid" }],
-    ["/sites/bad--name", { kind: "invalid" }],
-    ["/sites/amelia", { kind: "site", subdomain: "amelia", rest: "", canonical: true }],
-    ["/sites/amelia/press", { kind: "site", subdomain: "amelia", rest: "/press", canonical: true }],
-    ["/sites/Amelia", { kind: "site", subdomain: "amelia", rest: "", canonical: false }],
-  ] as const)("parses %s", (pathname, expected) => {
-    expect(parseSitesPath(pathname)).toEqual(expected);
-  });
-});
-
 describe("resolveHost with the product on www", () => {
-  const www: SubdomainRoutingConfig = { ...prod, appOnWww: true };
+  const www: RoutingConfig = { ...prod, appOnWww: true };
   it("serves the app on www, forwards the apex there, and keeps tenants", () => {
     expect(resolveHost("www.ceomaker.com", www)).toEqual({ kind: "app" });
     expect(resolveHost("ceomaker.com", www)).toEqual({ kind: "redirect-to-app" });
@@ -117,12 +96,14 @@ describe("resolveHost with the product on www", () => {
 });
 
 describe("routingConfigFromEnv", () => {
-  it("uses path mode when no root domain is configured", () => {
-    expect(routingConfigFromEnv({})).toEqual({ mode: "path" });
-    expect(routingConfigFromEnv({ ROOT_DOMAIN: "  " })).toEqual({ mode: "path" });
+  it("uses the app's own host as the root domain when none is configured", () => {
+    expect(routingConfigFromEnv({})).toMatchObject({ rootDomain: "localhost:3000" });
+    expect(
+      routingConfigFromEnv({ ROOT_DOMAIN: "  ", APP_URL: "https://www.ceomaker.app" }),
+    ).toEqual({ rootDomain: "ceomaker.app", unknownHostsServeApp: true, appOnWww: true });
   });
 
-  it("uses subdomain mode when a root domain is configured", () => {
+  it("uses the configured root domain", () => {
     expect(
       routingConfigFromEnv({
         ROOT_DOMAIN: "ceomaker.com",
@@ -130,7 +111,6 @@ describe("routingConfigFromEnv", () => {
         VERCEL_ENV: "production",
       }),
     ).toEqual({
-      mode: "subdomain",
       rootDomain: "ceomaker.com",
       unknownHostsServeApp: false,
       appOnWww: false,
@@ -184,25 +164,14 @@ describe("siteUrl and siteAddressParts", () => {
   it("builds subdomain addresses", () => {
     expect(siteUrl("amelia", prod, "https://ceomaker.com")).toBe("https://amelia.ceomaker.com");
     expect(siteUrl("demo", dev, "http://localhost:3000")).toBe("http://demo.localhost:3000");
-    expect(siteAddressParts(prod, "https://ceomaker.com")).toEqual({
+    expect(siteAddressParts(prod)).toEqual({
       prefix: "",
       suffix: ".ceomaker.com",
     });
   });
-
-  it("builds path addresses", () => {
-    const path = { mode: "path" } as const;
-    expect(siteUrl("amelia", path, "https://ceomaker.vercel.app")).toBe(
-      "https://ceomaker.vercel.app/sites/amelia",
-    );
-    expect(siteAddressParts(path, "https://ceomaker.vercel.app")).toEqual({
-      prefix: "ceomaker.vercel.app/sites/",
-      suffix: "",
-    });
-  });
 });
 
-describe("appHostnames (path mode)", () => {
+describe("appHostnames", () => {
   it("lists the product's own hosts", () => {
     expect(
       appHostnames({

@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     await recordAnalyticsEvent(getDb(), {
       siteId: site.siteId,
       kind,
-      path: sitePath(typeof beacon.p === "string" ? beacon.p : "/", subdomain),
+      path: sitePath(typeof beacon.p === "string" ? beacon.p : "/"),
       source,
       referrerHost,
       clickKind,

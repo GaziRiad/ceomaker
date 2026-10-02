@@ -27,7 +27,7 @@ function send(data: Record<string, string>) {
 export function Beacon({ subdomain, websiteHosts }: { subdomain: string; websiteHosts: string[] }) {
   const sent = useRef(false);
   useEffect(() => {
-    const path = sitePath(location.pathname, subdomain);
+    const path = sitePath(location.pathname);
     if (!sent.current) {
       sent.current = true;
       const medium = new URLSearchParams(location.search).get("utm_medium");

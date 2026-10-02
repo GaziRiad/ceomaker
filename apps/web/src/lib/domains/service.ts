@@ -56,7 +56,7 @@ export function toDomainView(row: SiteDomainRow): DomainView {
 function ourHosts(): string[] {
   const routing = routingConfigFromEnv();
   const hosts = [new URL(appUrl()).hostname, "vercel.app", "vercel-dns.com"];
-  if (routing.mode === "subdomain") hosts.push(routing.rootDomain.split(":")[0]!);
+  hosts.push(routing.rootDomain.split(":")[0]!);
   return hosts;
 }
 

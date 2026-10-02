@@ -66,12 +66,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     icons: { icon: monogramIconDataUri(name, colors) },
     openGraph: { type: "profile", title, description, url },
     twitter: { card: "summary", title, description },
-    // Path-mode addresses (e.g. on *.vercel.app) are temporary. Keeping them out of search
-    // indexes avoids duplicates competing with the real domain after launch. A site on its own
-    // domain is indexed there.
-    ...(routing.mode === "path" && !site.customDomain
-      ? { robots: { index: false, follow: false } }
-      : {}),
   };
 }
 

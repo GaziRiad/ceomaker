@@ -75,11 +75,9 @@ describe("devices and bots", () => {
 });
 
 describe("sitePath", () => {
-  it("makes paths relative to the site", () => {
-    expect(sitePath("/sites/amelia", "amelia")).toBe("/");
-    expect(sitePath("/sites/amelia/press", "amelia")).toBe("/press");
-    expect(sitePath("/", "amelia")).toBe("/");
-    expect(sitePath("/press", "amelia")).toBe("/press");
-    expect(sitePath("/sites/ameliax", "amelia")).toBe("/sites/ameliax");
+  it("keeps the path only, starting with a slash", () => {
+    expect(sitePath("/")).toBe("/");
+    expect(sitePath("/press?ref=x#top")).toBe("/press");
+    expect(sitePath("press")).toBe("/press");
   });
 });

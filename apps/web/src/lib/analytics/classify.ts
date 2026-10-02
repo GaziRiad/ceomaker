@@ -101,11 +101,8 @@ export function clickKindOf(
   return "other";
 }
 
-/** A page path relative to the site: "/sites/amelia/press" on the shared address is "/press". */
-export function sitePath(pathname: string, subdomain: string): string {
-  const base = `/sites/${subdomain}`;
-  const relative =
-    pathname === base || pathname.startsWith(`${base}/`) ? pathname.slice(base.length) : pathname;
-  const clean = (relative || "/").split(/[?#]/)[0]!.slice(0, 200);
+/** A page path as stored: without query or fragment, at most 200 characters, starting with "/". */
+export function sitePath(pathname: string): string {
+  const clean = (pathname || "/").split(/[?#]/)[0]!.slice(0, 200);
   return clean.startsWith("/") ? clean : `/${clean}`;
 }
