@@ -1,4 +1,4 @@
-import { ADDRESS_HOLD_DAYS, getDb, getPrimarySiteForOwner } from "@ceomaker/db";
+import { ADDRESS_HOLD_DAYS, getDb, getPrimarySiteForOwner, getSiteDomain } from "@ceomaker/db";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -6,21 +6,34 @@ import { Suspense } from "react";
 import { ExternalLink, Lock } from "@/components/icons";
 import { ArrowRight } from "@/components/ui";
 import { getSession } from "@/lib/auth";
+import { domainProvider } from "@/lib/domains/provider";
+import { toDomainView } from "@/lib/domains/service";
 import { emailConfigured } from "@/lib/email";
-import { siteAddressParts, siteUrl } from "@/lib/routing";
+import { appUrl, siteAddressParts, siteUrl } from "@/lib/routing";
 import { displayName } from "@/lib/site-data";
 import { When } from "../_components/relative-time";
 import { AddressForm } from "./_components/address-form";
-import { CardText, SettingsCard, SettingsSkeleton } from "./_components/card";
+import { CardText, SettingsCard, SettingsSection, SettingsSkeleton } from "./_components/card";
 import { DeleteSite } from "./_components/delete-site";
+import { DomainCard } from "./_components/domain-card";
 import { NotifySwitch } from "./_components/notify-switch";
+
+/** "Amelia Hart" → "ameliahart.com", for examples in the owner's own name. */
+function exampleDomain(name: string): string {
+  const plain = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  return `${(plain.match(/[a-z0-9]+/g) ?? ["yourname"]).join("")}.com`;
+}
 
 export const metadata: Metadata = { title: "Site settings", robots: { index: false } };
 
 async function SiteSettings() {
   const session = await getSession();
   if (!session) redirect("/sign-in?callbackURL=/dashboard/settings");
-  const site = await getPrimarySiteForOwner(getDb(), session.user.id);
+  const db = getDb();
+  const site = await getPrimarySiteForOwner(db, session.user.id);
 
   if (!site) {
     return (
@@ -44,8 +57,7 @@ async function SiteSettings() {
   // Oldest last: the first publish is when the address locked.
   const firstPublish = site.versions.at(-1)?.publishedAt ?? null;
   const name = displayName(session.user, site.answers?.name);
-  const domain = (name.toLowerCase().match(/\p{L}+/gu) ?? ["yourname"]).join("");
-  const rootDomain = parts.suffix ? parts.suffix.slice(1) : "current";
+  const domainRow = await getSiteDomain(db, { userId: session.user.id, siteId: site.id });
 
   return (
     <>
@@ -86,17 +98,18 @@ async function SiteSettings() {
         )}
       </SettingsCard>
 
-      <SettingsCard
-        index={2}
-        title="Custom domain"
-        aside={<span className="tag tag-neutral">Coming soon</span>}
-        className="gap-2.5"
-      >
-        <CardText className="max-w-[600px]">
-          Connect a domain you own, like {domain}.com. Your {rootDomain} address will keep working
-          alongside it.
-        </CardText>
-      </SettingsCard>
+      <SettingsSection index={2} id="custom-domain" label="Custom domain" className="gap-[18px]">
+        <DomainCard
+          siteId={site.id}
+          initial={domainRow ? toDomainView(domainRow) : null}
+          available={domainProvider() !== null}
+          address={address}
+          liveUrl={domainRow ? `https://${domainRow.domain}` : siteUrl(site.subdomain)}
+          firstName={name.split(/\s+/)[0] ?? name}
+          example={exampleDomain(name)}
+          origin={appUrl()}
+        />
+      </SettingsSection>
 
       <SettingsCard index={3} title="Notifications" className="gap-4">
         <NotifySwitch

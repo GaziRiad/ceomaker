@@ -39,12 +39,24 @@ export function messageTime(date: Date, now: Date): string {
  * A time in the reader's own time zone. The server renders a neutral UTC date, the browser swaps
  * in the local wording after hydration, so the two never disagree.
  */
-export function When({ iso, style }: { iso: string; style: "relative" | "message" | "day" }) {
+const DATE_FORMATS = {
+  day: { day: "numeric", month: "long", year: "numeric" },
+  "day-month": { day: "numeric", month: "long" },
+} as const;
+
+export function When({
+  iso,
+  style,
+}: {
+  iso: string;
+  /** relative: "3 h ago"; message: "Today, 10:22"; day: "2 September 2026"; day-month: "2 September". */
+  style: "relative" | "message" | "day" | "day-month";
+}) {
   const [text, setText] = useState(() =>
     new Intl.DateTimeFormat("en-GB", {
-      day: "numeric",
-      month: style === "day" ? "long" : "short",
-      ...(style === "day" ? { year: "numeric" } : {}),
+      ...(style === "day" || style === "day-month"
+        ? DATE_FORMATS[style]
+        : { day: "numeric", month: "short" }),
       timeZone: "UTC",
     }).format(new Date(iso)),
   );
@@ -57,7 +69,7 @@ export function When({ iso, style }: { iso: string; style: "relative" | "message
         ? relativeTime(date, now)
         : style === "message"
           ? messageTime(date, now)
-          : new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(date),
+          : new Intl.DateTimeFormat(undefined, DATE_FORMATS[style]).format(date),
     );
   }, [iso, style]);
   return <time dateTime={iso}>{text}</time>;

@@ -3,6 +3,12 @@
 import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { Corners } from "./ui";
 
+const TONES = {
+  primary: "btn-primary",
+  danger: "btn-danger",
+  "danger-quiet": "border-danger text-danger hover:bg-danger-soft hover:text-danger",
+} as const;
+
 /**
  * A modal that asks before doing something hard to undo. The caller owns the state: it opens
  * and closes the dialog and runs the action, so it can show progress and errors here.
@@ -28,7 +34,8 @@ export function ConfirmDialog({
   pendingLabel: string;
   /** What keeping things as they are is called: "Keep it", "Keep my site". */
   cancelLabel?: string;
-  tone?: "primary" | "danger";
+  /** "danger-quiet": an outlined red button, for undoable removals. */
+  tone?: "primary" | "danger" | "danger-quiet";
   canConfirm?: boolean;
   pending?: boolean;
   error?: string | null;
@@ -69,7 +76,7 @@ export function ConfirmDialog({
         </button>
         <button
           type="submit"
-          className={`btn ${tone === "danger" ? "btn-danger" : "btn-primary"} min-h-11 flex-1 px-4 sm:min-h-10 sm:flex-none`}
+          className={`btn ${TONES[tone]} min-h-11 flex-1 px-4 sm:min-h-10 sm:flex-none`}
           disabled={!canConfirm || pending}
         >
           {pending ? pendingLabel : confirmLabel}

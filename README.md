@@ -12,8 +12,8 @@ The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 | 1. Content contract + multi-tenant renderer  | Done                          |
 | 2. Onboarding, AI generation, editor         | Done                          |
 | 3. Publish + billing (Lemon Squeezy)         | Publishing done, billing next |
-| 4. Analytics, more templates, SEO            | Planned                       |
-| 5. Custom domains, renderer isolation, scale | Planned                       |
+| 4. Analytics, more templates, SEO            | Analytics done                |
+| 5. Custom domains, renderer isolation, scale | Custom domains done           |
 
 ## Architecture
 
@@ -25,6 +25,8 @@ One Next.js 16 app serves the product (landing page, auth, dashboard) and every 
 | **Subdomain** (`ROOT_DOMAIN=ceomaker.com`) | `amelia.ceomaker.com`              | After buying the domain                 |
 
 Only one mode is active at a time, so a site never has two public URLs. Path-mode pages are marked `noindex`, so the temporary addresses never compete in search with the real domain. Customer addresses expose no API, auth or dashboard routes in either mode.
+
+In both modes an owner can also connect their own domain (Settings › Site). The proxy looks up unknown hosts in `site_domain` (cached in memory for 30 seconds) and serves that site; `www.` forwards to the domain, and once the domain is live the site's own address forwards there too, so only one address is indexed.
 
 A site is data, not HTML. The Zod contract in [`packages/schema`](packages/schema) defines colours, section types, site content and the guided answers, and every layer uses it: the database layer validates writes against it, the renderer parses stored JSON through it, and the editor and the AI drafting step emit it.
 
@@ -140,6 +142,10 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    | `GOOGLE_CLIENT_ID`             | optional            | (leave unset)            |
    | `GOOGLE_CLIENT_SECRET`         | optional            | (leave unset)            |
    | `ANTHROPIC_API_KEY`            | Claude key          | Claude key               |
+   | `VERCEL_API_TOKEN`             | see Custom domains  | (leave unset)            |
+   | `VERCEL_PROJECT_ID`            | see Custom domains  | (leave unset)            |
+   | `VERCEL_TEAM_ID`               | see Custom domains  | (leave unset)            |
+   | `CRON_SECRET`                  | new random value    | (leave unset)            |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
    - Leave `APP_URL` and `ROOT_DOMAIN` unset: the app derives its address from Vercel's system variables and serves customer sites at `/sites/<name>`.
 
@@ -187,10 +193,28 @@ Drafts use Claude Opus 5.5 (`claude-opus-5-5`) with structured output, streamed 
 
 Without a key the product still works end to end: the first draft is built from the answers alone, and the editor says so.
 
+### Custom domains (customers' own)
+
+Owners connect a domain they bought elsewhere in Settings › Site: they get the DNS records to add, a step-by-step guide for their registrar and a link they can send to an assistant. CEOMaker checks DNS itself (public resolvers) and asks Vercel to serve and secure the domain. Everything Vercel-specific is in [`apps/web/src/lib/domains/provider.ts`](apps/web/src/lib/domains/provider.ts), so another host means another implementation of that file.
+
+1. **Token:** Vercel → Account Settings → Tokens → Create, scoped to the team that owns the project, no expiry or a long one. Set it as `VERCEL_API_TOKEN` (Production only).
+2. **Project:** Project → Settings → General → Project ID (`prj_…`) as `VERCEL_PROJECT_ID`. If the project belongs to a team, Team Settings → General → Team ID (`team_…`) as `VERCEL_TEAM_ID`.
+3. **Background check:** set `CRON_SECRET` to a long random value. [`apps/web/vercel.json`](apps/web/vercel.json) calls `/api/cron/domains` once a day, the most the Hobby plan allows (a more frequent schedule makes every deployment fail). Owners with Settings open are checked every 30 seconds from the page anyway. On Pro, change the schedule to `*/10 * * * *`; on Hobby, an outside scheduler (for example cron-job.org) can call `https://<app>/api/cron/domains` with the header `Authorization: Bearer <CRON_SECRET>` every 10 minutes.
+4. **Redeploy.** Until the token and project are set, production shows "Not available yet" on the card. Preview deployments never touch the production project's domains. Locally, leave all three unset: development shows Vercel's standard records and checks real DNS, so you can try the whole flow with a domain you control (it just can't go live on localhost).
+5. **Optional, before many customers:** set `CUSTOM_DOMAIN_CNAME` to a hostname of yours (e.g. `sites.ceomaker.co`, itself a CNAME to `cname.vercel-dns.com`). Customers then point `www` at your hostname, so a future move of hosting needs one record changed by you instead of one per customer. Test it with one domain first: Vercel must still recognise the domain as pointed at it.
+
+Unconnected domains are released after 7 days, so nobody can hold a domain they never point here. When the domain goes live, the owner gets an email (once Resend is set up).
+
+### Analytics
+
+Live sites send anonymous page views and clicks on email, phone, LinkedIn and website links to `/api/collect` (no cookies, no stored addresses; a visitor is a keyed hash that changes every day). Country and city come from Vercel's request headers, so they only appear on deployments: locally every visit shows as "Unknown location". Signed-in CEOMaker users and known bots aren't counted.
+
 ### When you buy the domain
 
-1. In Vercel, add `ceomaker.com`, `www.ceomaker.com` and `*.ceomaker.com`. Wildcard certificates use a DNS-01 challenge: either move the domain to Vercel's nameservers, or delegate `_acme-challenge.ceomaker.com` to Vercel and add a wildcard CNAME at your DNS provider.
-2. Set `ROOT_DOMAIN=ceomaker.com` and `APP_URL=https://ceomaker.com` for Production, then redeploy. Customer sites move to `<name>.ceomaker.com`, and the `/sites/` addresses stop resolving.
+The examples use `ceomaker.co`; use whichever domain you bought.
+
+1. In Vercel, add `ceomaker.co`, `www.ceomaker.co` and `*.ceomaker.co`. Wildcard certificates use a DNS-01 challenge: either move the domain to Vercel's nameservers, or delegate `_acme-challenge.ceomaker.co` to Vercel and add a wildcard CNAME at your DNS provider.
+2. Set `ROOT_DOMAIN=ceomaker.co` and `APP_URL=https://ceomaker.co` for Production, then redeploy. Customer sites move to `<name>.ceomaker.co`, and the `/sites/` addresses stop resolving.
 3. Upgrade to Vercel Pro before charging customers.
 
 Buying the domain early also unblocks email sign-in for everyone (Resend needs a domain you own) and lets Google show your own domain on its consent screen.

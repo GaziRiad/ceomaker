@@ -39,6 +39,30 @@ export function SettingsCard({
   );
 }
 
+/** A settings block whose content draws its own heading (the custom domain card). */
+export function SettingsSection({
+  index,
+  id,
+  label,
+  className = "",
+  children,
+}: {
+  index: number;
+  /** Anchor for links from elsewhere, e.g. the Overview's domain card. */
+  id?: string;
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section {...enter(index)} id={id} aria-label={label} className="cm-enter scroll-mt-32">
+      <Blueprint className={`flex flex-col p-[18px] sm:px-6 sm:py-5 ${className}`}>
+        {children}
+      </Blueprint>
+    </section>
+  );
+}
+
 export function CardText({
   children,
   className = "",

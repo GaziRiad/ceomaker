@@ -39,6 +39,8 @@ import {
   type RewriteMode,
 } from "@/lib/ai/draft";
 import { getSession } from "@/lib/auth";
+import { forgetDomainRouting } from "@/lib/domain-routing";
+import { releaseFromProvider } from "@/lib/domains/service";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
@@ -247,6 +249,10 @@ export async function deleteSiteAction(
   try {
     const deleted = await deleteSite(db, { userId, siteId });
     updateTag(siteCacheTag(deleted.subdomain));
+    if (deleted.domain) {
+      await releaseFromProvider(deleted.domain);
+      forgetDomainRouting();
+    }
     return { ok: true };
   } catch (error) {
     if (error instanceof SiteNotFoundError) return NOT_FOUND;

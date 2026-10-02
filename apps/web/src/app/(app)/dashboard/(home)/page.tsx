@@ -2,6 +2,8 @@ import {
   countContactMessages,
   getDb,
   getPrimarySiteForOwner,
+  getSiteDomain,
+  getWeeklyVisitors,
   listContactMessages,
   type OwnedSite,
 } from "@ceomaker/db";
@@ -14,7 +16,9 @@ import { Suspense } from "react";
 import { ExternalLink, Inbox, Sparkles } from "@/components/icons";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { ArrowRight, Blueprint } from "@/components/ui";
+import { weeklyView } from "@/lib/analytics/report-view";
 import { getSession } from "@/lib/auth";
+import { toDomainView, type DomainView } from "@/lib/domains/service";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { displayName, toEditableDraft } from "@/lib/site-data";
 import { liveFingerprint } from "../sites/[id]/edit/editor-model";
@@ -47,15 +51,18 @@ function Main({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SiteCard({ site }: { site: OwnedSite }) {
+function SiteCard({ site, liveDomain }: { site: OwnedSite; liveDomain: string | null }) {
   const shown = toEditableDraft(site.published ?? site.draft);
   const draft = toEditableDraft(site.draft);
   const template = getTemplate(shown.templateKey, shown.templateVersion);
-  const address = siteAddressParts();
-  const url = siteUrl(site.subdomain);
+  const parts = siteAddressParts();
+  const address = `${parts.prefix}${site.subdomain}${parts.suffix}`;
   const editor = `/dashboard/sites/${site.id}/edit`;
   const isDraft = site.status === "draft" || !site.published;
   const paused = site.status === "paused";
+  // Once the owner's own domain is live, it's the address; theirs forwards to it.
+  const onDomain = liveDomain !== null && !isDraft;
+  const url = onDomain ? `https://${liveDomain}` : siteUrl(site.subdomain);
   const changes =
     !isDraft &&
     site.published !== null &&
@@ -104,10 +111,13 @@ function SiteCard({ site }: { site: OwnedSite }) {
         <div className="flex flex-wrap items-center gap-4 p-[18px] sm:px-6 sm:py-5">
           <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-1.5">
             <span className="text-[19px] font-medium [overflow-wrap:anywhere]">
-              {address.prefix}
-              {site.subdomain}
-              {address.suffix}
+              {onDomain ? liveDomain : address}
             </span>
+            {onDomain ? (
+              <span className="text-sm [overflow-wrap:anywhere] text-neutral-700">
+                {address} forwards here
+              </span>
+            ) : null}
             <span className="flex flex-wrap items-center gap-2 text-sm text-neutral-800">
               <span
                 aria-hidden
@@ -176,43 +186,157 @@ function SiteCard({ site }: { site: OwnedSite }) {
   );
 }
 
-function SideCards({ words }: { words: string[] }) {
+function Sparkline({ series }: { series: number[] }) {
+  const max = Math.max(1, ...series);
+  const step = 120 / Math.max(1, series.length - 1);
+  const line = series
+    .map((value, index) => `${index * step},${(34 - (value / max) * 30).toFixed(1)}`)
+    .join(" ");
+  return (
+    <svg
+      width="120"
+      height="36"
+      viewBox="0 0 120 36"
+      aria-hidden
+      className="flex-none overflow-visible"
+    >
+      <polygon points={`${line} 120,36 0,36`} fill="var(--color-accent-100)" />
+      <polyline
+        points={line}
+        fill="none"
+        stroke="var(--color-accent)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function SideCard({ index, children }: { index: number; children: React.ReactNode }) {
+  return (
+    <div {...enter(index)} className="cm-enter">
+      <Blueprint className="flex flex-col gap-2 p-[22px]">{children}</Blueprint>
+    </div>
+  );
+}
+
+const DOMAIN_TAGS: Record<DomainView["stage"] | "fix", { label: string; className: string }> = {
+  records: { label: "Step 1 of 3", className: "tag-neutral" },
+  waiting: { label: "Checking", className: "tag-accent" },
+  fix: { label: "Needs a fix", className: "tag-warning" },
+  securing: { label: "Almost done", className: "tag-accent" },
+  connected: { label: "Live", className: "bg-success-soft text-success" },
+};
+
+const DOMAIN_TEXT: Record<DomainView["stage"] | "fix", string> = {
+  records: "Add two records at your domain provider to finish.",
+  waiting: "Waiting for your records to take effect. We'll email you when it's live.",
+  fix: "One record needs fixing at your domain provider.",
+  securing: "Setting up the secure padlock. Usually under a minute.",
+  connected: "",
+};
+
+function SideCards({
+  visitors,
+  isLive,
+  domain,
+  address,
+  example,
+}: {
+  visitors: ReturnType<typeof weeklyView> | null;
+  isLive: boolean;
+  domain: DomainView | null;
+  address: string;
+  example: string;
+}) {
+  const stage = domain
+    ? domain.stage === "waiting" && domain.diagnosis?.fix
+      ? "fix"
+      : domain.stage
+    : null;
+  const tag = stage ? DOMAIN_TAGS[stage] : null;
   return (
     <div className="flex min-w-0 flex-col gap-6">
-      <div {...enter(2)} className="cm-enter">
-        <Blueprint className="flex flex-col gap-2 p-[22px]">
-          <span className="flex items-center justify-between gap-2.5">
-            <span className="kicker">Plan</span>
-            <span className="tag tag-accent">Private beta</span>
-          </span>
-          <span className="font-heading text-[28px] leading-[1.05] font-semibold uppercase">
-            Beta · Free
-          </span>
+      <SideCard index={2}>
+        <span className="kicker">Visitors this week</span>
+        {visitors ? (
+          <>
+            <div className="flex items-end justify-between gap-4">
+              <span className="font-heading text-[44px] leading-none font-semibold">
+                {visitors.visitors}
+              </span>
+              <Sparkline series={visitors.series} />
+            </div>
+            <span className="text-[15px] text-neutral-800">
+              {visitors.change}
+              {visitors.top ? ` · Most from ${visitors.top}` : ""}
+            </span>
+          </>
+        ) : (
           <span className="text-[15px] text-pretty text-neutral-800">
-            Free during the private beta. We&apos;ll email you before anything changes.
+            {isLive
+              ? "No visits yet. Sharing your link on LinkedIn is the quickest way to change that."
+              : "Visitor numbers appear here once your site is live."}
           </span>
-          <Link
-            href="/dashboard/settings/billing"
-            className="btn btn-ghost min-h-11 self-start pl-0 text-accent-700 sm:min-h-10"
-          >
-            Billing settings
-          </Link>
-        </Blueprint>
-      </div>
-      <div {...enter(3)} className="cm-enter">
-        <Blueprint className="flex flex-col gap-2 p-[22px]">
-          <span className="flex items-center justify-between gap-2.5">
-            <span className="kicker">Custom domain</span>
-            <span className="tag tag-neutral">Coming soon</span>
-          </span>
-          <span className="font-heading text-[28px] leading-[1.05] font-semibold uppercase">
-            Your own domain
-          </span>
-          <span className="text-[15px] text-neutral-800">
-            Connect a domain you own, like {words.length ? words.join("") : "yourname"}.com.
-          </span>
-        </Blueprint>
-      </div>
+        )}
+        <Link
+          href="/dashboard/analytics"
+          className="btn btn-ghost min-h-11 gap-2 self-start pl-0 text-accent-700 sm:min-h-10"
+        >
+          View analytics <ArrowRight />
+        </Link>
+      </SideCard>
+      <SideCard index={3}>
+        <span className="flex items-center justify-between gap-2.5">
+          <span className="kicker">Plan</span>
+          <span className="tag tag-accent">Private beta</span>
+        </span>
+        <span className="font-heading text-[28px] leading-[1.05] font-semibold uppercase">
+          Beta · Free
+        </span>
+        <span className="text-[15px] text-pretty text-neutral-800">
+          Free during the private beta. We&apos;ll email you before anything changes.
+        </span>
+        <Link
+          href="/dashboard/settings/billing"
+          className="btn btn-ghost min-h-11 self-start pl-0 text-accent-700 sm:min-h-10"
+        >
+          Billing settings
+        </Link>
+      </SideCard>
+      <SideCard index={4}>
+        <span className="flex items-center justify-between gap-2.5">
+          <span className="kicker">Custom domain</span>
+          {tag ? <span className={`tag ${tag.className}`}>{tag.label}</span> : null}
+        </span>
+        <span
+          className={`font-heading text-[28px] leading-[1.05] font-semibold [overflow-wrap:anywhere] ${domain ? "" : "uppercase"}`}
+        >
+          {domain ? domain.domain : "Your own domain"}
+        </span>
+        <span className="text-[15px] text-pretty text-neutral-800">
+          {!domain || !stage
+            ? `Use your own address, like ${example}.`
+            : stage === "connected"
+              ? `${address} forwards here.`
+              : domain.kind === "subdomain" && stage === "records"
+                ? "Add one record at your domain provider to finish."
+                : DOMAIN_TEXT[stage]}
+        </span>
+        <Link
+          href="/dashboard/settings#custom-domain"
+          className={`btn mt-1.5 min-h-11 self-start px-4 sm:min-h-10 ${stage === "fix" ? "btn-primary" : "btn-secondary"}`}
+        >
+          {!stage
+            ? "Set up"
+            : stage === "connected"
+              ? "Domain settings"
+              : stage === "fix"
+                ? "See the fix"
+                : "Continue setup"}
+        </Link>
+      </SideCard>
     </div>
   );
 }
@@ -344,14 +468,32 @@ async function Overview() {
     );
   }
 
-  const words = name.toLowerCase().match(/\p{L}+/gu) ?? [];
+  const db = getDb();
+  const [domainRow, weekly] = await Promise.all([
+    getSiteDomain(db, { userId: session.user.id, siteId: site.id }),
+    getWeeklyVisitors(db, { userId: session.user.id, siteId: site.id }),
+  ]);
+  const domain = domainRow ? toDomainView(domainRow) : null;
+  const liveDomain = domain?.stage === "connected" ? domain.domain : null;
+  const parts = siteAddressParts();
+  const plain = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  const example = `${(plain.match(/[a-z0-9]+/g) ?? ["yourname"]).join("")}.com`;
   return (
     <Main>
       <ForgetStartAnswers />
       <Heading first={first} />
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <SiteCard site={site} />
-        <SideCards words={words} />
+        <SiteCard site={site} liveDomain={liveDomain} />
+        <SideCards
+          visitors={weekly && weekly.visitorsEver > 0 ? weeklyView(weekly) : null}
+          isLive={site.versions.length > 0}
+          domain={domain}
+          address={`${parts.prefix}${site.subdomain}${parts.suffix}`}
+          example={example}
+        />
       </div>
       <Suspense fallback={<MessagesSkeleton />}>
         <MessagesCard site={site} userId={session.user.id} />

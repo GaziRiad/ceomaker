@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "pnpm --filter @ceomaker/db db:migrate && pnpm build",
-  "regions": ["fra1"]
+  "regions": ["fra1"],
+  "crons": [
+    {
+      "path": "/api/cron/domains",
+      "schedule": "17 6 * * *"
+    }
+  ]
 }

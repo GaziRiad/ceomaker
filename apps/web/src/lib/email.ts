@@ -118,3 +118,16 @@ export async function sendMessageNotification(input: {
     footnote: "You can turn these emails off in Settings, under Site.",
   });
 }
+
+/** Tells an owner their own domain is live. */
+export async function sendDomainLiveEmail(input: { to: string; domain: string }): Promise<void> {
+  if (!emailConfigured() && process.env.NODE_ENV === "production") return;
+  await sendLinkEmail({
+    to: input.to,
+    subject: `${input.domain} is live`,
+    intro: `Your site now opens at ${input.domain}, with the secure padlock. Your CEOMaker address forwards there, so links you've already shared keep working.`,
+    button: `Open ${input.domain}`,
+    url: `https://${input.domain}`,
+    footnote: "You can manage the domain in Settings, under Site.",
+  });
+}

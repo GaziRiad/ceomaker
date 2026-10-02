@@ -18,6 +18,10 @@
   --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
   --color-danger: #a4402a;
   --color-danger-soft: #fbeae6;
+  --color-success: #2b7a4b;
+  --color-success-soft: #e3f1e8;
+  --color-warning: #7a4b0c;
+  --color-warning-soft: #fdf3e2;
 
   --color-neutral-100: #f5f5f8;
   --color-neutral-200: #e7e7ea;
@@ -463,6 +467,59 @@
   }
 }
 
+/* Custom domains and analytics: a widening ring, an indeterminate bar, bars that grow in. */
+@keyframes cm-ring {
+  from {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes cm-indet {
+  from {
+    left: -30%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+@keyframes cm-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes cm-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes cm-swap {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes cm-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes cm-dot {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
 .cm-spinner {
   display: inline-block;
   width: 20px;
@@ -529,6 +586,36 @@
   }
   .cm-shimmer {
     animation: cm-shimmer 1.4s ease-in-out infinite;
+  }
+  .cm-ring {
+    animation: cm-ring 2.4s ease-out infinite;
+  }
+  .cm-indet {
+    animation: cm-indet 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  .cm-bar {
+    transform-origin: bottom;
+    animation: cm-grow-y 0.7s var(--ease-industry) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .cm-hbar {
+    transform-origin: left;
+    animation: cm-grow-x 0.7s var(--ease-industry) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .cm-swap {
+    animation: cm-swap 0.42s var(--ease-industry) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .cm-fade {
+    animation: cm-fade 0.8s var(--ease-industry) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .cm-dot {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cm-dot 0.6s var(--ease-industry) both;
+    animation-delay: var(--delay, 0ms);
   }
   /* Scroll reveals: hidden only once the observer has armed them (see Reveal). */
   [data-reveal="armed"] {

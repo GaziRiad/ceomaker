@@ -6,5 +6,7 @@ export * from "./sections";
 export * from "./site";
 export * from "./contact";
 export * from "./subdomain";
+export * from "./domains";
+export * from "./analytics";
 export * from "./onboarding";
 export * from "./fixtures/demo-site";

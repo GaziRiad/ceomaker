@@ -10,16 +10,22 @@
 <helmet>
 <link rel="stylesheet" href="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/styles.css">
 <script src="_ds/industry-0b546125-b657-4ed2-b39f-846f38c86be4/_ds_bundle.js"></script>
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<script src="./image-slot.js"></script>
 <style>body{margin:0;background:var(--color-bg)}
-:root{--color-danger:#a4402a;--color-danger-soft:#fbeae6;--color-warning:#7a4b0c;--color-warning-soft:#fdf3e2}
+:root{--color-success:#2b7a4b;--color-success-soft:#e3f1e8;--color-danger:#a4402a;--color-danger-soft:#fbeae6;--color-warning:#7a4b0c;--color-warning-soft:#fdf3e2}
 [data-dash] a{color:var(--color-accent-700)}
 [data-dash] a:hover{color:var(--color-accent-600)}
 @keyframes db-pulse{0%,100%{opacity:1}50%{opacity:.35}}
 @keyframes db-shimmer{0%,100%{opacity:.55}50%{opacity:1}}
 @keyframes db-spin{to{transform:rotate(360deg)}}
+@keyframes db-ring{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+@keyframes db-indet{0%{left:-30%}100%{left:100%}}
+[data-dash][data-still="1"] *{animation:none !important;transition:none !important}
 @media (prefers-reduced-motion:reduce){[data-dash] *{animation:none !important;transition:none !important}}</style>
 </helmet>
-<div data-dash="" ref="{{ rootRef }}" style="position:relative;min-height:{{ L.minH }};background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:{{ L.body }};line-height:1.5">
+<div data-dash="" data-still="{{ stillAttr }}" ref="{{ rootRef }}" style="position:relative;min-height:{{ L.minH }};background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:{{ L.body }};line-height:1.5">
 
 <header style="position:sticky;top:0;z-index:20;background:var(--color-neutral-100);border-bottom:1px solid var(--color-divider)">
   <div style="max-width:1200px;margin:0 auto;padding:0 {{ L.pad }};height:{{ L.headH }};display:flex;align-items:center;gap:20px">
@@ -39,9 +45,9 @@
       </sc-if>
     </div>
   </div>
-  <nav aria-label="Dashboard" style="max-width:1200px;margin:0 auto;padding:0 {{ L.pad }};display:flex;gap:{{ L.tabGap }}">
+  <nav aria-label="Dashboard" style="max-width:1200px;margin:0 auto;padding:0 {{ L.pad }};display:flex;gap:{{ L.tabGap }};overflow-x:auto;scrollbar-width:none">
     <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
-      <button onClick="{{ t.go }}" aria-current="{{ t.cur }}" style="border:0;background:none;padding:0;font:inherit;font-size:15px;font-weight:500;cursor:pointer;height:46px;display:flex;align-items:center;gap:8px;color:{{ t.color }};box-shadow:inset 0 -2px 0 {{ t.line }};transition:color .2s,box-shadow .25s" style-hover="color:var(--color-text)">{{ t.label }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="padding:1px 7px;font-size:12px">{{ t.badge }}</span></sc-if></button>
+      <button onClick="{{ t.go }}" aria-current="{{ t.cur }}" style="flex:none;white-space:nowrap;border:0;background:none;padding:0;font:inherit;font-size:15px;font-weight:500;cursor:pointer;height:46px;display:flex;align-items:center;gap:8px;color:{{ t.color }};box-shadow:inset 0 -2px 0 {{ t.line }};transition:color .2s,box-shadow .25s" style-hover="color:var(--color-text)">{{ t.label }}<sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="padding:1px 7px;font-size:12px">{{ t.badge }}</span></sc-if></button>
     </sc-for>
   </nav>
 </header>
@@ -66,13 +72,14 @@
   <div style="display:grid;grid-template-columns:{{ L.ovCols }};gap:24px;align-items:start">
     <div data-rise="" class="blueprint" style="min-width:0;background:var(--color-neutral-100);display:flex;flex-direction:column">
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-      <div ref="{{ pvRef }}" style="position:relative;height:{{ L.pvH }};overflow:hidden;border-bottom:1px solid var(--color-divider);background:#fbfbfa">
+      <div ref="{{ pvRef }}" data-pv="" style="position:relative;height:{{ L.pvH }};overflow:hidden;border-bottom:1px solid var(--color-divider);background:#fbfbfa">
         <div style="width:1280px;zoom:{{ L.pvZ }};pointer-events:none;filter:{{ site.pvFilter }};transition:filter .4s"><dc-import name="Meridian" device="desktop" sample="full" only="hero" motion="{{ false }}" hint-size="1280px,760px"></dc-import></div>
         <sc-if value="{{ site.pvTag }}" hint-placeholder-val="{{ false }}"><span class="tag tag-neutral" style="position:absolute;left:14px;top:14px;box-shadow:var(--shadow-sm)">{{ site.pvTagLabel }}</span></sc-if>
       </div>
       <div style="padding:{{ L.cardPad }};display:flex;flex-wrap:wrap;align-items:center;gap:16px">
         <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:6px">
-          <span style="font-size:19px;font-weight:500;overflow-wrap:anywhere">{{ site.address }}</span>
+          <span style="font-size:19px;font-weight:500;overflow-wrap:anywhere">{{ site.display }}</span>
+          <sc-if value="{{ site.hasFwd }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--color-neutral-700)">{{ site.fwd }}</span></sc-if>
           <span style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--color-neutral-800)"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ site.dot }};animation:{{ site.pulse }}"></span>{{ site.line }}<sc-if value="{{ site.hasTag }}" hint-placeholder-val="{{ false }}"><span class="tag" style="background:var(--color-warning-soft);color:var(--color-warning)">{{ site.tag }}</span></sc-if></span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;width:{{ L.btnRowW }}">
@@ -91,6 +98,19 @@
     <div style="min-width:0;display:flex;flex-direction:column;gap:24px">
       <div data-rise="" class="blueprint" style="padding:22px;display:flex;flex-direction:column;gap:8px">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Visitors this week</span>
+        <sc-if value="{{ ovA.has }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px">
+            <span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1">{{ ovA.v }}</span>
+            <svg width="120" height="36" viewBox="0 0 120 36" aria-hidden="true" style="overflow:visible"><polygon points="{{ ovA.area }}" fill="var(--color-accent-100)"></polygon><polyline points="{{ ovA.line }}" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>
+          </div>
+          <span style="font-size:15px;color:var(--color-neutral-800)">{{ ovA.change }} · Most from {{ ovA.top }}</span>
+        </sc-if>
+        <sc-if value="{{ ovA.empty }}" hint-placeholder-val="{{ false }}"><span style="font-size:15px;color:var(--color-neutral-800);text-wrap:pretty">{{ ovA.emptyText }}</span></sc-if>
+        <button class="btn btn-ghost" onClick="{{ toAnalytics }}" style="align-self:flex-start;padding-left:0;min-height:{{ L.hit }};gap:8px;color:var(--color-accent-700)">View analytics{{ ic.arrow }}</button>
+      </div>
+      <div data-rise="" class="blueprint" style="padding:22px;display:flex;flex-direction:column;gap:8px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
         <span style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Plan</span><sc-if value="{{ bill.hasTag }}" hint-placeholder-val="{{ true }}"><span class="tag" style="background:{{ bill.tagBg }};color:{{ bill.tagFg }}">{{ bill.tag }}</span></sc-if></span>
         <span style="font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">{{ bill.short }}</span>
         <span style="font-size:15px;color:var(--color-neutral-800);text-wrap:pretty">{{ bill.shortText }}</span>
@@ -99,9 +119,10 @@
       </div>
       <div data-rise="" class="blueprint" style="padding:22px;display:flex;flex-direction:column;gap:8px">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-        <span style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Custom domain</span><span class="tag tag-neutral">Coming soon</span></span>
-        <span style="font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Your own domain</span>
-        <span style="font-size:15px;color:var(--color-neutral-800)">Connect a domain you own, like ameliahart.com.</span>
+        <span style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">Custom domain</span><sc-if value="{{ dmo.hasTag }}" hint-placeholder-val="{{ false }}"><span class="tag" style="background:{{ dmo.tagBg }};color:{{ dmo.tagFg }}">{{ dmo.tag }}</span></sc-if></span>
+        <span style="font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:{{ dmo.tt }};overflow-wrap:anywhere">{{ dmo.title }}</span>
+        <span style="font-size:15px;color:var(--color-neutral-800);text-wrap:pretty">{{ dmo.text }}</span>
+        <button class="{{ dmo.btnCls }}" onClick="{{ toDomain }}" style="align-self:flex-start;margin-top:6px;min-height:{{ L.hit }};padding:0 16px">{{ dmo.btn }}</button>
       </div>
     </div>
   </div>
@@ -138,10 +159,10 @@
     <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">Published versions</h2>
     <sc-if value="{{ ver.has }}" hint-placeholder-val="{{ true }}">
       <sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}">
-        <table class="table" style="font-size:15px">
-          <thead><tr><th>Version</th><th>Published</th><th>Template</th><th style="text-align:right"><span style="position:absolute;width:1px;height:1px;overflow:hidden">Action</span></th></tr></thead>
-          <tbody><sc-for list="{{ ver.rows }}" as="v" hint-placeholder-count="4"><tr><td style="padding:14px 8px">{{ v.n }}</td><td style="color:var(--color-neutral-700)">{{ v.date }}</td><td style="color:var(--color-neutral-700)">{{ v.tpl }}</td><td style="text-align:right"><sc-if value="{{ v.cur }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">Current</span></sc-if><sc-if value="{{ v.notCur }}" hint-placeholder-val="{{ true }}"><a href="#" style="font-size:14px">View</a></sc-if></td></tr></sc-for></tbody>
-        </table>
+        <div role="table" aria-label="Published versions" style="display:flex;flex-direction:column;font-size:15px">
+          <div role="row" style="display:grid;grid-template-columns:140px 220px minmax(0,1fr) 100px;gap:16px;padding:10px 8px;border-bottom:1px solid var(--color-divider);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)"><span role="columnheader">Version</span><span role="columnheader">Published</span><span role="columnheader">Template</span><span role="columnheader" style="text-align:right">Action</span></div>
+          <sc-for list="{{ ver.rows }}" as="v" hint-placeholder-count="4"><div role="row" style="display:grid;grid-template-columns:140px 220px minmax(0,1fr) 100px;gap:16px;align-items:center;padding:14px 8px;border-bottom:1px solid color-mix(in srgb,var(--color-text) 8%,transparent)"><span role="cell">{{ v.n }}</span><span role="cell" style="color:var(--color-neutral-700)">{{ v.date }}</span><span role="cell" style="color:var(--color-neutral-700)">{{ v.tpl }}</span><span role="cell" style="display:flex;justify-content:flex-end"><sc-if value="{{ v.cur }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent">Current</span></sc-if><sc-if value="{{ v.notCur }}" hint-placeholder-val="{{ true }}"><a href="#" style="font-size:14px">View</a></sc-if></span></div></sc-for>
+        </div>
       </sc-if>
       <sc-if value="{{ L.phone }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider)">
@@ -157,6 +178,178 @@
     </sc-if>
     <sc-if value="{{ ver.none }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:var(--color-neutral-800)">Nothing published yet. A version is saved each time you publish, so you can go back to it.</p></sc-if>
   </section>
+  </sc-if>
+</main>
+</sc-if>
+
+<!-- ============ ANALYTICS ============ -->
+<sc-if value="{{ is.analytics }}" hint-placeholder-val="{{ false }}">
+<main style="max-width:1200px;margin:0 auto;padding:{{ L.mainPad }};display:flex;flex-direction:column;gap:{{ L.gap }}">
+  <div data-rise="" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px">
+    <h1 style="margin:0;font-family:var(--font-heading);font-weight:600;line-height:1;text-transform:uppercase;font-size:{{ L.h1 }}">Analytics</h1>
+    <sc-if value="{{ an.hasRange }}" hint-placeholder-val="{{ true }}">
+      <div class="seg" role="radiogroup" aria-label="Date range" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:{{ L.segW }}">
+        <sc-for list="{{ an.ranges }}" as="r" hint-placeholder-count="3"><label class="seg-opt" style="justify-content:center;min-height:{{ L.hit }};white-space:nowrap;font-size:15px"><input type="radio" name="{{ an.rangeName }}" checked="{{ r.on }}" onChange="{{ r.pick }}">{{ r.label }}</label></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ an.hasSince }}" hint-placeholder-val="{{ false }}"><span style="font-size:15px;color:var(--color-neutral-700)">Since you published on 28 September</span></sc-if>
+  </div>
+
+  <sc-if value="{{ an.loading }}" hint-placeholder-val="{{ false }}">
+    <div aria-busy="true" aria-label="Loading analytics" style="display:flex;flex-direction:column;gap:24px">
+      <div style="height:24px;width:72%;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div>
+      <div style="display:grid;grid-template-columns:{{ L.tileCols }};gap:{{ L.tileGap }}"><sc-for list="{{ an.skelTiles }}" as="k" hint-placeholder-count="4"><div style="height:120px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div></sc-for></div>
+      <div style="height:{{ L.chartH }};background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div>
+      <div style="height:380px;background:var(--color-neutral-200);animation:db-shimmer 1.4s ease-in-out infinite"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ an.error }}" hint-placeholder-val="{{ false }}">
+    <div data-rise="" role="alert" class="blueprint" style="padding:{{ L.bigEmptyPad }};display:flex;flex-direction:column;align-items:flex-start;gap:14px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <span style="display:flex;color:var(--color-danger)">{{ ic.alertLg }}</span>
+      <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">We couldn't load your analytics</h2>
+      <p style="margin:0;max-width:560px;color:var(--color-neutral-800);text-wrap:pretty">Your site isn't affected, and visits are still being counted. Try again in a moment.</p>
+      <button class="btn btn-secondary" onClick="{{ an.retry }}" style="min-height:{{ L.hit }};padding:0 16px;gap:8px"><span style="display:flex">{{ ic.rotate }}</span>Try again</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ an.unpublished }}" hint-placeholder-val="{{ false }}">
+    <div data-rise="" class="blueprint" style="padding:{{ L.bigEmptyPad }};display:flex;flex-direction:column;align-items:flex-start;gap:14px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <span style="display:flex;color:var(--color-accent-700)">{{ ic.chartLg }}</span>
+      <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Analytics start when your site is live</h2>
+      <p style="margin:0;max-width:560px;color:var(--color-neutral-800);text-wrap:pretty">Once you publish, you'll see how many people visit, where they are and how they found you.</p>
+      <button class="btn btn-primary" onClick="{{ toEditor }}" style="min-height:{{ L.hit }};padding:0 18px;gap:10px">Continue editing{{ ic.arrow }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ an.none }}" hint-placeholder-val="{{ false }}">
+    <div data-rise="" class="blueprint" style="display:flex;flex-direction:column">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="padding:{{ L.bigEmptyPad }};display:flex;flex-direction:column;align-items:flex-start;gap:14px">
+        <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">No visits yet</span>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Your site is live. Now let people find it.</h2>
+        <p style="margin:0;max-width:600px;color:var(--color-neutral-800);text-wrap:pretty">Most visitors to a personal site arrive from LinkedIn. Add your address to the contact info on your profile, or mention it in your next post.</p>
+        <div style="display:flex;align-items:stretch;max-width:100%;border:1px solid var(--color-divider);background:var(--color-neutral-100)"><code style="display:flex;align-items:center;min-width:0;padding:0 14px;font-family:ui-monospace,Menlo,monospace;font-size:15px;overflow-wrap:anywhere">{{ an.siteUrl }}</code><button onClick="{{ an.copySite }}" class="btn btn-ghost" style="flex:none;min-height:{{ L.hit }};gap:6px;border-radius:0;border-left:1px solid var(--color-divider);color:var(--color-accent-700)"><span style="display:flex">{{ an.copySiteIcon }}</span>{{ an.copySiteLabel }}</button></div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;width:{{ L.btnRowW }}"><a class="btn btn-primary" href="{{ an.shareLi }}" target="_blank" rel="noopener" style="flex:{{ L.btnFlex }};min-height:{{ L.hit }};padding:0 18px;gap:10px;color:var(--color-bg)"><span style="display:flex">{{ ic.linkedin }}</span>Share on LinkedIn</a></div>
+      </div>
+      <div aria-hidden="true" style="opacity:.6;padding:0 {{ L.cardPadX }} {{ L.cardPadX }}"><x-import component-from-global-scope="visitor-map" from="./visitor-map.js" data-cities="[]" data-motion="{{ motionStr }}" hint-size="100%,240px"></x-import></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ an.ready }}" hint-placeholder-val="{{ true }}">
+    <p data-rise="" style="margin:0;max-width:880px;font-size:{{ L.sumFs }};line-height:1.4;text-wrap:pretty">{{ an.summary }}</p>
+
+    <div style="display:grid;grid-template-columns:{{ L.tileCols }};gap:{{ L.tileGap }}">
+      <sc-for list="{{ an.tiles }}" as="t" hint-placeholder-count="4">
+        <div data-rise="" class="blueprint" style="min-width:0;padding:{{ L.tilePad }};display:flex;flex-direction:column;gap:6px">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <span style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ t.label }}</span>
+          <span style="font-family:var(--font-heading);font-weight:600;font-size:{{ L.tileV }};line-height:1;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto">{{ t.value }}</span>
+          <span style="display:flex;align-items:flex-start;gap:6px;font-size:14px;line-height:1.4;color:{{ t.color }}"><span style="display:flex;flex:none;padding-top:1px">{{ t.icon }}</span>{{ t.change }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:18px">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Visits over time</h2><span style="font-size:15px;color:var(--color-neutral-700)">{{ an.chartSub }}</span></div>
+      <sc-if value="{{ an.hasChart }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px">
+          <div aria-hidden="true" style="height:{{ L.chartH }};display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;font-size:12px;line-height:1;color:var(--color-neutral-700);font-variant-numeric:tabular-nums"><span>{{ an.yTop }}</span><span>{{ an.yMid }}</span><span>0</span></div>
+          <div style="position:relative;height:{{ L.chartH }}">
+            <span style="position:absolute;left:0;right:0;top:0;border-top:1px dashed var(--color-divider)"></span>
+            <span style="position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--color-divider)"></span>
+            <span style="position:absolute;left:0;right:0;bottom:0;border-top:1px solid var(--color-divider)"></span>
+            <div role="list" aria-label="{{ an.chartAria }}" style="position:absolute;inset:0;display:flex;align-items:flex-end;gap:{{ L.barGap }}">
+              <sc-for list="{{ an.bars }}" as="b" hint-placeholder-count="30"><div role="listitem" title="{{ b.tip }}" aria-label="{{ b.tip }}" style="flex:1;min-width:0;height:100%;display:flex;align-items:flex-end"><div data-bar="" style="width:100%;height:{{ b.h }};background:{{ b.bg }};transform-origin:bottom;transition:height .6s cubic-bezier(.2,.7,.2,1),background .2s" style-hover="background:var(--color-accent-700)"></div></div></sc-for>
+            </div>
+          </div>
+          <span></span>
+          <div aria-hidden="true" style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-700)"><span>{{ an.xFirst }}</span><span>{{ an.xMid }}</span><span>{{ an.xLast }}</span></div>
+        </div>
+        <span style="font-size:15px;color:var(--color-neutral-800)">{{ an.busiest }}</span>
+      </sc-if>
+      <sc-if value="{{ an.lowList }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider)">
+          <sc-for list="{{ an.visits }}" as="v" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:{{ L.visitCols }};gap:2px 20px;padding:14px 0;border-bottom:1px solid var(--color-divider);font-size:15px"><span style="font-weight:500">{{ v.when }}</span><span>{{ v.place }}</span><span style="color:var(--color-neutral-700)">{{ v.how }}</span></div></sc-for>
+        </div>
+      </sc-if>
+    </section>
+
+    <section data-rise="" aria-label="Where visitors are" class="blueprint" style="background:var(--color-neutral-100);display:grid;grid-template-columns:{{ L.mapCols }}">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="min-width:0;padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:14px;border-right:{{ L.mapBorder }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Where visitors are</h2><span style="font-size:15px;color:var(--color-neutral-700)">{{ an.geoSub }}</span></div>
+        <div style="margin:8px 0"><x-import component-from-global-scope="visitor-map" from="./visitor-map.js" data-cities="{{ an.mapJson }}" data-highlight="{{ an.hl }}" data-motion="{{ motionStr }}" data-label="{{ an.mapLabel }}" hint-size="100%,300px"></x-import></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--color-neutral-700)"><span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:50%;background:var(--color-accent)"></span>Bigger dot, more visitors</span><span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:50%;border:1.5px solid var(--color-accent);box-sizing:border-box"></span>Visited in the last 24 hours</span></div>
+      </div>
+      <div style="min-width:0;padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:10px;border-top:{{ L.mapListBorder }}">
+        <div style="display:flex;justify-content:space-between;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-700)"><span>Countries</span><span>Visitors</span></div>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+          <sc-for list="{{ an.countries }}" as="c" hint-placeholder-count="8">
+            <li style="border-top:1px solid var(--color-divider)">
+              <button onClick="{{ c.toggle }}" onMouseEnter="{{ c.hlOn }}" onMouseLeave="{{ an.hlOff }}" onFocus="{{ c.hlOn }}" onBlur="{{ an.hlOff }}" aria-expanded="{{ c.exp }}" style="width:100%;border:0;background:{{ c.bg }};font:inherit;color:var(--color-text);text-align:left;cursor:pointer;display:grid;grid-template-columns:24px minmax(0,1fr) auto 16px;align-items:center;gap:10px;padding:10px 6px;min-height:48px;transition:background .2s" style-hover="background:var(--color-neutral-200)">
+                <span aria-hidden="true" style="font-size:18px;line-height:1">{{ c.flag }}</span>
+                <span style="min-width:0;display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span><span style="display:block;height:4px;background:var(--color-neutral-200)"><span data-hbar="" style="display:block;height:100%;width:{{ c.w }};background:var(--color-accent);transform-origin:left;transition:width .6s cubic-bezier(.2,.7,.2,1)"></span></span></span>
+                <span style="font-size:15px;font-weight:500;font-variant-numeric:tabular-nums">{{ c.v }}</span>
+                <span style="display:flex;color:var(--color-neutral-700);transform:{{ c.chev }};transition:transform .25s">{{ ic.chevron }}</span>
+              </button>
+              <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
+                <ul style="list-style:none;margin:0;padding:2px 6px 14px 40px;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ c.cities }}" as="ct" hint-placeholder-count="2"><li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center;font-size:14px"><span style="display:flex;align-items:center;gap:8px;min-width:0">{{ ct.name }}<sc-if value="{{ ct.recent }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--color-accent-700)">· Last 24 hours</span></sc-if></span><span style="font-variant-numeric:tabular-nums">{{ ct.v }}</span><span style="grid-column:1 / -1;display:block;height:3px;background:var(--color-neutral-200)"><span style="display:block;height:100%;width:{{ ct.w }};background:var(--color-accent-400)"></span></span></li></sc-for>
+                </ul>
+              </sc-if>
+            </li>
+          </sc-for>
+        </ul>
+      </div>
+    </section>
+
+    <div style="display:grid;grid-template-columns:{{ L.twoCols }};gap:24px;align-items:start">
+      <section data-rise="" class="blueprint" style="min-width:0;padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:16px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Where visitors came from</h2>
+        <sc-for list="{{ an.sources }}" as="sr" hint-placeholder-count="5">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:15px"><span style="display:flex;align-items:flex-start;gap:10px;min-width:0"><span style="display:flex;flex:none;color:var(--color-neutral-700);padding-top:2px">{{ sr.icon }}</span><span style="display:flex;flex-direction:column"><span>{{ sr.label }}</span><sc-if value="{{ sr.hasNote }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--color-neutral-700)">{{ sr.note }}</span></sc-if></span></span><span style="white-space:nowrap;font-variant-numeric:tabular-nums"><span style="font-weight:500">{{ sr.v }}</span><span style="color:var(--color-neutral-700)"> · {{ sr.pct }}</span></span></div>
+            <span style="display:block;height:8px;background:var(--color-neutral-200)"><span data-hbar="" style="display:block;height:100%;width:{{ sr.w }};background:var(--color-accent);transform-origin:left;transition:width .6s cubic-bezier(.2,.7,.2,1)"></span></span>
+            <sc-if value="{{ sr.hasSub }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:4px;padding:4px 0 0 28px"><sc-for list="{{ sr.sub }}" as="d" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--color-neutral-800)"><span style="overflow-wrap:anywhere">{{ d.label }}</span><span style="font-variant-numeric:tabular-nums">{{ d.v }}</span></div></sc-for></div></sc-if>
+          </div>
+        </sc-for>
+      </section>
+      <section data-rise="" class="blueprint" style="min-width:0;padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:6px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase;margin-bottom:8px">What visitors did</h2>
+        <sc-for list="{{ an.actions }}" as="ac" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:15px"><span style="display:flex;flex:none;color:var(--color-neutral-700)">{{ ac.icon }}</span><span style="flex:1;min-width:0">{{ ac.label }}</span><span style="font-weight:500;font-variant-numeric:tabular-nums">{{ ac.v }}</span></div></sc-for>
+        <sc-if value="{{ an.hasActNote }}" hint-placeholder-val="{{ false }}"><span style="padding-top:8px;font-size:14px;color:var(--color-neutral-700)">Clicks on your email, LinkedIn and phone number appear here as they happen.</span></sc-if>
+      </section>
+    </div>
+
+    <div style="display:grid;grid-template-columns:{{ L.twoCols }};gap:24px;align-items:start">
+      <section data-rise="" class="blueprint" style="min-width:0;padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:12px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Pages</h2>
+        <div role="table" aria-label="Views per page" style="display:flex;flex-direction:column">
+          <div role="row" style="display:grid;grid-template-columns:{{ L.pageCols }};gap:12px;padding:8px 0;border-bottom:1px solid var(--color-divider);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)"><span role="columnheader">Page</span><span role="columnheader" style="text-align:right">Views</span><span role="columnheader" style="text-align:right">Visitors</span></div>
+          <sc-for list="{{ an.pages }}" as="pg" hint-placeholder-count="1"><div role="row" style="display:grid;grid-template-columns:{{ L.pageCols }};gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--color-divider)"><span role="cell" style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:500">{{ pg.page }}</span><span style="font-size:13px;color:var(--color-neutral-700)">{{ pg.path }}</span></span><span role="cell" style="text-align:right;font-variant-numeric:tabular-nums">{{ pg.views }}</span><span role="cell" style="text-align:right;font-variant-numeric:tabular-nums">{{ pg.visitors }}</span></div></sc-for>
+        </div>
+        <span style="font-size:14px;color:var(--color-neutral-700)">Sub-pages and posts appear here when you add them.</span>
+      </section>
+      <section data-rise="" class="blueprint" style="min-width:0;padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:16px">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:28px;line-height:1.05;text-transform:uppercase">Devices</h2>
+        <div role="img" aria-label="{{ an.devAria }}" style="display:flex;height:14px;gap:2px">
+          <sc-for list="{{ an.devices }}" as="dv" hint-placeholder-count="3"><span data-hbar="" style="display:block;height:100%;width:{{ dv.w }};background:{{ dv.bg }};transform-origin:left;transition:width .6s cubic-bezier(.2,.7,.2,1)"></span></sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ an.devices }}" as="dv" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:15px"><span style="width:12px;height:12px;flex:none;background:{{ dv.bg }}"></span><span style="flex:1">{{ dv.label }}</span><span style="font-variant-numeric:tabular-nums"><span style="font-weight:500">{{ dv.pct }}</span><span style="color:var(--color-neutral-700)"> · {{ dv.v }}</span></span></div></sc-for>
+        </div>
+      </section>
+    </div>
+
+    <p data-rise="" style="margin:0;max-width:720px;display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.55;color:var(--color-neutral-700)"><span style="display:flex;flex:none;padding-top:1px">{{ ic.shield16 }}</span>Private by design. No cookies and no banner. Visitors are never identified; we only see their country and city, the page, where they came from and the type of device.</p>
   </sc-if>
 </main>
 </sc-if>
@@ -275,10 +468,135 @@
         </sc-if>
       </section>
 
-      <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:10px">
+      <section data-rise="" class="blueprint" aria-labelledby="{{ dm.hid }}" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:18px">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Custom domain</h2><span class="tag tag-neutral">Coming soon</span></div>
-        <p style="margin:0;max-width:600px;color:var(--color-neutral-800)">Connect a domain you own, like ameliahart.com. Your ceomaker.com address will keep working alongside it.</p>
+        <div style="order:-2;display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2 id="{{ dm.hid }}" style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:24px;line-height:1;text-transform:uppercase">Custom domain</h2><sc-if value="{{ dm.hasTag }}" hint-placeholder-val="{{ false }}"><span class="tag" style="background:{{ dm.tagBg }};color:{{ dm.tagFg }}">{{ dm.tag }}</span></sc-if></div>
+
+        <sc-if value="{{ dm.inFlow }}" hint-placeholder-val="{{ false }}">
+          <ol aria-label="Progress" style="order:-1;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:640px">
+            <sc-for list="{{ dm.steps }}" as="st" hint-placeholder-count="3"><li aria-current="{{ st.cur }}" style="display:flex;flex-direction:column;gap:8px;min-width:0"><span style="display:block;height:3px;background:{{ st.bar }};transition:background .4s"></span><span style="display:flex;align-items:center;gap:6px;font-size:{{ L.stepFs }};color:{{ st.color }};font-weight:{{ st.fw }}"><span style="display:flex">{{ st.icon }}</span>{{ st.label }}</span></li></sc-for>
+          </ol>
+        </sc-if>
+
+        <sc-if value="{{ dm.none }}" hint-placeholder-val="{{ true }}">
+          <div style="order:-1;display:flex;flex-direction:column;gap:14px">
+            <p style="margin:0;max-width:620px;color:var(--color-neutral-800);text-wrap:pretty">Use your own address, like ameliahart.com. Your hart.ceomaker.com address keeps working and forwards to it.</p>
+            <form onSubmit="{{ dm.submit }}" noValidate="{{ true }}" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;max-width:620px">
+              <div class="field" style="flex:1 1 260px;min-width:0"><label for="{{ dm.inId }}">Your domain</label><input id="{{ dm.inId }}" class="input" value="{{ dm.input }}" onChange="{{ dm.onInput }}" placeholder="ameliahart.com" autoComplete="off" autoCapitalize="none" spellCheck="false" inputMode="url" aria-invalid="{{ dm.inv }}" aria-describedby="{{ dm.errId }}" style="min-height:48px;font-size:16px;border-color:{{ dm.bc }}"></div>
+              <button type="submit" class="btn btn-primary" style="flex:{{ L.btnFlexWide }};min-height:48px;padding:0 18px;gap:10px">Connect domain{{ ic.arrow }}</button>
+            </form>
+            <sc-if value="{{ dm.hasErr }}" hint-placeholder-val="{{ false }}"><span id="{{ dm.errId }}" role="alert" style="display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--color-danger)"><span style="display:flex;padding-top:2px">{{ ic.alert16 }}</span>{{ dm.err }}</span></sc-if>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button class="btn btn-ghost" onClick="{{ dm.toggleBuy }}" aria-expanded="{{ dm.buyAria }}" style="align-self:flex-start;padding-left:0;min-height:{{ L.hit }};gap:6px;color:var(--color-accent-700)">Don't have a domain yet?<span style="display:flex;transform:{{ dm.buyChev }};transition:transform .25s">{{ ic.chevron }}</span></button>
+              <sc-if value="{{ dm.buyOpen }}" hint-placeholder-val="{{ false }}"><p data-open="" style="margin:0;max-width:620px;padding:14px 16px;background:var(--color-neutral-200);font-size:15px;line-height:1.55;color:var(--color-neutral-900);text-wrap:pretty">You can buy a domain from any domain registrar, usually for $10 to $20 a year. Search for the name you want, buy it, then come back here and type it in. Many people use their full name, like ameliahart.com.</p></sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dm.records }}" hint-placeholder-val="{{ false }}">
+          <p style="order:-1;margin:0;max-width:640px;text-wrap:pretty">Sign in where you bought <strong style="font-weight:500">{{ dm.domain }}</strong> and add these two records in its DNS settings (sometimes called Manage DNS). Copy each value exactly.</p>
+        </sc-if>
+
+        <sc-if value="{{ dm.waiting }}" hint-placeholder-val="{{ false }}">
+          <div style="order:-1;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;gap:14px">
+              <span aria-hidden="true" style="position:relative;width:22px;height:22px;flex:none;display:flex;align-items:center;justify-content:center"><span style="position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--color-accent);animation:db-ring 2.4s ease-out infinite"></span><span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)"></span></span>
+              <span style="font-size:19px;font-weight:500;overflow-wrap:anywhere">Waiting for {{ dm.domain }}</span>
+            </div>
+            <p style="margin:0;max-width:640px;color:var(--color-neutral-800);text-wrap:pretty">We check automatically. This usually takes a few minutes, sometimes up to 24 hours. We'll email you when it's live.</p>
+            <div style="display:flex;flex-direction:column;border-top:1px solid var(--color-divider);max-width:640px">
+              <sc-for list="{{ dm.checks }}" as="ck" hint-placeholder-count="2"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--color-divider)"><span style="font-family:ui-monospace,Menlo,monospace;font-size:14px;overflow-wrap:anywhere;min-width:0">{{ ck.name }}</span><span style="display:flex;align-items:center;gap:6px;font-size:14px;color:{{ ck.color }};white-space:nowrap"><span style="display:flex">{{ ck.icon }}</span>{{ ck.label }}</span></div></sc-for>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px"><span role="status" style="font-size:14px;color:var(--color-neutral-700)">{{ dm.lastChecked }}</span><button class="btn btn-secondary" onClick="{{ dm.checkNow }}" disabled="{{ dm.checking }}" style="min-height:{{ L.hit }};padding:0 16px;gap:8px">{{ dm.checkIcon }}{{ dm.checkLabel }}</button></div>
+            <button class="btn btn-ghost" onClick="{{ dm.toggleRecs }}" aria-expanded="{{ dm.recsAria }}" style="align-self:flex-start;padding-left:0;min-height:{{ L.hit }};gap:6px;color:var(--color-accent-700)">{{ dm.recsLabel }}<span style="display:flex;transform:{{ dm.recsChev }};transition:transform .25s">{{ ic.chevron }}</span></button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dm.fix }}" hint-placeholder-val="{{ false }}">
+          <div style="order:-1;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--color-warning-soft)"><span style="display:flex;flex:none;color:var(--color-warning);padding-top:2px">{{ ic.alert }}</span><div style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:17px;font-weight:500;overflow-wrap:anywhere">{{ dm.fixTitle }}</span><span style="font-size:15px;line-height:1.55;color:var(--color-neutral-900);text-wrap:pretty">{{ dm.fixText }}</span></div></div>
+            <span style="font-size:15px;font-weight:500">{{ dm.fixDo }}</span>
+            <div style="display:flex;flex-direction:column;border:1px solid var(--color-divider)">
+              <sc-for list="{{ dm.fixRows }}" as="fr" hint-placeholder-count="2">
+                <div style="display:grid;grid-template-columns:{{ L.fixCols }};grid-template-areas:{{ L.fixAreas }};gap:8px 14px;align-items:center;padding:12px 14px;border-top:{{ fr.bt }}">
+                  <span style="grid-area:act"><span class="tag" style="background:{{ fr.tagBg }};color:{{ fr.tagFg }}">{{ fr.action }}</span></span>
+                  <span style="grid-area:type;font-weight:500;font-size:15px">{{ fr.type }}<span style="font-weight:400;color:var(--color-neutral-700)"> · {{ fr.name }}</span></span>
+                  <span style="grid-area:val;min-width:0;display:flex;align-items:center;gap:8px"><code style="flex:1;min-width:0;padding:8px 10px;background:var(--color-neutral-100);border:1px solid var(--color-divider);border-radius:4px;font-family:ui-monospace,Menlo,monospace;font-size:14px;overflow-wrap:anywhere;text-decoration:{{ fr.deco }};color:{{ fr.color }}">{{ fr.value }}</code><sc-if value="{{ fr.canCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ fr.copy }}" aria-label="{{ fr.copyAria }}" class="btn btn-secondary" style="flex:none;min-height:{{ L.hit }};padding:0 12px;gap:6px;font-size:14px;min-width:96px;justify-content:center"><span style="display:flex">{{ fr.copyIcon }}</span>{{ fr.copyLabel }}</button></sc-if></span>
+                </div>
+              </sc-for>
+            </div>
+            <span style="font-size:14px;color:var(--color-neutral-700);max-width:640px;text-wrap:pretty">{{ dm.fixAfter }}</span>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;width:{{ L.btnRowW }}"><button class="btn btn-primary" onClick="{{ dm.checkNow }}" disabled="{{ dm.checking }}" style="flex:{{ L.btnFlex }};min-height:{{ L.hit }};padding:0 18px;gap:8px">{{ dm.checkIcon }}{{ dm.checkLabel }}</button><button class="btn btn-secondary" onClick="{{ open.share }}" style="flex:{{ L.btnFlex }};min-height:{{ L.hit }};padding:0 16px;gap:8px;white-space:nowrap"><span style="display:flex">{{ ic.send }}</span>Send to someone</button></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dm.securing }}" hint-placeholder-val="{{ false }}">
+          <div style="order:-1;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;gap:12px"><span style="display:flex;color:var(--color-accent-700)">{{ ic.shield }}</span><span style="font-size:19px;font-weight:500">Your domain is connected.</span></div>
+            <p style="margin:0;max-width:620px;color:var(--color-neutral-800);text-wrap:pretty">Setting up the secure padlock, usually under a minute. Your site will then open at https://{{ dm.domain }}.</p>
+            <div role="progressbar" aria-label="Setting up the secure padlock" style="position:relative;height:3px;max-width:420px;background:var(--color-neutral-200);overflow:hidden"><span style="position:absolute;top:0;bottom:0;width:30%;background:var(--color-accent);animation:db-indet 1.6s cubic-bezier(.4,0,.2,1) infinite"></span></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dm.connected }}" hint-placeholder-val="{{ false }}">
+          <div style="order:-1;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px"><span data-pop="" style="font-family:var(--font-heading);font-weight:600;font-size:{{ L.domFs }};line-height:1;overflow-wrap:anywhere">{{ dm.domain }}</span><span class="tag" style="display:inline-flex;align-items:center;gap:6px;background:var(--color-success-soft);color:var(--color-success)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-success);animation:db-pulse 1.8s ease-in-out infinite"></span>Live</span></div>
+            <p style="margin:0;display:flex;align-items:center;gap:8px;color:var(--color-neutral-800)"><span style="display:flex;color:var(--color-success)">{{ ic.check16 }}</span>hart.ceomaker.com now forwards here.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-secondary" href="#" style="min-height:{{ L.hit }};padding:0 16px;gap:8px;color:var(--color-text)">View site ↗</a></div>
+            <div style="border-top:1px solid var(--color-divider);padding-top:4px;display:flex;flex-direction:column">
+              <button class="btn btn-ghost" onClick="{{ dm.toggleTip }}" aria-expanded="{{ dm.tipAria }}" style="align-self:flex-start;padding-left:0;min-height:{{ L.hit }};gap:8px;color:var(--color-text)"><span style="display:flex;color:var(--color-neutral-700)">{{ ic.search }}</span>See how Google finds you<span style="display:flex;transform:{{ dm.tipChev }};transition:transform .25s">{{ ic.chevron }}</span></button>
+              <sc-if value="{{ dm.tipOpen }}" hint-placeholder-val="{{ false }}"><p data-open="" style="margin:4px 0 8px;max-width:640px;font-size:15px;line-height:1.6;color:var(--color-neutral-800);text-wrap:pretty">Google finds new addresses on its own, usually within a few weeks. To speed it up and see which searches lead to you, add {{ dm.domain }} to Google Search Console, Google's free tool for site owners. It asks you to add one TXT record, the same way you added the records here. After that it shows how often you appear in Google results and which words people searched for.</p></sc-if>
+            </div>
+            <button class="btn btn-ghost" onClick="{{ open.removeDomain }}" style="align-self:flex-start;padding-left:0;min-height:{{ L.hit }};gap:6px;color:var(--color-danger)"><span style="display:flex">{{ ic.trash }}</span>Remove domain</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dm.showRecs }}" hint-placeholder-val="{{ false }}">
+          <div data-open="" style="order:0;display:flex;flex-direction:column">
+            <sc-if value="{{ L.recTable }}" hint-placeholder-val="{{ true }}">
+              <div role="table" aria-label="Records to add" style="display:flex;flex-direction:column;border:1px solid var(--color-divider)">
+                <div role="row" style="display:grid;grid-template-columns:80px 130px minmax(0,1fr);gap:16px;padding:10px 16px;background:var(--color-neutral-200);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-800)"><span role="columnheader">Type</span><span role="columnheader">Name</span><span role="columnheader">Value</span></div>
+                <sc-for list="{{ dm.recs }}" as="r" hint-placeholder-count="2"><div role="row" style="display:grid;grid-template-columns:80px 130px minmax(0,1fr);gap:16px;align-items:center;padding:12px 16px;border-top:1px solid var(--color-divider)">
+                  <span role="cell" style="font-weight:500">{{ r.type }}</span>
+                  <span role="cell" style="display:flex;flex-direction:column;min-width:0"><code style="font-family:ui-monospace,Menlo,monospace;font-size:15px">{{ r.name }}</code><span style="font-size:12px;color:var(--color-neutral-700);overflow-wrap:anywhere">{{ r.hint }}</span></span>
+                  <span role="cell" style="min-width:0;display:flex;align-items:center;gap:8px"><code style="flex:1;min-width:0;padding:8px 10px;background:var(--color-neutral-100);border:1px solid var(--color-divider);border-radius:4px;font-family:ui-monospace,Menlo,monospace;font-size:14px;overflow-wrap:anywhere;word-break:keep-all">{{ r.value }}</code><button onClick="{{ r.copy }}" aria-label="{{ r.copyAria }}" class="btn btn-secondary" style="flex:none;min-height:40px;padding:0 12px;gap:6px;font-size:14px;min-width:96px;justify-content:center"><span style="display:flex">{{ r.copyIcon }}</span>{{ r.copyLabel }}</button></span>
+                </div></sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ L.recCards }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:{{ L.recCardCols }};gap:12px">
+                <sc-for list="{{ dm.recs }}" as="r" hint-placeholder-count="2"><div style="border:1px solid var(--color-divider);padding:14px;display:flex;flex-direction:column;gap:10px">
+                  <span style="display:flex;justify-content:space-between;gap:10px;font-size:14px"><span style="font-weight:500">{{ r.type }} record</span><span style="color:var(--color-neutral-700);overflow-wrap:anywhere;text-align:right">{{ r.hint }}</span></span>
+                  <span style="display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;color:var(--color-neutral-700)">Name</span><code style="font-family:ui-monospace,Menlo,monospace;font-size:15px">{{ r.name }}</code></span>
+                  <span style="display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;color:var(--color-neutral-700)">Value</span><code style="padding:8px 10px;background:var(--color-neutral-100);border:1px solid var(--color-divider);border-radius:4px;font-family:ui-monospace,Menlo,monospace;font-size:14px;overflow-wrap:anywhere;word-break:keep-all">{{ r.value }}</code></span>
+                  <button onClick="{{ r.copy }}" aria-label="{{ r.copyAria }}" class="btn btn-secondary" style="min-height:44px;gap:6px;justify-content:center"><span style="display:flex">{{ r.copyIcon }}</span>{{ r.copyLabel }}</button>
+                </div></sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dm.records }}" hint-placeholder-val="{{ false }}">
+          <div style="order:1;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:15px;font-weight:500">Where did you buy your domain?</span>
+              <div role="group" aria-label="Domain provider" style="display:flex;flex-wrap:{{ L.chipWrap }};gap:8px;overflow-x:auto;margin:0 {{ L.provBleed }};padding:2px {{ L.provInset }} 6px;scrollbar-width:none">
+                <sc-for list="{{ dm.providers }}" as="pv" hint-placeholder-count="5"><button onClick="{{ pv.pick }}" aria-pressed="{{ pv.on }}" style="flex:none;min-height:{{ L.chipH }};padding:0 14px;border:1px solid {{ pv.bc }};background:{{ pv.bg }};color:var(--color-text);border-radius:4px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap;transition:border-color .2s,background .2s,transform .2s" style-hover="border-color:var(--color-accent);transform:translateY(-2px)">{{ pv.label }}</button></sc-for>
+              </div>
+            </div>
+            <ol data-steps="" aria-label="{{ dm.stepsAria }}" style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:{{ L.stepCols }};gap:20px">
+              <sc-for list="{{ dm.pSteps }}" as="ps" hint-placeholder-count="4"><li style="display:flex;flex-direction:column;gap:10px;min-width:0">
+                <div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:26px;height:26px;box-sizing:border-box;border:1px solid var(--color-accent);color:var(--color-accent-700);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500">{{ ps.n }}</span><span style="font-size:15px;line-height:1.5;text-wrap:pretty">{{ ps.text }}</span></div>
+                <div style="aspect-ratio:16 / 10;border:1px solid var(--color-divider);background:var(--color-neutral-100)"><image-slot id="{{ ps.slot }}" placeholder="{{ ps.ph }}" style="display:block;width:100%;height:100%"></image-slot></div>
+              </li></sc-for>
+            </ol>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;width:{{ L.btnRowW }}">
+              <button class="btn btn-primary" onClick="{{ dm.added }}" style="flex:{{ L.btnFlexWide }};min-height:{{ L.hit }};padding:0 18px;gap:10px">I've added the records{{ ic.arrow }}</button>
+              <button class="btn btn-secondary" onClick="{{ open.share }}" style="flex:{{ L.btnFlexWide }};min-height:{{ L.hit }};padding:0 16px;gap:8px"><span style="display:flex">{{ ic.send }}</span>Send these steps to someone</button>
+              <button class="btn btn-ghost" onClick="{{ dm.reset }}" style="min-height:{{ L.hit }};color:var(--color-neutral-800)">Use a different domain</button>
+            </div>
+          </div>
+        </sc-if>
       </section>
 
       <section data-rise="" class="blueprint" style="padding:{{ L.cardPad }};display:flex;flex-direction:column;gap:16px">
@@ -417,6 +735,19 @@
         </sc-if>
       </sc-if>
 
+      <sc-if value="{{ dlg.share }}" hint-placeholder-val="{{ false }}">
+        <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Send these steps</h2>
+        <p style="margin:0;color:var(--color-neutral-800);text-wrap:pretty">Share a page with the records for {{ dlg.domain }} and the steps for {{ dlg.pName }}. Handy for an assistant or IT person. It doesn't give access to your account.</p>
+        <div style="display:flex;align-items:stretch;border:1px solid var(--color-divider)"><code style="flex:1;min-width:0;display:flex;align-items:center;padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:14px;overflow-wrap:anywhere">{{ dlg.shareLink }}</code><button onClick="{{ dlg.shareCopy }}" class="btn btn-ghost" style="flex:none;min-height:{{ L.hit }};gap:6px;border-radius:0;border-left:1px solid var(--color-divider);color:var(--color-accent-700)"><span style="display:flex">{{ dlg.shareIcon }}</span>{{ dlg.shareLabel }}</button></div>
+        <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-secondary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }}">Close</button><a class="btn btn-primary" href="{{ dlg.shareMail }}" style="min-height:{{ L.hit }};padding:0 16px;gap:8px;flex:{{ L.btnFlex }};color:var(--color-bg)"><span style="display:flex">{{ ic.mail }}</span>Open in email</a></div>
+      </sc-if>
+
+      <sc-if value="{{ dlg.removeDomain }}" hint-placeholder-val="{{ false }}">
+        <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase;overflow-wrap:anywhere">Remove {{ dlg.domain }}?</h2>
+        <p style="margin:0;color:var(--color-neutral-800);text-wrap:pretty">Your site goes back to hart.ceomaker.com straight away. Links to {{ dlg.domain }} stop working until you connect it again. The records at your domain provider stay where they are; you can delete them there.</p>
+        <div class="dialog-actions" style="flex-wrap:wrap"><button class="btn btn-secondary" onClick="{{ dlg.close }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }}">Keep domain</button><button class="btn" onClick="{{ dlg.confirmRemove }}" style="min-height:{{ L.hit }};padding:0 16px;flex:{{ L.btnFlex }};border:1px solid var(--color-danger);color:var(--color-danger)" style-hover="background:var(--color-danger-soft)">Remove domain</button></div>
+      </sc-if>
+
       <sc-if value="{{ dlg.cancel }}" hint-placeholder-val="{{ false }}">
         <h2 id="{{ dlg.titleId }}" class="dialog-title" style="margin:0;font-size:28px;line-height:1.05;text-transform:uppercase">Cancel your plan?</h2>
         <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
@@ -432,7 +763,7 @@
 </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:1000},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;overview&quot;,&quot;messages&quot;,&quot;site&quot;,&quot;account&quot;,&quot;billing&quot;],&quot;default&quot;:&quot;overview&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;status&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;draft&quot;,&quot;live&quot;,&quot;changes&quot;,&quot;paused&quot;],&quot;default&quot;:&quot;live&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;billing&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;beta&quot;,&quot;active&quot;,&quot;cancelling&quot;,&quot;pastdue&quot;,&quot;paused&quot;],&quot;default&quot;:&quot;beta&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;notice&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;newDesign&quot;,&quot;draftNew&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;msgs&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;many&quot;,&quot;one&quot;,&quot;loading&quot;,&quot;notlive&quot;,&quot;off&quot;,&quot;noform&quot;,&quot;none&quot;],&quot;default&quot;:&quot;many&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;plan&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;dialog&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;toast&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;menu&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;filter&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;address&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;typed&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;emailStage&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;newEmail&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;reason&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;loading&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;expand&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;},&quot;failDelete&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;emailReady&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;motion&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;shownAll&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:1000},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;overview&quot;,&quot;analytics&quot;,&quot;messages&quot;,&quot;site&quot;,&quot;account&quot;,&quot;billing&quot;],&quot;default&quot;:&quot;overview&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;status&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;draft&quot;,&quot;live&quot;,&quot;changes&quot;,&quot;paused&quot;],&quot;default&quot;:&quot;live&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;analytics&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;low&quot;,&quot;none&quot;,&quot;unpublished&quot;,&quot;loading&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Analytics&quot;},&quot;range&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;7&quot;,&quot;30&quot;,&quot;90&quot;],&quot;default&quot;:&quot;30&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Analytics&quot;},&quot;domain&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;records&quot;,&quot;waiting&quot;,&quot;fix-old&quot;,&quot;fix-partial&quot;,&quot;fix-verify&quot;,&quot;securing&quot;,&quot;connected&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Custom domain&quot;},&quot;provider&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;godaddy&quot;,&quot;namecheap&quot;,&quot;cloudflare&quot;,&quot;squarespace&quot;,&quot;other&quot;],&quot;default&quot;:&quot;godaddy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Custom domain&quot;},&quot;billing&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;beta&quot;,&quot;active&quot;,&quot;cancelling&quot;,&quot;pastdue&quot;,&quot;paused&quot;],&quot;default&quot;:&quot;beta&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;notice&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;newDesign&quot;,&quot;draftNew&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;msgs&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;many&quot;,&quot;one&quot;,&quot;loading&quot;,&quot;notlive&quot;,&quot;off&quot;,&quot;noform&quot;,&quot;none&quot;],&quot;default&quot;:&quot;many&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;plan&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;dialog&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;toast&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;menu&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;filter&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;address&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;typed&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;emailStage&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;newEmail&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;reason&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;loading&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;expand&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;},&quot;failDelete&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;emailReady&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;shownAll&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;}}">
 const T = ["Speaking", "Board and advisory", "Investors", "Press", "Careers", "Something else"];
 const LONG = [
   "Dear Amelia,",
@@ -503,6 +834,73 @@ const PATHS = {
 };
 const icon = (n, s) => React.createElement("svg", { width: s || 18, height: s || 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true }, PATHS[n].map(([t, a], i) => React.createElement(t, { key: i, ...a })));
 
+const A_CITIES = [
+  ["London", "United Kingdom", "GB", 51.51, -0.13, 28, 1], ["Manchester", "United Kingdom", "GB", 53.48, -2.24, 7, 0], ["Edinburgh", "United Kingdom", "GB", 55.95, -3.19, 6, 0],
+  ["New York", "United States", "US", 40.71, -74.01, 14, 1], ["San Francisco", "United States", "US", 37.77, -122.42, 8, 0], ["Boston", "United States", "US", 42.36, -71.06, 7, 0],
+  ["Berlin", "Germany", "DE", 52.52, 13.4, 8, 0], ["Hamburg", "Germany", "DE", 53.55, 9.99, 6, 1], ["Munich", "Germany", "DE", 48.14, 11.58, 4, 0],
+  ["Dubai", "United Arab Emirates", "AE", 25.2, 55.27, 11, 1], ["Abu Dhabi", "United Arab Emirates", "AE", 24.45, 54.38, 3, 0],
+  ["Rotterdam", "Netherlands", "NL", 51.92, 4.48, 7, 1], ["Amsterdam", "Netherlands", "NL", 52.37, 4.9, 5, 0],
+  ["Toronto", "Canada", "CA", 43.65, -79.38, 6, 0], ["Vancouver", "Canada", "CA", 49.28, -123.12, 3, 0],
+  ["Paris", "France", "FR", 48.86, 2.35, 6, 0], ["Lyon", "France", "FR", 45.76, 4.84, 2, 0],
+  ["Zurich", "Switzerland", "CH", 47.37, 8.54, 5, 0], ["Singapore", "Singapore", "SG", 1.35, 103.82, 3, 0], ["Stockholm", "Sweden", "SE", 59.33, 18.07, 3, 0]
+];
+const RANGES = { 7: { k: 0.27, pct: 12, pvPct: 9, msg: 3, msgPrev: 2, spike: 4, sm: 1.8 }, 30: { k: 1, pct: 18, pvPct: 12, msg: 9, msgPrev: 6, spike: 10, sm: 3 }, 90: { k: 2.85, pct: 31, pvPct: 24, msg: 24, msgPrev: 15, spike: 3, sm: 1.6 } };
+const SRC = { linkedin: ["LinkedIn", "linkedin", ""], google: ["Google", "search", "Searched for you"], direct: ["Direct", "link", "Typed the address or used a saved link"], email: ["Email", "mail", "Clicked a link in an email"], other: ["Other sites", "globe", ""] };
+const ACT = { form: ["Sent a message through your form", "send"], email: ["Clicked your email address", "mail"], linkedin: ["Clicked your LinkedIn", "linkedin"], site: ["Clicked your company website", "globe"], phone: ["Clicked your phone number", "phone"] };
+const END = new Date(2026, 9, 2);
+const DOWS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MONS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const dayAgo = n => { const d = new Date(END); d.setDate(d.getDate() - n); return d; };
+const fmtD = d => d.getDate() + " " + MONS[d.getMonth()];
+const flagOf = cc => String.fromCodePoint.apply(null, cc.split("").map(c => 127397 + c.charCodeAt(0)));
+const theName = n => /^(United|Netherlands)/.test(n) ? "the " + n : n;
+const seeded = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const spread = (total, w) => { const sum = w.reduce((a, b) => a + b, 0) || 1; const raw = w.map(x => x / sum * total); const fl = raw.map(Math.floor); const rem = total - fl.reduce((a, b) => a + b, 0); raw.map((x, i) => [x - fl[i], i]).sort((a, b) => b[0] - a[0]).slice(0, rem).forEach(e => { fl[e[1]]++; }); return fl; };
+const AN_CACHE = {};
+function anData(R) {
+  if (AN_CACHE[R]) return AN_CACHE[R];
+  const c = RANGES[R];
+  const cities = A_CITIES.map(a => ({ city: a[0], country: a[1], cc: a[2], lat: a[3], lon: a[4], v: Math.round(a[5] * c.k), recent: !!a[6] })).filter(x => x.v > 0);
+  const visitors = cities.reduce((a, x) => a + x.v, 0);
+  const r = seeded(R * 7919), n = R === 90 ? 13 : R;
+  const w = Array.from({ length: n }, (_, i) => { const sp = i === n - 1 - c.spike ? c.sm : 1; if (R === 90) return (0.75 + i * 0.03) * (0.85 + r() * 0.3) * sp; const d = dayAgo(n - 1 - i).getDay(); return (d === 0 || d === 6 ? 0.5 : 1) * (0.7 + r() * 0.6) * sp; });
+  const vals = spread(visitors, w);
+  const bars = vals.map((v, i) => { const d = R === 90 ? dayAgo((n - 1 - i) * 7 + 6) : dayAgo(n - 1 - i); return { v, lbl: R === 90 ? "Week of " + fmtD(d) : DOWS[d.getDay()] + " " + fmtD(d), short: fmtD(d) }; });
+  const sv = spread(visitors, [43, 19, 17, 10, 11]);
+  const ov = spread(sv[4], [40, 30, 20, 10]);
+  const sources = [{ key: "linkedin", v: sv[0] }, { key: "google", v: sv[1] }, { key: "direct", v: sv[2] }, { key: "email", v: sv[3] }, { key: "other", v: sv[4], sub: [["meridianfreight.com", ov[0]], ["logisticsweekly.com", ov[1]], ["eurofreightforum.org", ov[2]], ["x.com", ov[3]]].filter(x => x[1] > 0) }];
+  const dv = spread(visitors, [62, 35, 3]);
+  const pv = Math.round(visitors * 1.6);
+  return (AN_CACHE[R] = { visitors, pv, cities, bars, sources, devices: [["Phone", dv[0]], ["Desktop", dv[1]], ["Tablet", dv[2]]], actions: [["linkedin", Math.round(19 * c.k)], ["email", Math.round(11 * c.k)], ["form", c.msg], ["site", Math.round(7 * c.k)], ["phone", Math.max(1, Math.round(2 * c.k))]], pages: [{ page: "Home", path: "/", views: pv, visitors }], msg: c.msg, msgPrev: c.msgPrev, pct: c.pct, pvPct: c.pvPct });
+}
+const LOW_AN = {
+  visitors: 3, pv: 5, msg: 0, bars: [],
+  cities: [{ city: "London", country: "United Kingdom", cc: "GB", lat: 51.51, lon: -0.13, v: 1, recent: true }, { city: "Dubai", country: "United Arab Emirates", cc: "AE", lat: 25.2, lon: 55.27, v: 1, recent: false }, { city: "Toronto", country: "Canada", cc: "CA", lat: 43.65, lon: -79.38, v: 1, recent: false }],
+  visits: [{ when: "Today, 09:12", place: "London, United Kingdom", how: "From LinkedIn · Phone" }, { when: "Wed 30 Sep, 18:40", place: "Dubai, United Arab Emirates", how: "From LinkedIn · Phone" }, { when: "Tue 29 Sep, 08:05", place: "Toronto, Canada", how: "Typed the address · Desktop" }],
+  sources: [{ key: "linkedin", v: 2 }, { key: "direct", v: 1 }],
+  devices: [["Phone", 2], ["Desktop", 1]], actions: [["email", 1]],
+  pages: [{ page: "Home", path: "/", views: 5, visitors: 3 }]
+};
+const DNS = { a: "203.0.113.10", cname: "sites.ceomaker.com", txt: "ceomaker-verify=7f3a9c2e1b", old: "198.51.100.23" };
+const PROVIDERS = {
+  godaddy: ["GoDaddy", ["Sign in to GoDaddy and open My Products.", "Next to your domain, choose DNS.", "Choose Add New Record, pick the type, and paste the Name and Value. Repeat for each row.", "Save. If an A record for @ already exists, edit it to the new value instead."]],
+  namecheap: ["Namecheap", ["Sign in to Namecheap and open Domain List.", "Choose Manage next to your domain, then Advanced DNS.", "Choose Add New Record and paste each row. Use @ for the main domain.", "Select the tick on each record to save it."]],
+  cloudflare: ["Cloudflare", ["Sign in to Cloudflare and select your domain.", "Open DNS, then Records.", "Choose Add record and paste each row.", "Set Proxy status to DNS only (grey cloud), then save."]],
+  squarespace: ["Squarespace Domains", ["Sign in to Squarespace and open Domains.", "Choose your domain, then DNS.", "Under Custom records, choose Add record and paste each row.", "Save. Delete any default records for @ or www that point elsewhere."]],
+  other: ["Google or other", ["Sign in where you bought your domain.", "Look for DNS, DNS settings or Manage DNS.", "Add each record from the table: same Type, Name and Value.", "Save, then come back here. We check automatically."]]
+};
+Object.assign(PATHS, {
+  copy: [["rect", { x: 9, y: 9, width: 13, height: 13, rx: 2 }], ["path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" }]],
+  trend: [["polyline", { points: "22 7 13.5 15.5 8.5 10.5 2 17" }], ["polyline", { points: "16 7 22 7 22 13" }]],
+  shield: [["path", { d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" }], ["path", { d: "m9 12 2 2 4-4" }]],
+  search: [["circle", { cx: 11, cy: 11, r: 8 }], ["path", { d: "m21 21-4.3-4.3" }]],
+  send: [["path", { d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" }], ["path", { d: "m21.854 2.147-10.94 10.939" }]],
+  linkedin: [["path", { d: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" }], ["rect", { x: 2, y: 9, width: 4, height: 12 }], ["circle", { cx: 4, cy: 4, r: 2 }]],
+  link: [["path", { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }], ["path", { d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" }]],
+  phone: [["path", { d: "M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" }]],
+  chart: [["path", { d: "M3 3v16a2 2 0 0 0 2 2h16" }], ["path", { d: "M18 17V9" }], ["path", { d: "M13 17V5" }], ["path", { d: "M8 17v-3" }]],
+  clock: [["circle", { cx: 12, cy: 12, r: 10 }], ["polyline", { points: "12 6 12 12 16 14" }]]
+});
+
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -518,7 +916,8 @@ class Component extends DCLogic {
       dialog: p.dialog || null, dlgId: p.dialog === "deleteMsg" ? 4 : null, typed: p.typed || "", emailStage: p.emailStage || "form", newEmail: p.newEmail || "",
       reason: p.reason || null, billing: p.billing || "beta", plan: p.plan || "monthly", notify: true,
       addr: p.address === "taken" ? "amelia" : "hart", addrCheck: p.address === "taken" ? "taken" : "available", addrSaved: "hart",
-      name: "Amelia Hart", nameSaved: "Amelia Hart", menu: !!p.menu, toast: p.toast || null, sending: false
+      name: "Amelia Hart", nameSaved: "Amelia Hart", menu: !!p.menu, toast: p.toast || null, sending: false,
+      range: +p.range || 30, hl: null, openC: { GB: true }, anOverride: null, provider: p.provider || "godaddy", copied: null, ...this.domainInit(p.domain)
     };
     this.uid = "db" + Math.random().toString(36).slice(2, 7);
   }
@@ -534,7 +933,7 @@ class Component extends DCLogic {
   pvRef = el => {
     if (this._pro) { this._pro.disconnect(); this._pro = null; }
     if (!el) return;
-    const upd = () => { if (!this.root) return; const w = el.clientWidth; if (w && Math.abs(w - (this.state.pvW || 0)) > 1) this.setState({ pvW: w }); };
+    const upd = () => { const w = el.clientWidth; if (w && Math.abs(w - (this.state.pvW || 0)) > 1) this.setState({ pvW: w }); };
     this._pro = new ResizeObserver(upd); this._pro.observe(el); upd();
   };
   motionOK() { return (this.props.motion ?? true) && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
@@ -543,10 +942,33 @@ class Component extends DCLogic {
     requestAnimationFrame(() => { const r = this.root; if (!r) return; r.querySelectorAll(sel).forEach((el, i) => el.animate(kf, { duration: dur, delay: (delay || 0) + i * (step || 0), easing: EASE, fill: "backwards" })); });
   }
   rise() { this.anim("[data-rise]", [{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }], 560, 40, 60); }
-  componentDidMount() { this.rise(); }
-  componentDidUpdate(pp, ps) {
+  domainInit(d) {
+    d = d || "none";
+    return { dm: d.indexOf("fix") === 0 ? "fix" : d, fixKind: d.split("-")[1] || "old", domain: "ameliahart.com", dInput: "", dErr: "", buy: false, recsOpen: false, checking: false, checkedAt: null, tip: false };
+  }
+  grow() {
+    this.anim("[data-bar]", [{ transform: "scaleY(0)" }, { transform: "none" }], 700, 160, 12);
+    this.anim("[data-hbar]", [{ transform: "scaleX(0)" }, { transform: "none" }], 700, 220, 25);
+  }
+  componentDidMount() { this._prev = this.state; this._pp = this.props; requestAnimationFrame(() => { const el = this.root && this.root.querySelector("[data-pv]"); if (el && el.clientWidth && el.clientWidth !== this.state.pvW) this.setState({ pvW: el.clientWidth }); }); this.rise(); if (this.state.tab === "analytics") this.grow(); }
+  componentDidUpdate(ppArg) {
+    const pp = this._pp || ppArg || this.props, ps = this._prev || this.state;
+    this._pp = this.props; this._prev = this.state;
     const s = this.state;
     if (ps.tab !== s.tab || ps.sub !== s.sub) this.rise();
+    if ((ps.tab !== s.tab && s.tab === "analytics") || (ps.anOverride !== s.anOverride && s.anOverride === "normal")) this.grow();
+    if (ps.dm !== s.dm) this.anim('[aria-labelledby="' + this.uid + '-dmh"] > *', [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], 420, 0, 40);
+    if (ps.provider !== s.provider) this.anim("[data-steps] > li", [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], 380, 0, 50);
+    if (s.dm === "connected" && ps.dm !== "connected") this.anim("[data-pop]", [{ opacity: 0, transform: "scale(.94)" }, { opacity: 1, transform: "none" }], 600, 120);
+    if ((s.buy && !ps.buy) || (s.tip && !ps.tip) || (s.recsOpen && !ps.recsOpen)) this.anim("[data-open]", [{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }], 300);
+    const p = this.props;
+    if (pp.view !== p.view && p.view) { const st = ["site", "account", "billing"].includes(p.view); this.setState(x => ({ tab: st ? "settings" : p.view, sub: st ? p.view : x.sub })); }
+    if (pp.billing !== p.billing) this.setState({ billing: p.billing || "beta" });
+    if (pp.domain !== p.domain) this.setState(this.domainInit(p.domain));
+    if (pp.range !== p.range) this.setState({ range: +p.range || 30 });
+    if (pp.provider !== p.provider) this.setState({ provider: p.provider || "godaddy" });
+    if (pp.analytics !== p.analytics) this.setState({ anOverride: null });
+    if (pp.dialog !== p.dialog) this.setState({ dialog: p.dialog || null });
     if (!ps.dialog && s.dialog) this.anim("[data-dlg]", [{ opacity: 0, transform: "translateY(14px) scale(.97)" }, { opacity: 1, transform: "none" }], 380);
     if (ps.dialog && s.dialog && ps.emailStage !== s.emailStage) this.anim("[data-dlg] > *", [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], 360, 0, 40);
     if (s.toast && ps.toast !== s.toast) this.anim("[data-toast]", [{ opacity: 0, transform: "translateY(-10px)" }, { opacity: 1, transform: "none" }], 380);
@@ -554,7 +976,7 @@ class Component extends DCLogic {
     if (ps.billing !== s.billing) this.anim("[data-plan]", [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], 420);
     if (ps.shown < s.shown) this.anim("[data-msg]", [{ opacity: 0 }, { opacity: 1 }], 1, 0, 0);
   }
-  componentWillUnmount() { this._ro && this._ro.disconnect(); this._pro && this._pro.disconnect(); clearTimeout(this._tt); clearTimeout(this._ac); clearTimeout(this._ol); clearTimeout(this._se); }
+  componentWillUnmount() { this._ro && this._ro.disconnect(); this._pro && this._pro.disconnect(); clearTimeout(this._tt); clearTimeout(this._ac); clearTimeout(this._ol); clearTimeout(this._se); clearTimeout(this._ck); clearTimeout(this._ck2); clearTimeout(this._cp); clearTimeout(this._rt); }
   say(kind, text, action) { clearTimeout(this._tt); this.setState({ toast: { kind, text, action } }); this._tt = setTimeout(() => this.setState({ toast: null }), 4200); }
   go(tab, sub) { this.setState(st => ({ tab, sub: sub || st.sub, menu: false })); if (this.root && this.root.parentElement) { const sc = this.root.closest("[data-scroll]"); if (sc) sc.scrollTop = 0; } }
 
@@ -569,7 +991,7 @@ class Component extends DCLogic {
     const cardW = ph ? W - 2 * pad : Math.min(W, 1200 + 2 * pad) - 2 * pad - 360 - 24;
 
     const L = {
-      desk: !ph, phone: ph, pad: pad + "px", body: ph ? "16px" : "17px", headH: ph ? "56px" : "64px", tabGap: ph ? "24px" : "32px",
+      desk: !ph, phone: ph, pad: pad + "px", body: ph ? "16px" : "17px", headH: ph ? "56px" : "64px", tabGap: ph ? "20px" : "32px",
       mainPad: (ph ? 24 : 40) + "px " + pad + "px " + (ph ? 64 : 96) + "px", gap: ph ? "28px" : "36px", h1: ph ? "40px" : "56px",
       ovCols: ph ? "minmax(0,1fr)" : "minmax(0,1fr) 360px", pvH: ph ? "196px" : "300px", pvZ: ((s.pvW || cardW) / 1280).toFixed(4),
       cardPad: ph ? "18px" : "20px 24px", cardPadX: ph ? "18px" : "24px", hit: ph ? "44px" : "40px", btnRowW: ph ? "100%" : "auto", btnFlex: ph ? "1 1 0" : "none",
@@ -704,23 +1126,162 @@ class Component extends DCLogic {
     const tt = typeof t === "string" ? TOASTS[t] : t;
     const toast = tt ? { show: true, text: tt.text, icon: tt.kind === "err" ? icon("alert") : icon("check"), iconColor: tt.kind === "err" ? "var(--color-danger-soft)" : "var(--color-accent-300)", hasAction: !!tt.action, action: tt.action || "", act: () => this.setState({ toast: null }), close: () => this.setState({ toast: null }) } : { show: false };
 
-    const tabs = [["overview", "Overview"], ["messages", "Messages"], ["settings", "Settings"]].map(([k, label]) => { const on = s.tab === k; return { label, cur: on ? "page" : "false", color: on ? "var(--color-text)" : "var(--color-neutral-700)", line: on ? "var(--color-accent)" : "transparent", hasBadge: k === "messages" && hasMsgs && unread > 0, badge: String(unread), go: () => this.go(k) }; });
+    const tabs = [["overview", "Overview"], ["analytics", "Analytics"], ["messages", "Messages"], ["settings", "Settings"]].map(([k, label]) => { const on = s.tab === k; return { label, cur: on ? "page" : "false", color: on ? "var(--color-text)" : "var(--color-neutral-700)", line: on ? "var(--color-accent)" : "transparent", hasBadge: k === "messages" && hasMsgs && unread > 0, badge: String(unread), go: () => this.go(k) }; });
     const subs = [["site", "Site", "globe"], ["account", "Account", "user"], ["billing", "Billing", "card"]].map(([k, label, ic]) => { const on = s.sub === k; return { label, on, cur: on ? "page" : "false", icon: icon(ic), bg: on ? "var(--color-accent-100)" : "transparent", color: on ? "var(--color-accent-800)" : "var(--color-text)", go: () => this.go("settings", k) }; });
 
+    const motionOn = p.motion ?? true;
+    const anMode = s.anOverride || p.analytics || (status === "draft" ? "unpublished" : "normal");
+    const lowM = anMode === "low";
+    const D = lowM ? LOW_AN : anData(s.range);
+    const RG = RANGES[s.range];
+    const nBars = D.bars.length;
+    Object.assign(L, {
+      segW: ph ? "100%" : "360px", sumFs: ph ? "20px" : "26px", tileCols: W < 1040 ? "repeat(2,minmax(0,1fr))" : "repeat(4,minmax(0,1fr))", tileGap: ph ? "12px" : "24px", tilePad: ph ? "16px" : "20px 22px", tileV: ph ? "34px" : "44px",
+      chartH: ph ? "170px" : "240px", barGap: nBars > 20 ? (ph ? "2px" : "5px") : (ph ? "6px" : "14px"),
+      mapCols: ph ? "minmax(0,1fr)" : "minmax(0,1.75fr) minmax(0,1fr)", mapBorder: ph ? "0" : "1px solid var(--color-divider)", mapListBorder: ph ? "1px solid var(--color-divider)" : "0",
+      twoCols: ph ? "minmax(0,1fr)" : "minmax(0,1fr) minmax(0,1fr)", visitCols: ph ? "minmax(0,1fr)" : "180px minmax(0,1fr) auto", pageCols: ph ? "minmax(0,1fr) 56px 68px" : "minmax(0,1fr) 90px 90px",
+      stepCols: ph ? "minmax(0,1fr)" : "repeat(4,minmax(0,1fr))", stepFs: ph ? "13px" : "14px", domFs: ph ? "34px" : "52px", btnFlexWide: ph ? "1 1 100%" : "none",
+      provBleed: ph ? "-18px" : "0", provInset: ph ? "18px" : "0",
+      recTable: W >= 1040, recCards: W < 1040, recCardCols: ph ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))",
+      fixCols: ph ? "auto minmax(0,1fr)" : "84px 130px minmax(0,1fr)", fixAreas: ph ? '"act type" "val val"' : '"act type val"'
+    });
+    const up = icon("trend", 16), tagUp = "var(--color-accent-700)";
+    const maxBar = Math.max(1, ...D.bars.map(b => b.v));
+    const niceMax = maxBar <= 4 ? 4 : Math.ceil(maxBar / 4) * 4;
+    const best = D.bars.length ? D.bars.reduce((a, b) => b.v > a.v ? b : a, D.bars[0]) : null;
+    const byC = {};
+    D.cities.forEach(c => { if (!byC[c.cc]) byC[c.cc] = { cc: c.cc, name: c.country, v: 0, cities: [] }; byC[c.cc].v += c.v; byC[c.cc].cities.push(c); });
+    const clist = Object.values(byC).sort((a, b) => b.v - a.v);
+    const cmax = clist.length ? clist[0].v : 1;
+    const srcTotal = D.sources.reduce((a, x) => a + x.v, 0) || 1;
+    const smax = Math.max(1, ...D.sources.map(x => x.v));
+    const topSrc = D.sources[0];
+    const devTotal = D.devices.reduce((a, x) => a + x[1], 0) || 1;
+    const DEVBG = ["var(--color-accent)", "var(--color-accent-300)", "var(--color-neutral-400)"];
+    const copyFn = (k, v, msg) => () => { try { if (navigator.clipboard) navigator.clipboard.writeText(v).catch(() => {}); } catch (e) {} this.setState({ copied: k }); clearTimeout(this._cp); this._cp = setTimeout(() => this.setState({ copied: null }), 1800); if (msg) this.say("ok", msg); };
+    const siteUrl = "hart.ceomaker.com";
+    const tiles = lowM ? [
+      { label: "Visitors", value: "3", change: "Since 28 Sep", icon: null, color: "var(--color-neutral-700)" },
+      { label: "Page views", value: "5", change: "About 2 per visitor", icon: null, color: "var(--color-neutral-700)" },
+      { label: "Messages received", value: "0", change: "None yet", icon: null, color: "var(--color-neutral-700)" },
+      { label: "Top source", value: "LinkedIn", change: "2 of 3 visitors", icon: null, color: "var(--color-neutral-700)" }
+    ] : [
+      { label: "Visitors", value: String(D.visitors), change: "+" + D.pct + "% on the previous " + s.range + " days", icon: up, color: tagUp },
+      { label: "Page views", value: String(D.pv), change: "+" + D.pvPct + "% on the previous " + s.range + " days", icon: up, color: tagUp },
+      { label: "Messages received", value: String(D.msg), change: "+" + (D.msg - D.msgPrev) + " on the previous " + s.range + " days", icon: up, color: tagUp },
+      { label: "Top source", value: SRC[topSrc.key][0], change: Math.round(topSrc.v / srcTotal * 100) + "% of visitors", icon: null, color: "var(--color-neutral-700)" }
+    ];
+    const an = {
+      loading: anMode === "loading", error: anMode === "error", unpublished: anMode === "unpublished", none: anMode === "none", ready: anMode === "normal" || lowM,
+      hasRange: anMode === "normal" || anMode === "loading", hasSince: lowM, rangeName: this.uid + "-rg",
+      ranges: [7, 30, 90].map(r => ({ label: r + " days", on: s.range === r, pick: () => this.setState({ range: r }) })),
+      skelTiles: [1, 2, 3, 4],
+      summary: lowM ? "3 people have visited your site since you published on 28 September. Two came from LinkedIn." : D.visitors + " people visited your site in the last " + s.range + " days, " + D.pct + "% more than the " + s.range + " days before. Most came from " + SRC[topSrc.key][0] + ", and more were in " + theName(clist[0].name) + " than anywhere else.",
+      tiles, hasChart: !lowM && nBars > 0, lowList: lowM, visits: D.visits || [],
+      chartSub: lowM ? "Every visit so far" : s.range === 90 ? "Visitors per week" : "Visitors per day",
+      chartAria: "Visitors per " + (s.range === 90 ? "week" : "day") + " for the last " + s.range + " days",
+      bars: D.bars.map(b => ({ h: b.v ? Math.max(2, b.v / niceMax * 100).toFixed(1) + "%" : "2px", bg: b.v ? "var(--color-accent)" : "var(--color-neutral-300)", tip: b.lbl + " · " + b.v + (b.v === 1 ? " visitor" : " visitors") })),
+      yTop: String(niceMax), yMid: String(niceMax / 2),
+      xFirst: nBars ? D.bars[0].short : "", xMid: nBars ? D.bars[Math.floor(nBars / 2)].short : "", xLast: nBars ? (s.range === 90 ? D.bars[nBars - 1].short : "Today") : "",
+      busiest: best ? (s.range === 90 ? "Busiest week: " + best.lbl.toLowerCase() + " · " + best.v + " visitors" : "Busiest day: " + best.lbl + " · " + best.v + " visitors") : "",
+      mapJson: JSON.stringify(D.cities.map(c => ({ city: c.city, country: c.country, cc: c.cc, lat: c.lat, lon: c.lon, v: c.v, recent: c.recent }))),
+      hl: s.hl || "", mapLabel: "World map of visitors by city. The list of countries has the same information.",
+      geoSub: clist.length + (clist.length === 1 ? " country · " : " countries · ") + D.cities.length + (D.cities.length === 1 ? " city" : " cities"),
+      hlOff: () => this.setState({ hl: null }),
+      countries: clist.map(c => { const open = !!s.openC[c.cc]; const cm = Math.max(...c.cities.map(x => x.v)); return { name: c.name, flag: flagOf(c.cc), v: c.v, w: (c.v / cmax * 100).toFixed(1) + "%", open, exp: open ? "true" : "false", chev: open ? "rotate(180deg)" : "none", bg: s.hl === c.cc ? "var(--color-accent-100)" : "transparent", toggle: () => this.setState(st => ({ openC: { ...st.openC, [c.cc]: !st.openC[c.cc] } })), hlOn: () => this.setState({ hl: c.cc }), cities: c.cities.slice().sort((a, b) => b.v - a.v).map(x => ({ name: x.city, v: x.v, w: (x.v / cm * 100).toFixed(1) + "%", recent: x.recent })) }; }),
+      sources: D.sources.map(x => { const m = SRC[x.key]; return { label: m[0], note: m[2], hasNote: !!m[2], icon: icon(m[1], 16), v: x.v, pct: Math.round(x.v / srcTotal * 100) + "%", w: (x.v / smax * 100).toFixed(1) + "%", hasSub: !!(x.sub && x.sub.length), sub: (x.sub || []).map(d => ({ label: d[0], v: d[1] })) }; }),
+      actions: D.actions.map(a => ({ label: ACT[a[0]][0], icon: icon(ACT[a[0]][1], 16), v: a[1] })), hasActNote: lowM,
+      devices: D.devices.map((d, i) => ({ label: d[0], v: d[1], pct: Math.round(d[1] / devTotal * 100) + "%", w: (d[1] / devTotal * 100).toFixed(1) + "%", bg: DEVBG[i] })),
+      devAria: D.devices.map(d => d[0] + " " + Math.round(d[1] / devTotal * 100) + "%").join(", "),
+      pages: D.pages, siteUrl,
+      shareLi: "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent("https://" + siteUrl),
+      copySite: copyFn("site", "https://" + siteUrl, "Link copied"), copySiteLabel: s.copied === "site" ? "Copied" : "Copy link", copySiteIcon: s.copied === "site" ? icon("check", 16) : icon("copy", 16),
+      retry: () => { this.setState({ anOverride: "loading" }); clearTimeout(this._rt); this._rt = setTimeout(() => this.setState({ anOverride: "normal" }), 1100); }
+    };
+    const W7 = anData(7);
+    const series = lowM ? [0, 0, 0, 0, 1, 1, 1] : W7.bars.map(b => b.v);
+    const smx = Math.max(1, ...series);
+    const line = series.map((v, i) => (i * 20) + "," + (34 - v / smx * 30).toFixed(1)).join(" ");
+    const ovA = anMode === "unpublished" ? { has: false, empty: true, emptyText: "Visitor numbers appear here once your site is live." }
+      : anMode === "none" ? { has: false, empty: true, emptyText: "No visits yet. Sharing your link on LinkedIn is the quickest way to change that." }
+      : { has: true, empty: false, emptyText: "", v: lowM ? 3 : W7.visitors, line, area: line + " 120,36 0,36", change: lowM ? "Since 28 Sep" : "+12% on last week", top: lowM ? "the United Kingdom" : theName(W7.cities.reduce((m, c) => { m[c.country] = (m[c.country] || 0) + c.v; return m; }, {}) && "United Kingdom") };
+
+    const dmS = s.dm, DOMAIN = s.domain;
+    const recs = [{ key: "a", type: "A", name: "@", hint: "Main domain · " + DOMAIN, value: DNS.a }, { key: "cname", type: "CNAME", name: "www", hint: "www." + DOMAIN, value: DNS.cname }];
+    const withCopy = r => ({ ...r, copy: copyFn(r.key, r.value), copyAria: "Copy " + r.type + " value " + r.value, copyLabel: s.copied === r.key ? "Copied" : "Copy", copyIcon: s.copied === r.key ? icon("check", 16) : icon("copy", 16) });
+    const ACTC = { Delete: ["var(--color-danger-soft)", "var(--color-danger)"], Add: ["var(--color-accent-100)", "var(--color-accent-800)"], Keep: ["var(--color-neutral-200)", "var(--color-neutral-800)"] };
+    const FIX = {
+      old: { title: "An old record still points somewhere else", text: DOMAIN + " has an extra A record pointing to " + DNS.old + ", probably your previous website. While it's there, some visitors land on the old site instead of yours.", act: "At your domain provider, delete the old record and keep the new one:", rows: [{ key: "fo", action: "Delete", type: "A", name: "@", value: DNS.old }, { key: "fa", action: "Keep", type: "A", name: "@", value: DNS.a }], after: "Leave the www record as it is." },
+      partial: { title: "www." + DOMAIN + " works, but " + DOMAIN + " doesn't yet", text: "The main domain, without www, still points to your old host. People who type the address without www don't reach your site.", act: "Add this record at your domain provider:", rows: [{ key: "fa", action: "Add", type: "A", name: "@", value: DNS.a }], after: "If there's already an A record for @, edit it to this value instead of adding a second one." },
+      verify: { title: DOMAIN + " is in use on another platform", text: "It's still connected to a website builder or another service. To prove it's yours, add one extra record. You can delete it once we've confirmed.", act: "Add this record at your domain provider:", rows: [{ key: "ft", action: "Add", type: "TXT", name: "_ceomaker", value: DNS.txt }], after: "Then remove the domain from the other service if you no longer use it there." }
+    };
+    const fx = FIX[s.fixKind] || FIX.old;
+    const spin = React.createElement("span", { "aria-hidden": true, style: { width: 14, height: 14, boxSizing: "border-box", borderRadius: "50%", border: "2px solid var(--color-neutral-300)", borderTopColor: "var(--color-accent)", animation: "db-spin .8s linear infinite" } });
+    const checkNow = () => { this.setState({ checking: true }); clearTimeout(this._ck); this._ck = setTimeout(() => { this.setState({ checking: false, checkedAt: "now", dm: "securing" }); clearTimeout(this._ck2); this._ck2 = setTimeout(() => { this.setState({ dm: "connected" }); this.say("ok", this.state.domain + " is live"); }, 2600); }, 1400); };
+    const TAGS = { records: ["Step 1 of 3", tagN], waiting: ["Checking", tagA], fix: ["Needs a fix", tagW], securing: ["Almost done", tagA] };
+    const stepState = { records: ["cur", "todo", "todo"], waiting: ["done", "cur", "todo"], fix: ["done", "warn", "todo"], securing: ["done", "done", "cur"] }[dmS];
+    const dm = {
+      hid: this.uid + "-dmh", inId: this.uid + "-dmi", errId: this.uid + "-dme",
+      none: dmS === "none", records: dmS === "records", waiting: dmS === "waiting", fix: dmS === "fix", securing: dmS === "securing", connected: dmS === "connected",
+      inFlow: !!stepState, hasTag: !!TAGS[dmS], tag: TAGS[dmS] ? TAGS[dmS][0] : "", tagBg: TAGS[dmS] ? TAGS[dmS][1].bg : "", tagFg: TAGS[dmS] ? TAGS[dmS][1].fg : "",
+      domain: DOMAIN, input: s.dInput, onInput: e => this.setState({ dInput: e.target.value, dErr: "" }),
+      hasErr: !!s.dErr, err: s.dErr, inv: s.dErr ? "true" : "false", bc: s.dErr ? "var(--color-danger)" : "var(--color-divider)",
+      submit: e => {
+        e.preventDefault();
+        const v = this.state.dInput.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
+        if (!v) return this.setState({ dErr: "Enter your domain, like ameliahart.com." });
+        if (/ceomaker\.com$/.test(v)) return this.setState({ dErr: "That's already your CEOMaker address. Enter a domain you own." });
+        if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(v)) return this.setState({ dErr: "That doesn't look like a domain. Try something like ameliahart.com." });
+        this.setState({ dm: "records", domain: v, dErr: "" });
+      },
+      buyOpen: s.buy, buyAria: s.buy ? "true" : "false", buyChev: s.buy ? "rotate(180deg)" : "none", toggleBuy: () => this.setState(st => ({ buy: !st.buy })),
+      steps: ["Add records", "We check", "Secure and live"].map((label, i) => { const st = stepState ? stepState[i] : "todo"; return { label, cur: st === "cur" || st === "warn" ? "step" : "false", bar: st === "done" || st === "cur" ? "var(--color-accent)" : st === "warn" ? "var(--color-warning)" : "var(--color-neutral-300)", color: st === "todo" ? "var(--color-neutral-700)" : "var(--color-text)", fw: st === "cur" || st === "warn" ? 500 : 400, icon: st === "done" ? icon("check", 14) : st === "warn" ? icon("alert", 14) : null }; }),
+      showRecs: dmS === "records" || (dmS === "waiting" && s.recsOpen), recs: recs.map(withCopy),
+      providers: Object.keys(PROVIDERS).map(k => { const on = s.provider === k; return { label: PROVIDERS[k][0], on, pick: () => this.setState({ provider: k }), bc: on ? "var(--color-accent)" : "var(--color-divider)", bg: on ? "var(--color-accent-100)" : "var(--color-bg)" }; }),
+      pSteps: PROVIDERS[s.provider][1].map((text, i) => ({ n: i + 1, text, slot: "dns-" + s.provider + "-" + (i + 1), ph: "Screenshot · step " + (i + 1) })),
+      stepsAria: "Steps for " + PROVIDERS[s.provider][0],
+      added: () => this.setState({ dm: "waiting", checkedAt: "now", recsOpen: false }),
+      reset: () => this.setState({ dm: "none", dInput: "", dErr: "" }),
+      checks: [{ name: "www." + DOMAIN, ok: true }, { name: DOMAIN, ok: false }].map(c => ({ name: c.name, label: c.ok ? "Found" : "Waiting", color: c.ok ? "var(--color-success)" : "var(--color-neutral-700)", icon: c.ok ? icon("check", 16) : icon("clock", 16) })),
+      lastChecked: s.checking ? "Checking now…" : s.checkedAt === "now" ? "Last checked just now" : "Last checked 2 min ago",
+      checking: s.checking, checkNow, checkLabel: s.checking ? "Checking…" : dmS === "fix" ? "Check again" : "Check now", checkIcon: s.checking ? spin : null,
+      recsLabel: s.recsOpen ? "Hide the records" : "Show the records again", recsAria: s.recsOpen ? "true" : "false", recsChev: s.recsOpen ? "rotate(180deg)" : "none", toggleRecs: () => this.setState(st => ({ recsOpen: !st.recsOpen })),
+      fixTitle: fx.title, fixText: fx.text, fixDo: fx.act, fixAfter: fx.after,
+      fixRows: fx.rows.map((r, i) => ({ ...withCopy(r), canCopy: r.action !== "Delete" && r.action !== "Keep", tagBg: ACTC[r.action][0], tagFg: ACTC[r.action][1], deco: r.action === "Delete" ? "line-through" : "none", color: r.action === "Delete" ? "var(--color-neutral-700)" : "var(--color-text)", bt: i ? "1px solid var(--color-divider)" : "0" })),
+      tipOpen: s.tip, tipAria: s.tip ? "true" : "false", tipChev: s.tip ? "rotate(180deg)" : "none", toggleTip: () => this.setState(st => ({ tip: !st.tip }))
+    };
+    const dmo = dmS === "none" ? { title: "Your own domain", tt: "uppercase", hasTag: false, tag: "", tagBg: "", tagFg: "", text: "Use your own address, like ameliahart.com.", btn: "Set up", btnCls: "btn btn-secondary" }
+      : dmS === "connected" ? { title: DOMAIN, tt: "none", hasTag: true, tag: "Live", tagBg: "var(--color-success-soft)", tagFg: "var(--color-success)", text: "hart.ceomaker.com forwards here.", btn: "Domain settings", btnCls: "btn btn-secondary" }
+      : { title: DOMAIN, tt: "none", hasTag: true, tag: TAGS[dmS][0], tagBg: TAGS[dmS][1].bg, tagFg: TAGS[dmS][1].fg, text: { records: "Add two records at your domain provider to finish.", waiting: "Waiting for your records to take effect. We'll email you when it's live.", fix: "One record needs fixing at your domain provider.", securing: "Setting up the secure padlock. Usually under a minute." }[dmS], btn: dmS === "fix" ? "See the fix" : "Continue setup", btnCls: dmS === "fix" ? "btn btn-primary" : "btn btn-secondary" };
+    site.display = dmS === "connected" && status !== "draft" ? DOMAIN : site.address;
+    site.hasFwd = dmS === "connected" && status !== "draft";
+    site.fwd = site.address + " forwards here";
+    const shareLink = "ceomaker.com/dns/hart-7f3a9c", pName = PROVIDERS[s.provider][0];
+    const mailBody = "Hi,\n\nCould you connect " + DOMAIN + " to my website? It needs these records in the domain's DNS settings" + (s.provider !== "other" ? " at " + pName : "") + ":\n\n" + recs.map(r => r.type + " record · Name: " + r.name + " · Value: " + r.value).join("\n") + "\n\nStep-by-step instructions: https://" + shareLink + "\n\nThank you,\n" + s.nameSaved.split(" ")[0];
+    Object.assign(dlg, {
+      share: s.dialog === "share", removeDomain: s.dialog === "removeDomain", domain: DOMAIN, pName, shareLink,
+      shareCopy: copyFn("share", "https://" + shareLink), shareLabel: s.copied === "share" ? "Copied" : "Copy link", shareIcon: s.copied === "share" ? icon("check", 16) : icon("copy", 16),
+      shareMail: "mailto:?subject=" + encodeURIComponent("Connecting " + DOMAIN + " to my website") + "&body=" + encodeURIComponent(mailBody),
+      confirmRemove: () => { this.setState({ dialog: null, dm: "none", dInput: "" }); this.say("ok", DOMAIN + " removed. Your site is back on " + site.address + "."); }
+    });
+    const icx = { alert: icon("alert"), alert16: icon("alert", 16), alertLg: icon("alert", 32), rotate: icon("rotate", 16), chartLg: icon("chart", 32), linkedin: icon("linkedin", 16), shield: icon("shield", 22), shield16: icon("shield", 16), search: icon("search", 16), send: icon("send", 16), check16: icon("check", 16) };
+
     return {
-      L, ic: { arrow, ext, chevron: icon("chevron", 16), reply: icon("reply", 16), trash: icon("trash", 16), lock: icon("lock"), x: icon("x"), info: icon("info"), sparkles: icon("sparkles"), inbox: icon("inbox", 22), inboxLg: icon("inbox", 32), mail: icon("mail"), mailLg: icon("mail", 24), logout: icon("logout", 16) },
+      L, an, dm, dmo, ovA, stillAttr: motionOn ? "0" : "1", motionStr: motionOn ? "true" : "false",
+      toAnalytics: () => this.go("analytics"), toDomain: () => this.go("settings", "site"),
+      ic: { ...icx, arrow, ext, chevron: icon("chevron", 16), reply: icon("reply", 16), trash: icon("trash", 16), lock: icon("lock"), x: icon("x"), info: icon("info"), sparkles: icon("sparkles"), inbox: icon("inbox", 22), inboxLg: icon("inbox", 32), mail: icon("mail"), mailLg: icon("mail", 24), logout: icon("logout", 16) },
       me: { name: s.nameSaved, first: s.nameSaved.split(" ")[0], email: "amelia@example.com", initials: "AH" },
       menu: { open: !!s.menu, chev: s.menu ? "rotate(180deg)" : "none", items: [{ label: "Account", icon: icon("user"), go: () => this.go("settings", "account") }, { label: "Billing", icon: icon("card"), go: () => this.go("settings", "billing") }, { label: "Sign out", icon: icon("logout"), go: () => this.setState({ menu: false }) }] },
       toggleMenu: () => this.setState(st => ({ menu: !st.menu })),
       tabs, subs, segName: this.uid + "-seg",
-      is: { overview: s.tab === "overview", messages: s.tab === "messages", settings: s.tab === "settings", ovLoading: p.loading === true, ovReady: p.loading !== true, msgLoading: loading },
+      is: { overview: s.tab === "overview", analytics: s.tab === "analytics", messages: s.tab === "messages", settings: s.tab === "settings", ovLoading: p.loading === true, ovReady: p.loading !== true, msgLoading: loading },
       sub: { site: s.sub === "site", account: s.sub === "account", billing: s.sub === "billing" },
       site, bill, inbox, empty, list, chips, older, addr, dlg, toast,
       ver: { has: status !== "draft", none: status === "draft", rows: VERSIONS.slice(0, 5).map(([n, date, tpl], i) => ({ n, date, tpl, cur: i === 0, notCur: i !== 0 })), more: VERSIONS.length > 5 },
       skel: [["92%", "64%"], ["86%", "40%"], ["95%", "72%"], ["70%", "30%"]].map(([w1, w2], i) => ({ w1, w2, bt: i ? "1px solid var(--color-divider)" : "0" })), skel2: [{ w1: "80%" }, { w1: "60%" }],
       sw: { id: this.uid + "-sw", aria: s.notify ? "true" : "false", bg: s.notify ? "var(--color-accent)" : "var(--color-neutral-400)", x: s.notify ? "23px" : "3px", toggle: () => this.setState(st => ({ notify: !st.notify })), notReady: !p.emailReady },
       prof: { id: this.uid + "-name", name: s.name, onName: e => this.setState({ name: e.target.value }), saveOff: !s.name.trim() || s.name === s.nameSaved, save: () => this.setState(st => ({ nameSaved: st.name.trim() }), () => this.say("ok", "Changes saved")) },
-      open: { deleteSite: () => this.setState({ dialog: "deleteSite", typed: "" }), deleteAccount: () => this.setState({ dialog: "deleteAccount", typed: "" }), changeEmail: () => this.setState({ dialog: "changeEmail", emailStage: "form", newEmail: "" }), cancel: () => this.setState({ dialog: "cancel" }) },
+      open: { share: () => this.setState({ dialog: "share" }), removeDomain: () => this.setState({ dialog: "removeDomain" }), deleteSite: () => this.setState({ dialog: "deleteSite", typed: "" }), deleteAccount: () => this.setState({ dialog: "deleteAccount", typed: "" }), changeEmail: () => this.setState({ dialog: "changeEmail", emailStage: "form", newEmail: "" }), cancel: () => this.setState({ dialog: "cancel" }) },
       signOutAll: () => this.say("ok", "Signed out on all other devices"),
       toMessages: () => this.go("messages"), toBilling: () => this.go("settings", "billing"), toEditor: editor,
       clearFilter: () => this.setState({ filter: "All" }), stop: e => e.stopPropagation(), rootRef: this.rootRef
