@@ -454,13 +454,3 @@ export function label(model: SiteModel, key: string, fallback: string): ModelTex
 export function shows(model: SiteModel, kind: MiddleKind): boolean {
   return model.order.includes(kind);
 }
-
-/** The first span of the lead paragraph split for a drop cap: "I" + "joined Meridian…". */
-export function dropCap(spans: RichTextSpan[]): { letter: string; spans: RichTextSpan[] } | null {
-  const [first, ...rest] = spans;
-  if (!first || first.bold || first.italic || first.href) return null;
-  const characters = Array.from(first.text.trimStart());
-  const letter = characters[0];
-  if (!letter) return null;
-  return { letter, spans: [{ ...first, text: characters.slice(1).join("") }, ...rest] };
-}

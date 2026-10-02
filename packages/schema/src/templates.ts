@@ -1,14 +1,7 @@
 import { z } from "zod";
 
 /** Template keys are part of the contract: stored on sites and versions, implemented in @ceomaker/templates. */
-export const TEMPLATE_KEYS = [
-  "meridian",
-  "aurora",
-  "obsidian",
-  "monument",
-  "bento",
-  "chronicle",
-] as const;
+export const TEMPLATE_KEYS = ["meridian", "monument"] as const;
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 export const DEFAULT_TEMPLATE_KEY: TemplateKey = "meridian";
@@ -21,11 +14,7 @@ export const DEFAULT_TEMPLATE_KEY: TemplateKey = "meridian";
  */
 export const TEMPLATE_VERSIONS = {
   meridian: [1],
-  aurora: [1],
-  obsidian: [1],
   monument: [1],
-  bento: [1],
-  chronicle: [1],
 } as const satisfies Record<TemplateKey, readonly [number, ...number[]]>;
 
 export type TemplateVersionOf<K extends TemplateKey> = (typeof TEMPLATE_VERSIONS)[K][number];
@@ -58,9 +47,17 @@ export function resolveTemplateVersion(key: TemplateKey, version: unknown): numb
   return isTemplateVersion(key, version) ? version : versionsOf(key)[0];
 }
 
-/** Retired keys still stored on older sites and versions, each mapped to one fixed design. */
+/**
+ * Retired keys still stored on older sites and versions, each mapped to one fixed design.
+ * Aurora, Obsidian, Bento and Chronicle were removed before launch, when only test accounts used
+ * them; their sites show Meridian.
+ */
 const TEMPLATE_KEY_ALIASES: Record<string, TemplateRef> = {
   executive: { key: "meridian", version: 1 },
+  aurora: { key: "meridian", version: 1 },
+  obsidian: { key: "meridian", version: 1 },
+  bento: { key: "meridian", version: 1 },
+  chronicle: { key: "meridian", version: 1 },
 };
 
 /** Resolves a stored key, including retired aliases. Null for keys we have never shipped. */

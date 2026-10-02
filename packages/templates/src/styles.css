@@ -50,46 +50,6 @@
   outline-offset: 3px;
 }
 
-@keyframes pt-marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes pt-float {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(40px, -30px, 0) scale(1.08);
-  }
-}
-
-@keyframes pt-ping {
-  0% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
-  }
-  100% {
-    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
-  }
-}
-
-.pt-marquee {
-  animation: pt-marquee var(--pt-duration, 40s) linear infinite;
-}
-
-.pt-float {
-  animation: pt-float var(--pt-duration, 16s) ease-in-out infinite alternate;
-}
-
-.pt-float-reverse {
-  animation: pt-float var(--pt-duration, 16s) ease-in-out infinite alternate-reverse;
-}
-
-.pt-ping {
-  animation: pt-ping 1.8s ease-out infinite;
-}
-
 /* Thumbnails and previews that should not move (template picker, dashboard cards). */
 .ceomaker-site[data-still] *,
 .ceomaker-site[data-still] *::before,

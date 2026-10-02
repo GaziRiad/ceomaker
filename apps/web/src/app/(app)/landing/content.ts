@@ -50,7 +50,7 @@ export const compare: {
     highlight: true,
     rows: [
       ["✓", "Copy drafted in your voice"],
-      ["✓", "Six templates built for executives"],
+      ["✓", "Templates designed for executives"],
       ["✓", "Edit anything, instantly"],
       ["✓", "Hosting and security included"],
     ],
@@ -92,7 +92,7 @@ export const quotes: { quote: string; name: string; initials: string; role: stri
 export const included = [
   "yourname.ceomaker.com address",
   "AI-drafted copy you can edit freely",
-  "All six executive templates",
+  "Every executive template",
   "Mobile-first, fast everywhere",
   "Visitor analytics (coming soon)",
   "Your own domain (coming soon)",

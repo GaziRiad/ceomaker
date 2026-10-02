@@ -271,7 +271,7 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
 
 ## Current state (October 2026)
 
-**Live in production** (`main`): guided questions and AI draft, six templates, in-place editor, publishing with versions, contact form and Messages inbox, Settings (site, account, billing beta), custom domains on Vercel (tested end to end with a real domain on Hostinger), and analytics with the world map.
+**Live in production** (`main`): guided questions and AI draft, two templates (Meridian, Monument), in-place editor, publishing with versions, contact form and Messages inbox, Settings (site, account, billing beta), custom domains on Vercel (tested end to end with a real domain on Hostinger), and analytics with the world map.
 
 **Merged (PR #2):** the Overview's site preview fills the height beside the side cards; smooth section links on live sites; every visible text in Meridian editable in place.
 
@@ -282,7 +282,7 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
 - DNS friction for non-technical users. Registrars ship a default `www` record, so adding ours fails (seen on Hostinger) until the old one is deleted. Options, cheapest first: show "change this record" using what's already on their DNS and detect the registrar from nameservers; Domain Connect one-click setup (GoDaddy, Cloudflare, IONOS, NameSilo; not Hostinger or Namecheap as far as we found); selling domains in-app. Measure where users stall before choosing.
 - Lemon Squeezy billing (Phase 3), Resend in production, buying the product domain.
 
-**Template direction (agreed October 2026):** fewer, stronger templates. Meridian is the quiet one; Monument (rebuilt) is the loud one. Round 1 also produced "Index" (1a: a precise, specification-sheet layout) as a candidate third template, not designed yet. Aurora, Obsidian, Bento and Chronicle are to be removed (only test accounts use them); not done yet.
+**Template direction (agreed October 2026):** fewer, stronger templates. Meridian is the quiet one; Monument (rebuilt) is the loud one. Round 1 also produced "Index" (1a: a precise, specification-sheet layout) as a candidate third template, not designed yet. Aurora, Obsidian, Bento and Chronicle were removed (only test accounts used them). Their keys stay as aliases of Meridian 1, so any stored site or version still renders, and saved colours for them are dropped when a draft is saved.
 
 **Monument redesign** (Claude Design round 2, direction 1b "Field"). Replaced Monument v1 in place instead of adding v2, because no real user has a Monument site yet; the freeze rule applies from launch.
 

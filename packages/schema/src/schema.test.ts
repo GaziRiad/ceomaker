@@ -189,24 +189,24 @@ describe("theme", () => {
         }
       }
     }
-    expect(resolveSiteColors({ palettes: {} }, "obsidian", 1).bg).toBe("#0b0b0c");
+    expect(resolveSiteColors({ palettes: {} }, "monument", 1).bg).toBe("#f3f0e8");
   });
 
   it("writes out a design's colours so a later default can't change them", () => {
     const settings = themeSettingsSchema.parse({
-      palettes: { aurora: { bg: "#ffffff", ink: "#000000", accent: "#123456" } },
+      palettes: { monument: { bg: "#ffffff", ink: "#000000", accent: "#123456" } },
     });
     const frozen = withResolvedColors(settings, "meridian", 1);
     expect(frozen.palettes.meridian).toEqual(defaultColors("meridian", 1));
-    expect(frozen.palettes.aurora).toEqual(settings.palettes.aurora);
-    expect(withResolvedColors(frozen, "aurora", 1)).toEqual(frozen);
+    expect(frozen.palettes.monument).toEqual(settings.palettes.monument);
+    expect(withResolvedColors(frozen, "monument", 1)).toEqual(frozen);
   });
 
   it("remembers colours per template", () => {
     const settings = themeSettingsSchema.parse({
-      palettes: { aurora: { bg: "#FFFFFF", ink: "#000000", accent: "#123456" } },
+      palettes: { monument: { bg: "#FFFFFF", ink: "#000000", accent: "#123456" } },
     });
-    expect(resolveSiteColors(settings, "aurora", 1)).toEqual({
+    expect(resolveSiteColors(settings, "monument", 1)).toEqual({
       bg: "#ffffff",
       ink: "#000000",
       accent: "#123456",
@@ -223,14 +223,21 @@ describe("theme", () => {
     expect(result.success).toBe(false);
   });
 
+  it("drops palettes of retired templates, so older drafts still save", () => {
+    const settings = themeSettingsSchema.parse({
+      palettes: { aurora: { bg: "#ffffff", ink: "#000000", accent: "#123456" } },
+    });
+    expect(settings.palettes).toEqual({});
+  });
+
   it("keeps valid palettes and drops bad ones when rendering stored data", () => {
     const settings = parseThemeSettingsForRender({
       palettes: {
-        bento: { bg: "#ececef", ink: "#111113", accent: "#0e7a5f" },
+        meridian: { bg: "#ececef", ink: "#111113", accent: "#0e7a5f" },
         monument: { bg: "nope", ink: "#000000", accent: "#000000" },
       },
     });
-    expect(Object.keys(settings.palettes)).toEqual(["bento"]);
+    expect(Object.keys(settings.palettes)).toEqual(["meridian"]);
     expect(parseThemeSettingsForRender({ colors: { background: "#fff" } })).toEqual({
       palettes: {},
     });
@@ -253,10 +260,11 @@ describe("theme", () => {
 });
 
 describe("templates", () => {
-  it("maps the retired executive key to meridian", () => {
+  it("maps retired keys to meridian", () => {
     expect(normalizeTemplateKey("executive")).toBe("meridian");
     expect(templateKeySchema.parse("executive")).toBe("meridian");
-    expect(normalizeTemplateKey("bento")).toBe("bento");
+    expect(normalizeTemplateKey("bento")).toBe("meridian");
+    expect(normalizeTemplateKey("monument")).toBe("monument");
     expect(normalizeTemplateKey("marquee")).toBeNull();
     expect(templateKeySchema.safeParse("marquee").success).toBe(false);
   });
@@ -273,7 +281,8 @@ describe("templates", () => {
       }
     }
     expect(resolveTemplateRef("executive", 999)).toEqual({ key: "meridian", version: 1 });
-    expect(resolveTemplateRef("bento", 1)).toEqual({ key: "bento", version: 1 });
+    expect(resolveTemplateRef("bento", 1)).toEqual({ key: "meridian", version: 1 });
+    expect(resolveTemplateRef("monument", 1)).toEqual({ key: "monument", version: 1 });
     expect(resolveTemplateRef("marquee", 1)).toEqual({ key: "meridian", version: 1 });
   });
 });

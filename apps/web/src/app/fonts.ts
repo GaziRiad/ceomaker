@@ -3,9 +3,7 @@ import {
   Barlow_Condensed,
   Big_Shoulders,
   Inter,
-  Manrope,
   Newsreader,
-  Playfair_Display,
   Public_Sans,
 } from "next/font/google";
 
@@ -29,19 +27,6 @@ export const barlowCondensed = Barlow_Condensed({
 export const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
-  preload: false,
-});
-export const playfair = Playfair_Display({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  variable: "--font-playfair",
-  display: "swap",
-  preload: false,
-});
-export const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
   display: "swap",
   preload: false,
 });
@@ -88,7 +73,7 @@ export const barlowCondensedLazy = Barlow_Condensed({
   preload: false,
 });
 
-const siteFonts = [inter, playfair, manrope, newsreader, bigShoulders, publicSans];
+const siteFonts = [inter, newsreader, bigShoulders, publicSans];
 
 export const siteFontVariables = [...siteFonts, barlowLazy, barlowCondensedLazy]
   .map((font) => font.variable)

@@ -198,7 +198,7 @@ describe("comparing the draft with the live site", () => {
     // Colours saved for another template don't show on this one.
     const otherTemplate = {
       ...draft,
-      theme: { palettes: { aurora: { bg: "#ffffff", ink: "#000000", accent: "#123456" } } },
+      theme: { palettes: { monument: { bg: "#ffffff", ink: "#000000", accent: "#123456" } } },
     };
     expect(liveFingerprint(otherTemplate)).toBe(liveFingerprint(draft));
     expect(fingerprint(otherTemplate)).not.toBe(fingerprint(draft));
@@ -207,7 +207,7 @@ describe("comparing the draft with the live site", () => {
   it("compares the design that would render, and saves the one chosen", () => {
     // There's no Meridian 99: it renders as the oldest design, so visitors see no change.
     expect(liveFingerprint({ ...draft, templateVersion: 99 })).toBe(liveFingerprint(draft));
-    expect(liveFingerprint({ ...draft, templateKey: "bento" })).not.toBe(liveFingerprint(draft));
+    expect(liveFingerprint({ ...draft, templateKey: "monument" })).not.toBe(liveFingerprint(draft));
     expect(fingerprint({ ...draft, templateVersion: 99 })).not.toBe(fingerprint(draft));
   });
 });

@@ -31,7 +31,20 @@ export type SiteColors = z.output<typeof siteColorsSchema>;
  * back never loses a palette. Templates without an entry use their default palette.
  */
 export const themeSettingsSchema = z.object({
-  palettes: z.partialRecord(z.enum(TEMPLATE_KEYS), siteColorsSchema).default({}),
+  palettes: z
+    .preprocess(
+      // Palettes of retired templates are dropped, so older drafts still save.
+      (value) =>
+        typeof value === "object" && value !== null && !Array.isArray(value)
+          ? Object.fromEntries(
+              Object.entries(value).filter(([key]) =>
+                (TEMPLATE_KEYS as readonly string[]).includes(key),
+              ),
+            )
+          : value,
+      z.partialRecord(z.enum(TEMPLATE_KEYS), siteColorsSchema),
+    )
+    .default({}),
 });
 
 export type ThemeSettings = z.output<typeof themeSettingsSchema>;
@@ -65,26 +78,6 @@ export const TEMPLATE_PALETTES: {
       palette("Night", "#111316", "#ecebe6", "#a9bfdc"),
     ],
   },
-  aurora: {
-    1: [
-      palette("Indigo", "#fbfbfd", "#0f1222", "#4f46e5"),
-      palette("Ocean", "#f8fbfd", "#0b1b2b", "#0284c7"),
-      palette("Emerald", "#fafcfb", "#0c1f17", "#059669"),
-      palette("Coral", "#fdfbfa", "#1f1210", "#e11d48"),
-      palette("Graphite", "#fafafa", "#111111", "#3f3f46"),
-      palette("Midnight", "#0c0e1a", "#eef0fa", "#818cf8"),
-    ],
-  },
-  obsidian: {
-    1: [
-      palette("Champagne", "#0b0b0c", "#f2efe9", "#c9a86a"),
-      palette("Midnight", "#0a0f1c", "#eef1f7", "#8fb3ff"),
-      palette("Bordeaux", "#120a0c", "#f4ece9", "#c2575f"),
-      palette("Emerald night", "#08110e", "#e9f2ee", "#6fcf97"),
-      palette("Platinum", "#0c0c0d", "#f2f2f2", "#bfc3c9"),
-      palette("Daylight", "#f6f3ee", "#141414", "#9a7b45"),
-    ],
-  },
   monument: {
     1: [
       palette("Signal", "#f3f0e8", "#15130f", "#ff5a1f"),
@@ -93,26 +86,6 @@ export const TEMPLATE_PALETTES: {
       palette("Oxblood", "#f4efe9", "#1a1414", "#7a1f2b"),
       palette("Acid night", "#0f100d", "#efeee6", "#c6f36b"),
       palette("Ember night", "#14110f", "#f3ede4", "#ff6b2c"),
-    ],
-  },
-  bento: {
-    1: [
-      palette("Emerald", "#ececef", "#111113", "#0e7a5f"),
-      palette("Sand", "#efebe4", "#1a1714", "#a15c2f"),
-      palette("Ice", "#eaeff3", "#0d1620", "#2563eb"),
-      palette("Plum", "#eeebf0", "#17111a", "#7c3aed"),
-      palette("Carbon", "#0f0f11", "#f2f2f4", "#34d399"),
-      palette("Blush", "#f3eceb", "#1c1414", "#be185d"),
-    ],
-  },
-  chronicle: {
-    1: [
-      palette("Evergreen", "#f3efe6", "#22211d", "#2f4a3a"),
-      palette("Terracotta", "#f4eee6", "#2a1f19", "#b5562f"),
-      palette("Ink blue", "#f2f0ea", "#1b2230", "#2d4a7a"),
-      palette("Plum", "#f3eee9", "#261d22", "#6b3a52"),
-      palette("Charcoal", "#ecebe7", "#1c1c1c", "#555048"),
-      palette("Lamplight", "#16140f", "#efe8da", "#d4a55a"),
     ],
   },
 };
