@@ -4,6 +4,7 @@
  * stylesheet serves every tenant. Import this after `@import "tailwindcss"`.
  */
 @import "./meridian/v1/meridian.css";
+@import "./monument/v1/monument.css";
 @source "./";
 
 @theme inline {

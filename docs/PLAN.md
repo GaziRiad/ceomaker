@@ -273,11 +273,24 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
 
 **Live in production** (`main`): guided questions and AI draft, six templates, in-place editor, publishing with versions, contact form and Messages inbox, Settings (site, account, billing beta), custom domains on Vercel (tested end to end with a real domain on Hostinger), and analytics with the world map.
 
-**On the claude branch, not yet merged:** the Overview's site preview fills the height beside the side cards; smooth section links on live sites (instant under reduced motion), stopping just under the sticky header; every visible text in Meridian editable in place.
+**Merged (PR #2):** the Overview's site preview fills the height beside the side cards; smooth section links on live sites; every visible text in Meridian editable in place.
+
+**On the claude branch, not yet merged:** Monument rebuilt from the Claude Design round 2 board (see "Monument redesign" below).
 
 **Parked, revisit around launch:**
 
 - DNS friction for non-technical users. Registrars ship a default `www` record, so adding ours fails (seen on Hostinger) until the old one is deleted. Options, cheapest first: show "change this record" using what's already on their DNS and detect the registrar from nameservers; Domain Connect one-click setup (GoDaddy, Cloudflare, IONOS, NameSilo; not Hostinger or Namecheap as far as we found); selling domains in-app. Measure where users stall before choosing.
 - Lemon Squeezy billing (Phase 3), Resend in production, buying the product domain.
+
+**Template direction (agreed October 2026):** fewer, stronger templates. Meridian is the quiet one; Monument (rebuilt) is the loud one. Round 1 also produced "Index" (1a: a precise, specification-sheet layout) as a candidate third template, not designed yet. Aurora, Obsidian, Bento and Chronicle are to be removed (only test accounts use them); not done yet.
+
+**Monument redesign** (Claude Design round 2, direction 1b "Field"). Replaced Monument v1 in place instead of adding v2, because no real user has a Monument site yet; the freeze rule applies from launch.
+
+- Big Shoulders (Google renamed "Big Shoulders Display"; set at its display optical size) and Public Sans. The name is fitted without a browser measurement: `monument/v1/measure.ts` holds the font's measured letter widths.
+- Three owner colours, everything else mixed per site to clear 4.5:1 (3:1 for field borders) on paper, on the inverse field and on the accent field. Text on the accent picks the background or the text colour, whichever contrasts more. New presets: Signal, Cobalt, Forest, Oxblood, Acid night, Ember night.
+- The contact form, custom section titles and template wording now work in Monument. The form moved to `src/contact-form.tsx` and is shared with Meridian through a class prefix (Meridian's output unchanged).
+- Motion: the name entrance, marquee, row flood and form states are CSS. The design's section wipe needs to know which sections were off screen at load, so a small client component marks them after the page has loaded; without it, or under reduced motion and in thumbnails, nothing is hidden. Phone menu is a client component.
+- Deviations: photos are greyscale multiplied into the accent as designed (open question: owners may want natural colour); the eyebrow is hidden when it only repeats the role and organisation shown on the field; dates use an en dash.
+- Not built: the board's proposed "Speaking topics" and "In the press" sections (new content, needs a decision).
 
 **Next:** decide the next template objectives with the owner before building anything. Earlier ideas the owner raised: sub-pages and a simple blog, menu links to sub-pages, bringing custom titles to the other templates. The constraint stands: easy for busy non-technical people, not a Webflow clone.

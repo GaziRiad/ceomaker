@@ -7,7 +7,7 @@ import {
   type SendContactMessageResult,
 } from "@ceomaker/schema";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { SendContactMessage } from "../../types";
+import type { SendContactMessage } from "./types";
 
 interface Values {
   name: string;
@@ -38,11 +38,19 @@ function validate(values: Values, first: string): Errors {
   return errors;
 }
 
-function FieldError({ id, message }: { id: string; message: string | undefined }) {
+function FieldError({
+  id,
+  message,
+  prefix,
+}: {
+  id: string;
+  message: string | undefined;
+  prefix: string;
+}) {
   if (!message) return null;
   return (
-    <span id={id} className="mer-error">
-      <span aria-hidden="true" className="mer-error-icon">
+    <span id={id} className={`${prefix}-error`}>
+      <span aria-hidden="true" className={`${prefix}-error-icon`}>
         !
       </span>
       {message}
@@ -50,10 +58,6 @@ function FieldError({ id, message }: { id: string; message: string | undefined }
   );
 }
 
-/**
- * Meridian's contact form. Validates on submit, then sends through `send` on a live site. In
- * previews there's nothing to send to, so it walks through the same states and says so.
- */
 /** One piece of the form's wording; `field` is set only in the editor's preview. */
 interface Word {
   text: string;
@@ -81,13 +85,21 @@ function Text({ word, className }: { word: Word; className?: string }) {
   );
 }
 
-export function MeridianContactForm({
+/**
+ * The contact form templates share. Validates on submit, then sends through `send` on a live
+ * site. In previews there's nothing to send to, so it walks through the same states and says so.
+ * Each template styles it through its own class prefix ("mer-panel", "mon-panel").
+ */
+export function ContactForm({
+  prefix,
   topics,
   topicFields,
   words,
   first,
   send,
 }: {
+  /** The template's class prefix. */
+  prefix: string;
   topics: string[];
   /** Content paths of the topics, in the editor's preview only. */
   topicFields: string[];
@@ -168,18 +180,18 @@ export function MeridianContactForm({
     const sender = values.name.trim().split(/\s+/)[0] ?? "";
     const email = values.email.trim();
     return (
-      <div ref={sent} tabIndex={-1} role="status" className="mer-panel mer-sent">
+      <div ref={sent} tabIndex={-1} role="status" className={`${prefix}-panel ${prefix}-sent`}>
         <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
-          <circle className="mer-check-ring" cx="24" cy="24" r="23" />
-          <path className="mer-check" d="M15 24.5l6 6 12-13" />
+          <circle className={`${prefix}-check-ring`} cx="24" cy="24" r="23" />
+          <path className={`${prefix}-check`} d="M15 24.5l6 6 12-13" />
         </svg>
-        <span className="mer-sent-title">Message sent</span>
-        <span className="mer-sent-line">
+        <span className={`${prefix}-sent-title`}>Message sent</span>
+        <span className={`${prefix}-sent-line`}>
           {send
             ? `${sender ? `Thanks, ${sender}. ` : "Thanks. "}${first ? `${first} will reply to ` : "You'll get a reply at "}${email}.`
             : "This is a preview. On your live site, messages arrive in your dashboard."}
         </span>
-        <button type="button" className="mer-again" onClick={reset}>
+        <button type="button" className={`${prefix}-again`} onClick={reset}>
           Send another message
         </button>
       </div>
@@ -187,17 +199,23 @@ export function MeridianContactForm({
   }
 
   const describedBy = (field: ContactMessageField) =>
-    errors[field] ? `mer-${field}-error` : undefined;
+    errors[field] ? `${prefix}-${field}-error` : undefined;
 
   return (
-    <div className="mer-panel">
-      <form ref={form} noValidate aria-label="Contact form" className="mer-form" onSubmit={submit}>
+    <div className={`${prefix}-panel`}>
+      <form
+        ref={form}
+        noValidate
+        aria-label="Contact form"
+        className={`${prefix}-form`}
+        onSubmit={submit}
+      >
         {topics.length ? (
-          <fieldset className="mer-fieldset">
-            <legend className="mer-legend">
+          <fieldset className={`${prefix}-fieldset`}>
+            <legend className={`${prefix}-legend`}>
               <Text word={words.question} />
             </legend>
-            <div className="mer-topics">
+            <div className={`${prefix}-topics`}>
               {topics.map((topic, index) => {
                 const on = values.topic === topic;
                 return (
@@ -206,11 +224,11 @@ export function MeridianContactForm({
                     type="button"
                     aria-pressed={on}
                     disabled={busy}
-                    className="mer-topic"
+                    className={`${prefix}-topic`}
                     onClick={() => set("topic", on ? null : topic)}
                   >
                     {on ? (
-                      <span aria-hidden="true" className="mer-topic-tick">
+                      <span aria-hidden="true" className={`${prefix}-topic-tick`}>
                         ✓
                       </span>
                     ) : null}
@@ -225,44 +243,44 @@ export function MeridianContactForm({
             </div>
           </fieldset>
         ) : null}
-        <div className="mer-fields">
-          <label className="mer-field">
-            <Text word={words.name} className="mer-field-label" />
+        <div className={`${prefix}-fields`}>
+          <label className={`${prefix}-field`}>
+            <Text word={words.name} className={`${prefix}-field-label`} />
             <input
               name="name"
               autoComplete="name"
               maxLength={CONTACT_MESSAGE_LIMITS.name}
-              className="mer-input"
+              className={`${prefix}-input`}
               value={values.name}
               disabled={busy}
               aria-invalid={Boolean(errors.name)}
               aria-describedby={describedBy("name")}
               onChange={(event) => set("name", event.target.value)}
             />
-            <FieldError id="mer-name-error" message={errors.name} />
+            <FieldError id={`${prefix}-name-error`} message={errors.name} prefix={prefix} />
           </label>
-          <label className="mer-field">
-            <Text word={words.email} className="mer-field-label" />
+          <label className={`${prefix}-field`}>
+            <Text word={words.email} className={`${prefix}-field-label`} />
             <input
               name="email"
               type="email"
               inputMode="email"
               autoComplete="email"
               maxLength={CONTACT_MESSAGE_LIMITS.email}
-              className="mer-input"
+              className={`${prefix}-input`}
               value={values.email}
               disabled={busy}
               aria-invalid={Boolean(errors.email)}
               aria-describedby={describedBy("email")}
               onChange={(event) => set("email", event.target.value)}
             />
-            <FieldError id="mer-email-error" message={errors.email} />
+            <FieldError id={`${prefix}-email-error`} message={errors.email} prefix={prefix} />
           </label>
         </div>
-        <label className="mer-field">
-          <span className="mer-field-label">
+        <label className={`${prefix}-field`}>
+          <span className={`${prefix}-field-label`}>
             <Text word={words.organisation} />
-            <span className="mer-optional">
+            <span className={`${prefix}-optional`}>
               {" · "}
               <Text word={words.optional} />
             </span>
@@ -271,53 +289,53 @@ export function MeridianContactForm({
             name="organisation"
             autoComplete="organization"
             maxLength={CONTACT_MESSAGE_LIMITS.organisation}
-            className="mer-input"
+            className={`${prefix}-input`}
             value={values.organisation}
             disabled={busy}
             onChange={(event) => set("organisation", event.target.value)}
           />
         </label>
-        <label className="mer-field">
-          <Text word={words.message} className="mer-field-label" />
+        <label className={`${prefix}-field`}>
+          <Text word={words.message} className={`${prefix}-field-label`} />
           <textarea
             name="message"
             rows={5}
             maxLength={CONTACT_MESSAGE_LIMITS.message}
-            className="mer-input mer-textarea"
+            className={`${prefix}-input ${prefix}-textarea`}
             value={values.message}
             disabled={busy}
             aria-invalid={Boolean(errors.message)}
             aria-describedby={describedBy("message")}
             onChange={(event) => set("message", event.target.value)}
           />
-          <FieldError id="mer-message-error" message={errors.message} />
+          <FieldError id={`${prefix}-message-error`} message={errors.message} prefix={prefix} />
         </label>
         <input
           name="website"
           tabIndex={-1}
           autoComplete="off"
           aria-hidden="true"
-          className="mer-honeypot"
+          className={`${prefix}-honeypot`}
           defaultValue=""
         />
         {failure ? (
-          <span role="alert" className="mer-error">
-            <span aria-hidden="true" className="mer-error-icon">
+          <span role="alert" className={`${prefix}-error`}>
+            <span aria-hidden="true" className={`${prefix}-error-icon`}>
               !
             </span>
             {failure}
           </span>
         ) : null}
-        <div className="mer-submit-row">
-          <button type="submit" disabled={busy} className="mer-button mer-submit">
+        <div className={`${prefix}-submit-row`}>
+          <button type="submit" disabled={busy} className={`${prefix}-button ${prefix}-submit`}>
             {busy ? "Sending…" : <Text word={words.send} />}
             {busy ? (
-              <span aria-hidden="true" className="mer-spinner" />
+              <span aria-hidden="true" className={`${prefix}-spinner`} />
             ) : (
               <span aria-hidden="true">→</span>
             )}
           </button>
-          <Text word={words.note} className="mer-note" />
+          <Text word={words.note} className={`${prefix}-note`} />
         </div>
       </form>
     </div>

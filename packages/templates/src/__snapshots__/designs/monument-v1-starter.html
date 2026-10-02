@@ -1,95 +1,127 @@
-<div class="ceomaker-site" style="--site-bg:#f2f2ee;--site-ink:#0a0a0a;--site-accent:#1f3bff;--site-on:#ffffff;--site-surface:#ffffff;--site-pastel:100%;min-height:100dvh">
-<div id="top" style="font-family:var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;font-size:16px;line-height:1.5;overflow:hidden">
+<div class="ceomaker-site" style="--site-bg:#f3f0e8;--site-ink:#15130f;--site-accent:#ff5a1f;--site-on:#111111;--site-surface:#ffffff;--site-pastel:100%;min-height:100dvh">
+<div id="top" class="mon" style="--mon-on:var(--site-ink);--mon-on2:color-mix(in srgb, var(--site-ink) 82%, var(--site-accent));--mon-ink2:color-mix(in srgb, var(--site-ink) 70%, var(--site-bg));--mon-bg2:color-mix(in srgb, var(--site-bg) 70%, var(--site-ink));--mon-act:color-mix(in srgb, var(--site-accent) 68%, var(--site-ink));--mon-acd:var(--site-accent);--mon-field:color-mix(in srgb, var(--site-ink) 48%, var(--site-bg));--mon-rulea:color-mix(in srgb, var(--site-ink) 30%, var(--site-accent));--mon-tone:color-mix(in srgb, var(--site-ink) 14%, var(--site-accent));--mon-measure:2.062;font-family:var(--font-public-sans), &quot;Public Sans&quot;, &quot;Noto Sans&quot;, &quot;Noto Sans SC&quot;, &quot;Noto Sans JP&quot;, &quot;Noto Sans Arabic&quot;, system-ui, sans-serif;min-height:inherit">
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-site-ink focus:px-4 focus:py-2 focus:text-site-bg">Skip to content</a>
-<header class="grid grid-cols-[1fr_auto] @3xl:grid-cols-3" style="font-size:13px;font-weight:600;text-transform:uppercase;padding:0 clamp(20px, 3.125cqw, 40px);height:64px;align-items:center;gap:16px;border-bottom:1px solid var(--site-ink);letter-spacing:0.02em">
-<a href="#top" style="white-space:nowrap;overflow:hidden">
+<header class="mon-header">
+<div class="mon-header-in">
+<a href="#top" class="mon-brand">
 <span>Sam</span>
 </a>
-<span class="hidden @3xl:flex" style="align-items:center;gap:10px;justify-content:center">
-</span>
-<nav aria-label="Sections" style="display:flex;gap:28px;justify-content:flex-end">
-<a href="#about" class="hidden hover:text-site-accent @xl:inline">About</a>
-<a href="#contact" class="hover:text-site-accent">Contact</a>
+<nav aria-label="Sections" class="mon-nav">
+<a href="#about" class="mon-nav-link">About</a>
 </nav>
+<a href="#contact" class="mon-header-cta">Contact</a>
+<div class="mon-phone-only">
+<button type="button" class="mon-menu-button" aria-expanded="false">Menu<span aria-hidden="true" class="mon-burger">
+<span>
+</span>
+<span>
+</span>
+</span>
+</button>
+</div>
+</div>
 </header>
 <main id="main">
-<section class="[--mn-reserve:0px] @3xl:[--mn-reserve:480px]" style="padding:36px clamp(20px, 3.125cqw, 40px) 0">
-<div style="font-weight:900">
-<span style="font-weight:900;font-size:max(40px, min(236px, calc((100cqw - 2 * clamp(20px, 3.125cqw, 40px)) / 1.86)));line-height:0.8;letter-spacing:-0.075em;text-transform:uppercase;white-space:nowrap;display:block">Sam</span>
-<span class="flex flex-wrap items-end gap-6 @3xl:flex-nowrap @3xl:gap-8" style="margin-top:10px">
-<div class="h-[150px] w-[236px] @3xl:h-[190px] @3xl:w-[300px]" style="position:relative;overflow:hidden;flex:none;background:linear-gradient(135deg, var(--site-accent), var(--site-accent-deep));margin-bottom:6px">
-<span style="position:absolute;right:14px;bottom:4px;font-weight:900;font-size:clamp(84px, 9.375cqw, 120px);line-height:1;color:color-mix(in srgb, var(--site-on) 16%, transparent);letter-spacing:-0.06em">S</span>
-</div>
-<span style="flex:1;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0;line-height:1.5;padding-bottom:8px;white-space:nowrap">(Portrait)</span>
+<section aria-label="Introduction" class="mon-hero">
+<div class="mon-stage">
+<span aria-hidden="true" class="mon-initials">S</span>
+<div class="mon-field-top">
+<span class="mon-meta">
+<span>Founder</span>
 </span>
 </div>
-</section>
-<section class="grid grid-cols-1 gap-6 @3xl:grid-cols-[4fr_8fr] @3xl:gap-10" style="padding:clamp(48px, 5.625cqw, 72px) clamp(20px, 3.125cqw, 40px) clamp(64px, 6.875cqw, 88px)">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;display:flex;flex-direction:column;gap:6px">
-<span style="color:var(--site-accent)">(Role)</span>
+<div class="mon-name-row">
+<div class="mon-name-col">
+<h1 class="mon-name">
+<span class="mon-line" style="animation-delay:60ms">Sam</span>
+</h1>
+<ul aria-label="Keywords" class="mon-keywords">
+<li>
 <span>Founder</span>
+<span aria-hidden="true" class="mon-on2">/</span>
+</li>
+<li>
+<span>Technology</span>
+</li>
+</ul>
 </div>
-<div>
-<h1 style="margin:0;font-family:var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;font-weight:700;font-size:clamp(32px, 4.0625cqw, 52px);line-height:1.02;letter-spacing:-0.045em;text-wrap:balance">Building technology that earns its place.</h1>
-<p style="margin:22px 0 0;max-width:640px;font-size:clamp(16px, 1.4063cqw, 18px);color:var(--site-muted)">I lead a growing organisation in technology.</p>
-<a href="#contact" class="transition-opacity hover:opacity-90" style="margin-top:32px;display:inline-flex;justify-content:space-between;align-items:center;gap:24px;min-width:280px;padding:18px 20px;background:var(--site-accent);color:var(--site-on);font-weight:700;text-transform:uppercase;font-size:14px;letter-spacing:0.02em">
-<span>Get in touch</span> <span aria-hidden="true">→</span>
+</div>
+</div>
+<div class="mon-below">
+<div class="mon-headline-col mon-in" style="animation-delay:380ms">
+<p class="mon-headline">Building technology that earns its place.</p>
+</div>
+<div class="mon-intro-col mon-in" style="animation-delay:450ms">
+<p class="mon-intro">I lead a growing organisation in technology.</p>
+<a href="#contact" class="mon-button">
+<span>Get in touch</span>
+<span aria-hidden="true" class="mon-dot-arrow">→</span>
 </a>
 </div>
+</div>
 </section>
-<div role="group" aria-label="Keywords" style="background:var(--site-accent);color:var(--site-on);overflow:hidden;padding:26px 0">
-<div class="pt-marquee" style="display:flex;width:max-content;--pt-duration:30s">
-<span aria-hidden="false" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Founder <span style="color:var(--site-ink)">✦</span>
+<section id="about" aria-labelledby="mon-about-h" class="mon-sec mon-inverse mon-about" data-wipe="">
+<span class="mon-count" data-rise="true">
+<span class="mon-count-n">01</span>
+<span aria-hidden="true"> / 01</span>
 </span>
-<span aria-hidden="false" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Technology <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Founder <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Technology <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Founder <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Technology <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Founder <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Technology <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Founder <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Technology <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Founder <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Technology <span style="color:var(--site-ink)">✦</span>
-</span>
-</div>
-</div>
-<div style="display:contents">
-<section id="about" aria-label="About" style="padding:clamp(72px, 9.375cqw, 120px) clamp(20px, 3.125cqw, 40px) 0">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;border-top:1px solid var(--site-ink);padding-top:14px;display:flex;justify-content:space-between;gap:24px">
-<span>(01) About</span>
-</div>
-<div class="grid grid-cols-1 @3xl:grid-cols-[4fr_8fr] @3xl:gap-10" style="margin-top:40px">
-<div>
-</div>
-<div>
-<p style="margin:0;font-weight:700;font-size:clamp(28px, 3.125cqw, 40px);line-height:1.14;letter-spacing:-0.04em;text-wrap:pretty">
+<h2 id="mon-about-h" data-rise="" class="mon-title mon-title-accent" style="--mon-ts:1">About</h2>
+<div class="mon-about-grid">
+<p data-rise="" class="mon-lead">
 <span>I lead a growing organisation in technology.</span>
 </p>
 </div>
-</div>
 </section>
+<section id="contact" aria-labelledby="mon-contact-h" class="mon-contact" data-wipe="" data-form="">
+<h2 id="mon-contact-h" data-rise="" class="mon-contact-title" style="--mon-ts:1">Contact</h2>
+<div class="mon-contact-grid" data-split="true">
+<div data-rise="" class="mon-direct">
+<p class="mon-blurb">For enquiries and introductions.</p>
 </div>
-<section id="contact" aria-label="Contact" style="padding:clamp(96px, 11.25cqw, 144px) clamp(20px, 3.125cqw, 40px) 48px">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;border-top:1px solid var(--site-ink);padding-top:14px;display:flex;justify-content:space-between;gap:24px">
-<span>(02) Contact</span>
-<span style="text-align:right">For enquiries and introductions.</span>
+<div data-rise="" class="mon-form-column">
+<div class="mon-panel">
+<form noValidate="" aria-label="Contact form" class="mon-form">
+<div class="mon-fields">
+<label class="mon-field">
+<span class="mon-field-label">Your name</span>
+<input autoComplete="name" maxLength="80" class="mon-input" aria-invalid="false" name="name" value=""/>
+</label>
+<label class="mon-field">
+<span class="mon-field-label">Email</span>
+<input type="email" inputMode="email" autoComplete="email" maxLength="254" class="mon-input" aria-invalid="false" name="email" value=""/>
+</label>
 </div>
-<footer style="font-size:13px;font-weight:600;text-transform:uppercase;margin-top:clamp(56px, 6.25cqw, 80px);display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px">
-<span>© 2026 Sam</span>
-</footer>
+<label class="mon-field">
+<span class="mon-field-label">Organisation<span class="mon-optional"> · optional</span>
+</span>
+<input autoComplete="organization" maxLength="100" class="mon-input" name="organisation" value=""/>
+</label>
+<label class="mon-field">
+<span class="mon-field-label">Message</span>
+<textarea name="message" rows="5" maxLength="4000" class="mon-input mon-textarea" aria-invalid="false">
+</textarea>
+</label>
+<input tabindex="-1" autoComplete="off" aria-hidden="true" class="mon-honeypot" name="website" value=""/>
+<div class="mon-submit-row">
+<button type="submit" class="mon-button mon-submit">Send message<span aria-hidden="true">→</span>
+</button>
+<span class="mon-note">Goes straight to Sam. Your details aren&#x27;t shared.</span>
+</div>
+</form>
+</div>
+</div>
+</div>
 </section>
 </main>
+<footer class="mon-footer">
+<div class="mon-footer-in">
+<span>© 2026 Sam</span>
+<span class="mon-footer-location">
+</span>
+<a href="#top" class="mon-top">Back to top ↑</a>
+</div>
+</footer>
+<span hidden="">
+</span>
 </div>
 </div>

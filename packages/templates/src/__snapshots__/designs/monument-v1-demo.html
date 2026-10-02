@@ -1,226 +1,473 @@
-<div class="ceomaker-site" style="--site-bg:#f2f2ee;--site-ink:#0a0a0a;--site-accent:#1f3bff;--site-on:#ffffff;--site-surface:#ffffff;--site-pastel:100%;min-height:100dvh">
-<div id="top" style="font-family:var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;font-size:16px;line-height:1.5;overflow:hidden">
+<div class="ceomaker-site" style="--site-bg:#f3f0e8;--site-ink:#15130f;--site-accent:#ff5a1f;--site-on:#111111;--site-surface:#ffffff;--site-pastel:100%;min-height:100dvh">
+<div id="top" class="mon" style="--mon-on:var(--site-ink);--mon-on2:color-mix(in srgb, var(--site-ink) 82%, var(--site-accent));--mon-ink2:color-mix(in srgb, var(--site-ink) 70%, var(--site-bg));--mon-bg2:color-mix(in srgb, var(--site-bg) 70%, var(--site-ink));--mon-act:color-mix(in srgb, var(--site-accent) 68%, var(--site-ink));--mon-acd:var(--site-accent);--mon-field:color-mix(in srgb, var(--site-ink) 48%, var(--site-bg));--mon-rulea:color-mix(in srgb, var(--site-ink) 30%, var(--site-accent));--mon-tone:color-mix(in srgb, var(--site-ink) 14%, var(--site-accent));--mon-measure:2.835;font-family:var(--font-public-sans), &quot;Public Sans&quot;, &quot;Noto Sans&quot;, &quot;Noto Sans SC&quot;, &quot;Noto Sans JP&quot;, &quot;Noto Sans Arabic&quot;, system-ui, sans-serif;min-height:inherit">
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-site-ink focus:px-4 focus:py-2 focus:text-site-bg">Skip to content</a>
-<header class="grid grid-cols-[1fr_auto] @3xl:grid-cols-3" style="font-size:13px;font-weight:600;text-transform:uppercase;padding:0 clamp(20px, 3.125cqw, 40px);height:64px;align-items:center;gap:16px;border-bottom:1px solid var(--site-ink);letter-spacing:0.02em">
-<a href="#top" style="white-space:nowrap;overflow:hidden">
+<header class="mon-header">
+<div class="mon-header-in">
+<a href="#top" class="mon-brand">
 <span>Amelia Hart</span>
 </a>
-<span class="hidden @3xl:flex" style="align-items:center;gap:10px;justify-content:center">
-<span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:var(--site-accent);flex:none">
-</span>
-<span>Open to board and advisory roles</span>
-</span>
-<nav aria-label="Sections" style="display:flex;gap:28px;justify-content:flex-end">
-<a href="#about" class="hidden hover:text-site-accent @xl:inline">About</a>
-<a href="#work" class="hidden hover:text-site-accent @xl:inline">Work</a>
-<a href="#contact" class="hover:text-site-accent">Contact</a>
+<nav aria-label="Sections" class="mon-nav">
+<a href="#impact" class="mon-nav-link">Impact</a>
+<a href="#about" class="mon-nav-link">About</a>
+<a href="#experience" class="mon-nav-link">Experience</a>
+<a href="#work" class="mon-nav-link">Selected work</a>
+<a href="#testimonials" class="mon-nav-link">In their words</a>
 </nav>
+<a href="#contact" class="mon-header-cta">Contact</a>
+<div class="mon-phone-only">
+<button type="button" class="mon-menu-button" aria-expanded="false">Menu<span aria-hidden="true" class="mon-burger">
+<span>
+</span>
+<span>
+</span>
+</span>
+</button>
+</div>
+</div>
 </header>
 <main id="main">
-<section class="[--mn-reserve:0px] @3xl:[--mn-reserve:480px]" style="padding:36px clamp(20px, 3.125cqw, 40px) 0">
-<div style="font-weight:900">
-<span style="font-weight:900;font-size:max(40px, min(236px, calc((100cqw - 2 * clamp(20px, 3.125cqw, 40px)) / 3.72), calc((100cqw - 2 * clamp(20px, 3.125cqw, 40px) - var(--mn-reserve)) / 2.48)));line-height:0.8;letter-spacing:-0.075em;text-transform:uppercase;white-space:nowrap;display:block">Amelia</span>
-<span class="flex flex-wrap items-end gap-6 @3xl:flex-nowrap @3xl:gap-8" style="margin-top:10px">
-<span style="font-weight:900;font-size:max(40px, min(236px, calc((100cqw - 2 * clamp(20px, 3.125cqw, 40px)) / 3.72), calc((100cqw - 2 * clamp(20px, 3.125cqw, 40px) - var(--mn-reserve)) / 2.48)));line-height:0.8;letter-spacing:-0.075em;text-transform:uppercase;white-space:nowrap">Hart</span>
-<div class="h-[150px] w-[236px] @3xl:h-[190px] @3xl:w-[300px]" style="position:relative;overflow:hidden;flex:none;background:linear-gradient(135deg, var(--site-accent), var(--site-accent-deep));margin-bottom:6px">
-<span style="position:absolute;right:14px;bottom:4px;font-weight:900;font-size:clamp(84px, 9.375cqw, 120px);line-height:1;color:color-mix(in srgb, var(--site-on) 16%, transparent);letter-spacing:-0.06em">AH</span>
-</div>
-<span style="flex:1;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0;line-height:1.5;padding-bottom:8px;white-space:nowrap">(Portrait)<br/>
-<span>Rotterdam</span>
+<section aria-label="Introduction" class="mon-hero">
+<div class="mon-stage">
+<span aria-hidden="true" class="mon-initials">AH</span>
+<div class="mon-field-top">
+<span class="mon-meta">
+<span>Chief Executive Officer</span>
+<span>Meridian Freight Group</span>
+<span class="mon-on2">Rotterdam</span>
+</span>
+<span class="mon-status">
+<span aria-hidden="true" class="mon-ping">
+<span>
+</span>
+<span>
 </span>
 </span>
+<span>Board and advisory roles</span>
+</span>
 </div>
-</section>
-<section class="grid grid-cols-1 gap-6 @3xl:grid-cols-[4fr_8fr] @3xl:gap-10" style="padding:clamp(48px, 5.625cqw, 72px) clamp(20px, 3.125cqw, 40px) clamp(64px, 6.875cqw, 88px)">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;display:flex;flex-direction:column;gap:6px">
-<span style="color:var(--site-accent)">(Role)</span>
-<span>Chief Executive Officer, Meridian Freight Group</span>
+<div class="mon-name-row">
+<div class="mon-name-col">
+<h1 class="mon-name">
+<span class="mon-line" style="animation-delay:60ms">Amelia</span> <span class="mon-line" style="animation-delay:170ms">Hart</span>
+</h1>
+<ul aria-label="Keywords" class="mon-keywords">
+<li>
+<span>Operator</span>
+<span aria-hidden="true" class="mon-on2">/</span>
+</li>
+<li>
+<span>Board member</span>
+<span aria-hidden="true" class="mon-on2">/</span>
+</li>
+<li>
+<span>Speaker</span>
+<span aria-hidden="true" class="mon-on2">/</span>
+</li>
+<li>
+<span>Mentor</span>
+</li>
+</ul>
 </div>
-<div>
-<h1 style="margin:0;font-family:var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;font-weight:700;font-size:clamp(32px, 4.0625cqw, 52px);line-height:1.02;letter-spacing:-0.045em;text-wrap:balance">Building supply chains that hold up under pressure.</h1>
-<p style="margin:22px 0 0;max-width:640px;font-size:clamp(16px, 1.4063cqw, 18px);color:var(--site-muted)">I lead a 2,400-person logistics company moving goods across 31 countries. I write and speak about resilient operations, practical AI adoption, and leading through volatility.</p>
-<a href="#contact" class="transition-opacity hover:opacity-90" style="margin-top:32px;display:inline-flex;justify-content:space-between;align-items:center;gap:24px;min-width:280px;padding:18px 20px;background:var(--site-accent);color:var(--site-on);font-weight:700;text-transform:uppercase;font-size:14px;letter-spacing:0.02em">
-<span>Get in touch</span> <span aria-hidden="true">→</span>
+</div>
+</div>
+<div class="mon-below">
+<div class="mon-headline-col mon-in" style="animation-delay:380ms">
+<p class="mon-headline">Building supply chains that hold up under pressure.</p>
+</div>
+<div class="mon-intro-col mon-in" style="animation-delay:450ms">
+<p class="mon-intro">I lead a 2,400-person logistics company moving goods across 31 countries. I write and speak about resilient operations, practical AI adoption, and leading through volatility.</p>
+<p class="mon-avail">Open to board and advisory roles</p>
+<a href="#contact" class="mon-button">
+<span>Get in touch</span>
+<span aria-hidden="true" class="mon-dot-arrow">→</span>
 </a>
 </div>
-</section>
-<div role="group" aria-label="Keywords" style="background:var(--site-accent);color:var(--site-on);overflow:hidden;padding:26px 0">
-<div class="pt-marquee" style="display:flex;width:max-content;--pt-duration:30s">
-<span aria-hidden="false" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Operator <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="false" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Board member <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="false" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Speaker <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="false" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Mentor <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Operator <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Board member <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Speaker <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Mentor <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Operator <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Board member <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Speaker <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Mentor <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Operator <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Board member <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Speaker <span style="color:var(--site-ink)">✦</span>
-</span>
-<span aria-hidden="true" style="padding:0 28px;font-weight:900;font-size:clamp(40px, 5cqw, 64px);line-height:1;letter-spacing:-0.05em;text-transform:uppercase;white-space:nowrap">Mentor <span style="color:var(--site-ink)">✦</span>
-</span>
-</div>
-</div>
-<div style="display:contents">
-<section id="impact" aria-label="Impact" style="padding:clamp(72px, 8.125cqw, 104px) clamp(20px, 3.125cqw, 40px) 0">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;border-top:1px solid var(--site-ink);padding-top:14px;display:flex;justify-content:space-between;gap:24px">
-<span>(01) Impact</span>
-<span style="text-align:right">Meridian Freight Group</span>
-</div>
-<div class="grid grid-cols-2 gap-6 @3xl:grid-cols-4" style="margin-top:40px">
-<div>
-<div style="font-weight:900;font-size:clamp(52px, 6.5625cqw, 84px);line-height:0.9;letter-spacing:-0.06em;color:var(--site-accent)">€780M</div>
-<div style="margin-top:16px;font-size:15px;font-weight:500;max-width:220px">Annual revenue, up from €310M</div>
-</div>
-<div>
-<div style="font-weight:900;font-size:clamp(52px, 6.5625cqw, 84px);line-height:0.9;letter-spacing:-0.06em;color:var(--site-accent)">31</div>
-<div style="margin-top:16px;font-size:15px;font-weight:500;max-width:220px">Countries served</div>
-</div>
-<div>
-<div style="font-weight:900;font-size:clamp(52px, 6.5625cqw, 84px);line-height:0.9;letter-spacing:-0.06em;color:var(--site-accent)">2,400</div>
-<div style="margin-top:16px;font-size:15px;font-weight:500;max-width:220px">People across the group</div>
-</div>
-<div>
-<div style="font-weight:900;font-size:clamp(52px, 6.5625cqw, 84px);line-height:0.9;letter-spacing:-0.06em;color:var(--site-accent)">42%</div>
-<div style="margin-top:16px;font-size:15px;font-weight:500;max-width:220px">Reduction in delivery variance</div>
-</div>
 </div>
 </section>
+<section aria-label="Boards &amp; affiliations" class="mon-aff">
+<div class="mon-aff-label">Boards &amp; affiliations</div>
+<ul class="sr-only">
+<li>Meridian Freight Group</li>
+<li>European Freight Council</li>
+<li>Alder &amp; Crane Logistics</li>
+<li>Northgate Capital</li>
+<li>Industrial Founders Network</li>
+</ul>
+<div aria-hidden="true" class="mon-band">
+<div class="mon-track">
+<span class="mon-band-item">
+<span>Meridian Freight Group</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>European Freight Council</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Alder &amp; Crane Logistics</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Northgate Capital</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Industrial Founders Network</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Meridian Freight Group</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>European Freight Council</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Alder &amp; Crane Logistics</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Northgate Capital</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Industrial Founders Network</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Meridian Freight Group</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>European Freight Council</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Alder &amp; Crane Logistics</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Northgate Capital</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Industrial Founders Network</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Meridian Freight Group</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>European Freight Council</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Alder &amp; Crane Logistics</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Northgate Capital</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
+<span class="mon-band-item">
+<span>Industrial Founders Network</span>
+<span aria-hidden="true" class="mon-sep">/</span>
+</span>
 </div>
-<div style="display:contents">
-<section id="about" aria-label="About" style="padding:clamp(72px, 9.375cqw, 120px) clamp(20px, 3.125cqw, 40px) 0">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;border-top:1px solid var(--site-ink);padding-top:14px;display:flex;justify-content:space-between;gap:24px">
-<span>(02) About</span>
 </div>
-<div class="grid grid-cols-1 @3xl:grid-cols-[4fr_8fr] @3xl:gap-10" style="margin-top:40px">
-<div>
+</section>
+<section id="impact" aria-labelledby="mon-impact-h" class="mon-sec mon-paper mon-impact" data-wipe="">
+<div data-rise="" class="mon-impact-head">
+<h2 id="mon-impact-h" class="mon-title" style="--mon-ts:1">Impact</h2>
+<span class="mon-count">
+<span class="mon-count-n">01</span>
+<span aria-hidden="true"> / 05</span>
+</span>
 </div>
-<div>
-<p style="margin:0;font-weight:700;font-size:clamp(28px, 3.125cqw, 40px);line-height:1.14;letter-spacing:-0.04em;text-wrap:pretty">
+<div class="mon-stats" data-count="many" style="--mon-cols:4">
+<div data-rise="" class="mon-stat">
+<span class="mon-stat-value" style="--mon-w:2.77">€780M</span>
+<span class="mon-stat-label">Annual revenue, up from €310M</span>
+</div>
+<div data-rise="" class="mon-stat">
+<span class="mon-stat-value" style="--mon-w:1">31</span>
+<span class="mon-stat-label">Countries served</span>
+</div>
+<div data-rise="" class="mon-stat">
+<span class="mon-stat-value" style="--mon-w:2.27">2,400</span>
+<span class="mon-stat-label">People across the group</span>
+</div>
+<div data-rise="" class="mon-stat">
+<span class="mon-stat-value" style="--mon-w:1.75">42%</span>
+<span class="mon-stat-label">Reduction in delivery variance</span>
+</div>
+</div>
+</section>
+<section id="about" aria-labelledby="mon-about-h" class="mon-sec mon-inverse mon-about" data-wipe="">
+<span class="mon-count" data-rise="true">
+<span class="mon-count-n">02</span>
+<span aria-hidden="true"> / 05</span>
+</span>
+<h2 id="mon-about-h" data-rise="" class="mon-title mon-title-accent" style="--mon-ts:1">About</h2>
+<div class="mon-about-grid">
+<p data-rise="" class="mon-lead">
 <span>I joined Meridian as COO in 2015, when it was a regional carrier with </span>
 <span>
-<span style="color:var(--site-accent)">thin margins and no shared planning system</span>
+<em>thin margins and no shared planning system</em>
 </span>
 <span>. Six years later we run one of Europe&#x27;s most reliable mid-sized freight networks.</span>
 </p>
-<p style="margin:28px 0 0;max-width:640px;font-size:17px;color:var(--site-muted)">Before Meridian, I spent a decade in operations at Alder &amp; Crane Logistics in Hamburg. I sit on the board of the European Freight Council and mentor first-time founders in industrial technology.</p>
+<div data-rise="" class="mon-rest">
+<p>Before Meridian, I spent a decade in operations at Alder &amp; Crane Logistics in Hamburg. I sit on the board of the European Freight Council and mentor first-time founders in industrial technology.</p>
 </div>
 </div>
 </section>
-</div>
-<div style="display:contents">
-<section id="experience" aria-label="Experience" style="padding:clamp(72px, 9.375cqw, 120px) clamp(20px, 3.125cqw, 40px) 0">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;border-top:1px solid var(--site-ink);padding-top:14px;display:flex;justify-content:space-between;gap:24px">
-<span>(03) Experience</span>
-</div>
-<div style="margin-top:24px">
-<div class="grid grid-cols-1 gap-3 transition-colors duration-200 hover:bg-site-soft @3xl:grid-cols-3 @3xl:gap-10" style="padding:30px 0;border-bottom:1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)">
-<div style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">2019 – Present</div>
-<div>
-<div style="font-weight:800;font-size:clamp(24px, 2.3438cqw, 30px);line-height:1.05;letter-spacing:-0.04em">Chief Executive Officer</div>
-<div style="margin-top:6px;font-size:15px;color:var(--site-muted)">Meridian Freight Group</div>
-</div>
-<p style="margin:0;font-size:15px;color:var(--site-muted)">Grew revenue 2.5x while cutting on-time delivery variance by 42%. Led the acquisition and integration of three regional carriers.</p>
-</div>
-<div class="grid grid-cols-1 gap-3 transition-colors duration-200 hover:bg-site-soft @3xl:grid-cols-3 @3xl:gap-10" style="padding:30px 0;border-bottom:1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)">
-<div style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">2015 – 2019</div>
-<div>
-<div style="font-weight:800;font-size:clamp(24px, 2.3438cqw, 30px);line-height:1.05;letter-spacing:-0.04em">Chief Operating Officer</div>
-<div style="margin-top:6px;font-size:15px;color:var(--site-muted)">Meridian Freight Group</div>
-</div>
-<p style="margin:0;font-size:15px;color:var(--site-muted)">Rebuilt the operating model around a single planning platform and a weekly operating review adopted across all depots.</p>
-</div>
-<div class="grid grid-cols-1 gap-3 transition-colors duration-200 hover:bg-site-soft @3xl:grid-cols-3 @3xl:gap-10" style="padding:30px 0;border-bottom:1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)">
-<div style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">2010 – 2015</div>
-<div>
-<div style="font-weight:800;font-size:clamp(24px, 2.3438cqw, 30px);line-height:1.05;letter-spacing:-0.04em">VP Operations</div>
-<div style="margin-top:6px;font-size:15px;color:var(--site-muted)">Alder &amp; Crane Logistics</div>
-</div>
-<p style="margin:0;font-size:15px;color:var(--site-muted)">Ran network operations for Northern Europe, 600 staff across 9 depots.</p>
-</div>
-</div>
-</section>
-</div>
-<div style="display:contents">
-<section id="work" aria-label="Selected work" style="padding:clamp(72px, 9.375cqw, 120px) clamp(20px, 3.125cqw, 40px) 0">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;border-top:1px solid var(--site-ink);padding-top:14px;display:flex;justify-content:space-between;gap:24px">
-<span>(04) Selected work</span>
-</div>
-<div style="margin-top:16px">
-<div class="grid grid-cols-1 items-baseline gap-2 transition-colors duration-200 hover:text-site-accent @3xl:grid-cols-[4fr_7fr_1fr] @3xl:gap-10" style="padding:22px 0;border-bottom:1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)">
-<span style="font-size:13px;font-weight:600;text-transform:uppercase">Keynote</span>
-<span style="font-weight:800;font-size:clamp(28px, 3.125cqw, 40px);line-height:1.05;letter-spacing:-0.045em">Resilient networks for a volatile decade</span>
-<span class="@3xl:justify-self-end" style="font-size:15px;font-weight:600">2025</span>
-</div>
-<div class="grid grid-cols-1 items-baseline gap-2 transition-colors duration-200 hover:text-site-accent @3xl:grid-cols-[4fr_7fr_1fr] @3xl:gap-10" style="padding:22px 0;border-bottom:1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)">
-<span style="font-size:13px;font-weight:600;text-transform:uppercase">Essay</span>
-<span style="font-weight:800;font-size:clamp(28px, 3.125cqw, 40px);line-height:1.05;letter-spacing:-0.045em">Why planning beats forecasting</span>
-<span class="@3xl:justify-self-end" style="font-size:15px;font-weight:600">2024</span>
-</div>
-<div class="grid grid-cols-1 items-baseline gap-2 transition-colors duration-200 hover:text-site-accent @3xl:grid-cols-[4fr_7fr_1fr] @3xl:gap-10" style="padding:22px 0;border-bottom:1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)">
-<span style="font-size:13px;font-weight:600;text-transform:uppercase">Board</span>
-<span style="font-weight:800;font-size:clamp(28px, 3.125cqw, 40px);line-height:1.05;letter-spacing:-0.045em">European Freight Council</span>
-<span class="@3xl:justify-self-end" style="font-size:15px;font-weight:600">Since 2021</span>
-</div>
-<div class="grid grid-cols-1 items-baseline gap-2 transition-colors duration-200 hover:text-site-accent @3xl:grid-cols-[4fr_7fr_1fr] @3xl:gap-10" style="padding:22px 0;border-bottom:1px solid color-mix(in srgb, var(--site-ink) 20%, transparent)">
-<span style="font-size:13px;font-weight:600;text-transform:uppercase">Mentoring</span>
-<span style="font-weight:800;font-size:clamp(28px, 3.125cqw, 40px);line-height:1.05;letter-spacing:-0.045em">Industrial founders programme</span>
-<span class="@3xl:justify-self-end" style="font-size:15px;font-weight:600">Since 2019</span>
-</div>
-</div>
-</section>
-</div>
-<div style="display:contents">
-<section id="testimonials" aria-label="Testimonials" class="grid grid-cols-1 gap-10 @3xl:grid-cols-2" style="padding:clamp(72px, 9.375cqw, 120px) clamp(20px, 3.125cqw, 40px) 0">
-<figure style="margin:0;border-top:1px solid var(--site-ink);padding-top:24px">
-<blockquote style="margin:0;font-weight:700;font-size:clamp(24px, 2.3438cqw, 30px);line-height:1.15;letter-spacing:-0.035em">“<span>Amelia combines operational depth with a rare calm under pressure. She made the hard calls early, and the business is stronger for it.</span>”</blockquote>
-<figcaption style="font-size:13px;font-weight:600;text-transform:uppercase;margin-top:22px;color:color-mix(in srgb, var(--site-ink) 55%, transparent)">
-<span>Jonas Weber</span> <span style="color:var(--site-accent)">/</span> <span>Chair, Meridian Freight Group</span>
-</figcaption>
-</figure>
-<figure style="margin:0;border-top:1px solid var(--site-ink);padding-top:24px">
-<blockquote style="margin:0;font-weight:700;font-size:clamp(24px, 2.3438cqw, 30px);line-height:1.15;letter-spacing:-0.035em">“<span>The clearest thinker on supply chain resilience I have worked with.</span>”</blockquote>
-<figcaption style="font-size:13px;font-weight:600;text-transform:uppercase;margin-top:22px;color:color-mix(in srgb, var(--site-ink) 55%, transparent)">
-<span>Priya Raman</span> <span style="color:var(--site-accent)">/</span> <span>Partner, Northgate Capital</span>
-</figcaption>
-</figure>
-</section>
-</div>
-<section id="contact" aria-label="Contact" style="padding:clamp(96px, 11.25cqw, 144px) clamp(20px, 3.125cqw, 40px) 48px">
-<div style="font-size:13px;font-weight:600;text-transform:uppercase;border-top:1px solid var(--site-ink);padding-top:14px;display:flex;justify-content:space-between;gap:24px">
-<span>(05) Contact</span>
-<span style="text-align:right">For speaking, board and advisory enquiries.</span>
-</div>
-<div style="margin-top:48px;font-weight:900;font-size:min(108px, calc((100cqw - 2 * clamp(20px, 3.125cqw, 40px)) / 10.08));line-height:0.9;letter-spacing:-0.065em;color:var(--site-accent)">
-<a href="mailto:office@example.com" style="text-decoration:underline;text-decoration-thickness:0.055em;text-underline-offset:0.15em">office@example.com</a>
-</div>
-<footer style="font-size:13px;font-weight:600;text-transform:uppercase;margin-top:clamp(56px, 6.25cqw, 80px);display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px">
-<span>© 2026 Amelia Hart</span>
-<span style="display:flex;flex-wrap:wrap;gap:12px 28px">
-<a href="https://www.linkedin.com/" target="_blank" rel="noopener me" class="hover:text-site-accent">LinkedIn ↗</a>
-<a href="https://example.com/" target="_blank" rel="noopener me" class="hover:text-site-accent">Meridian Freight Group ↗</a>
+<section id="experience" aria-labelledby="mon-experience-h" class="mon-sec mon-paper mon-experience" data-wipe="">
+<div data-rise="" class="mon-head-row">
+<h2 id="mon-experience-h" class="mon-title" style="--mon-ts:1">Experience</h2>
+<span class="mon-count">
+<span class="mon-count-n">03</span>
+<span aria-hidden="true"> / 05</span>
 </span>
-</footer>
+</div>
+<ol class="mon-rows mon-rows-thin">
+<li data-rise="" tabindex="0" class="mon-row mon-exp-row">
+<span class="mon-dates">
+<span>2019</span> – <span>Present</span>
+</span>
+<span class="mon-exp-main">
+<span class="mon-role">Chief Executive Officer</span>
+<span class="mon-row2">
+<span>Meridian Freight Group</span> · <span>Rotterdam</span>
+</span>
+</span>
+<span class="mon-row2 mon-summary">Grew revenue 2.5x while cutting on-time delivery variance by 42%. Led the acquisition and integration of three regional carriers.</span>
+</li>
+<li data-rise="" tabindex="0" class="mon-row mon-exp-row">
+<span class="mon-dates">
+<span>2015</span> – <span>2019</span>
+</span>
+<span class="mon-exp-main">
+<span class="mon-role">Chief Operating Officer</span>
+<span class="mon-row2">
+<span>Meridian Freight Group</span> · <span>Rotterdam</span>
+</span>
+</span>
+<span class="mon-row2 mon-summary">Rebuilt the operating model around a single planning platform and a weekly operating review adopted across all depots.</span>
+</li>
+<li data-rise="" tabindex="0" class="mon-row mon-exp-row">
+<span class="mon-dates">
+<span>2010</span> – <span>2015</span>
+</span>
+<span class="mon-exp-main">
+<span class="mon-role">VP Operations</span>
+<span class="mon-row2">
+<span>Alder &amp; Crane Logistics</span> · <span>Hamburg</span>
+</span>
+</span>
+<span class="mon-row2 mon-summary">Ran network operations for Northern Europe, 600 staff across 9 depots.</span>
+</li>
+</ol>
+</section>
+<section id="work" aria-labelledby="mon-work-h" class="mon-sec mon-inverse mon-work" data-wipe="">
+<span class="mon-count" data-rise="true">
+<span class="mon-count-n">04</span>
+<span aria-hidden="true"> / 05</span>
+</span>
+<h2 id="mon-work-h" data-rise="" class="mon-title" style="--mon-ts:1">Selected work</h2>
+<ol class="mon-rows">
+<li data-rise="" class="mon-row-wrap">
+<div tabindex="0" class="mon-row mon-work-row">
+<span aria-hidden="true" class="mon-row2 mon-work-n">01</span>
+<span class="mon-work-main">
+<span class="mon-work-title">
+<span>Resilient networks for a volatile decade</span>
+</span>
+</span>
+<span class="mon-work-side">
+<span class="mon-kind">
+<span>Keynote</span>
+<span class="mon-row2"> · </span>
+<span class="mon-row2">2025</span>
+</span>
+<span class="mon-row2">
+<span class="mon-context">European Freight Forum</span>
+</span>
+</span>
+</div>
+</li>
+<li data-rise="" class="mon-row-wrap">
+<div tabindex="0" class="mon-row mon-work-row">
+<span aria-hidden="true" class="mon-row2 mon-work-n">02</span>
+<span class="mon-work-main">
+<span class="mon-work-title">
+<span>Why planning beats forecasting</span>
+</span>
+</span>
+<span class="mon-work-side">
+<span class="mon-kind">
+<span>Essay</span>
+<span class="mon-row2"> · </span>
+<span class="mon-row2">2024</span>
+</span>
+<span class="mon-row2">
+<span class="mon-context">Op-ed, logistics trade press</span>
+</span>
+</span>
+</div>
+</li>
+<li data-rise="" class="mon-row-wrap">
+<div tabindex="0" class="mon-row mon-work-row">
+<span aria-hidden="true" class="mon-row2 mon-work-n">03</span>
+<span class="mon-work-main">
+<span class="mon-work-title">
+<span>European Freight Council</span>
+</span>
+</span>
+<span class="mon-work-side">
+<span class="mon-kind">
+<span>Board</span>
+<span class="mon-row2"> · </span>
+<span class="mon-row2">Since 2021</span>
+</span>
+<span class="mon-row2">
+<span class="mon-context">Non-executive director</span>
+</span>
+</span>
+</div>
+</li>
+<li data-rise="" class="mon-row-wrap">
+<div tabindex="0" class="mon-row mon-work-row">
+<span aria-hidden="true" class="mon-row2 mon-work-n">04</span>
+<span class="mon-work-main">
+<span class="mon-work-title">
+<span>Industrial founders programme</span>
+</span>
+</span>
+<span class="mon-work-side">
+<span class="mon-kind">
+<span>Mentoring</span>
+<span class="mon-row2"> · </span>
+<span class="mon-row2">Since 2019</span>
+</span>
+<span class="mon-row2">
+<span class="mon-context">Mentor to first-time founders</span>
+</span>
+</span>
+</div>
+</li>
+</ol>
+</section>
+<section id="testimonials" aria-labelledby="mon-testimonials-h" class="mon-sec mon-paper mon-quotes" data-wipe="">
+<div data-rise="" class="mon-head-row">
+<h2 id="mon-testimonials-h" class="mon-label-title">In their words</h2>
+<span class="mon-count">
+<span class="mon-count-n">05</span>
+<span aria-hidden="true"> / 05</span>
+</span>
+</div>
+<figure data-rise="" class="mon-lead-quote">
+<span aria-hidden="true" class="mon-quote-mark">“</span>
+<div class="mon-lead-quote-body">
+<blockquote>Amelia combines operational depth with a rare calm under pressure. She made the hard calls early, and the business is stronger for it.</blockquote>
+<figcaption class="mon-caption">
+<span aria-hidden="true" class="mon-caption-rule">
+</span>
+<span class="mon-caption-name">Jonas Weber</span>
+<span class="mon-row2">
+<span>Chair, Meridian Freight Group</span>
+</span>
+</figcaption>
+</div>
+</figure>
+<div class="mon-more-quotes" style="--mon-cols:2">
+<figure data-rise="" class="mon-quote">
+<blockquote>“<span>The clearest thinker on supply chain resilience I have worked with.</span>”</blockquote>
+<figcaption class="mon-caption-small">
+<span class="mon-caption-name">Priya Raman</span>
+<span class="mon-row2"> · <span>Partner, Northgate Capital</span>
+</span>
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="contact" aria-labelledby="mon-contact-h" class="mon-contact" data-wipe="" data-form="">
+<h2 id="mon-contact-h" data-rise="" class="mon-contact-title" style="--mon-ts:1">Contact</h2>
+<div class="mon-contact-grid" data-split="true">
+<div data-rise="" class="mon-direct">
+<p class="mon-blurb">For speaking, board and advisory enquiries.</p>
+<a href="mailto:office@example.com" class="mon-email">office@example.com</a>
+<ul class="mon-links">
+<li>
+<a href="https://www.linkedin.com/" target="_blank" rel="noopener me" class="mon-link">
+<span class="mon-link-label">LinkedIn</span>
+<span aria-hidden="true">↗</span>
+</a>
+</li>
+<li>
+<a href="https://example.com/" target="_blank" rel="noopener me" class="mon-link">
+<span class="mon-link-label">Meridian Freight Group</span>
+<span aria-hidden="true">↗</span>
+</a>
+</li>
+</ul>
+</div>
+<div data-rise="" class="mon-form-column">
+<div class="mon-panel">
+<form noValidate="" aria-label="Contact form" class="mon-form">
+<fieldset class="mon-fieldset">
+<legend class="mon-legend">Topic</legend>
+<div class="mon-topics">
+<button type="button" aria-pressed="false" class="mon-topic">Speaking</button>
+<button type="button" aria-pressed="false" class="mon-topic">Board and advisory</button>
+<button type="button" aria-pressed="false" class="mon-topic">Press</button>
+<button type="button" aria-pressed="false" class="mon-topic">Something else</button>
+</div>
+</fieldset>
+<div class="mon-fields">
+<label class="mon-field">
+<span class="mon-field-label">Your name</span>
+<input autoComplete="name" maxLength="80" class="mon-input" aria-invalid="false" name="name" value=""/>
+</label>
+<label class="mon-field">
+<span class="mon-field-label">Email</span>
+<input type="email" inputMode="email" autoComplete="email" maxLength="254" class="mon-input" aria-invalid="false" name="email" value=""/>
+</label>
+</div>
+<label class="mon-field">
+<span class="mon-field-label">Organisation<span class="mon-optional"> · optional</span>
+</span>
+<input autoComplete="organization" maxLength="100" class="mon-input" name="organisation" value=""/>
+</label>
+<label class="mon-field">
+<span class="mon-field-label">Message</span>
+<textarea name="message" rows="5" maxLength="4000" class="mon-input mon-textarea" aria-invalid="false">
+</textarea>
+</label>
+<input tabindex="-1" autoComplete="off" aria-hidden="true" class="mon-honeypot" name="website" value=""/>
+<div class="mon-submit-row">
+<button type="submit" class="mon-button mon-submit">Send message<span aria-hidden="true">→</span>
+</button>
+<span class="mon-note">Goes straight to Amelia. Your details aren&#x27;t shared.</span>
+</div>
+</form>
+</div>
+</div>
+</div>
 </section>
 </main>
+<footer class="mon-footer">
+<div class="mon-footer-in">
+<span>© 2026 Amelia Hart</span>
+<span class="mon-footer-location">
+<span>Rotterdam</span>
+</span>
+<a href="#top" class="mon-top">Back to top ↑</a>
+</div>
+</footer>
+<span hidden="">
+</span>
 </div>
 </div>

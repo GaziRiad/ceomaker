@@ -55,9 +55,10 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
   monument: {
     1: {
       name: "Monument",
-      description: "Your name as the headline, in cobalt. For operators who want to be remembered.",
-      tagline: "Your name as the headline, in cobalt. For operators.",
-      contactForm: false,
+      description:
+        "Your name stacked edge to edge on a full field of colour, then bold alternating sections. For leaders who want to be remembered.",
+      tagline: "Your name on a full field of colour. For leaders who want to be remembered.",
+      contactForm: true,
       Component: MonumentV1,
     },
   },

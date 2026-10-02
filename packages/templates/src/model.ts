@@ -71,7 +71,18 @@ export interface ModelWork {
   meta: string;
   year: string;
   href: string | null;
-  fields: { title: FieldPath; kind: FieldPath; meta: FieldPath; year: FieldPath };
+  /** The one-line context alone, and the description alone, for templates that show both. */
+  context: string;
+  description: string;
+  image: ModelImage | null;
+  fields: {
+    title: FieldPath;
+    kind: FieldPath;
+    meta: FieldPath;
+    year: FieldPath;
+    context: FieldPath;
+    description: FieldPath;
+  };
 }
 
 export interface ModelQuote {
@@ -95,6 +106,7 @@ export interface ModelAbout {
   lead: RichTextSpan[];
   /** Further paragraphs, as plain text. */
   rest: { text: string; field: FieldPath }[];
+  image: ModelImage | null;
   fields: { lead: FieldPath };
 }
 
@@ -130,6 +142,8 @@ export interface SiteModel {
     availabilityShort: FieldPath;
     /** One per entry of `affiliations`. */
     affiliations: FieldPath[];
+    /** One per entry of `keywords`. */
+    keywords: FieldPath[];
   };
   hero: {
     eyebrow: string;
@@ -280,6 +294,7 @@ export function buildSiteModel(
               field: `${about.id}.body.${index + 1}`,
             }))
             .filter((paragraph) => paragraph.text),
+          image: about.image ? { src: about.image.src, alt: about.image.alt || name } : null,
           fields: { lead: `${about.id}.body.0` },
         }
       : null;
@@ -310,8 +325,13 @@ export function buildSiteModel(
       meta: item.meta || item.description || "",
       year: item.year ?? "",
       href: item.href ?? null,
+      context: item.meta ?? "",
+      description: item.description ?? "",
+      image: item.image ? { src: item.image.src, alt: item.image.alt || item.title } : null,
       fields: {
         title: `${work.id}.items.${index}.title`,
+        context: `${work.id}.items.${index}.meta`,
+        description: `${work.id}.items.${index}.description`,
         kind: `${work.id}.items.${index}.kind`,
         // The line shows the description when there's no meta, so edits go where the text came from.
         meta: `${work.id}.items.${index}.${!item.meta && item.description ? "description" : "meta"}`,
@@ -372,6 +392,7 @@ export function buildSiteModel(
       availability: "meta.availability",
       availabilityShort: "meta.availabilityShort",
       affiliations: (meta?.affiliations ?? []).map((_, index) => `meta.affiliations.${index}`),
+      keywords: (meta?.keywords ?? []).map((_, index) => `meta.keywords.${index}`),
     },
     hero: {
       eyebrow: hero?.eyebrow ?? "",

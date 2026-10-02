@@ -1,10 +1,12 @@
 import {
   Barlow,
   Barlow_Condensed,
+  Big_Shoulders,
   Inter,
   Manrope,
   Newsreader,
   Playfair_Display,
+  Public_Sans,
 } from "next/font/google";
 
 // App chrome: the "Industry" system. Preloaded because every product page uses them.
@@ -52,6 +54,23 @@ export const newsreader = Newsreader({
   preload: false,
 });
 
+export const bigShoulders = Big_Shoulders({
+  subsets: ["latin"],
+  axes: ["opsz"],
+  variable: "--font-big-shoulders",
+  display: "swap",
+  preload: false,
+  // Next has no metrics to build a size-matched fallback for this family.
+  adjustFontFallback: false,
+});
+export const publicSans = Public_Sans({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-public-sans",
+  display: "swap",
+  preload: false,
+});
+
 // The same families for the "not live" and "paused" cards on customer addresses, without
 // preloading: published sites never use them.
 export const barlowLazy = Barlow({
@@ -69,7 +88,7 @@ export const barlowCondensedLazy = Barlow_Condensed({
   preload: false,
 });
 
-const siteFonts = [inter, playfair, manrope, newsreader];
+const siteFonts = [inter, playfair, manrope, newsreader, bigShoulders, publicSans];
 
 export const siteFontVariables = [...siteFonts, barlowLazy, barlowCondensedLazy]
   .map((font) => font.variable)

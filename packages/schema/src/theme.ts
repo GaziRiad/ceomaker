@@ -87,12 +87,12 @@ export const TEMPLATE_PALETTES: {
   },
   monument: {
     1: [
-      palette("Cobalt", "#f2f2ee", "#0a0a0a", "#1f3bff"),
-      palette("Signal", "#f2f2ee", "#0a0a0a", "#ff4d00"),
-      palette("Forest", "#f0f1ec", "#0b120d", "#0f7b3a"),
-      palette("Oxblood", "#efe9df", "#111111", "#b3261e"),
-      palette("Acid night", "#0b0b0b", "#f2f2ee", "#c8ff00"),
-      palette("Mono", "#ffffff", "#000000", "#000000"),
+      palette("Signal", "#f3f0e8", "#15130f", "#ff5a1f"),
+      palette("Cobalt", "#f1f1ee", "#0e1015", "#1f3bff"),
+      palette("Forest", "#f2f1ea", "#121512", "#1d5c3a"),
+      palette("Oxblood", "#f4efe9", "#1a1414", "#7a1f2b"),
+      palette("Acid night", "#0f100d", "#efeee6", "#c6f36b"),
+      palette("Ember night", "#14110f", "#f3ede4", "#ff6b2c"),
     ],
   },
   bento: {
