@@ -129,11 +129,10 @@ export async function proxy(request: NextRequest) {
 
   const resolution = resolveHost(request.headers.get("host"), routing);
   switch (resolution.kind) {
-    case "redirect-to-apex":
-      return NextResponse.redirect(
-        `${request.nextUrl.protocol}//${routing.rootDomain}${pathname}${search}`,
-        308,
-      );
+    case "redirect-to-app": {
+      const host = routing.appOnWww ? `www.${routing.rootDomain}` : routing.rootDomain;
+      return NextResponse.redirect(`${request.nextUrl.protocol}//${host}${pathname}${search}`, 308);
+    }
     case "app": {
       if (isInternalTenantPath(pathname)) return notFound(request);
       // One URL per site: links to a path-mode address (from before subdomains) forward to it.

@@ -99,6 +99,15 @@ describe("proxy in subdomain mode", () => {
     expect(getRedirectUrl(response)).toBe("https://ceomaker.com/sign-in?next=%2Fdashboard");
   });
 
+  it("serves the app on www and forwards the apex there when APP_URL is on www", async () => {
+    vi.stubEnv("APP_URL", "https://www.ceomaker.com");
+    const apex = await proxy(request("https://ceomaker.com/sign-in?x=1"));
+    expect(apex.status).toBe(308);
+    expect(getRedirectUrl(apex)).toBe("https://www.ceomaker.com/sign-in?x=1");
+    expect(isRewrite(await proxy(request("https://www.ceomaker.com/")))).toBe(false);
+    expect((await proxy(request("https://www.ceomaker.com/"))).status).toBe(200);
+  });
+
   it("forwards path-mode addresses from before subdomains to the site's subdomain", async () => {
     const response = await proxy(request("https://ceomaker.com/sites/Amelia/press?ref=card"));
     expect(response.status).toBe(308);

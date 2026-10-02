@@ -215,14 +215,13 @@ The product domain is `ceomaker.app`. Customer sites move from `/sites/<name>` t
 
 1. **DNS at Vercel.** Wildcard certificates need Vercel to answer DNS challenges, so move the domain to Vercel's nameservers (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`) at the registrar. Re-create any other records you need (email, verification) in Vercel's DNS first.
 2. **Domains** (Vercel → Project → Domains):
-   - `ceomaker.app` → Production, and make it the primary domain.
-   - `www.ceomaker.app` → redirect (308) to `ceomaker.app`. Not the other way round: the app itself sends `www` to the apex, and both redirecting makes a loop.
+   - `www.ceomaker.app` → Production (the product's address), and `ceomaker.app` → redirect (308) to `www.ceomaker.app`. The app follows `APP_URL`: with it on `www`, the app also sends the apex to `www`, so the two agree. (With `APP_URL` on the apex it does the reverse; never let Vercel and `APP_URL` disagree, or the two redirects loop.)
    - `*.ceomaker.app` → Production.
    - Previews: `preview.ceomaker.app` and `*.preview.ceomaker.app`, both assigned to the Git branch you preview.
 3. **Environment variables**, then redeploy:
-   - Production: `ROOT_DOMAIN=ceomaker.app`, `APP_URL=https://ceomaker.app`.
+   - Production: `ROOT_DOMAIN=ceomaker.app`, `APP_URL=https://www.ceomaker.app`.
    - Preview: `ROOT_DOMAIN=preview.ceomaker.app`, `APP_URL=https://preview.ceomaker.app`.
-4. **Google sign-in:** add `https://ceomaker.app` (and the preview address, if you sign in there with Google) to the authorised origins and `/api/auth/callback/google` redirect URIs.
+4. **Google sign-in:** add `https://www.ceomaker.app` (and the preview address, if you sign in there with Google) to the authorised origins and `/api/auth/callback/google` redirect URIs.
 5. Upgrade to Vercel Pro before charging customers.
 
 Buying the domain also unblocks email sign-in for everyone (Resend needs a domain you own) and lets Google show your own domain on its consent screen.

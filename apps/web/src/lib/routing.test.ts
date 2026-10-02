@@ -15,11 +15,13 @@ const prod: SubdomainRoutingConfig = {
   mode: "subdomain",
   rootDomain: "ceomaker.com",
   unknownHostsServeApp: false,
+  appOnWww: false,
 };
 const dev: SubdomainRoutingConfig = {
   mode: "subdomain",
   rootDomain: "localhost:3000",
   unknownHostsServeApp: true,
+  appOnWww: false,
 };
 
 describe("resolveHost (subdomain mode)", () => {
@@ -28,7 +30,7 @@ describe("resolveHost (subdomain mode)", () => {
     ["CEOMaker.com", { kind: "app" }],
     ["ceomaker.com.", { kind: "app" }],
     ["ceomaker.com:443", { kind: "app" }],
-    ["www.ceomaker.com", { kind: "redirect-to-apex" }],
+    ["www.ceomaker.com", { kind: "redirect-to-app" }],
     ["amelia.ceomaker.com", { kind: "tenant", subdomain: "amelia" }],
     ["Amelia.CEOMaker.com", { kind: "tenant", subdomain: "amelia" }],
     ["amelia-hart.ceomaker.com:443", { kind: "tenant", subdomain: "amelia-hart" }],
@@ -92,6 +94,28 @@ describe("parseSitesPath (path mode)", () => {
   });
 });
 
+describe("resolveHost with the product on www", () => {
+  const www: SubdomainRoutingConfig = { ...prod, appOnWww: true };
+  it("serves the app on www, forwards the apex there, and keeps tenants", () => {
+    expect(resolveHost("www.ceomaker.com", www)).toEqual({ kind: "app" });
+    expect(resolveHost("ceomaker.com", www)).toEqual({ kind: "redirect-to-app" });
+    expect(resolveHost("amelia.ceomaker.com", www)).toEqual({
+      kind: "tenant",
+      subdomain: "amelia",
+    });
+  });
+
+  it("follows APP_URL", () => {
+    const env = { ROOT_DOMAIN: "ceomaker.app", NODE_ENV: "production", VERCEL_ENV: "production" };
+    expect(routingConfigFromEnv({ ...env, APP_URL: "https://www.ceomaker.app" })).toMatchObject({
+      appOnWww: true,
+    });
+    expect(routingConfigFromEnv({ ...env, APP_URL: "https://ceomaker.app" })).toMatchObject({
+      appOnWww: false,
+    });
+  });
+});
+
 describe("routingConfigFromEnv", () => {
   it("uses path mode when no root domain is configured", () => {
     expect(routingConfigFromEnv({})).toEqual({ mode: "path" });
@@ -105,7 +129,12 @@ describe("routingConfigFromEnv", () => {
         NODE_ENV: "production",
         VERCEL_ENV: "production",
       }),
-    ).toEqual({ mode: "subdomain", rootDomain: "ceomaker.com", unknownHostsServeApp: false });
+    ).toEqual({
+      mode: "subdomain",
+      rootDomain: "ceomaker.com",
+      unknownHostsServeApp: false,
+      appOnWww: false,
+    });
     expect(
       routingConfigFromEnv({
         ROOT_DOMAIN: "ceomaker.com",

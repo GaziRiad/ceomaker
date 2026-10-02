@@ -20,11 +20,17 @@ export interface SubdomainRoutingConfig {
   rootDomain: string;
   /** Serve the app on hosts we don't recognise (local IPs, preview deployments). */
   unknownHostsServeApp: boolean;
+  /**
+   * The product answers on www.<root> and the apex forwards there; otherwise the reverse.
+   * Follows APP_URL, so it matches whichever of the two the hosting forwards to.
+   */
+  appOnWww: boolean;
 }
 
 export type HostResolution =
   | { kind: "app" }
-  | { kind: "redirect-to-apex" }
+  /** The other of apex and www: forwarded to the product's own host. */
+  | { kind: "redirect-to-app" }
   | { kind: "tenant"; subdomain: string }
   /** Not ours: possibly a customer's own domain, looked up before deciding. */
   | { kind: "custom"; hostname: string }
@@ -49,8 +55,10 @@ export function resolveHost(host: string | null, config: SubdomainRoutingConfig)
   const hostname = hostnameOf(host);
   const root = hostnameOf(config.rootDomain);
 
-  if (hostname === root) return { kind: "app" };
-  if (hostname === `www.${root}`) return { kind: "redirect-to-apex" };
+  if (hostname === root) return config.appOnWww ? { kind: "redirect-to-app" } : { kind: "app" };
+  if (hostname === `www.${root}`) {
+    return config.appOnWww ? { kind: "app" } : { kind: "redirect-to-app" };
+  }
 
   if (hostname.endsWith(`.${root}`)) {
     const label = hostname.slice(0, -(root.length + 1));
@@ -119,6 +127,7 @@ export function routingConfigFromEnv(env: Env = process.env): RoutingConfig {
     rootDomain,
     // Only production refuses unknown hosts; dev and preview deployments serve the app on them.
     unknownHostsServeApp: env.NODE_ENV !== "production" || env.VERCEL_ENV === "preview",
+    appOnWww: new URL(appUrl(env)).hostname === `www.${hostnameOf(rootDomain)}`,
   };
 }
 
