@@ -15,6 +15,7 @@ import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
 import { routingConfigFromEnv, siteUrl } from "@/lib/routing";
 import { getTenantSite } from "@/lib/sites";
 import { SiteStatus } from "../../site-status";
+import { Beacon } from "./beacon";
 import { sendContactMessage } from "./contact-action";
 
 type Params = PageProps<"/s/[subdomain]">["params"];
@@ -56,7 +57,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { key, version } = resolveTemplateRef(site.templateKey, site.templateVersion);
   const colors = resolveSiteColors(parseThemeSettingsForRender(site.theme), key, version);
   const routing = routingConfigFromEnv();
-  const url = siteUrl(subdomain, routing);
+  // A live custom domain is the site's real address; its own address forwards there.
+  const url = site.customDomain ? `https://${site.customDomain}` : siteUrl(subdomain, routing);
   return {
     title: { absolute: title },
     description,
@@ -65,9 +67,28 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     openGraph: { type: "profile", title, description, url },
     twitter: { card: "summary", title, description },
     // Path-mode addresses (e.g. on *.vercel.app) are temporary. Keeping them out of search
-    // indexes avoids duplicates competing with the real domain after launch.
-    ...(routing.mode === "path" ? { robots: { index: false, follow: false } } : {}),
+    // indexes avoids duplicates competing with the real domain after launch. A site on its own
+    // domain is indexed there.
+    ...(routing.mode === "path" && !site.customDomain
+      ? { robots: { index: false, follow: false } }
+      : {}),
   };
+}
+
+/** The owner's own websites listed on the site (kind "website"), for "Clicked your website". */
+function websiteHosts(content: unknown): string[] {
+  const contact = parseSiteContentForRender(content).sections.find(
+    (section) => section.type === "contact",
+  );
+  if (contact?.type !== "contact") return [];
+  return contact.links.flatMap((link) => {
+    if (link.kind !== "website") return [];
+    try {
+      return [new URL(link.href).hostname.replace(/^www\./, "")];
+    } catch {
+      return [];
+    }
+  });
 }
 
 async function TenantSite({ params }: { params: Params }) {
@@ -79,14 +100,17 @@ async function TenantSite({ params }: { params: Params }) {
 
   const { site } = tenant;
   return (
-    <SiteRenderer
-      templateKey={site.templateKey}
-      templateVersion={site.templateVersion}
-      theme={site.theme}
-      content={site.content}
-      publishedAt={site.publishedAt}
-      sendMessage={sendContactMessage.bind(null, site.subdomain)}
-    />
+    <>
+      <SiteRenderer
+        templateKey={site.templateKey}
+        templateVersion={site.templateVersion}
+        theme={site.theme}
+        content={site.content}
+        publishedAt={site.publishedAt}
+        sendMessage={sendContactMessage.bind(null, site.subdomain)}
+      />
+      <Beacon subdomain={site.subdomain} websiteHosts={websiteHosts(site.content)} />
+    </>
   );
 }
 

@@ -15,6 +15,7 @@ import {
   templateKeySchema,
   themeSettingsSchema,
   withResolvedColors,
+  type DomainKind,
   type OnboardingAnswers,
   type SiteContentInput,
   type TemplateKey,
@@ -31,7 +32,15 @@ import {
   SubdomainTakenError,
   VersionNotFoundError,
 } from "../errors";
-import { ADDRESS_HOLD_DAYS, media, retiredAddress, site, siteVersion, user } from "../schema";
+import {
+  ADDRESS_HOLD_DAYS,
+  media,
+  retiredAddress,
+  site,
+  siteDomain,
+  siteVersion,
+  user,
+} from "../schema";
 
 // Every function that reads or writes a customer's site takes the acting userId and scopes the
 // query to it. Authorization lives here, next to the data, not only in route handlers.
@@ -68,6 +77,8 @@ export interface PublishedSite {
   theme: unknown;
   content: unknown;
   publishedAt: Date;
+  /** The site's live custom domain, if it has one: its canonical address. */
+  customDomain: string | null;
 }
 
 /** What a public address should show: the live version, or why there isn't one. */
@@ -90,12 +101,14 @@ export async function getTenantSiteBySubdomain(
       theme: siteVersion.theme,
       content: siteVersion.content,
       publishedAt: siteVersion.publishedAt,
+      customDomain: siteDomain.domain,
     })
     .from(site)
     .leftJoin(
       siteVersion,
       and(eq(siteVersion.id, site.publishedVersionId), eq(siteVersion.siteId, site.id)),
     )
+    .leftJoin(siteDomain, and(eq(siteDomain.siteId, site.id), eq(siteDomain.stage, "connected")))
     .where(eq(site.subdomain, subdomain))
     .limit(1);
 
@@ -114,6 +127,7 @@ export async function getTenantSiteBySubdomain(
       theme: row.theme,
       content: row.content,
       publishedAt: row.publishedAt,
+      customDomain: row.customDomain ?? null,
     },
   };
 }
@@ -701,7 +715,12 @@ export async function changeSubdomain(
 export async function deleteSite(
   db: Database,
   input: { userId: string; siteId: string },
-): Promise<{ subdomain: string; addressHeld: boolean }> {
+): Promise<{
+  subdomain: string;
+  addressHeld: boolean;
+  /** Its custom domain, for the caller to remove from the hosting provider. */
+  domain: { domain: string; kind: DomainKind } | null;
+}> {
   return db.transaction(async (tx) => {
     const [owned] = await tx
       .select({ id: site.id, subdomain: site.subdomain })
@@ -726,10 +745,15 @@ export async function deleteSite(
           set: { userId: input.userId, retiredAt },
         });
     }
-    // Versions go with the site (foreign key cascade).
+    const [domain] = await tx
+      .select({ domain: siteDomain.domain, kind: siteDomain.kind })
+      .from(siteDomain)
+      .where(eq(siteDomain.siteId, owned.id))
+      .limit(1);
+    // Versions, messages, analytics and the domain go with the site (foreign key cascade).
     await tx.delete(site).where(eq(site.id, owned.id));
     await tx.delete(media).where(eq(media.userId, input.userId));
-    return { subdomain: owned.subdomain, addressHeld: Boolean(published) };
+    return { subdomain: owned.subdomain, addressHeld: Boolean(published), domain: domain ?? null };
   });
 }
 
@@ -771,13 +795,18 @@ export async function deleteAccount(db: Database, input: { userId: string }) {
           set: { userId: input.userId, retiredAt },
         });
     }
-    // Sites, versions, messages, media, sessions and AI usage go with the user (cascades);
-    // the address holds stay and lose their owner.
+    const domains = await tx
+      .select({ domain: siteDomain.domain, kind: siteDomain.kind })
+      .from(siteDomain)
+      .innerJoin(site, eq(site.id, siteDomain.siteId))
+      .where(eq(site.userId, input.userId));
+    // Sites, versions, messages, domains, media, sessions and AI usage go with the user
+    // (cascades); the address holds stay and lose their owner.
     const deleted = await tx
       .delete(user)
       .where(eq(user.id, input.userId))
       .returning({ id: user.id });
     if (!deleted.length) throw new SiteNotFoundError();
-    return { heldAddresses: published.map((row) => row.subdomain) };
+    return { heldAddresses: published.map((row) => row.subdomain), domains };
   });
 }

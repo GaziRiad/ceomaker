@@ -11,6 +11,11 @@ import { clearFlow } from "../../../start/storage";
 const TABS = [
   { href: "/dashboard", label: "Overview", match: (path: string) => path === "/dashboard" },
   {
+    href: "/dashboard/analytics",
+    label: "Analytics",
+    match: (path: string) => path.startsWith("/dashboard/analytics"),
+  },
+  {
     href: "/dashboard/messages",
     label: "Messages",
     match: (path: string) => path.startsWith("/dashboard/messages"),
@@ -143,7 +148,7 @@ export function DashboardBar({
       </div>
       <nav
         aria-label="Dashboard"
-        className="mx-auto flex max-w-[1200px] gap-6 px-5 sm:gap-8 sm:px-10"
+        className="mx-auto flex max-w-[1200px] gap-5 overflow-x-auto px-5 [scrollbar-width:none] sm:gap-8 sm:px-10"
       >
         {TABS.map((tab) => {
           const current = tab.match(pathname);
@@ -152,7 +157,7 @@ export function DashboardBar({
               key={tab.href}
               href={tab.href}
               aria-current={current ? "page" : undefined}
-              className="flex h-[46px] items-center gap-2 text-[15px] font-medium no-underline transition-[color,box-shadow] duration-200 hover:text-text"
+              className="flex h-[46px] flex-none items-center gap-2 text-[15px] font-medium whitespace-nowrap no-underline transition-[color,box-shadow] duration-200 hover:text-text"
               style={{
                 color: current ? "var(--color-text)" : "var(--color-neutral-700)",
                 boxShadow: `inset 0 -2px 0 ${current ? "var(--color-accent)" : "transparent"}`,
@@ -185,12 +190,12 @@ export function DashboardBarSkeleton() {
       </div>
       <nav
         aria-label="Dashboard"
-        className="mx-auto flex max-w-[1200px] gap-6 px-5 sm:gap-8 sm:px-10"
+        className="mx-auto flex max-w-[1200px] gap-5 overflow-x-auto px-5 [scrollbar-width:none] sm:gap-8 sm:px-10"
       >
         {TABS.map((tab) => (
           <span
             key={tab.href}
-            className="flex h-[46px] items-center text-[15px] font-medium text-neutral-700"
+            className="flex h-[46px] flex-none items-center text-[15px] font-medium whitespace-nowrap text-neutral-700"
           >
             {tab.label}
           </span>

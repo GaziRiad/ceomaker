@@ -52,3 +52,11 @@ export class AddressLockedError extends Error {
     this.name = "AddressLockedError";
   }
 }
+
+/** Another site already uses (or is connecting) this domain. */
+export class DomainTakenError extends Error {
+  constructor(domain: string) {
+    super(`The domain "${domain}" is already connected to another site`);
+    this.name = "DomainTakenError";
+  }
+}

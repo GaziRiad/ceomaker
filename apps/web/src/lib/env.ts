@@ -24,6 +24,16 @@ const serverEnvSchema = z.object({
   GOOGLE_CLIENT_SECRET: optional,
   // AI drafting. Without a key, drafts are built from the answers alone and rewrites are off.
   ANTHROPIC_API_KEY: optional,
+  // Custom domains are added to this Vercel project through its API. Without them, production
+  // says custom domains aren't available yet (development simulates the hosting side).
+  VERCEL_API_TOKEN: optional,
+  VERCEL_PROJECT_ID: optional,
+  VERCEL_TEAM_ID: optional,
+  // Optional: a hostname of ours that points at Vercel, given to customers as their www CNAME
+  // so moving hosts later doesn't need every customer to edit DNS. Defaults to Vercel's.
+  CUSTOM_DOMAIN_CNAME: optional,
+  // Secret for the scheduled domain check (Vercel sends it as a bearer token).
+  CRON_SECRET: optional,
 });
 
 export type ServerEnv = z.output<typeof serverEnvSchema>;

@@ -5,7 +5,9 @@ import {
   changeSubdomain,
   deleteAccount,
   getDb,
+  getSiteDomain,
   InvalidSiteDataError,
+  listSitesForUser,
   setSiteNotifications,
   SiteNotFoundError,
   SubdomainTakenError,
@@ -14,6 +16,15 @@ import { updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { getAuth, getSession } from "@/lib/auth";
+import { forgetDomainRouting } from "@/lib/domain-routing";
+import {
+  checkSiteDomain,
+  connectDomain,
+  disconnectDomain,
+  recordsAdded,
+  releaseFromProvider,
+  type DomainResult,
+} from "@/lib/domains/service";
 import { canSendEmail } from "@/lib/email";
 import { isUuid } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
@@ -138,8 +149,10 @@ export async function deleteAccountAction(confirmation: string): Promise<{ ok: t
     return { ok: false, error: "Type your email exactly as shown to confirm." };
   }
   try {
-    const { heldAddresses } = await deleteAccount(getDb(), { userId: session.user.id });
+    const { heldAddresses, domains } = await deleteAccount(getDb(), { userId: session.user.id });
     for (const subdomain of heldAddresses) updateTag(siteCacheTag(subdomain));
+    for (const domain of domains) await releaseFromProvider(domain);
+    if (domains.length) forgetDomainRouting();
   } catch (error) {
     if (error instanceof SiteNotFoundError) return SIGNED_OUT;
     throw error;
@@ -147,4 +160,64 @@ export async function deleteAccountAction(confirmation: string): Promise<{ ok: t
   // The sessions went with the account; this clears this browser's cookies too.
   await getAuth().api.signOut({ headers: await headers() });
   return { ok: true };
+}
+
+// Custom domains. Each returns the domain as Settings should now show it (null: none).
+
+const invalidate = (subdomain: string) => updateTag(siteCacheTag(subdomain));
+
+/** The signed-in user's site with this id, or a failure to show. */
+async function ownedSite(siteId: string) {
+  const session = await getSession();
+  if (!session) return { failure: SIGNED_OUT };
+  if (!isUuid(siteId)) return { failure: NOT_FOUND };
+  const site = (await listSitesForUser(getDb(), session.user.id)).find((row) => row.id === siteId);
+  if (!site) return { failure: NOT_FOUND };
+  return { failure: null, session, site };
+}
+
+export async function connectDomainAction(siteId: string, domain: string): Promise<DomainResult> {
+  const owned = await ownedSite(siteId);
+  if (owned.failure) return owned.failure;
+  return connectDomain({
+    userId: owned.session.user.id,
+    siteId,
+    subdomain: owned.site.subdomain,
+    raw: String(domain).slice(0, 300),
+    invalidate,
+  });
+}
+
+export async function domainRecordsAddedAction(siteId: string): Promise<DomainResult> {
+  const owned = await ownedSite(siteId);
+  if (owned.failure) return owned.failure;
+  return recordsAdded({
+    userId: owned.session.user.id,
+    siteId,
+    subdomain: owned.site.subdomain,
+    owner: owned.session.user,
+    invalidate,
+  });
+}
+
+/** Checks DNS now. Repeated presses within a few seconds return the last result. */
+export async function checkDomainAction(siteId: string): Promise<DomainResult> {
+  const owned = await ownedSite(siteId);
+  if (owned.failure) return owned.failure;
+  const row = await getSiteDomain(getDb(), { userId: owned.session.user.id, siteId });
+  if (!row) return { ok: true, view: null };
+  const view = await checkSiteDomain({
+    row,
+    subdomain: owned.site.subdomain,
+    owner: owned.session.user,
+    invalidate,
+  });
+  return { ok: true, view };
+}
+
+export async function removeDomainAction(siteId: string): Promise<DomainResult> {
+  const owned = await ownedSite(siteId);
+  if (owned.failure) return owned.failure;
+  await disconnectDomain({ userId: owned.session.user.id, siteId, invalidate });
+  return { ok: true, view: null };
 }

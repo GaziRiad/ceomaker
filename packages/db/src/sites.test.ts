@@ -9,6 +9,7 @@ import {
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase, type Database } from "./client";
+import { DomainTakenError } from "./errors";
 import {
   AddressLockedError,
   InvalidSiteDataError,
@@ -19,6 +20,25 @@ import {
 } from "./errors";
 import { runMigrations } from "./migrate";
 import { finishAiUsage, startAiUsage } from "./queries/ai-usage";
+import {
+  getAnalyticsReport,
+  getWeeklyVisitors,
+  recordAnalyticsEvent,
+  type AnalyticsEventInput,
+} from "./queries/analytics";
+import {
+  claimSiteDomain,
+  findConnectedDomain,
+  findSiteByHost,
+  getDomainByShareToken,
+  getSiteDomain,
+  listDomainsToCheck,
+  listExpiredDomainClaims,
+  markDomainRecordsAdded,
+  releaseDomainClaim,
+  removeSiteDomain,
+  saveDomainCheck,
+} from "./queries/domains";
 import { getMedia, insertMedia } from "./queries/media";
 import {
   countContactMessages,
@@ -309,6 +329,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     expect(await deleteSite(db, { userId: "alice", siteId: id })).toEqual({
       subdomain: "alice",
       addressHeld: true,
+      domain: null,
     });
 
     expect(await getPrimarySiteForOwner(db, "alice")).toBeNull();
@@ -349,6 +370,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     expect(await deleteSite(db, { userId: "alice", siteId: draftOnly.id })).toEqual({
       subdomain: "draft-only",
       addressHeld: false,
+      domain: null,
     });
     expect(await isSubdomainAvailable(db, "draft-only", { userId: "mallory" })).toBe(true);
 
@@ -546,7 +568,19 @@ describe.skipIf(!url)("sites (integration)", () => {
       message: { name: "A", email: "a@example.com", organisation: "", topic: "", message: "Hi" },
     });
 
-    expect(await deleteAccount(db, { userId: "alice" })).toEqual({ heldAddresses: ["alice"] });
+    await claimSiteDomain(db, {
+      userId: "alice",
+      siteId: id,
+      domain: "alice.example",
+      kind: "apex",
+      aValue: "76.76.21.21",
+      cnameValue: "cname.vercel-dns.com",
+      shareToken: "account-token",
+    });
+    expect(await deleteAccount(db, { userId: "alice" })).toEqual({
+      heldAddresses: ["alice"],
+      domains: [{ domain: "alice.example", kind: "apex" }],
+    });
     expect(await db.select().from(user).where(eq(user.id, "alice"))).toEqual([]);
     expect(await db.select().from(site)).toEqual([]);
     expect(await db.select().from(contactMessage)).toEqual([]);
@@ -611,5 +645,205 @@ describe.skipIf(!url)("sites (integration)", () => {
     expect(await countUnreadMessages(db, "mallory")).toBe(0);
     await setContactMessageRead(db, { userId: "alice", messageId: newest!.id, read: false });
     expect(await countUnreadMessages(db, "alice")).toBe(7);
+  });
+  it("connects one domain per site, routes it and forwards the site's address once live", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    const other = await createSite(db, { ...draft, userId: "mallory", subdomain: "mallory" });
+    const claim = {
+      userId: "alice",
+      siteId: id,
+      domain: "ameliahart.com",
+      kind: "apex" as const,
+      aValue: "76.76.21.21",
+      cnameValue: "cname.vercel-dns.com",
+      shareToken: "token-a",
+    };
+    await expect(claimSiteDomain(db, { ...claim, userId: "mallory" })).rejects.toBeInstanceOf(
+      SiteNotFoundError,
+    );
+    const row = await claimSiteDomain(db, claim);
+    expect(row).toMatchObject({ domain: "ameliahart.com", stage: "records", diagnosis: null });
+    expect(await getSiteDomain(db, { userId: "mallory", siteId: id })).toBeNull();
+
+    // Taken while Alice's claim is fresh; free once it has expired unconnected.
+    await expect(
+      claimSiteDomain(db, { ...claim, userId: "mallory", siteId: other.id, shareToken: "t2" }),
+    ).rejects.toBeInstanceOf(DomainTakenError);
+    const later = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000);
+    expect(await listExpiredDomainClaims(db, later)).toEqual([
+      { siteId: id, domain: "ameliahart.com", kind: "apex" },
+    ]);
+
+    expect(await findSiteByHost(db, "ameliahart.com")).toMatchObject({
+      subdomain: "alice",
+      isWww: false,
+      stage: "records",
+    });
+    expect(await findSiteByHost(db, "www.ameliahart.com")).toMatchObject({
+      subdomain: "alice",
+      isWww: true,
+    });
+    expect(await findSiteByHost(db, "nobody.com")).toBeNull();
+    expect(await getDomainByShareToken(db, "token-a")).toMatchObject({ domain: "ameliahart.com" });
+
+    expect(await markDomainRecordsAdded(db, { userId: "mallory", siteId: id })).toBe(false);
+    expect(await markDomainRecordsAdded(db, { userId: "alice", siteId: id })).toBe(true);
+    expect(await listDomainsToCheck(db, { before: new Date(), limit: 10 })).toMatchObject([
+      {
+        domain: "ameliahart.com",
+        stage: "waiting",
+        subdomain: "alice",
+        ownerEmail: "alice@example.com",
+      },
+    ]);
+
+    const diagnosis = { hosts: [{ name: "ameliahart.com", ok: true }], fix: null };
+    // A check for a domain the owner has since replaced changes nothing.
+    expect(
+      await saveDomainCheck(db, { siteId: id, domain: "old.com", stage: "connected", diagnosis }),
+    ).toBeNull();
+    expect(await findConnectedDomain(db, "alice")).toBeNull();
+    const connected = await saveDomainCheck(db, {
+      siteId: id,
+      domain: "ameliahart.com",
+      stage: "connected",
+      diagnosis,
+    });
+    expect(connected?.connectedAt).toBeInstanceOf(Date);
+    expect(await findConnectedDomain(db, "alice")).toBe("ameliahart.com");
+    expect(await listDomainsToCheck(db, { before: new Date(), limit: 10 })).toEqual([]);
+    expect(await listExpiredDomainClaims(db, later)).toEqual([]);
+    expect(await releaseDomainClaim(db, { siteId: id, domain: "ameliahart.com" })).toBe(false);
+
+    await publishSite(db, { userId: "alice", siteId: id });
+    expect((await getLive(db, "alice"))?.customDomain).toBe("ameliahart.com");
+
+    // Replacing the domain drops the old one.
+    await claimSiteDomain(db, {
+      ...claim,
+      domain: "me.ameliahart.com",
+      kind: "subdomain",
+      shareToken: "t3",
+    });
+    expect(await findSiteByHost(db, "ameliahart.com")).toBeNull();
+    expect(await findSiteByHost(db, "www.me.ameliahart.com")).toBeNull();
+    expect((await getLive(db, "alice"))?.customDomain).toBeNull();
+
+    expect(await removeSiteDomain(db, { userId: "mallory", siteId: id })).toBeNull();
+    expect(await removeSiteDomain(db, { userId: "alice", siteId: id })).toEqual({
+      domain: "me.ameliahart.com",
+      kind: "subdomain",
+      subdomain: "alice",
+    });
+
+    await claimSiteDomain(db, { ...claim, shareToken: "t4" });
+    expect((await deleteSite(db, { userId: "alice", siteId: id })).domain).toEqual({
+      domain: "ameliahart.com",
+      kind: "apex",
+    });
+    expect(await findSiteByHost(db, "ameliahart.com")).toBeNull();
+  });
+
+  it("reports anonymous visits for the owner only", async () => {
+    const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    const now = new Date("2026-10-02T12:00:00Z");
+    const daysAgo = (days: number, hours = 0) =>
+      new Date(now.getTime() - days * 24 * 60 * 60 * 1000 - hours * 60 * 60 * 1000);
+    const view = (overrides: Partial<AnalyticsEventInput>): AnalyticsEventInput => ({
+      siteId: id,
+      kind: "pageview",
+      path: "/",
+      source: "linkedin",
+      referrerHost: null,
+      clickKind: null,
+      country: "GB",
+      city: "London",
+      latitude: 51.5,
+      longitude: -0.1,
+      device: "phone",
+      visitor: "v1",
+      ...overrides,
+    });
+    const events: AnalyticsEventInput[] = [
+      view({ createdAt: daysAgo(0, 2) }),
+      view({ createdAt: daysAgo(0, 1), path: "/" }), // same visitor, same day: one visitor
+      view({
+        visitor: "v2",
+        country: "US",
+        city: "New York",
+        source: "google",
+        device: "desktop",
+        createdAt: daysAgo(3),
+      }),
+      view({
+        visitor: "v3",
+        source: "other",
+        referrerHost: "logisticsweekly.com",
+        createdAt: daysAgo(10),
+      }),
+      view({ visitor: "v4", source: "direct", createdAt: daysAgo(40) }), // previous 30 days
+      view({ kind: "click", clickKind: "email", createdAt: daysAgo(0, 1) }),
+    ];
+    for (const event of events) await recordAnalyticsEvent(db, event);
+    await saveContactMessage(db, {
+      siteId: id,
+      senderKey: null,
+      now: daysAgo(1),
+      message: { name: "A", email: "a@example.com", organisation: "", topic: "", message: "Hi" },
+    });
+
+    expect(
+      await getAnalyticsReport(db, { userId: "mallory", siteId: id, days: 30, now }),
+    ).toBeNull();
+    const report = (await getAnalyticsReport(db, { userId: "alice", siteId: id, days: 30, now }))!;
+    expect(report.current).toEqual({ visitors: 3, pageviews: 4, messages: 1 });
+    expect(report.previous).toEqual({ visitors: 1, pageviews: 1, messages: 0 });
+    expect(report.visitorsEver).toBe(4);
+    expect(report.series).toHaveLength(30);
+    expect(report.series.at(-1)).toEqual({ start: new Date("2026-10-02T00:00:00Z"), visitors: 1 });
+    expect(report.series.reduce((sum, day) => sum + day.visitors, 0)).toBe(3);
+    expect(report.places).toEqual([
+      { country: "GB", city: "London", latitude: 51.5, longitude: -0.1, visitors: 2, recent: true },
+      {
+        country: "US",
+        city: "New York",
+        latitude: 51.5,
+        longitude: -0.1,
+        visitors: 1,
+        recent: false,
+      },
+    ]);
+    expect(report.sources).toEqual(
+      expect.arrayContaining([
+        { source: "linkedin", visitors: 1 },
+        { source: "google", visitors: 1 },
+        { source: "other", visitors: 1 },
+      ]),
+    );
+    expect(report.otherSites).toEqual([{ host: "logisticsweekly.com", visitors: 1 }]);
+    expect(report.devices).toEqual([
+      { device: "phone", visitors: 2 },
+      { device: "desktop", visitors: 1 },
+    ]);
+    expect(report.clicks).toEqual([{ kind: "email", count: 1 }]);
+    expect(report.pages).toEqual([{ path: "/", views: 4, visitors: 3 }]);
+    expect(report.visits.map((visit) => visit.city)).toEqual([
+      "London",
+      "New York",
+      "London",
+      "London",
+    ]);
+
+    const weekly = (await getAnalyticsReport(db, { userId: "alice", siteId: id, days: 90, now }))!;
+    expect(weekly.series).toHaveLength(13);
+    expect(weekly.current.visitors).toBe(4);
+
+    expect(await getWeeklyVisitors(db, { userId: "alice", siteId: id, now })).toEqual({
+      visitors: 2,
+      previous: 1,
+      series: [0, 0, 0, 1, 0, 0, 1],
+      topCountry: "GB",
+      visitorsEver: 4,
+    });
   });
 });

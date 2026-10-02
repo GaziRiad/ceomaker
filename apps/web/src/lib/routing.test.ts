@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  appHostnames,
   appUrl,
+  isCustomDomainCandidate,
   parseSitesPath,
   resolveHost,
   routingConfigFromEnv,
@@ -41,12 +43,23 @@ describe("resolveHost (subdomain mode)", () => {
     "xn--mlia-bsa.ceomaker.com",
     "-bad.ceomaker.com",
     "ab.ceomaker.com",
-    "evilceomaker.com",
-    "ceomaker.com.evil.example",
-    "attacker.example",
     "",
   ])("refuses %s in production", (host) => {
     expect(resolveHost(host, prod)).toEqual({ kind: "not-found" });
+  });
+
+  it.each(["evilceomaker.com", "ceomaker.com.evil.example", "attacker.example", "AmeliaHart.com"])(
+    "looks up %s as a possible customer domain",
+    (host) => {
+      expect(resolveHost(host, prod)).toEqual({ kind: "custom", hostname: host.toLowerCase() });
+    },
+  );
+
+  it("never looks up IP addresses, localhost or Vercel addresses as customer domains", () => {
+    for (const host of ["10.0.0.4", "foo.localhost", "ceomaker-git-x.vercel.app"]) {
+      expect(isCustomDomainCandidate(host)).toBe(false);
+    }
+    expect(isCustomDomainCandidate("me.ameliahart.co.uk")).toBe(true);
   });
 
   it("refuses a missing Host header", () => {
@@ -157,5 +170,18 @@ describe("siteUrl and siteAddressParts", () => {
       prefix: "ceomaker.vercel.app/sites/",
       suffix: "",
     });
+  });
+});
+
+describe("appHostnames (path mode)", () => {
+  it("lists the product's own hosts", () => {
+    expect(
+      appHostnames({
+        APP_URL: "https://ceomaker.co",
+        VERCEL_URL: "ceomaker-abc.vercel.app",
+        VERCEL_PROJECT_PRODUCTION_URL: "ceomaker.vercel.app",
+      }),
+    ).toEqual(new Set(["ceomaker.co", "ceomaker-abc.vercel.app", "ceomaker.vercel.app"]));
+    expect(appHostnames({})).toEqual(new Set(["localhost"]));
   });
 });
