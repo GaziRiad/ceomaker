@@ -4,8 +4,8 @@
 
 A website builder for busy, non-technical executives (CEOs, founders, chairs). They answer a few
 questions, AI drafts a personal site in their voice from one of two templates (Meridian, Monument), they edit it in
-place and publish. Live at `ceomaker.vercel.app` (path mode: sites at `/sites/<name>`) until the
-product domain is set up.
+place and publish. Live at `www.ceomaker.app` (the apex forwards there), customer sites at
+`<name>.ceomaker.app`; previews at `preview.ceomaker.app` and `<name>.preview.ceomaker.app`.
 
 Read before working: `README.md` (setup, deployment, env vars) and `docs/PLAN.md` (architecture,
 decisions, and "Current state" at the end: what's done, parked and next).
