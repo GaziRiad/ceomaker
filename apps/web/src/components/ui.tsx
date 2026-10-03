@@ -34,13 +34,46 @@ export function Blueprint<T extends ElementType = "div">({
   );
 }
 
+/**
+ * The CEOMaker symbol: a frame's corner and the block it holds (design/brand). Drawn on a
+ * 28-unit grid; at 16px and below use FAVICON_PATH, whose bars are tuned to whole pixels.
+ */
+export const SYMBOL_PATH = "M0 0H28V6H6V28H0Z M10 10H28V28H10Z";
+
+export function BrandSymbol({
+  size = 20,
+  color = "var(--color-accent)",
+  className,
+}: {
+  size?: number;
+  color?: string;
+  className?: string;
+}) {
+  return (
+    <svg
+      aria-hidden
+      width={size}
+      height={size}
+      viewBox="0 0 28 28"
+      className={className}
+      style={{ flex: "none" }}
+    >
+      <path fill={color} fillRule="evenodd" d={SYMBOL_PATH} />
+    </svg>
+  );
+}
+
+/** The lockup: symbol, then CEO in the text colour and MAKER in the accent. */
 export function Wordmark({ size = 22, className = "" }: { size?: number; className?: string }) {
   return (
     <span
-      className={`font-heading font-semibold uppercase ${className}`}
-      style={{ fontSize: size, letterSpacing: "0.02em", lineHeight: 1 }}
+      className={`inline-flex items-center font-heading font-semibold uppercase ${className}`}
+      style={{ fontSize: size, letterSpacing: "0.02em", lineHeight: 1, gap: size * 0.4 }}
     >
-      CEO<span className="text-accent">Maker</span>
+      <BrandSymbol size={Math.round(size * 0.82)} />
+      <span>
+        CEO<span className="text-accent">Maker</span>
+      </span>
     </span>
   );
 }

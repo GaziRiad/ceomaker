@@ -13,6 +13,7 @@ import { monogramIconDataUri, SiteRenderer } from "@ceomaker/templates";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { BrandSymbol } from "@/components/ui";
 import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
 import { asEntitled } from "@/lib/plan";
 import { SHARE_CARD_PATH, shareCardVersion } from "@/lib/share-card";
@@ -128,6 +129,7 @@ function MadeWith() {
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.18)",
       }}
     >
+      <BrandSymbol size={11} color="#ffffff" />
       Made with <strong style={{ fontWeight: 700 }}>CEOMaker</strong>
     </a>
   );
