@@ -520,7 +520,11 @@ function Footer() {
     >
       <Wordmark size={18} className="text-text" />
       <span>Personal websites for people who lead.</span>
-      <span>© 2026</span>
+      <span className="flex gap-5">
+        <Link href="/terms">Terms</Link>
+        <Link href="/privacy">Privacy</Link>
+        <span>© 2026</span>
+      </span>
     </footer>
   );
 }
