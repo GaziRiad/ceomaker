@@ -116,11 +116,10 @@ const sections: LegalSection[] = [
           cancel.
         </p>
         <p>
-          Our order process is conducted by our online reseller Paddle.com. Paddle is the merchant
-          of record for all our orders: it processes your payment, charges any sales tax or VAT that
-          applies, sends your receipts and invoices, and handles payment questions and refunds.
-          Paddle&apos;s <a href="https://www.paddle.com/legal/buyer-terms">buyer terms</a> apply to
-          the payment.
+          Our order process is conducted by our online reseller Freemius, Inc. Freemius is the
+          merchant of record for all our orders: it processes your payment, charges any sales tax or
+          VAT that applies, sends your receipts and invoices, and handles payment questions and
+          refunds. The terms Freemius shows at checkout apply to the payment.
         </p>
       </>
     ),
@@ -165,7 +164,9 @@ const sections: LegalSection[] = [
     title: "Failed payments, and when Pro ends",
     body: (
       <>
-        <p>If a payment fails, Paddle will try again and email you; Pro stays on while we retry.</p>
+        <p>
+          If a payment fails, Freemius will try again and email you; Pro stays on while it retries.
+        </p>
         <p>
           When Pro ends (you cancelled, a refund was made, or payment couldn&apos;t be collected),
           your site is not taken down. It stays live on the free plan: a premium template is shown

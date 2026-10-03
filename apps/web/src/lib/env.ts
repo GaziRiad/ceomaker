@@ -34,6 +34,12 @@ const serverEnvSchema = z.object({
   CUSTOM_DOMAIN_CNAME: optional,
   // Secret for the scheduled domain check (Vercel sends it as a bearer token).
   CRON_SECRET: optional,
+  // Payments through Freemius (merchant of record). Upgrading appears only when all four are
+  // set: the product's ID and keys from Settings › API & Keys (the API key is the bearer token).
+  FREEMIUS_PRODUCT_ID: optional,
+  FREEMIUS_API_KEY: optional,
+  FREEMIUS_SECRET_KEY: optional,
+  FREEMIUS_PUBLIC_KEY: optional,
 });
 
 export type ServerEnv = z.output<typeof serverEnvSchema>;

@@ -1,9 +1,11 @@
+import { getDb, listSubscriptions } from "@ceomaker/db";
 import { isPro } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Blueprint, Check } from "@/components/ui";
 import { getSession } from "@/lib/auth";
+import { freemius } from "@/lib/freemius";
 import { planFor } from "@/lib/plan";
 import { FREE_FEATURES, PRO_FEATURES, PRO_PRICES } from "@/lib/plan-copy";
 import { enter } from "../../_components/enter";
@@ -25,11 +27,24 @@ function Features({ items }: { items: readonly string[] }) {
   );
 }
 
-// Upgrading arrives with Paddle; until then Pro is granted by hand (see README, "Plans").
-async function Billing() {
+const CHECKOUT = "/api/billing/freemius/checkout";
+const PORTAL = "/api/billing/freemius/portal";
+
+type Search = Promise<Record<string, string | string[] | undefined>>;
+
+// Upgrading goes through Freemius once it's configured (see README, "Plans"); until then the
+// button says it's coming, and Pro is granted by hand.
+async function Billing({ searchParams }: { searchParams: Search }) {
   const session = await getSession();
   if (!session) redirect("/sign-in?callbackURL=/dashboard/settings/billing");
-  const pro = isPro(await planFor(session.user.id));
+  const [plan, subscriptions, search] = await Promise.all([
+    planFor(session.user.id),
+    listSubscriptions(getDb(), session.user.id),
+    searchParams,
+  ]);
+  const pro = isPro(plan);
+  const subscription = subscriptions.find((row) => row.status !== "canceled") ?? null;
+  const canBuy = freemius() !== null;
   return (
     <>
       <section {...enter(1)} className="cm-enter">
@@ -43,6 +58,28 @@ async function Billing() {
               ? "Every template, your own domain, the contact form and analytics."
               : "Your site can be live for free, on Meridian at yourname.ceomaker.app."}
           </p>
+          {!pro && search.checkout === "done" ? (
+            <p className="m-0 max-w-[620px] text-[15px] text-pretty">
+              Thank you. We&apos;re confirming your payment with Freemius: refresh this page in a
+              minute to see Pro.
+            </p>
+          ) : null}
+          {pro && subscription?.status === "past_due" ? (
+            <p className="m-0 max-w-[620px] text-[15px] text-pretty">
+              Your last payment didn&apos;t go through. Freemius is trying again; update your card
+              to keep Pro.
+            </p>
+          ) : null}
+          {pro && subscription ? (
+            <a className="btn btn-secondary self-start" href={PORTAL}>
+              Manage subscription
+            </a>
+          ) : null}
+          {search.portal === "unavailable" ? (
+            <p className="m-0 max-w-[620px] text-[15px] text-pretty">
+              Your billing details couldn&apos;t be opened just now. Try again in a minute.
+            </p>
+          ) : null}
         </Blueprint>
       </section>
       <section {...enter(2)} className="cm-enter grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -63,7 +100,21 @@ async function Billing() {
             </span>
           </span>
           <Features items={PRO_FEATURES} />
-          {pro ? null : (
+          {pro ? null : canBuy ? (
+            <>
+              <span className="flex flex-wrap gap-3">
+                <a className="btn btn-primary" href={`${CHECKOUT}?cycle=annual`}>
+                  Upgrade yearly, {PRO_PRICES.annual.price}
+                </a>
+                <a className="btn btn-secondary" href={`${CHECKOUT}?cycle=monthly`}>
+                  Monthly, {PRO_PRICES.monthly.price}
+                </a>
+              </span>
+              <span className="text-[13px] text-neutral-700">
+                Secure checkout by Freemius. Cancel any time, and get a full refund within 14 days.
+              </span>
+            </>
+          ) : (
             <>
               <button type="button" className="btn btn-primary self-start" disabled>
                 Upgrade to Pro
@@ -79,10 +130,10 @@ async function Billing() {
   );
 }
 
-export default function BillingSettingsPage() {
+export default function BillingSettingsPage({ searchParams }: { searchParams: Search }) {
   return (
     <Suspense fallback={<span className="cm-shimmer block h-[320px] bg-neutral-200" />}>
-      <Billing />
+      <Billing searchParams={searchParams} />
     </Suspense>
   );
 }

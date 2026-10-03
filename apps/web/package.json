@@ -15,6 +15,8 @@
     "@ceomaker/db": "workspace:*",
     "@ceomaker/schema": "workspace:*",
     "@ceomaker/templates": "workspace:*",
+    "@freemius/checkout": "1.5.1",
+    "@freemius/sdk": "0.5.0",
     "better-auth": "1.7.6",
     "fflate": "0.8.2",
     "next": "16.3.7",

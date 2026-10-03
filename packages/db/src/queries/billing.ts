@@ -4,7 +4,7 @@ import {
   type Plan,
   type SubscriptionStatus,
 } from "@ceomaker/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { subscription, user } from "../schema";
 
@@ -16,13 +16,13 @@ export interface SubscriptionEvent {
   subscriptionId: string;
   customerId?: string | null;
   /**
-   * Our account id, when the provider hands back what checkout was given. Later events may
-   * leave it out: the subscription is then found by its id.
+   * Our account, when the provider's event can be matched to one (what checkout was given, or the
+   * buyer's email). Later events may leave it out: the subscription is then found by its id.
    */
   userId?: string | null;
   status: SubscriptionStatus;
   currentPeriodEnd?: Date | null;
-  /** When the change happened at the provider (not when the webhook arrived). */
+  /** When the change happened at the provider, or when its state was read from it. */
   occurredAt: Date;
 }
 
@@ -96,4 +96,35 @@ export async function applySubscriptionEvent(
     if (planChanged) await tx.update(user).set({ plan }).where(eq(user.id, userId));
     return { outcome: "applied", userId, plan, planChanged };
   });
+}
+
+/** The account a buyer's email belongs to, compared without case. */
+export async function findUserIdByEmail(db: Database, email: string): Promise<string | null> {
+  const [row] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(sql`lower(${user.email}) = ${email.trim().toLowerCase()}`)
+    .limit(1);
+  return row?.id ?? null;
+}
+
+export interface SubscriptionRow {
+  provider: string;
+  providerSubscriptionId: string;
+  status: SubscriptionStatus;
+  currentPeriodEnd: Date | null;
+}
+
+/** The account's subscriptions, the most recently changed first. */
+export async function listSubscriptions(db: Database, userId: string): Promise<SubscriptionRow[]> {
+  return db
+    .select({
+      provider: subscription.provider,
+      providerSubscriptionId: subscription.providerSubscriptionId,
+      status: subscription.status,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+    })
+    .from(subscription)
+    .where(eq(subscription.userId, userId))
+    .orderBy(desc(subscription.changedAt));
 }

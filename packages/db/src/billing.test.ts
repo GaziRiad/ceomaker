@@ -2,7 +2,12 @@ import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase, type Database } from "./client";
 import { runMigrations } from "./migrate";
-import { applySubscriptionEvent, type SubscriptionEvent } from "./queries/billing";
+import {
+  applySubscriptionEvent,
+  findUserIdByEmail,
+  listSubscriptions,
+  type SubscriptionEvent,
+} from "./queries/billing";
 import { getUserPlan } from "./queries/sites";
 import { subscription, user } from "./schema";
 
@@ -137,5 +142,20 @@ describe.skipIf(!url)("billing (integration)", () => {
     await applySubscriptionEvent(db, event());
     await db.delete(user).where(eq(user.id, "alice"));
     expect(await db.select().from(subscription)).toHaveLength(0);
+  });
+
+  it("finds a buyer's account by email, whatever the case", async () => {
+    expect(await findUserIdByEmail(db, " Alice@Example.com ")).toBe("alice");
+    expect(await findUserIdByEmail(db, "nobody@example.com")).toBeNull();
+  });
+
+  it("lists the account's subscriptions, the latest change first", async () => {
+    await applySubscriptionEvent(db, event({ status: "canceled", occurredAt: at(1) }));
+    await applySubscriptionEvent(db, event({ subscriptionId: "sub_2", occurredAt: at(2) }));
+    expect(await listSubscriptions(db, "alice")).toEqual([
+      expect.objectContaining({ providerSubscriptionId: "sub_2", status: "active" }),
+      expect.objectContaining({ providerSubscriptionId: "sub_1", status: "canceled" }),
+    ]);
+    expect(await listSubscriptions(db, "mallory")).toEqual([]);
   });
 });

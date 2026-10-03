@@ -28,6 +28,7 @@ import {
   type DomainResult,
 } from "@/lib/domains/service";
 import { canSendEmail } from "@/lib/email";
+import { cancelFreemiusSubscriptions } from "@/lib/freemius";
 import { isUuid } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
 
@@ -142,13 +143,23 @@ export async function signOutEverywhereAction(): Promise<{ ok: true } | Failure>
 
 /**
  * Deletes the account and everything it owns. The confirmation must be the account's email,
- * checked here as well as in the dialog. Live addresses stay held, and their pages stop at once.
+ * checked here as well as in the dialog. A Pro subscription is cancelled first, so nobody is
+ * charged for a deleted account. Live addresses stay held, and their pages stop at once.
  */
 export async function deleteAccountAction(confirmation: string): Promise<{ ok: true } | Failure> {
   const session = await getSession();
   if (!session) return SIGNED_OUT;
   if (String(confirmation).trim().toLowerCase() !== session.user.email.toLowerCase()) {
     return { ok: false, error: "Type your email exactly as shown to confirm." };
+  }
+  try {
+    await cancelFreemiusSubscriptions(session.user.id);
+  } catch (error) {
+    console.error("Cancelling the subscription before deleting an account failed", error);
+    return {
+      ok: false,
+      error: "Your Pro subscription couldn't be cancelled, so nothing was deleted. Try again.",
+    };
   }
   try {
     const { heldAddresses, domains } = await deleteAccount(getDb(), { userId: session.user.id });

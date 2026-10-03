@@ -56,8 +56,8 @@ const sections: LegalSection[] = [
           limits and keep costs in check. Not the content itself.
         </li>
         <li>
-          <strong>Payments, once paid plans start:</strong> Paddle handles checkout as the merchant
-          of record. We receive your plan and its status, never your card details.
+          <strong>Payments, once paid plans start:</strong> Freemius handles checkout as the
+          merchant of record. We receive your plan and its status, never your card details.
         </li>
         <li>
           <strong>Unfinished answers</strong> are kept in your own browser for up to a week so you
@@ -145,7 +145,8 @@ const sections: LegalSection[] = [
             <strong>Google</strong> signs you in, if you choose Continue with Google.
           </li>
           <li>
-            <strong>Paddle</strong> handles payments, once paid plans start, as merchant of record.
+            <strong>Freemius</strong> handles payments, once paid plans start, as merchant of
+            record.
           </li>
         </ul>
         <p>
@@ -173,7 +174,7 @@ const sections: LegalSection[] = [
         </li>
         <li>Contact-form messages: until the owner deletes them or deletes the site.</li>
         <li>Sign-in links: they work once and expire after 15 minutes.</li>
-        <li>Payment records: as long as tax law requires, kept by Paddle.</li>
+        <li>Payment records: as long as tax law requires, kept by Freemius.</li>
       </ul>
     ),
   },
