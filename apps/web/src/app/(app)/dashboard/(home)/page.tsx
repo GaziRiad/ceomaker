@@ -28,6 +28,7 @@ import { enter } from "./_components/enter";
 import { countLabel, emptyInbox, snippet } from "./_components/inbox";
 import { When } from "./_components/relative-time";
 import { Versions } from "./_components/versions";
+import { ProTag } from "@/components/pro";
 
 export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
 
@@ -268,7 +269,7 @@ function SideCards({
       <SideCard index={2}>
         <span className="flex items-center justify-between gap-2.5">
           <span className="kicker">Visitors this week</span>
-          {pro ? null : <span className="tag tag-accent">Pro</span>}
+          {pro ? null : <ProTag />}
         </span>
         {!pro ? (
           <span className="text-[15px] text-pretty text-neutral-800">
@@ -304,7 +305,7 @@ function SideCards({
       <SideCard index={3}>
         <span className="flex items-center justify-between gap-2.5">
           <span className="kicker">Plan</span>
-          {pro ? <span className="tag tag-accent">Pro</span> : null}
+          {pro ? <ProTag /> : null}
         </span>
         <span className="font-heading text-[28px] leading-[1.05] font-semibold uppercase">
           {pro ? "Pro" : "Free"}
@@ -325,7 +326,7 @@ function SideCards({
         <span className="flex items-center justify-between gap-2.5">
           <span className="kicker">Custom domain</span>
           {!pro ? (
-            <span className="tag tag-accent">Pro</span>
+            <ProTag />
           ) : tag ? (
             <span className={`tag ${tag.className}`}>{tag.label}</span>
           ) : null}

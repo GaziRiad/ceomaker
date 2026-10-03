@@ -38,6 +38,7 @@ import { enter } from "../_components/enter";
 import { When } from "../_components/relative-time";
 import { Geography } from "./geo";
 import { RetryButton, ShareSite } from "./share-link";
+import { ProTag } from "@/components/pro";
 
 export const metadata: Metadata = { title: "Analytics", robots: { index: false } };
 
@@ -542,7 +543,7 @@ async function Analytics({ searchParams }: { searchParams: Search }) {
         <BigCard index={1}>
           <span className="flex items-center gap-3 text-accent-700">
             <Chart size={32} />
-            <span className="tag tag-accent">Pro</span>
+            <ProTag />
           </span>
           <h2 className={H2}>Analytics is part of Pro</h2>
           <p className="m-0 max-w-[560px] text-pretty text-neutral-800">

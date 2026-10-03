@@ -20,6 +20,7 @@ import type { RewriteMode } from "@/lib/ai/draft";
 import { SECTION_LABELS, type FieldErrors } from "./editor-model";
 import { RemoveButton, TextAreaField, TextField } from "./fields";
 import { PortraitField } from "./portrait-field";
+import { UpgradePrompt } from "@/components/pro";
 
 const REWRITE_OPTIONS: RewriteMode[] = ["Sharper", "More formal", "Shorter"];
 
@@ -846,13 +847,11 @@ function ContactForm({
 }: FormProps<"contact"> & { template: ContentPanelProps["template"]; pro: boolean }) {
   // On the free plan the form is off on the live site whatever is saved, so show it off.
   const formOn = pro && section.form?.enabled !== false;
-  const formHint = !pro
-    ? "The contact form and its inbox are part of Pro. Visitors use your email and links instead."
-    : !template.contactForm
-      ? `${template.name} doesn't show a contact form. Meridian does.`
-      : formOn
-        ? "Visitors can write to you without seeing your email address. Messages arrive in your dashboard."
-        : "Visitors use your email and links instead.";
+  const formHint = !template.contactForm
+    ? `${template.name} doesn't show a contact form. Meridian does.`
+    : formOn
+      ? "Visitors can write to you without seeing your email address. Messages arrive in your dashboard."
+      : "Visitors use your email and links instead.";
   const links = section.links;
   const setLinks = (next: typeof links) => update((current) => ({ ...current, links: next }));
   const quick = QUICK_LINKS.filter(([label]) => !links.some((link) => link.label === label));
@@ -960,10 +959,7 @@ function ContactForm({
         ) : null}
       </div>
       <div className="flex flex-col gap-2">
-        <span className="flex items-center gap-2 text-xs text-neutral-700">
-          Contact form
-          {pro ? null : <span className="tag tag-accent">Pro</span>}
-        </span>
+        <span className="text-xs text-neutral-700">Contact form</span>
         <div className="seg grid w-full grid-cols-2" role="radiogroup" aria-label="Contact form">
           {(["on", "off"] as const).map((key) => (
             <label key={key} className="seg-opt justify-center">
@@ -983,7 +979,14 @@ function ContactForm({
             </label>
           ))}
         </div>
-        <span className="text-xs text-neutral-600">{formHint}</span>
+        {pro ? (
+          <span className="text-xs text-neutral-600">{formHint}</span>
+        ) : (
+          <UpgradePrompt title="Let visitors write to you">
+            With Pro, visitors send you messages from your site without seeing your email address,
+            and you read them in your dashboard.
+          </UpgradePrompt>
+        )}
       </div>
     </>
   );

@@ -16,6 +16,7 @@ import {
   TemplateView,
 } from "@ceomaker/templates";
 import { ScaledFrame } from "@/components/scaled-frame";
+import { ProTag, UpgradePrompt } from "@/components/pro";
 
 const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
@@ -86,13 +87,10 @@ export function TemplatePanel({
         </div>
       ) : null}
       {!pro && isPremiumTemplate(current.key) ? (
-        <div className="flex flex-col gap-1.5 border border-accent bg-accent-100 p-3 text-[13px]">
-          <strong className="font-medium">{name} is a Pro template.</strong>
-          <span>
-            Try it here as much as you like. Publishing it needs Pro; Meridian is included in the
-            free plan.
-          </span>
-        </div>
+        <UpgradePrompt title={`${name} is a Pro template`}>
+          Try it here as much as you like. Upgrade to publish it, or switch back to Meridian, which
+          is included in the free plan.
+        </UpgradePrompt>
       ) : null}
       <div role="radiogroup" aria-label="Template" className="flex flex-col gap-3">
         {choices.map((template) => {
@@ -132,9 +130,7 @@ export function TemplatePanel({
                   <span className="font-heading text-lg font-semibold uppercase">
                     {template.name}
                   </span>
-                  {isPremiumTemplate(template.key) ? (
-                    <span className="tag tag-accent">Pro</span>
-                  ) : null}
+                  {isPremiumTemplate(template.key) ? <ProTag /> : null}
                 </span>
                 <span
                   aria-hidden

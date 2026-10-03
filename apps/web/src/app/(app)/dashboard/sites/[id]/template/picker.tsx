@@ -15,6 +15,7 @@ import { ScaledFrame } from "@/components/scaled-frame";
 import { ArrowRight } from "@/components/ui";
 import { DOCUMENT_ACCEPT, DOCUMENT_MAX_BYTES, setPendingDocument } from "@/lib/pending-document";
 import { chooseTemplateAction } from "../../../site-actions";
+import { ProTag } from "@/components/pro";
 
 const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
@@ -134,9 +135,7 @@ export function TemplatePicker({
                       <span className="font-heading text-[22px] font-semibold uppercase">
                         {template.name}
                       </span>
-                      {isPremiumTemplate(template.key) ? (
-                        <span className="tag tag-accent">Pro</span>
-                      ) : null}
+                      {isPremiumTemplate(template.key) ? <ProTag /> : null}
                     </span>
                     <span className="text-sm text-neutral-700">{template.tagline}</span>
                     {isPremiumTemplate(template.key) && !pro ? (
@@ -169,7 +168,7 @@ export function TemplatePicker({
           </span>
           {wantsDocument && !pro ? (
             <span className="flex items-center gap-2 text-sm text-neutral-700">
-              <span className="tag tag-accent">Pro</span>
+              <ProTag />
               Drafting from your CV is part of Pro.
             </span>
           ) : wantsDocument ? (

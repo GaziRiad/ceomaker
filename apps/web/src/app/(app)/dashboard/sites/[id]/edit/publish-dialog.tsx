@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, Corners, Spinner } from "@/components/ui";
 import { checkAddressAction, publishAction } from "../../../site-actions";
+import { ProTag } from "@/components/pro";
 
 type Stage = "plan" | "publishing" | "done";
 
@@ -199,7 +200,7 @@ export function PublishDialog({
             <div className="flex flex-col gap-1 border border-accent bg-accent-100 p-3.5">
               <span className="flex items-center justify-between gap-3 text-[13px] text-neutral-700">
                 Your plan
-                {pro ? <span className="tag tag-accent">Pro</span> : null}
+                {pro ? <ProTag /> : null}
               </span>
               <span className="font-heading text-[26px] leading-[1.1] font-semibold">
                 {pro ? "Pro" : "Free · $0"}
