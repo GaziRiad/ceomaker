@@ -214,13 +214,15 @@ Every account starts on the free plan: a site on Meridian at `<name>.ceomaker.ap
 
 Free accounts can try Pro templates in the draft but not publish them. When an account isn't Pro, its live site is shown as Meridian, its form is off, its custom domain forwards to its own address and the badge appears; nothing stored changes, so Pro brings it all back.
 
-Until Paddle is connected, Pro is granted by hand (for example for your own accounts):
+**Billing** (provider not connected yet; Paddle is in review). Every provider's webhook will hand its events to `syncSubscription` (`apps/web/src/lib/billing.ts`), which records them in the `subscription` table and sets `user.plan` from all of the account's subscriptions: Pro while any is active or its payment is being retried (the provider's retry schedule is the grace period), free once it's paused or canceled. Events arriving out of order or twice change nothing. When the plan changes, the owner's live pages are rebuilt on their next visit, so nobody has to republish. Accounts without a subscription are never touched by billing.
+
+Until then, Pro is granted by hand (for example for your own accounts, or a customer who paid by invoice):
 
 ```sql
 update "user" set plan = 'pro' where email = 'someone@example.com';
 ```
 
-Live pages are cached, so the owner should publish once afterwards for their live site to pick up the change.
+Live pages are cached, so after a change by hand the owner should publish once for their live site to pick it up.
 
 ### Domain setup
 

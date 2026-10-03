@@ -19,7 +19,8 @@ export const user = pgTable("user", {
   image: text("image"),
   /**
    * "free" or "pro" (see PLANS in @ceomaker/schema). Not a Better Auth field: the database default
-   * makes every new account free. Set by billing, or by hand for complimentary accounts.
+   * makes every new account free. Billing keeps it in step with the account's subscriptions
+   * (see subscription); complimentary accounts, which have none, are set by hand.
    */
   plan: text("plan").notNull().default("free"),
   /** Last canvas size the owner picked in the editor: "desktop", "tablet" or "phone". */
