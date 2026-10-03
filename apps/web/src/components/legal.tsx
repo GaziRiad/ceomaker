@@ -4,7 +4,7 @@ import { Wordmark } from "@/components/ui";
 
 /** Shown at the top of both legal pages; change it whenever either page changes. */
 export const LEGAL_UPDATED = "3 October 2026";
-export const LEGAL_CONTACT = "hello@ceomaker.app";
+export const LEGAL_CONTACT = "riadhallouch447@gmail.com";
 
 export interface LegalSection {
   id: string;
