@@ -12,6 +12,8 @@ const BEZEL = {
   phone: { pad: 12, radius: 48, screen: 36 },
 } as const;
 const MIN_SCREEN = 420;
+/** How long the selection ring stays before fading. */
+const RING_MS = 2500;
 const TOOLBAR = 56;
 const GUTTER = 24;
 const BOTTOM = 28;
@@ -37,7 +39,7 @@ interface Ring {
  * of the chosen device. Templates lay out by container width, so a 390px box shows the phone
  * layout. The page only scales down when the canvas is too narrow, and says by how much.
  *
- * The selected section is ringed and scrolled into view on every switch; clicking anywhere on
+ * The selected section is ringed briefly and scrolled into view on every switch; clicking anywhere on
  * the page selects the section under the pointer.
  */
 export function DeviceCanvas({
@@ -71,6 +73,17 @@ export function DeviceCanvas({
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [ring, setRing] = useState<Ring | null>(null);
   const pendingScroll = useRef(true);
+
+  // The ring shows when the selection or the size changes, then fades so it doesn't sit over
+  // the page while the owner reads or edits it.
+  const flashKey = `${selectedLabel}|${device}|${String(scrollKey)}`;
+  const [flash, setFlash] = useState({ key: flashKey, on: true });
+  if (flash.key !== flashKey) setFlash({ key: flashKey, on: true });
+  useEffect(() => {
+    if (!flash.on) return;
+    const timer = setTimeout(() => setFlash((current) => ({ ...current, on: false })), RING_MS);
+    return () => clearTimeout(timer);
+  }, [flash]);
 
   useLayoutEffect(() => {
     const element = canvas.current;
@@ -175,6 +188,8 @@ export function DeviceCanvas({
           border: `${2 / scale}px solid var(--color-accent)`,
           pointerEvents: "none",
           zIndex: 30,
+          opacity: flash.on ? 1 : 0,
+          transition: "opacity 400ms ease",
         }}
       >
         <span
