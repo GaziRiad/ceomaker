@@ -2,6 +2,7 @@
 
 import {
   contrastRatio,
+  isPremiumTemplate,
   isPublishableColors,
   MIN_TEXT_CONTRAST,
   resolveSiteColors,
@@ -66,6 +67,7 @@ export function Editor({
   versionCount,
   initials,
   notice,
+  pro,
 }: {
   siteId: string;
   subdomain: string;
@@ -79,6 +81,8 @@ export function Editor({
   versionCount: number;
   initials: string;
   notice: string | null;
+  /** The account is on Pro: premium templates publish and the contact form can be on. */
+  pro: boolean;
 }) {
   // The draft and, for the preview, the last valid version of each section, updated together.
   const [state, setState] = useState(() => {
@@ -253,10 +257,20 @@ export function Editor({
   const colors = resolveSiteColors(draft.theme, draft.templateKey, draft.templateVersion);
   const template = getTemplate(draft.templateKey, draft.templateVersion);
   const newer = newerDesign(draft.templateKey, draft.templateVersion);
-  const renderable = useMemo(
-    () => previewContent(draft.content, state.lastValid),
-    [draft.content, state.lastValid],
-  );
+  const renderable = useMemo(() => {
+    const content = previewContent(draft.content, state.lastValid);
+    // The preview shows what the live site will: on the free plan the form stays off.
+    return pro
+      ? content
+      : {
+          ...content,
+          sections: content.sections.map((section) =>
+            section.type === "contact"
+              ? { ...section, form: { enabled: false, topics: section.form?.topics ?? [] } }
+              : section,
+          ),
+        };
+  }, [draft.content, state.lastValid, pro]);
   const currentPrint = liveFingerprint(draft);
   const everPublished = livePrint !== null;
   const statusTag =
@@ -272,14 +286,19 @@ export function Editor({
     contact?.type === "contact" &&
     (Boolean(contact.email?.trim()) ||
       contact.links.some((link) => link.href.trim()) ||
-      (template.contactForm && contact.form?.enabled !== false));
-  const blocker = !isPublishableColors(colors)
-    ? `Text contrast is ${contrastRatio(colors.ink, colors.bg).toFixed(1)}:1. Publishing needs at least ${MIN_TEXT_CONTRAST}:1: adjust your colours in Brand.`
-    : errors.size
-      ? "Some fields need fixing before you can publish. They're highlighted in Content."
-      : !reachable
-        ? "Visitors need a way to reach you. Under Contact, add an email or a link, or turn on the contact form."
-        : null;
+      (pro && template.contactForm && contact.form?.enabled !== false));
+  const blocker =
+    !pro && isPremiumTemplate(draft.templateKey)
+      ? `${template.name} is a Pro template. Switch to Meridian under Template to publish on the free plan.`
+      : !isPublishableColors(colors)
+        ? `Text contrast is ${contrastRatio(colors.ink, colors.bg).toFixed(1)}:1. Publishing needs at least ${MIN_TEXT_CONTRAST}:1: adjust your colours in Brand.`
+        : errors.size
+          ? "Some fields need fixing before you can publish. They're highlighted in Content."
+          : !reachable
+            ? pro
+              ? "Visitors need a way to reach you. Under Contact, add an email or a link, or turn on the contact form."
+              : "Visitors need a way to reach you. Under Contact, add an email or a link."
+            : null;
 
   const onPublished = (result: PublishedResult) => {
     setSubdomain(result.subdomain);
@@ -405,6 +424,7 @@ export function Editor({
               rewriteError={rewriteError}
               revision={formRevision}
               template={{ name: template.name, contactForm: template.contactForm }}
+              pro={pro}
               onSelect={setSelectedId}
               onSections={setSections}
               onSection={updateSection}
@@ -426,6 +446,7 @@ export function Editor({
               live={live}
               theme={draft.theme}
               content={renderable}
+              pro={pro}
               onChoose={setTemplate}
               onDesign={setDesign}
             />
@@ -463,6 +484,7 @@ export function Editor({
         addressSuffix={addressSuffix}
         nextVersion={versions + 1}
         blocker={blocker}
+        pro={pro}
         ensureSaved={ensureSaved}
         onPublished={onPublished}
       />

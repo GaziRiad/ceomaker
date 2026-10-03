@@ -208,6 +208,20 @@ Unconnected domains are released after 7 days, so nobody can hold a domain they 
 
 Live sites send anonymous page views and clicks on email, phone, LinkedIn and website links to `/api/collect` (no cookies, no stored addresses; a visitor is a keyed hash that changes every day). Country and city come from Vercel's request headers, so they only appear on deployments: locally every visit shows as "Unknown location". Signed-in CEOMaker users and known bots aren't counted.
 
+### Plans (Free and Pro)
+
+Every account starts on the free plan: a site on Meridian at `<name>.ceomaker.app`, reached by email and links, one AI draft and 5 AI rewrites a day, and a "Made with CEOMaker" badge. Pro adds Monument (and future premium templates), a custom domain, the contact form and Messages inbox, analytics, more AI and drafting from a CV, and removes the badge. The rules live in `packages/schema/src/plans.ts`; the plan is `user.plan` (`free` or `pro`).
+
+Free accounts can try Pro templates in the draft but not publish them. When an account isn't Pro, its live site is shown as Meridian, its form is off, its custom domain forwards to its own address and the badge appears; nothing stored changes, so Pro brings it all back.
+
+Until Paddle is connected, Pro is granted by hand (for example for your own accounts):
+
+```sql
+update "user" set plan = 'pro' where email = 'someone@example.com';
+```
+
+Live pages are cached, so the owner should publish once afterwards for their live site to pick up the change.
+
 ### Domain setup
 
 The product domain is `ceomaker.app`, with customer sites at `<name>.ceomaker.app`.

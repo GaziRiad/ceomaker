@@ -23,6 +23,7 @@ export function PublishDialog({
   addressSuffix,
   nextVersion,
   blocker,
+  pro,
   ensureSaved,
   onPublished,
 }: {
@@ -37,6 +38,8 @@ export function PublishDialog({
   nextVersion: number;
   /** A reason publishing can't happen yet (unreadable colours, fields to fix). */
   blocker: string | null;
+  /** Shown in the plan box: what the live site includes. */
+  pro: boolean;
   ensureSaved: () => Promise<boolean>;
   onPublished: (result: PublishedResult) => void;
 }) {
@@ -195,13 +198,16 @@ export function PublishDialog({
             </div>
             <div className="flex flex-col gap-1 border border-accent bg-accent-100 p-3.5">
               <span className="flex items-center justify-between gap-3 text-[13px] text-neutral-700">
-                Private beta
-                <span className="tag tag-accent">Free while in beta</span>
+                Your plan
+                {pro ? <span className="tag tag-accent">Pro</span> : null}
               </span>
-              <span className="font-heading text-[26px] leading-[1.1] font-semibold">$0 today</span>
+              <span className="font-heading text-[26px] leading-[1.1] font-semibold">
+                {pro ? "Pro" : "Free · $0"}
+              </span>
               <span className="text-xs text-neutral-700">
-                Plans will be $9.99 a month or $99 a year once billing starts. We&apos;ll email you
-                before anything changes.
+                {pro
+                  ? "Every template, your own domain, the contact form and analytics."
+                  : "Free sites use Meridian, are reached by email and links, and carry a small “Made with CEOMaker” badge."}
               </span>
             </div>
             {error ? (

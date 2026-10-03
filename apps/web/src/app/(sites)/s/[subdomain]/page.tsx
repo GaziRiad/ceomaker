@@ -1,4 +1,5 @@
 import {
+  isPro,
   isValidSubdomain,
   parseSiteContentForRender,
   parseThemeSettingsForRender,
@@ -12,7 +13,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
-import { routingConfigFromEnv, siteUrl } from "@/lib/routing";
+import { asEntitled } from "@/lib/plan";
+import { appUrl, routingConfigFromEnv, siteUrl } from "@/lib/routing";
 import { getTenantSite } from "@/lib/sites";
 import { SiteStatus } from "../../site-status";
 import { Beacon } from "./beacon";
@@ -48,7 +50,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
   if (tenant?.status !== "published") return NOT_LIVE;
 
-  const { site } = tenant;
+  const site = asEntitled(tenant.site, tenant.site.ownerPlan);
   const { meta, sections } = parseSiteContentForRender(site.content);
   const hero = sections.find((section) => section.type === "hero");
   const name = meta?.name ?? subdomain;
@@ -85,6 +87,36 @@ function websiteHosts(content: unknown): string[] {
   });
 }
 
+/** Free sites carry a small, quiet link back to CEOMaker. Pro removes it. */
+function MadeWith() {
+  return (
+    <a
+      href={appUrl()}
+      target="_blank"
+      rel="noopener"
+      style={{
+        position: "fixed",
+        right: 16,
+        bottom: 16,
+        zIndex: 50,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "8px 12px",
+        borderRadius: 999,
+        background: "rgba(17, 17, 17, 0.88)",
+        color: "#ffffff",
+        font: "500 12px/1 system-ui, -apple-system, 'Segoe UI', sans-serif",
+        letterSpacing: "0.01em",
+        textDecoration: "none",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.18)",
+      }}
+    >
+      Made with <strong style={{ fontWeight: 700 }}>CEOMaker</strong>
+    </a>
+  );
+}
+
 async function TenantSite({ params }: { params: Params }) {
   const { subdomain } = await params;
   const tenant = await loadSite(subdomain);
@@ -92,7 +124,7 @@ async function TenantSite({ params }: { params: Params }) {
   if (!tenant || tenant.status === "draft") notFound();
   if (tenant.status === "paused") return <SiteStatus variant="paused" />;
 
-  const { site } = tenant;
+  const site = asEntitled(tenant.site, tenant.site.ownerPlan);
   return (
     <>
       <SiteRenderer
@@ -104,6 +136,7 @@ async function TenantSite({ params }: { params: Params }) {
         sendMessage={sendContactMessage.bind(null, site.subdomain)}
       />
       <Beacon subdomain={site.subdomain} websiteHosts={websiteHosts(site.content)} />
+      {isPro(site.ownerPlan) ? null : <MadeWith />}
     </>
   );
 }

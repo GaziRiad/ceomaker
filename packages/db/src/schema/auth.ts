@@ -17,6 +17,11 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
+  /**
+   * "free" or "pro" (see PLANS in @ceomaker/schema). Not a Better Auth field: the database default
+   * makes every new account free. Set by billing, or by hand for complimentary accounts.
+   */
+  plan: text("plan").notNull().default("free"),
   ...timestamps,
 });
 

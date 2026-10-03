@@ -1,4 +1,5 @@
 import { findConnectedDomain, findSiteByHost, getDb } from "@ceomaker/db";
+import type { Plan } from "@ceomaker/schema";
 
 // Lookups the proxy makes for customer domains, cached briefly in memory so steady traffic
 // doesn't touch the database. A change reaches every server within CACHE_MS; the server that
@@ -35,6 +36,8 @@ export interface HostSite {
   domain: string;
   /** The www form of an apex domain, which forwards to the domain. */
   isWww: boolean;
+  /** Custom domains are a Pro feature: a free owner's domain forwards to the site's own address. */
+  ownerPlan: Plan;
 }
 
 const hosts = cache<HostSite | null>();
@@ -46,7 +49,12 @@ export async function siteForHost(hostname: string): Promise<HostSite | null> {
     return await hosts.get(hostname, async () => {
       const found = await findSiteByHost(getDb(), hostname);
       return found
-        ? { subdomain: found.subdomain, domain: found.domain, isWww: found.isWww }
+        ? {
+            subdomain: found.subdomain,
+            domain: found.domain,
+            isWww: found.isWww,
+            ownerPlan: found.ownerPlan,
+          }
         : null;
     });
   } catch (error) {

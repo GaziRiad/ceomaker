@@ -6,6 +6,7 @@ import {
   type TemplateKey,
   type TemplateRef,
   type ThemeSettings,
+  isPremiumTemplate,
 } from "@ceomaker/schema";
 import {
   designOnChoosing,
@@ -23,6 +24,7 @@ export function TemplatePanel({
   live,
   theme,
   content,
+  pro,
   onChoose,
   onDesign,
 }: {
@@ -32,6 +34,8 @@ export function TemplatePanel({
   live: TemplateRef | null;
   theme: ThemeSettings;
   content: RenderableSiteContent;
+  /** On the free plan, premium templates can be tried in the draft but not published. */
+  pro: boolean;
   onChoose: (key: TemplateKey) => void;
   onDesign: (version: number) => void;
 }) {
@@ -81,6 +85,15 @@ export function TemplatePanel({
           </button>
         </div>
       ) : null}
+      {!pro && isPremiumTemplate(current.key) ? (
+        <div className="flex flex-col gap-1.5 border border-accent bg-accent-100 p-3 text-[13px]">
+          <strong className="font-medium">{name} is a Pro template.</strong>
+          <span>
+            Try it here as much as you like. Publishing it needs Pro; Meridian is included in the
+            free plan.
+          </span>
+        </div>
+      ) : null}
       <div role="radiogroup" aria-label="Template" className="flex flex-col gap-3">
         {choices.map((template) => {
           const selected = template.key === current.key;
@@ -115,8 +128,13 @@ export function TemplatePanel({
                 onClick={() => onChoose(template.key)}
                 className="flex cursor-pointer items-center justify-between px-3 py-2.5 text-left outline-none after:absolute after:inset-0 after:content-['']"
               >
-                <span className="font-heading text-lg font-semibold uppercase">
-                  {template.name}
+                <span className="flex items-center gap-2">
+                  <span className="font-heading text-lg font-semibold uppercase">
+                    {template.name}
+                  </span>
+                  {isPremiumTemplate(template.key) ? (
+                    <span className="tag tag-accent">Pro</span>
+                  ) : null}
                 </span>
                 <span
                   aria-hidden

@@ -1,4 +1,5 @@
 import { ADDRESS_HOLD_DAYS, getDb, getPrimarySiteForOwner, getSiteDomain } from "@ceomaker/db";
+import { isPro } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -9,6 +10,7 @@ import { getSession } from "@/lib/auth";
 import { domainProvider } from "@/lib/domains/provider";
 import { toDomainView } from "@/lib/domains/service";
 import { emailConfigured } from "@/lib/email";
+import { planFor } from "@/lib/plan";
 import { appUrl, siteAddressParts, siteUrl } from "@/lib/routing";
 import { displayName } from "@/lib/site-data";
 import { When } from "../_components/relative-time";
@@ -57,7 +59,10 @@ async function SiteSettings() {
   // Oldest last: the first publish is when the address locked.
   const firstPublish = site.versions.at(-1)?.publishedAt ?? null;
   const name = displayName(session.user, site.answers?.name);
-  const domainRow = await getSiteDomain(db, { userId: session.user.id, siteId: site.id });
+  const [domainRow, plan] = await Promise.all([
+    getSiteDomain(db, { userId: session.user.id, siteId: site.id }),
+    planFor(session.user.id),
+  ]);
 
   return (
     <>
@@ -98,18 +103,36 @@ async function SiteSettings() {
         )}
       </SettingsCard>
 
-      <SettingsSection index={2} id="custom-domain" label="Custom domain" className="gap-[18px]">
-        <DomainCard
-          siteId={site.id}
-          initial={domainRow ? toDomainView(domainRow) : null}
-          available={domainProvider() !== null}
-          address={address}
-          liveUrl={domainRow ? `https://${domainRow.domain}` : siteUrl(site.subdomain)}
-          firstName={name.split(/\s+/)[0] ?? name}
-          example={exampleDomain(name)}
-          origin={appUrl()}
-        />
-      </SettingsSection>
+      {!isPro(plan) && !domainRow ? (
+        <SettingsCard index={2} title="Custom domain" className="gap-3">
+          <span id="custom-domain" className="tag tag-accent self-start">
+            Pro
+          </span>
+          <CardText>
+            Use your own address, like {exampleDomain(name)}, instead of {address}. Custom domains
+            are part of Pro.
+          </CardText>
+          <Link
+            href="/dashboard/settings/billing"
+            className="btn btn-secondary min-h-11 gap-2.5 self-start px-4 sm:min-h-10"
+          >
+            See plans <ArrowRight />
+          </Link>
+        </SettingsCard>
+      ) : (
+        <SettingsSection index={2} id="custom-domain" label="Custom domain" className="gap-[18px]">
+          <DomainCard
+            siteId={site.id}
+            initial={domainRow ? toDomainView(domainRow) : null}
+            available={domainProvider() !== null}
+            address={address}
+            liveUrl={domainRow ? `https://${domainRow.domain}` : siteUrl(site.subdomain)}
+            firstName={name.split(/\s+/)[0] ?? name}
+            example={exampleDomain(name)}
+            origin={appUrl()}
+          />
+        </SettingsSection>
+      )}
 
       <SettingsCard index={3} title="Notifications" className="gap-4">
         <NotifySwitch

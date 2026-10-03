@@ -17,8 +17,15 @@ export interface InboxAction {
 export function emptyInbox(
   site: OwnedSite,
   hasMessages: boolean,
+  pro: boolean,
 ): { text: string; action: InboxAction } | null {
   if (hasMessages) return null;
+  if (!pro) {
+    return {
+      text: "The contact form and this inbox are part of Pro. Until then, visitors reach you by email and your links.",
+      action: { label: "See plans", href: "/dashboard/settings/billing" },
+    };
+  }
   const editor = `/dashboard/sites/${site.id}/edit`;
   if (site.status === "draft" || !site.published) {
     return {

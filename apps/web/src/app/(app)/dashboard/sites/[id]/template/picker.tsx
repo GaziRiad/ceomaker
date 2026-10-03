@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  isPremiumTemplate,
   resolveSiteColors,
   type RenderableSiteContent,
   type TemplateKey,
@@ -24,6 +25,7 @@ export function TemplatePicker({
   theme,
   content,
   wantsDocument,
+  pro,
 }: {
   siteId: string;
   initialTemplate: TemplateKey;
@@ -32,6 +34,8 @@ export function TemplatePicker({
   theme: ThemeSettings;
   content: RenderableSiteContent;
   wantsDocument: boolean;
+  /** Free accounts can pick any template, but publish premium ones and draft from a CV with Pro. */
+  pro: boolean;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<TemplateKey>(initialTemplate);
@@ -126,10 +130,20 @@ export function TemplatePicker({
                   className="flex cursor-pointer items-start gap-3 p-4 text-left outline-none after:absolute after:inset-0 after:content-['']"
                 >
                   <span className="flex flex-1 flex-col gap-0.5">
-                    <span className="font-heading text-[22px] font-semibold uppercase">
-                      {template.name}
+                    <span className="flex items-center gap-2">
+                      <span className="font-heading text-[22px] font-semibold uppercase">
+                        {template.name}
+                      </span>
+                      {isPremiumTemplate(template.key) ? (
+                        <span className="tag tag-accent">Pro</span>
+                      ) : null}
                     </span>
                     <span className="text-sm text-neutral-700">{template.tagline}</span>
+                    {isPremiumTemplate(template.key) && !pro ? (
+                      <span className="text-[13px] text-neutral-600">
+                        Try it free; publishing it needs Pro.
+                      </span>
+                    ) : null}
                   </span>
                   <span
                     aria-hidden
@@ -153,7 +167,12 @@ export function TemplatePicker({
           <span className="flex-1">
             Selected: <strong className="font-medium">{selectedName}</strong>
           </span>
-          {wantsDocument ? (
+          {wantsDocument && !pro ? (
+            <span className="flex items-center gap-2 text-sm text-neutral-700">
+              <span className="tag tag-accent">Pro</span>
+              Drafting from your CV is part of Pro.
+            </span>
+          ) : wantsDocument ? (
             <span className="flex min-w-0 items-center gap-2 text-sm text-neutral-700">
               <input
                 ref={input}

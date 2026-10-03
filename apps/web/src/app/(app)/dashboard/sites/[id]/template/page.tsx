@@ -1,6 +1,7 @@
-import { DOCUMENT_SOURCES, parseSiteContentForRender } from "@ceomaker/schema";
+import { DOCUMENT_SOURCES, isPro, parseSiteContentForRender } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { planFor } from "@/lib/plan";
 import { siteAddressParts } from "@/lib/routing";
 import { initialsFor, loadOwnedSite, toEditableDraft } from "@/lib/site-data";
 import { BuilderHeader } from "../../../builder-header";
@@ -16,6 +17,7 @@ async function Picker({
   const { id } = await params;
   const { user, site, draft } = await loadOwnedSite(id, `/dashboard/sites/${id}/template`);
   const address = siteAddressParts();
+  const pro = isPro(await planFor(user.id));
   const wantsDocument = (site.answers?.sources ?? []).some((source) =>
     DOCUMENT_SOURCES.has(source),
   );
@@ -39,6 +41,7 @@ async function Picker({
         theme={draft.theme}
         content={parseSiteContentForRender(draft.content)}
         wantsDocument={wantsDocument}
+        pro={pro}
       />
     </>
   );

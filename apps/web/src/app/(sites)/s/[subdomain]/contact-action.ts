@@ -4,6 +4,7 @@ import { getDb, getMessageAlertAddress, saveContactMessage } from "@ceomaker/db"
 import {
   CONTACT_MESSAGE_LIMITS,
   contactMessageSchema,
+  isPro,
   isValidSubdomain,
   parseSiteContentForRender,
   type ContactMessageInput,
@@ -70,6 +71,8 @@ export async function sendContactMessage(
 
   const tenant = await getTenantSite(subdomain);
   if (tenant?.status !== "published") return UNAVAILABLE;
+  // The contact form is a Pro feature; free sites show email and links instead.
+  if (!isPro(tenant.site.ownerPlan)) return UNAVAILABLE;
   const contact = parseSiteContentForRender(tenant.site.content).sections.find(
     (section) => section.type === "contact",
   );

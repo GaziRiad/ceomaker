@@ -1,5 +1,8 @@
 import {
   buildStarterContent,
+  isPro,
+  planOf,
+  type Plan,
   contrastRatio,
   CURRENT_SCHEMA_VERSION,
   DEFAULT_TEMPLATE_KEY,
@@ -77,8 +80,13 @@ export interface PublishedSite {
   theme: unknown;
   content: unknown;
   publishedAt: Date;
-  /** The site's live custom domain, if it has one: its canonical address. */
+  /**
+   * The site's live custom domain, if it has one and its owner is on Pro: its canonical address.
+   * A domain whose owner left Pro stays connected but no longer serves the site.
+   */
   customDomain: string | null;
+  /** The owner's plan: free sites lose the premium template, the form, and get the badge. */
+  ownerPlan: Plan;
 }
 
 /** What a public address should show: the live version, or why there isn't one. */
@@ -102,8 +110,10 @@ export async function getTenantSiteBySubdomain(
       content: siteVersion.content,
       publishedAt: siteVersion.publishedAt,
       customDomain: siteDomain.domain,
+      ownerPlan: user.plan,
     })
     .from(site)
+    .innerJoin(user, eq(user.id, site.userId))
     .leftJoin(
       siteVersion,
       and(eq(siteVersion.id, site.publishedVersionId), eq(siteVersion.siteId, site.id)),
@@ -127,9 +137,16 @@ export async function getTenantSiteBySubdomain(
       theme: row.theme,
       content: row.content,
       publishedAt: row.publishedAt,
-      customDomain: row.customDomain ?? null,
+      customDomain: isPro(planOf(row.ownerPlan)) ? (row.customDomain ?? null) : null,
+      ownerPlan: planOf(row.ownerPlan),
     },
   };
+}
+
+/** The account's plan. Missing accounts are free. */
+export async function getUserPlan(db: Database, userId: string): Promise<Plan> {
+  const [row] = await db.select({ plan: user.plan }).from(user).where(eq(user.id, userId)).limit(1);
+  return planOf(row?.plan);
 }
 
 export async function listSitesForUser(db: Database, userId: string) {

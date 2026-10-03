@@ -27,8 +27,11 @@ import {
   templateKeySchema,
   type SiteContentInput,
   type ThemeSettingsInput,
+  FREE_AI_LIMITS,
+  isPremiumTemplate,
+  isPro,
 } from "@ceomaker/schema";
-import { designOnChoosing } from "@ceomaker/templates";
+import { designOnChoosing, getTemplate } from "@ceomaker/templates";
 import { updateTag } from "next/cache";
 import { z } from "zod";
 import { AI_LIMITS, AI_MODEL, anthropic, DAY_MS, FALLBACK_BETA } from "@/lib/ai/client";
@@ -39,6 +42,7 @@ import {
   type RewriteMode,
 } from "@/lib/ai/draft";
 import { getSession } from "@/lib/auth";
+import { planFor } from "@/lib/plan";
 import { forgetDomainRouting } from "@/lib/domain-routing";
 import { releaseFromProvider } from "@/lib/domains/service";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
@@ -148,7 +152,14 @@ export async function publishAction(
   const site = await getSiteForOwner(db, { userId, siteId });
   if (!site) return NOT_FOUND;
 
-  // Billing isn't live yet: during the beta every account may publish (docs/PLAN.md, Phase 3).
+  // Free accounts publish too, but premium templates need Pro (the draft may try them).
+  const draft = toEditableDraft(site.draft);
+  if (isPremiumTemplate(draft.templateKey) && !isPro(await planFor(userId))) {
+    return {
+      ok: false,
+      error: `${getTemplate(draft.templateKey, draft.templateVersion).name} is a Pro template. Switch to Meridian under Template to publish on the free plan.`,
+    };
+  }
   try {
     let subdomain = site.subdomain;
     if (options.subdomain && options.subdomain !== site.subdomain) {
@@ -291,14 +302,22 @@ export async function rewriteHeadlineAction(
       : { ok: false, error: "AI rewriting isn't switched on yet." };
   }
 
+  const pro = isPro(await planFor(userId));
   const usage = await startAiUsage(db, {
     userId,
     siteId,
     kind: "rewrite",
-    limit: AI_LIMITS.rewrite,
+    limit: pro ? AI_LIMITS.rewrite : FREE_AI_LIMITS.rewritesPerDay,
     windowMs: DAY_MS,
   });
-  if (!usage) return { ok: false, error: "You've reached today's limit for AI rewrites." };
+  if (!usage) {
+    return {
+      ok: false,
+      error: pro
+        ? "You've reached today's limit for AI rewrites."
+        : `The free plan includes ${FREE_AI_LIMITS.rewritesPerDay} AI rewrites a day. Pro has many more.`,
+    };
+  }
 
   try {
     const message = await client.beta.messages.parse({

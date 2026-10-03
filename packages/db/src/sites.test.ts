@@ -710,7 +710,13 @@ describe.skipIf(!url)("sites (integration)", () => {
       diagnosis,
     });
     expect(connected?.connectedAt).toBeInstanceOf(Date);
+    // Custom domains are a Pro feature: a free owner's address doesn't forward, and the live
+    // site doesn't treat the domain as its address.
+    expect(await findConnectedDomain(db, "alice")).toBeNull();
+    expect(await findSiteByHost(db, "ameliahart.com")).toMatchObject({ ownerPlan: "free" });
+    await db.update(user).set({ plan: "pro" }).where(eq(user.id, "alice"));
     expect(await findConnectedDomain(db, "alice")).toBe("ameliahart.com");
+    expect(await findSiteByHost(db, "ameliahart.com")).toMatchObject({ ownerPlan: "pro" });
     expect(await listDomainsToCheck(db, { before: new Date(), limit: 10 })).toEqual([]);
     expect(await listExpiredDomainClaims(db, later)).toEqual([]);
     expect(await releaseDomainClaim(db, { siteId: id, domain: "ameliahart.com" })).toBe(false);

@@ -4,7 +4,7 @@ import {
   getPrimarySiteForOwner,
   listContactMessages,
 } from "@ceomaker/db";
-import { parseSiteContentForRender } from "@ceomaker/schema";
+import { isPro, parseSiteContentForRender } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -12,6 +12,7 @@ import { Suspense, type CSSProperties } from "react";
 import { Inbox as InboxIcon } from "@/components/icons";
 import { Blueprint } from "@/components/ui";
 import { getSession } from "@/lib/auth";
+import { planFor } from "@/lib/plan";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { countLabel, emptyInbox } from "../_components/inbox";
 import { Inbox } from "./inbox";
@@ -113,7 +114,7 @@ async function Messages({ searchParams }: { searchParams: SearchParams }) {
   const topic = requested && topics.includes(requested) ? requested : null;
   const open = typeof query.open === "string" && isUuid(query.open) ? query.open : null;
   const page = await listContactMessages(db, { userId, siteId: site.id, topic });
-  const empty = emptyInbox(site, counts.total > 0);
+  const empty = emptyInbox(site, counts.total > 0, isPro(await planFor(userId)));
 
   return (
     <Main>

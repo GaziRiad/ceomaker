@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  isPremiumTemplate,
+  planOf,
   buildStarterContent,
   contactMessageSchema,
   contrastLevel,
@@ -429,5 +431,16 @@ describe("onboarding", () => {
     expect(decodeAnswers(encodeAnswers(named))).toEqual(named);
     expect(decodeAnswers("not-base64!")).toBeNull();
     expect(decodeAnswers(encodeAnswers({ ...answers, role: "Emperor" as never }))).toBeNull();
+  });
+});
+
+describe("plans", () => {
+  it("treats anything but pro as free, and Monument as premium", () => {
+    expect(planOf("pro")).toBe("pro");
+    expect(planOf("free")).toBe("free");
+    expect(planOf("PRO")).toBe("free");
+    expect(planOf(undefined)).toBe("free");
+    expect(isPremiumTemplate("monument")).toBe(true);
+    expect(isPremiumTemplate("meridian")).toBe(false);
   });
 });
