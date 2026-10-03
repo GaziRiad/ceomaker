@@ -109,9 +109,11 @@ const sections: LegalSection[] = [
           price shown when you subscribe, and renew automatically until you cancel.
         </p>
         <p>
-          Payments are handled by Lemon Squeezy, which sells the subscription to you as merchant of
-          record. It processes your payment, charges any sales tax or VAT that applies and sends
-          your receipts and invoices. Its own terms apply to the payment.
+          Our order process is conducted by our online reseller Paddle.com. Paddle is the merchant
+          of record for all our orders: it processes your payment, charges any sales tax or VAT that
+          applies, sends your receipts and invoices, and handles payment questions and refunds.
+          Paddle&apos;s <a href="https://www.paddle.com/legal/buyer-terms">buyer terms</a> apply to
+          the payment.
         </p>
       </>
     ),
@@ -155,11 +157,10 @@ const sections: LegalSection[] = [
     title: "Failed payments and paused sites",
     body: (
       <p>
-        If a payment fails, we and Lemon Squeezy will try again and email you; your site stays live
-        while we retry. If payment can&apos;t be collected, the subscription ends and your site is
-        paused: visitors see a short notice instead. Your content and versions are kept, and the
-        site goes live again as soon as you subscribe. We will email you before deleting a paused
-        site.
+        If a payment fails, Paddle will try again and email you; your site stays live while we
+        retry. If payment can&apos;t be collected, the subscription ends and your site is paused:
+        visitors see a short notice instead. Your content and versions are kept, and the site goes
+        live again as soon as you subscribe. We will email you before deleting a paused site.
       </p>
     ),
   },
