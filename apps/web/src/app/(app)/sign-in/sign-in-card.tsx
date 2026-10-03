@@ -171,7 +171,9 @@ export function SignInCard({
         </p>
       ) : null}
       <span className="text-[13px] text-neutral-600">
-        No password needed. Your answers are saved to your account and stay private.
+        No password needed. Your answers are saved to your account and stay private. By continuing
+        you agree to our <Link href="/terms">terms</Link> and{" "}
+        <Link href="/privacy">privacy policy</Link>.
       </span>
       <Link
         href={fromStart ? "/start" : "/"}

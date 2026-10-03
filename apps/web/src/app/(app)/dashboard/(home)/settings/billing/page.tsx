@@ -5,7 +5,7 @@ import { enter } from "../../_components/enter";
 export const metadata: Metadata = { title: "Billing", robots: { index: false } };
 
 // Billing isn't live yet: during the private beta every account is free (docs/PLAN.md, Phase 3).
-// The paid states (active, cancelling, payment failed, paused) arrive with Lemon Squeezy.
+// The paid states (active, cancelling, payment failed, paused) arrive with Paddle.
 export default function BillingSettingsPage() {
   return (
     <section {...enter(1)} className="cm-enter">

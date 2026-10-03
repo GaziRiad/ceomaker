@@ -11,7 +11,7 @@ The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 | 0. Foundation (monorepo, auth, DB, CI)       | Done                          |
 | 1. Content contract + multi-tenant renderer  | Done                          |
 | 2. Onboarding, AI generation, editor         | Done                          |
-| 3. Publish + billing (Lemon Squeezy)         | Publishing done, billing next |
+| 3. Publish + billing (Paddle)                | Publishing done, billing next |
 | 4. Analytics, more templates, SEO            | Analytics done                |
 | 5. Custom domains, renderer isolation, scale | Custom domains done           |
 

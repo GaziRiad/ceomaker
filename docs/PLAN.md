@@ -10,10 +10,11 @@ Greenfield project (`ceomaker`, empty repo). Goal: an AI-assisted website builde
 Verified facts (researched 2026-09-29):
 
 - **Next.js 16.3** is the current stable/LTS line (App Router + Turbopack stable, React 19.2). Build on it.
-- **Lemon Squeezy** is a merchant-of-record and now supports **bank payouts to Algeria** — so you can collect global subscriptions and get paid without incorporating. It also handles VAT/sales tax as the seller, which removes a large compliance burden. (Confirmed as the chosen billing provider.)
+- **Billing provider: Paddle** (decided October 2026), replacing the original choice of Lemon Squeezy, which Stripe acquired and is winding down toward Stripe Managed Payments. Paddle is a merchant of record, works with sellers anywhere except sanctioned countries (Algeria is supported, with a case-by-case review), and handles VAT, receipts and refunds. Where this plan says Paddle below, it originally said Lemon Squeezy.
+- _Original note:_ **Lemon Squeezy** is a merchant-of-record and now supports **bank payouts to Algeria** — so you can collect global subscriptions and get paid without incorporating. It also handles VAT/sales tax as the seller, which removes a large compliance burden. (Confirmed as the chosen billing provider.)
 - **Custom-domain SSL** at scale is a solved problem (Cloudflare for SaaS: 100 hostnames free, then $0.10/hostname/mo; apex domains need Enterprise). Deferred to a later phase per your decision.
 
-Decisions locked with you: **Lemon Squeezy** billing · **subdomains only for MVP** (`*.ceomaker.com`), custom domains later · onboarding via a **guided form (required) + optional resume upload**.
+Decisions locked with you: **Paddle** billing · **subdomains only for MVP** (`*.ceomaker.com`), custom domains later · onboarding via a **guided form (required) + optional resume upload**.
 
 ---
 
@@ -23,7 +24,7 @@ The engineering here is very doable and the plan below is production-grade. The 
 
 - **Analysis:** your plausible moat is positioning, not technology — VIP-grade curated templates, a done-for-you/concierge feel, and distribution into a specific niche you can reach (your network, a wedge audience). The AI is table stakes.
 - **Hypothesis (needs testing):** that target users will pay monthly rather than use a free incumbent. Validate this at the **first revenue-capable milestone (Phase 3)** with real outreach before pouring weeks into Phases 4–5.
-- **Operational flag:** paying USD hosting/AI bills _out_ of Algeria is a separate problem from collecting money _in_. Lemon Squeezy solves inbound. Outbound vendor bills (Vercel, Anthropic, Cloudflare) may push you toward a US LLC (Stripe Atlas + Mercury card) sooner than payments alone would. Gate that on revenue — don't incorporate before Phase 3 shows signal.
+- **Operational flag:** paying USD hosting/AI bills _out_ of Algeria is a separate problem from collecting money _in_. Paddle solves inbound. Outbound vendor bills (Vercel, Anthropic, Cloudflare) may push you toward a US LLC (Stripe Atlas + Mercury card) sooner than payments alone would. Gate that on revenue — don't incorporate before Phase 3 shows signal.
 
 This plan is sequenced so you reach "can take a real payment" fast and cheap, then stop and measure.
 
@@ -72,8 +73,8 @@ Get this schema right first; everything else hangs off it.
 - **Object storage:** Cloudflare R2 (no egress fees) for media + resume files.
 - **Rate limiting / ephemeral state:** Upstash Redis (serverless) — throttle AI and auth endpoints.
 - **Hosting (MVP):** Vercel — native ISR, edge middleware, wildcard `*.ceomaker.com` (Pro plan). Custom domains added later via Cloudflare for SaaS.
-- **Email:** Resend (verification, publish/billing notifications). Lemon Squeezy sends receipts itself.
-- **Payments:** Lemon Squeezy hosted checkout + subscriptions + signed webhooks.
+- **Email:** Resend (verification, publish/billing notifications). Paddle sends receipts itself.
+- **Payments:** Paddle hosted checkout + subscriptions + signed webhooks.
 - **Observability:** Sentry (errors), structured logs, uptime monitor, AI cost tracking.
 - **Styling:** Tailwind + shadcn/ui for the dashboard; templates are self-contained styled component sets.
 
@@ -86,11 +87,11 @@ Get this schema right first; everything else hangs off it.
 - `site` — `id`, `user_id`, `subdomain` (unique, validated), `custom_domain` (nullable, later), `status` (draft|published|paused), `template_key`, `theme` (JSONB), `current_draft_version_id`, `current_published_version_id`, timestamps.
 - `site_version` — `id`, `site_id`, `kind` (draft|published), `content` (JSONB: validated `Section[]`), `theme` (JSONB snapshot), `template_key`, `created_at`, `published_at`. **Published rows immutable** → rollback.
 - `template` — registry metadata (key, name, section catalog, schema version, preview image). Templates themselves are code.
-- `subscription` — `id`, `user_id`, `site_id`, `ls_subscription_id`, `ls_customer_id`, `status`, `current_period_end`, `plan`. Written only from verified LS webhooks. **This is the single source of entitlement.**
+- `subscription` — `id`, `user_id`, `site_id`, `paddle_subscription_id`, `paddle_customer_id`, `status`, `current_period_end`, `plan`. Written only from verified Paddle webhooks. **This is the single source of entitlement.**
 - `media_asset` — `id`, `site_id`, `r2_key`, `type`, `size`, `created_at`.
 - `analytics_event` — `id`, `site_id`, `type`, `path`, `referrer`, `country`, `ua_class`, `ts` (first-party, cookieless).
 - `ai_generation` — `id`, `site_id`, `status`, input snapshot, model, tokens, cost, `created_at` (cost + abuse tracking).
-- `webhook_event` — processed LS event IDs for idempotency.
+- `webhook_event` — processed Paddle event IDs for idempotency.
 
 Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every query is scoped by the authenticated `user_id`** in application code.
 
@@ -118,7 +119,7 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 
 **Subdomains:** validated on claim (regex, length, reserved blocklist: `app`, `api`, `www`, `admin`, `mail`, `dashboard`, etc.); impersonation review matters for a VIP brand. Custom domains are a later phase (Cloudflare for SaaS: DNS/TXT verification → automatic SSL).
 
-**Billing (Lemon Squeezy):** hosted checkout for the subscription; signed webhooks (`subscription_created/updated/cancelled`, payment events) update the `subscription` table idempotently. **Entitlement is derived only from stored subscription status** — never from the client. Publishing is gated on an active subscription; on lapse (after LS dunning/grace) the site flips to `paused` and the renderer serves a lightweight "site paused" page.
+**Billing (Paddle):** hosted checkout for the subscription; signed webhooks (`subscription_created/updated/cancelled`, payment events) update the `subscription` table idempotently. **Entitlement is derived only from stored subscription status** — never from the client. Publishing is gated on an active subscription; on lapse (after Paddle dunning/grace) the site flips to `paused` and the renderer serves a lightweight "site paused" page.
 
 **Analytics:** first-party, cookieless pageview events from the renderer to `analytics_event`, aggregated for a simple dashboard (privacy matters to VIPs). Scale path: offload to Tinybird/ClickHouse if volume warrants — don't build a pipeline for MVP.
 
@@ -132,10 +133,10 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 - **Cookie isolation:** auth cookies are **host-only** on the dashboard host — never `Domain=.ceomaker.com`. Published sites are cookieless. This prevents a subdomain from reaching dashboard sessions.
 - **CSP + headers:** strict CSP on rendered sites (no inline scripts except hashed), HSTS, `X-Content-Type-Options`, frame protections.
 - **Tenant authorization:** every mutation and query scoped to the authenticated `user_id`; never trust client-supplied IDs; optional Postgres RLS as backstop.
-- **Payments:** verify LS webhook HMAC signatures; idempotent processing via `webhook_event`; entitlement never client-trusted.
+- **Payments:** verify Paddle webhook HMAC signatures; idempotent processing via `webhook_event`; entitlement never client-trusted.
 - **AI abuse/cost:** per-user rate limits, input length caps, max tokens, cost ceilings. AI output is treated as untrusted data and validated — prompt injection can't execute anything because nothing the model returns is executed.
 - **Uploads:** strict type/size limits, isolated resume-parsing path with timeouts, random storage keys.
-- **Secrets:** host secret store, least-privilege separate keys (LS, Anthropic, R2), rotation. CSRF via same-site cookies + origin checks (Better Auth). Dependency scanning (pnpm audit + Renovate).
+- **Secrets:** host secret store, least-privilege separate keys (Paddle, Anthropic, R2), rotation. CSRF via same-site cookies + origin checks (Better Auth). Dependency scanning (pnpm audit + Renovate).
 - **Audit trail:** log publish, subdomain claim, domain, and billing events.
 
 ---
@@ -156,7 +157,7 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 - **Phase 0 — Foundation.** Monorepo (pnpm + Turborepo), Next.js 16.3 + TS strict, Drizzle + Postgres, Better Auth, Tailwind + shadcn/ui, CI, secrets, Sentry. One deployable app with host-based middleware skeleton (dashboard vs renderer).
 - **Phase 1 — Content contract + renderer (highest technical risk, do it early).** Define `@ceomaker/schema` (sections + theme). Build **one polished template** + renderer components. Serve a seeded site on `{sub}.ceomaker.com` via middleware + ISR + tag revalidation. Proves the multi-tenant serving path.
 - **Phase 2 — Onboarding + AI + editor.** Guided form (+ optional resume parse) → `Profile`; Claude generation → validated draft; editor (side panel, inline edit, reorder, theme, live preview, autosave).
-- **Phase 3 — Publish + billing (first revenue-capable milestone).** Lemon Squeezy checkout + signed webhooks + entitlement; publish flow (draft → immutable published version → revalidate); subdomain claim + reserved list; "site paused" on lapse. **Stop here and validate demand with real users before building more.**
+- **Phase 3 — Publish + billing (first revenue-capable milestone).** Paddle checkout + signed webhooks + entitlement; publish flow (draft → immutable published version → revalidate); subdomain claim + reserved list; "site paused" on lapse. **Stop here and validate demand with real users before building more.**
 - **Phase 4 — Analytics + polish + more templates.** First-party cookieless analytics dashboard; 2–3 more VIP-grade templates; media uploads; SEO (meta/OG/sitemap/robots); mobile/responsive polish (a stated priority).
 - **Phase 5 — Scale + BYO custom domains.** Cloudflare for SaaS custom domains (verification + auto-SSL); move renderer to its own registrable domain for full isolation; load test; harden; revisit US-LLC/Atlas incorporation if revenue signal is real.
 
@@ -177,7 +178,7 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 - `packages/schema/` — Zod `Site`, `Theme`, `Section` union + version/upcaster. (Build first.)
 - `packages/db/` — Drizzle schema (tables above) + migrations.
 - `packages/templates/` — template registry + first template's components.
-- `apps/web/` — Next.js app: `middleware.ts` (host-based routing), `app/(dashboard)/…`, `app/(site)/[...]` renderer route group, `lib/auth`, `lib/billing` (LS adapter), `lib/ai` (Claude generation), `app/api/webhooks/lemonsqueezy/route.ts`.
+- `apps/web/` — Next.js app: `middleware.ts` (host-based routing), `app/(dashboard)/…`, `app/(site)/[...]` renderer route group, `lib/auth`, `lib/billing` (Paddle adapter), `lib/ai` (Claude generation), `app/api/webhooks/paddle/route.ts`.
 
 ---
 
@@ -186,8 +187,8 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 1. **Local:** `pnpm dev`; add `*.ceomaker.localhost` / hosts entries or use a wildcard tunnel to exercise host-based middleware; seed a site and confirm `sub.localhost` renders the published version while `app.localhost` shows the dashboard.
 2. **Content contract:** unit tests feed malformed AI output through Zod and assert reject + repair; assert renderer ignores unknown section types.
 3. **Publish pipeline:** integration test — edit draft, publish, assert a new immutable published version and that `revalidateTag` refreshes the rendered subdomain.
-4. **Billing:** replay Lemon Squeezy test webhooks; assert entitlement flips publish on/off and that duplicate events are idempotent (signature verified).
-5. **e2e (Playwright):** signup → fill form → generate → edit → checkout (LS test mode) → publish → load `{sub}.ceomaker.com` and see the live site; cancel subscription → site shows "paused".
+4. **Billing:** replay Paddle test webhooks; assert entitlement flips publish on/off and that duplicate events are idempotent (signature verified).
+5. **e2e (Playwright):** signup → fill form → generate → edit → checkout (Paddle test mode) → publish → load `{sub}.ceomaker.com` and see the live site; cancel subscription → site shows "paused".
 6. **Security checks:** confirm no `Domain=.ceomaker.com` auth cookie; CSP present on rendered pages; a second user cannot read/mutate the first user's site; webhook rejects bad signatures.
 7. **Load smoke (pre-Phase 5):** hit a published subdomain under load and confirm reads are served from cache with no primary-DB query per request.
 
@@ -234,7 +235,7 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
 - **CVs** (PDF or .docx, up to 4 MB, under Vercel's 4.5 MB body limit) are attached on the template screen, sent once to the model and not stored. The questions screen only records the intent, so the flow works when the sign-in link opens on another device. The answers themselves travel inside the sign-in link for the same reason.
 - **Passwordless auth.** Magic links (single use, hashed at rest, 15 minutes) via Resend, plus Google. Email and password sign-in is off.
 - **Images in Postgres** (`media` table, bytea, max 3 MB, served at `/media/<id>` with a one-year immutable cache, allowed through the proxy on customer hosts). Fine for portraits at beta volume; move to object storage when storage cost or volume justifies it.
-- **Publishing is free in the beta.** The publish dialog states it plainly instead of showing a checkout. Lemon Squeezy, entitlements and the "paused on lapse" switch are the rest of Phase 3. The paused page exists and is driven by `site.status`.
+- **Publishing is free in the beta.** The publish dialog states it plainly instead of showing a checkout. Paddle, entitlements and the "paused on lapse" switch are the rest of Phase 3. The paused page exists and is driven by `site.status`.
 - **Versions.** Every publish is an immutable snapshot. The dashboard lists them; **View** opens one at full size (`/dashboard/sites/[id]/versions/[versionId]`, owner only) with two separate ways back: **Open in editor** replaces the draft with it and leaves the live site alone; **Make live now** puts it live at once and leaves the draft alone (the editor then shows the newer edits as unpublished). Both ask first, through the shared `ConfirmDialog`.
 - **One query per page for the site.** The dashboard and editor load a site with its draft, live version and version history in a single query (only the draft and live version carry their content); the dashboard used to make six. Both pages paint a skeleton from the static shell while data loads. Known remaining cost: postgres.js describes parameter types before each query (Drizzle passes `prepare: false` per query), so each query is two round trips, and Better Auth's session check (after its 5-minute cookie cache) is two more queries. In production, next to the database in Frankfurt, these cost about a millisecond each; revisit with Better Auth's `advanced.database.joins` and a driver that skips the describe step if they ever matter.
 - **Saved answers expire.** The questions flow keeps answers in the browser so "Save and exit" can resume. They expire a week after the last change, are cleared on sign-out and once the user has a site, and a resumed flow says so with a "Start over" button.
@@ -247,7 +248,7 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
   - **Messages:** 15 at a time, newest first, with **Load older messages** (cursor paging). New messages stay marked until opened, replied to or marked read; they can be marked unread again. Topic filters appear when there's more than one message. Long messages fold to three lines. Delete asks first. Each empty state says why the inbox is empty and what to do (not live yet, paused, template without a form, form off, nothing yet).
   - **Settings › Site:** the address (editable with a live availability check until the first publish, then locked with the date), custom domain (coming soon), the message-email switch, and Delete site (type the address to confirm).
   - **Settings › Account:** name, Change email (a link to the new address, valid 24 hours; the email changes only when it's opened, and an address that already has an account gets the same answer and no email), sign-in methods, **Sign out on all devices** (other devices' 5-minute session cookie cache can keep them in for up to five minutes), and Delete account (type the email). Deleting an account removes everything it owns; addresses of sites that were ever live stay held for 90 days, for nobody.
-  - **Settings › Billing:** the beta plan only. The paid states in the design (active, cancelling, payment failed, paused) come with Lemon Squeezy.
+  - **Settings › Billing:** the beta plan only. The paid states in the design (active, cancelling, payment failed, paused) come with Paddle.
   - **Until Resend is set up:** in production, Change email is disabled and the message-email switch says "Not available yet" (the choice is still saved and message emails are skipped). In development every email is printed to the server console instead, so all of it can be tried locally.
 - **Custom domains** (`design/Dashboard.dc.html`, Settings › Site). One domain per site, apex (`ameliahart.com`, with `www` forwarding to it) or subdomain (`me.ameliahart.com`). Flow: type the domain → records to add, with a guide per registrar and a page to send to an assistant (`/dns/<token>`) → "I've added the records" → checks until DNS points here → the certificate is issued → live, with an email. Checks run from the open Settings page (every 30 s), from "Check now", and from `/api/cron/domains` (daily on Vercel Hobby; see README). Problems are diagnosed from public DNS in plain words: an old record left next to ours, only one of the two hosts pointed here, or (from Vercel) the domain in use on another account, which needs one TXT record. Once live, the site's own address forwards to the domain (production only), the canonical URL is the domain. The proxy finds sites by host with a 30-second in-memory cache. Unconnected claims expire after 7 days. Deleting the site or account removes the domain from Vercel.
   - **Provider:** Vercel's domain API, behind `DomainProvider` (`lib/domains/provider.ts`). Development without credentials simulates the hosting side and checks real DNS. Production without credentials shows "Not available yet".
@@ -267,7 +268,7 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
   - Headline rewrite options follow the mock's logic (Sharper, More formal, Shorter) rather than the README's list.
   - Meridian follows the owner's section order. The Meridian mock puts About before Impact; new sites keep Impact first because the other five templates are designed that way, and one order serves all six.
   - The questions preview shows the address the person will be offered (from the full name), not just the first name.
-- **Follow-ups:** Lemon Squeezy checkout and webhooks; delete unreferenced media; email verification before first publish is covered by passwordless sign-in; per-tenant OG images; an "add CV later" import in the editor; claimed-but-never-published addresses could expire after N days.
+- **Follow-ups:** Paddle checkout and webhooks; delete unreferenced media; email verification before first publish is covered by passwordless sign-in; per-tenant OG images; an "add CV later" import in the editor; claimed-but-never-published addresses could expire after N days.
 
 ## Current state (October 2026)
 
@@ -280,7 +281,7 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
 **Parked, revisit around launch:**
 
 - DNS friction for non-technical users. Registrars ship a default `www` record, so adding ours fails (seen on Hostinger) until the old one is deleted. Options, cheapest first: show "change this record" using what's already on their DNS and detect the registrar from nameservers; Domain Connect one-click setup (GoDaddy, Cloudflare, IONOS, NameSilo; not Hostinger or Namecheap as far as we found); selling domains in-app. Measure where users stall before choosing.
-- Lemon Squeezy billing (Phase 3), Resend in production, buying the product domain.
+- Paddle billing (Phase 3), Resend in production, buying the product domain.
 
 **Template direction (agreed October 2026):** fewer, stronger templates. Meridian is the quiet one; Monument (rebuilt) is the loud one. Round 1 also produced "Index" (1a: a precise, specification-sheet layout) as a candidate third template, not designed yet. Aurora, Obsidian, Bento and Chronicle were removed (only test accounts used them). Their keys stay as aliases of Meridian 1, so any stored site or version still renders, and saved colours for them are dropped when a draft is saved.
 
