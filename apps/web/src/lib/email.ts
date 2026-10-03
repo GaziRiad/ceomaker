@@ -1,5 +1,6 @@
 import "server-only";
 import { serverEnv } from "./env";
+import { appUrl } from "./routing";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
@@ -60,7 +61,7 @@ async function sendLinkEmail(email: LinkEmail): Promise<void> {
       subject: email.subject,
       text: `${email.intro}\n\n${email.url}\n\n${email.footnote}`,
       html: `<div style="font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;color:#1d1f20;max-width:480px">
-<p style="font-size:20px;font-weight:600;letter-spacing:.02em;text-transform:uppercase">CEO<span style="color:#5980a6">Maker</span></p>
+<p style="font-size:20px;font-weight:600;letter-spacing:.02em;text-transform:uppercase"><img src="${appUrl()}/brand/ceomaker-icon-120.png" width="24" height="24" alt="" style="vertical-align:-4px;margin-right:10px;border:0">CEO<span style="color:#5980a6">Maker</span></p>
 <p>${escapeHtml(email.intro)}</p>
 <p><a href="${safeUrl}" style="display:inline-block;background:#5980a6;color:#f2f2f3;padding:12px 18px;text-decoration:none;font-weight:600">${escapeHtml(email.button)}</a></p>
 <p style="font-size:13px;color:#5d5d60">If the button doesn't work, paste this address into your browser:<br><span style="word-break:break-all">${safeUrl}</span></p>
