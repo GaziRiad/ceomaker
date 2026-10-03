@@ -178,7 +178,7 @@ Consider Postgres RLS (if on Supabase) as defense-in-depth; regardless, **every 
 - `packages/schema/` — Zod `Site`, `Theme`, `Section` union + version/upcaster. (Build first.)
 - `packages/db/` — Drizzle schema (tables above) + migrations.
 - `packages/templates/` — template registry + first template's components.
-- `apps/web/` — Next.js app: `middleware.ts` (host-based routing), `app/(dashboard)/…`, `app/(site)/[...]` renderer route group, `lib/auth`, `lib/billing` (Paddle adapter), `lib/ai` (Claude generation), `app/api/webhooks/lemonsqueezy/route.ts`.
+- `apps/web/` — Next.js app: `middleware.ts` (host-based routing), `app/(dashboard)/…`, `app/(site)/[...]` renderer route group, `lib/auth`, `lib/billing` (Paddle adapter), `lib/ai` (Claude generation), `app/api/webhooks/paddle/route.ts`.
 
 ---
 
