@@ -1,5 +1,5 @@
 import { countMediaSince, getDb, insertMedia, MEDIA_MAX_BYTES } from "@ceomaker/db";
-import { mediaPath } from "@ceomaker/schema";
+import { FAVICON_SIZE, mediaPath, SHARE_IMAGE } from "@ceomaker/schema";
 import { createHash } from "node:crypto";
 import { getAuth } from "@/lib/auth";
 import { DAY_MS } from "@/lib/ai/client";
@@ -33,13 +33,32 @@ export async function POST(request: Request) {
     return json(429, { error: "You've uploaded a lot of images today. Try again tomorrow." });
   }
 
-  const file = (await request.formData()).get("file");
+  const form = await request.formData();
+  const purpose = form.get("purpose") ?? "photo";
+  const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) return json(400, { error: "No image received." });
   if (file.size > MEDIA_MAX_BYTES) return json(413, { error: "That image is too large." });
 
   const data = new Uint8Array(await file.arrayBuffer());
   const info = imageInfo(data);
   if (!info) return json(415, { error: "Use a JPG, PNG or WebP image." });
+  // Share images and favicons are cropped in the browser to the exact size they are saved at.
+  if (
+    purpose === "share" &&
+    (info.contentType !== "image/jpeg" ||
+      info.width !== SHARE_IMAGE.width ||
+      info.height !== SHARE_IMAGE.height)
+  ) {
+    return json(422, { error: "Share images are saved at 1200 × 630." });
+  }
+  if (
+    purpose === "favicon" &&
+    (info.contentType !== "image/png" ||
+      info.width !== FAVICON_SIZE ||
+      info.height !== FAVICON_SIZE)
+  ) {
+    return json(422, { error: "Favicons are saved at 512 × 512." });
+  }
 
   const { id } = await insertMedia(db, {
     userId: session.user.id,

@@ -31,6 +31,11 @@ import {
   safeLinkUrl,
   siteDescription,
   siteTitle,
+  siteMetaSchema,
+  titleCutAfter,
+  arialWidth,
+  descriptionShownChars,
+  GOOGLE_TITLE_PX,
   subdomainSchema,
   TEMPLATE_KEYS,
   TEMPLATE_VERSIONS,
@@ -335,6 +340,49 @@ describe("site meta", () => {
     expect(siteTitle({ ...meta, title: "Custom" })).toBe("Custom");
     expect(siteDescription(meta, { subheadline: "x".repeat(200) })).toHaveLength(160);
     expect(siteDescription(meta)).toBeUndefined();
+  });
+
+  it("drops the organisation from an automatic title Google would cut", () => {
+    const meta = {
+      name: "Maximiliane Schönberg-Aldridge",
+      role: "Group Chief Executive",
+      company: "Hanseatic Maritime Holdings",
+      affiliations: [],
+      keywords: [],
+    };
+    expect(siteTitle(meta)).toBe("Maximiliane Schönberg-Aldridge · Group Chief Executive");
+  });
+
+  it("accepts only uploaded images for the share image and favicon", () => {
+    const base = { name: "Amelia Hart" };
+    const upload = "/media/0b5f3c3e-8c1d-4a52-9d61-0f3a1c2b4e5d";
+    expect(siteMetaSchema.safeParse({ ...base, shareImage: upload, favicon: upload }).success).toBe(
+      true,
+    );
+    expect(
+      siteMetaSchema.safeParse({ ...base, favicon: "https://example.com/x.png" }).success,
+    ).toBe(false);
+  });
+});
+
+describe("search and sharing", () => {
+  it("names the last word Google shows of a long title", () => {
+    expect(titleCutAfter("Amelia Hart · Chief Executive Officer, Meridian")).toBeNull();
+    const long =
+      "Amelia Hart · Chief Executive Officer of Meridian Freight Group, Rotterdam and Lagos";
+    const word = titleCutAfter(long);
+    expect(word).not.toBeNull();
+    expect(long.indexOf(word!)).toBeGreaterThan(0);
+    expect(arialWidth(long.slice(0, long.indexOf(word!) + word!.length), 20)).toBeLessThanOrEqual(
+      GOOGLE_TITLE_PX,
+    );
+  });
+
+  it("counts the characters Google shows of a long description", () => {
+    expect(descriptionShownChars("I lead a logistics company.")).toBeNull();
+    const shown = descriptionShownChars("word ".repeat(80));
+    expect(shown).toBeGreaterThan(100);
+    expect(shown).toBeLessThan(400);
   });
 });
 

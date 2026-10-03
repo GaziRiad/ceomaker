@@ -11,3 +11,4 @@ export * from "./analytics";
 export * from "./onboarding";
 export * from "./plans";
 export * from "./fixtures/demo-site";
+export * from "./sharing";

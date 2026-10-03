@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { longText, requiredText, text } from "./primitives";
+import { longText, mediaSrc, requiredText, text } from "./primitives";
 import { sectionSchema, type Section } from "./sections";
+import { arialWidth, GOOGLE_TITLE_PX } from "./sharing";
 
 export const CURRENT_SCHEMA_VERSION = 1;
 
@@ -19,6 +20,13 @@ export const siteMetaSchema = z.object({
   title: text(70).optional(),
   /** Search description. Derived from the hero introduction when missing. */
   description: longText(160).optional(),
+  /**
+   * Image shown when a link to the site is shared: an upload saved at exactly 1200 x 630. When
+   * missing, a card is drawn from the name, role and template colours.
+   */
+  shareImage: mediaSrc.optional(),
+  /** Browser-tab icon: an upload saved at 512 x 512. When missing, the monogram is used. */
+  favicon: mediaSrc.optional(),
   /** "Chief Executive Officer". Derived from the hero eyebrow when missing. */
   role: text(80).optional(),
   company: text(80).optional(),
@@ -130,12 +138,18 @@ export function roleFromEyebrow(eyebrow: string | undefined): string {
   return (eyebrow ?? "").split(/,|·/)[0]?.trim() ?? "";
 }
 
-/** Search title: the explicit one, else "Name · Role, Company" trimmed to fit. */
+/**
+ * Search title: the explicit one, else "Name · Role, Company". When that is wider than Google
+ * shows, the company is dropped ("Name · Role"); the result is trimmed to 70 characters.
+ */
 export function siteTitle(meta: SiteMeta, hero?: { eyebrow?: string | undefined }): string {
   if (meta.title) return meta.title;
   const role = meta.role || roleFromEyebrow(hero?.eyebrow);
-  const position = [role, meta.company].filter(Boolean).join(", ");
-  const title = position ? `${meta.name} · ${position}` : meta.name;
+  const full = [meta.name, [role, meta.company].filter(Boolean).join(", ")].filter(Boolean);
+  let title = full.join(" · ");
+  if (role && meta.company && arialWidth(title, 20) > GOOGLE_TITLE_PX) {
+    title = `${meta.name} · ${role}`;
+  }
   return title.length > 70 ? `${title.slice(0, 69).trimEnd()}…` : title;
 }
 

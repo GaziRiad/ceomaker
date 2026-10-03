@@ -6,6 +6,7 @@ import {
   resolveSiteColors,
   resolveTemplateRef,
   siteDescription,
+  SHARE_IMAGE,
   siteTitle,
 } from "@ceomaker/schema";
 import { monogramIconDataUri, SiteRenderer } from "@ceomaker/templates";
@@ -61,13 +62,30 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const routing = routingConfigFromEnv();
   // A live custom domain is the site's real address; its own address forwards there.
   const url = site.customDomain ? `https://${site.customDomain}` : siteUrl(subdomain, routing);
+  // Uploads are served on every host, so the share image is addressed on the site's own one.
+  const shareImage = meta?.shareImage && {
+    url: `${url}${meta.shareImage}`,
+    width: SHARE_IMAGE.width,
+    height: SHARE_IMAGE.height,
+    alt: title,
+  };
   return {
     title: { absolute: title },
     description,
     alternates: { canonical: url },
-    icons: { icon: monogramIconDataUri(name, colors) },
-    openGraph: { type: "profile", title, description, url },
-    twitter: { card: "summary", title, description },
+    icons: {
+      icon: meta?.favicon
+        ? { url: meta.favicon, type: "image/png", sizes: "512x512" }
+        : monogramIconDataUri(name, colors),
+    },
+    openGraph: {
+      type: "profile",
+      title,
+      description,
+      url,
+      ...(shareImage && { images: [shareImage] }),
+    },
+    twitter: { card: shareImage ? "summary_large_image" : "summary", title, description },
   };
 }
 

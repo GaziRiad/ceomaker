@@ -149,6 +149,20 @@ export async function getUserPlan(db: Database, userId: string): Promise<Plan> {
   return planOf(row?.plan);
 }
 
+/** The canvas size the owner last picked in the editor, or null before they pick one. */
+export async function getEditorDevice(db: Database, userId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ device: user.editorDevice })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1);
+  return row?.device ?? null;
+}
+
+export async function setEditorDevice(db: Database, userId: string, device: string) {
+  await db.update(user).set({ editorDevice: device }).where(eq(user.id, userId));
+}
+
 export async function listSitesForUser(db: Database, userId: string) {
   return db
     .select({

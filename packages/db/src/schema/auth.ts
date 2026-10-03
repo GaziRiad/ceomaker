@@ -22,6 +22,8 @@ export const user = pgTable("user", {
    * makes every new account free. Set by billing, or by hand for complimentary accounts.
    */
   plan: text("plan").notNull().default("free"),
+  /** Last canvas size the owner picked in the editor: "desktop", "tablet" or "phone". */
+  editorDevice: text("editor_device"),
   ...timestamps,
 });
 

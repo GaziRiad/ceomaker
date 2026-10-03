@@ -74,6 +74,9 @@ export const imageSrc = z
     message: "Must be an uploaded image or an https URL",
   });
 
+/** An image uploaded to CEOMaker; external URLs are not accepted. */
+export const mediaSrc = z.string().trim().regex(MEDIA_PATH, "Must be an uploaded image");
+
 export const imageRef = z.object({
   src: imageSrc,
   alt: text(200),
