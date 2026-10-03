@@ -168,16 +168,14 @@ function Hero() {
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-4 border-t border-divider px-5 py-3.5 text-sm text-neutral-700">
-            {[
-              "Mostly taps, very little typing",
-              "Free to preview",
-              "No card until you publish",
-            ].map((item) => (
-              <span key={item} className="flex items-center gap-1.5">
-                <Check size={16} color="var(--color-accent)" />
-                {item}
-              </span>
-            ))}
+            {["Mostly taps, very little typing", "Free to publish", "No card needed"].map(
+              (item) => (
+                <span key={item} className="flex items-center gap-1.5">
+                  <Check size={16} color="var(--color-accent)" />
+                  {item}
+                </span>
+              ),
+            )}
           </div>
         </Blueprint>
       </div>
@@ -434,9 +432,10 @@ function PricingSection() {
     >
       <div data-reveal="" className="flex flex-col items-center gap-3.5 text-center">
         <span className={kicker}>Pricing</span>
-        <h2 className={sectionTitle}>One plan. No surprises.</h2>
+        <h2 className={sectionTitle}>Free to start. Pro when you want more.</h2>
         <span className="text-neutral-800">
-          Build and preview for free. Pay only when you publish, and cancel any time.
+          Publish your site for free. Upgrade for every template, your own domain, the contact form
+          and analytics, and cancel any time.
         </span>
       </div>
       <Pricing />

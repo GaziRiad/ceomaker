@@ -6,9 +6,14 @@ import { proxy } from "./proxy";
 // Customer domains, as the database would answer: one connected apex domain for "amelia".
 vi.mock("./lib/domain-routing", () => ({
   siteForHost: vi.fn(async (host: string) => {
-    if (host === "ameliahart.com") return { subdomain: "amelia", domain: host, isWww: false };
+    if (host === "ameliahart.com") {
+      return { subdomain: "amelia", domain: host, isWww: false, ownerPlan: "pro" };
+    }
     if (host === "www.ameliahart.com") {
-      return { subdomain: "amelia", domain: "ameliahart.com", isWww: true };
+      return { subdomain: "amelia", domain: "ameliahart.com", isWww: true, ownerPlan: "pro" };
+    }
+    if (host === "brunofree.com") {
+      return { subdomain: "bruno", domain: host, isWww: false, ownerPlan: "free" };
     }
     return null;
   }),
@@ -132,6 +137,12 @@ describe("proxy", () => {
     expect(getRewrittenUrl(await proxy(request("https://ameliahart.com/dashboard")))).toBe(
       "https://ameliahart.com/s/amelia/dashboard",
     );
+  });
+
+  it("forwards a free owner's custom domain to the site's own address", async () => {
+    const response = await proxy(request("https://brunofree.com/press?x=1"));
+    expect(response.status).toBe(307);
+    expect(getRedirectUrl(response)).toBe("https://bruno.ceomaker.com/press?x=1");
   });
 
   it("forwards www of a customer domain to the domain", async () => {

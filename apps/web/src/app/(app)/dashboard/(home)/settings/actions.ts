@@ -15,7 +15,9 @@ import {
 import { updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
+import { isPro } from "@ceomaker/schema";
 import { getAuth, getSession } from "@/lib/auth";
+import { planFor } from "@/lib/plan";
 import { forgetDomainRouting } from "@/lib/domain-routing";
 import {
   checkSiteDomain,
@@ -179,6 +181,9 @@ async function ownedSite(siteId: string) {
 export async function connectDomainAction(siteId: string, domain: string): Promise<DomainResult> {
   const owned = await ownedSite(siteId);
   if (owned.failure) return owned.failure;
+  if (!isPro(await planFor(owned.session.user.id))) {
+    return { ok: false, error: "Custom domains are part of Pro." };
+  }
   return connectDomain({
     userId: owned.session.user.id,
     siteId,

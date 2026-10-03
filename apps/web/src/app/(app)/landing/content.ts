@@ -46,7 +46,7 @@ export const compare: {
     delay: 0,
     name: "CEOMaker",
     time: "Minutes",
-    cost: "$9.99 a month or $99 a year",
+    cost: "Free, or $9.99 a month for Pro",
     highlight: true,
     rows: [
       ["✓", "Copy drafted in your voice"],
@@ -89,15 +89,6 @@ export const compare: {
  */
 export const quotes: { quote: string; name: string; initials: string; role: string }[] = [];
 
-export const included = [
-  "yourname.ceomaker.com address",
-  "AI-drafted copy you can edit freely",
-  "Every executive template",
-  "Mobile-first, fast everywhere",
-  "Visitor analytics (coming soon)",
-  "Your own domain (coming soon)",
-];
-
 export const faq: [string, string][] = [
   [
     "How long does it take?",
@@ -105,7 +96,7 @@ export const faq: [string, string][] = [
   ],
   [
     "Do I have to write anything?",
-    "Only your name. Everything else is a tap. A CV or LinkedIn import is optional and fills in your experience.",
+    "Only your name. Everything else is a tap. With Pro, a CV or LinkedIn PDF fills in your experience.",
   ],
   [
     "Who can see my site before I publish?",
@@ -113,11 +104,11 @@ export const faq: [string, string][] = [
   ],
   [
     "Can I use my own domain?",
-    "Custom domains are coming soon. Until then your site lives at yourname.ceomaker.com.",
+    "Yes, with Pro. On the free plan your site lives at yourname.ceomaker.app.",
   ],
   [
-    "What happens if I cancel?",
-    "Your site is paused, not deleted. Renew and it comes back exactly as you left it.",
+    "What happens if I cancel Pro?",
+    "Your site stays live on the free plan: on Meridian, at yourname.ceomaker.app, with the badge. Nothing is deleted, and upgrading again brings everything back.",
   ],
   [
     "Is my information used to train AI?",

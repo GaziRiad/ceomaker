@@ -3,6 +3,8 @@ import {
   type DomainDiagnosis,
   type DomainKind,
   type DomainStage,
+  planOf,
+  type Plan,
 } from "@ceomaker/schema";
 import { and, asc, eq, inArray, isNull, lt, ne, or } from "drizzle-orm";
 import type { Database } from "../client";
@@ -281,7 +283,13 @@ export async function getDomainByShareToken(
 export async function findSiteByHost(
   db: Database,
   host: string,
-): Promise<{ subdomain: string; domain: string; stage: DomainStage; isWww: boolean } | null> {
+): Promise<{
+  subdomain: string;
+  domain: string;
+  stage: DomainStage;
+  isWww: boolean;
+  ownerPlan: Plan;
+} | null> {
   const bare = host.startsWith("www.") ? host.slice(4) : null;
   const rows = await db
     .select({
@@ -289,9 +297,11 @@ export async function findSiteByHost(
       domain: siteDomain.domain,
       kind: siteDomain.kind,
       stage: siteDomain.stage,
+      ownerPlan: user.plan,
     })
     .from(siteDomain)
     .innerJoin(site, eq(site.id, siteDomain.siteId))
+    .innerJoin(user, eq(user.id, site.userId))
     .where(bare ? inArray(siteDomain.domain, [host, bare]) : eq(siteDomain.domain, host))
     .limit(2);
   // An exact match beats the www form (a "www.x.com" domain added as a subdomain).
@@ -299,16 +309,28 @@ export async function findSiteByHost(
   if (!row) return null;
   const isWww = row.domain !== host;
   if (isWww && row.kind !== "apex") return null;
-  return { subdomain: row.subdomain, domain: row.domain, stage: row.stage, isWww };
+  return {
+    subdomain: row.subdomain,
+    domain: row.domain,
+    stage: row.stage,
+    isWww,
+    ownerPlan: planOf(row.ownerPlan),
+  };
 }
 
-/** Routing: the live custom domain of a site, which its own address forwards to. */
+/**
+ * Routing: the live custom domain of a site, which its own address forwards to. Only while the
+ * owner is on Pro; otherwise the site stays on its own address.
+ */
 export async function findConnectedDomain(db: Database, subdomain: string): Promise<string | null> {
   const [row] = await db
     .select({ domain: siteDomain.domain })
     .from(siteDomain)
     .innerJoin(site, eq(site.id, siteDomain.siteId))
-    .where(and(eq(site.subdomain, subdomain), eq(siteDomain.stage, "connected")))
+    .innerJoin(user, eq(user.id, site.userId))
+    .where(
+      and(eq(site.subdomain, subdomain), eq(siteDomain.stage, "connected"), eq(user.plan, "pro")),
+    )
     .limit(1);
   return row?.domain ?? null;
 }

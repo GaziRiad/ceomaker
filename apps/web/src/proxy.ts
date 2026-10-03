@@ -1,6 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 import { liveDomainFor, siteForHost } from "./lib/domain-routing";
+import { isPro } from "@ceomaker/schema";
 import {
   isInternalTenantPath,
   NOT_FOUND_PATH,
@@ -69,12 +70,21 @@ async function serveSiteHost(request: NextRequest, subdomain: string, forward: b
   return rewriteToTenant(request, subdomain, rest);
 }
 
-/** A customer's own domain: its site, or (for www) a redirect to the domain. Null if unknown. */
-async function serveCustomDomain(request: NextRequest, hostname: string) {
+/**
+ * A customer's own domain: its site, or (for www) a redirect to the domain. Null if unknown. If
+ * the owner isn't on Pro, the domain forwards to the site's own address instead.
+ */
+async function serveCustomDomain(request: NextRequest, hostname: string, rootDomain: string) {
   const found = await siteForHost(hostname);
   if (!found) return null;
+  const { pathname, search } = request.nextUrl;
+  if (!isPro(found.ownerPlan)) {
+    return NextResponse.redirect(
+      `${request.nextUrl.protocol}//${found.subdomain}.${rootDomain}${pathname}${search}`,
+      307,
+    );
+  }
   if (found.isWww) {
-    const { pathname, search } = request.nextUrl;
     return NextResponse.redirect(`https://${found.domain}${pathname}${search}`, 308);
   }
   return serveSiteHost(request, found.subdomain, false);
@@ -105,7 +115,7 @@ export async function proxy(request: NextRequest) {
       // Tenant hosts serve published pages and their images only: no API, auth or dashboard.
       return serveSiteHost(request, resolution.subdomain, true);
     case "custom": {
-      const custom = await serveCustomDomain(request, resolution.hostname);
+      const custom = await serveCustomDomain(request, resolution.hostname, routing.rootDomain);
       if (custom) return custom;
       return routing.unknownHostsServeApp ? serveApp(request) : notFound(request);
     }

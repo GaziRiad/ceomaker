@@ -5,7 +5,7 @@ import {
   getSiteDomain,
   type OwnedSite,
 } from "@ceomaker/db";
-import { ANALYTICS_RANGES, type AnalyticsRange } from "@ceomaker/schema";
+import { ANALYTICS_RANGES, isPro, type AnalyticsRange } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -32,11 +32,13 @@ import {
   type ReportView,
 } from "@/lib/analytics/report-view";
 import { getSession } from "@/lib/auth";
+import { planFor } from "@/lib/plan";
 import { siteUrl } from "@/lib/routing";
 import { enter } from "../_components/enter";
 import { When } from "../_components/relative-time";
 import { Geography } from "./geo";
 import { RetryButton, ShareSite } from "./share-link";
+import { ProTag } from "@/components/pro";
 
 export const metadata: Metadata = { title: "Analytics", robots: { index: false } };
 
@@ -534,6 +536,30 @@ async function Analytics({ searchParams }: { searchParams: Search }) {
     searchParams,
   ]);
   if (!site) redirect("/dashboard");
+  if (!isPro(await planFor(session.user.id))) {
+    return (
+      <>
+        <Heading />
+        <BigCard index={1}>
+          <span className="flex items-center gap-3 text-accent-700">
+            <Chart size={32} />
+            <ProTag />
+          </span>
+          <h2 className={H2}>Analytics is part of Pro</h2>
+          <p className="m-0 max-w-[560px] text-pretty text-neutral-800">
+            See how many people visit your site, where they are, how they found you and what they
+            click. Visits are counted already, so your history is here when you upgrade.
+          </p>
+          <Link
+            href="/dashboard/settings/billing"
+            className="btn btn-primary min-h-11 gap-2.5 px-[18px] sm:min-h-10"
+          >
+            See plans <ArrowRight />
+          </Link>
+        </BigCard>
+      </>
+    );
+  }
   return <Report site={site} userId={session.user.id} range={rangeOf(search.range)} />;
 }
 

@@ -105,8 +105,15 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          During the beta, publishing is free. Paid plans will be billed monthly or yearly, at the
-          price shown when you subscribe, and renew automatically until you cancel.
+          The free plan lets you publish a site on the Meridian template at an address on
+          ceomaker.app, with a small &ldquo;Made with CEOMaker&rdquo; badge. It includes one AI
+          draft per account and a few AI rewrites a day.
+        </p>
+        <p>
+          Pro adds the premium templates, your own domain, the contact form and its inbox, visitor
+          analytics, more AI use and drafting from a CV, and removes the badge. It is billed monthly
+          or yearly, at the price shown when you subscribe, and renews automatically until you
+          cancel.
         </p>
         <p>
           Our order process is conducted by our online reseller Paddle.com. Paddle is the merchant
@@ -123,8 +130,9 @@ const sections: LegalSection[] = [
     title: "Cancelling",
     body: (
       <p>
-        You can cancel at any time in Settings. You won&apos;t be charged again, and your site stays
-        live until the end of the period you have already paid for.
+        You can cancel Pro at any time in Settings. You won&apos;t be charged again, and Pro stays
+        on until the end of the period you have already paid for. After that your site stays live on
+        the free plan (see &ldquo;When Pro ends&rdquo; below).
       </p>
     ),
   },
@@ -140,9 +148,9 @@ const sections: LegalSection[] = [
           </li>
           <li>
             Outside those 14 days, payments are not refunded, but you can cancel at any time and
-            keep your site until the end of the period you paid for.
+            keep Pro until the end of the period you paid for.
           </li>
-          <li>When a refund is made, the subscription ends and the site is paused.</li>
+          <li>When a refund is made, Pro ends and the site moves to the free plan.</li>
         </ul>
         <p>
           This does not reduce any right you have under the consumer law of your country, such as
@@ -154,14 +162,18 @@ const sections: LegalSection[] = [
   },
   {
     id: "failed",
-    title: "Failed payments and paused sites",
+    title: "Failed payments, and when Pro ends",
     body: (
-      <p>
-        If a payment fails, Paddle will try again and email you; your site stays live while we
-        retry. If payment can&apos;t be collected, the subscription ends and your site is paused:
-        visitors see a short notice instead. Your content and versions are kept, and the site goes
-        live again as soon as you subscribe. We will email you before deleting a paused site.
-      </p>
+      <>
+        <p>If a payment fails, Paddle will try again and email you; Pro stays on while we retry.</p>
+        <p>
+          When Pro ends (you cancelled, a refund was made, or payment couldn&apos;t be collected),
+          your site is not taken down. It stays live on the free plan: a premium template is shown
+          as Meridian, the contact form is switched off, a custom domain forwards to your
+          ceomaker.app address, and the badge appears. Your content, versions and messages are kept,
+          and upgrading again brings everything back as it was.
+        </p>
+      </>
     ),
   },
   {

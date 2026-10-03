@@ -6,6 +6,7 @@ import {
   type TemplateKey,
   type TemplateRef,
   type ThemeSettings,
+  isPremiumTemplate,
 } from "@ceomaker/schema";
 import {
   designOnChoosing,
@@ -15,6 +16,7 @@ import {
   TemplateView,
 } from "@ceomaker/templates";
 import { ScaledFrame } from "@/components/scaled-frame";
+import { ProTag, UpgradePrompt } from "@/components/pro";
 
 const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
@@ -23,6 +25,7 @@ export function TemplatePanel({
   live,
   theme,
   content,
+  pro,
   onChoose,
   onDesign,
 }: {
@@ -32,6 +35,8 @@ export function TemplatePanel({
   live: TemplateRef | null;
   theme: ThemeSettings;
   content: RenderableSiteContent;
+  /** On the free plan, premium templates can be tried in the draft but not published. */
+  pro: boolean;
   onChoose: (key: TemplateKey) => void;
   onDesign: (version: number) => void;
 }) {
@@ -81,6 +86,12 @@ export function TemplatePanel({
           </button>
         </div>
       ) : null}
+      {!pro && isPremiumTemplate(current.key) ? (
+        <UpgradePrompt title={`${name} is a Pro template`}>
+          Try it here as much as you like. Upgrade to publish it, or switch back to Meridian, which
+          is included in the free plan.
+        </UpgradePrompt>
+      ) : null}
       <div role="radiogroup" aria-label="Template" className="flex flex-col gap-3">
         {choices.map((template) => {
           const selected = template.key === current.key;
@@ -115,8 +126,11 @@ export function TemplatePanel({
                 onClick={() => onChoose(template.key)}
                 className="flex cursor-pointer items-center justify-between px-3 py-2.5 text-left outline-none after:absolute after:inset-0 after:content-['']"
               >
-                <span className="font-heading text-lg font-semibold uppercase">
-                  {template.name}
+                <span className="flex items-center gap-2">
+                  <span className="font-heading text-lg font-semibold uppercase">
+                    {template.name}
+                  </span>
+                  {isPremiumTemplate(template.key) ? <ProTag /> : null}
                 </span>
                 <span
                   aria-hidden

@@ -1,12 +1,16 @@
 import { finishAiUsage, getDb, getSiteForOwner, saveDraft, startAiUsage } from "@ceomaker/db";
-import { parseThemeSettingsForRender } from "@ceomaker/schema";
+import { FREE_AI_LIMITS, isPro, parseThemeSettingsForRender } from "@ceomaker/schema";
 import { getAuth } from "@/lib/auth";
 import { AI_LIMITS, aiEnabled, DAY_MS } from "@/lib/ai/client";
 import { DOCUMENT_MAX_BYTES, readSourceDocument, type SourceDocument } from "@/lib/ai/documents";
 import type { GenerateEvent } from "@/lib/ai/events";
 import { generateDraft } from "@/lib/ai/generate";
+import { planFor } from "@/lib/plan";
 import { isSameOrigin } from "@/lib/same-origin";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
+
+/** A window long enough to count every draft an account has ever made. */
+const FOREVER_MS = 100 * 365 * DAY_MS;
 
 // Drafting with a long CV can take a minute or more.
 export const maxDuration = 300;
@@ -31,6 +35,7 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
   const site = await getSiteForOwner(db, { userId, siteId: id });
   if (!site) return json(404, "Site not found");
   if (!site.answers) return json(409, "This site has no answers to draft from");
+  const pro = isPro(await planFor(userId));
 
   let document: SourceDocument | null = null;
   if (request.headers.get("content-type")?.startsWith("multipart/form-data")) {
@@ -39,6 +44,7 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
     }
     const file = (await request.formData()).get("document");
     if (file instanceof File && file.size > 0) {
+      if (!pro) return json(403, "Drafting from a CV is part of Pro.");
       if (file.size > DOCUMENT_MAX_BYTES)
         return json(413, "That file is over 4 MB. Try a smaller one.");
       document = readSourceDocument(new Uint8Array(await file.arrayBuffer()));
@@ -77,11 +83,12 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
           userId,
           siteId: id,
           kind: "generate",
-          limit: AI_LIMITS.generate,
-          windowMs: DAY_MS,
+          // Free accounts get one AI draft, ever; starting over doesn't reset it.
+          limit: pro ? AI_LIMITS.generate : FREE_AI_LIMITS.drafts,
+          windowMs: pro ? DAY_MS : FOREVER_MS,
         });
         if (!usage) {
-          send({ type: "done", source: "starter", notice: "limited" });
+          send({ type: "done", source: "starter", notice: pro ? "limited" : "free-used" });
           return;
         }
 

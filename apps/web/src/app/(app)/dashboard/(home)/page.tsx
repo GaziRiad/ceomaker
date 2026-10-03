@@ -7,7 +7,7 @@ import {
   listContactMessages,
   type OwnedSite,
 } from "@ceomaker/db";
-import { parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
+import { isPro, parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
 import { getTemplate, newerDesign, TemplateView } from "@ceomaker/templates";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -19,6 +19,7 @@ import { ArrowRight, Blueprint } from "@/components/ui";
 import { weeklyView } from "@/lib/analytics/report-view";
 import { getSession } from "@/lib/auth";
 import { toDomainView, type DomainView } from "@/lib/domains/service";
+import { planFor } from "@/lib/plan";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { displayName, toEditableDraft } from "@/lib/site-data";
 import { liveFingerprint } from "../sites/[id]/edit/editor-model";
@@ -27,6 +28,7 @@ import { enter } from "./_components/enter";
 import { countLabel, emptyInbox, snippet } from "./_components/inbox";
 import { When } from "./_components/relative-time";
 import { Versions } from "./_components/versions";
+import { ProTag } from "@/components/pro";
 
 export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
 
@@ -247,7 +249,9 @@ function SideCards({
   domain,
   address,
   example,
+  pro,
 }: {
+  pro: boolean;
   visitors: ReturnType<typeof weeklyView> | null;
   isLive: boolean;
   domain: DomainView | null;
@@ -263,8 +267,15 @@ function SideCards({
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <SideCard index={2}>
-        <span className="kicker">Visitors this week</span>
-        {visitors ? (
+        <span className="flex items-center justify-between gap-2.5">
+          <span className="kicker">Visitors this week</span>
+          {pro ? null : <ProTag />}
+        </span>
+        {!pro ? (
+          <span className="text-[15px] text-pretty text-neutral-800">
+            Analytics is part of Pro: who visits, where they are and how they found you.
+          </span>
+        ) : visitors ? (
           <>
             <div className="flex items-end justify-between gap-4">
               <span className="font-heading text-[44px] leading-none font-semibold">
@@ -285,34 +296,40 @@ function SideCards({
           </span>
         )}
         <Link
-          href="/dashboard/analytics"
+          href={pro ? "/dashboard/analytics" : "/dashboard/settings/billing"}
           className="btn btn-ghost min-h-11 gap-2 self-start pl-0 text-accent-700 sm:min-h-10"
         >
-          View analytics <ArrowRight />
+          {pro ? "View analytics" : "See plans"} <ArrowRight />
         </Link>
       </SideCard>
       <SideCard index={3}>
         <span className="flex items-center justify-between gap-2.5">
           <span className="kicker">Plan</span>
-          <span className="tag tag-accent">Private beta</span>
+          {pro ? <ProTag /> : null}
         </span>
         <span className="font-heading text-[28px] leading-[1.05] font-semibold uppercase">
-          Beta · Free
+          {pro ? "Pro" : "Free"}
         </span>
         <span className="text-[15px] text-pretty text-neutral-800">
-          Free during the private beta. We&apos;ll email you before anything changes.
+          {pro
+            ? "Every template, your own domain, the contact form and analytics."
+            : "Your site is live for free. Pro adds Monument, your own domain, the contact form and analytics."}
         </span>
         <Link
           href="/dashboard/settings/billing"
           className="btn btn-ghost min-h-11 self-start pl-0 text-accent-700 sm:min-h-10"
         >
-          Billing settings
+          {pro ? "Billing settings" : "See plans"}
         </Link>
       </SideCard>
       <SideCard index={4}>
         <span className="flex items-center justify-between gap-2.5">
           <span className="kicker">Custom domain</span>
-          {tag ? <span className={`tag ${tag.className}`}>{tag.label}</span> : null}
+          {!pro ? (
+            <ProTag />
+          ) : tag ? (
+            <span className={`tag ${tag.className}`}>{tag.label}</span>
+          ) : null}
         </span>
         <span
           className={`font-heading text-[28px] leading-[1.05] font-semibold [overflow-wrap:anywhere] ${domain ? "" : "uppercase"}`}
@@ -320,38 +337,50 @@ function SideCards({
           {domain ? domain.domain : "Your own domain"}
         </span>
         <span className="text-[15px] text-pretty text-neutral-800">
-          {!domain || !stage
-            ? `Use your own address, like ${example}.`
-            : stage === "connected"
-              ? `${address} forwards here.`
-              : domain.kind === "subdomain" && stage === "records"
-                ? "Add one record at your domain provider to finish."
-                : DOMAIN_TEXT[stage]}
+          {!pro
+            ? `Use your own address, like ${example}, with Pro.`
+            : !domain || !stage
+              ? `Use your own address, like ${example}.`
+              : stage === "connected"
+                ? `${address} forwards here.`
+                : domain.kind === "subdomain" && stage === "records"
+                  ? "Add one record at your domain provider to finish."
+                  : DOMAIN_TEXT[stage]}
         </span>
         <Link
-          href="/dashboard/settings#custom-domain"
+          href={pro ? "/dashboard/settings#custom-domain" : "/dashboard/settings/billing"}
           className={`btn mt-1.5 min-h-11 self-start px-4 sm:min-h-10 ${stage === "fix" ? "btn-primary" : "btn-secondary"}`}
         >
-          {!stage
-            ? "Set up"
-            : stage === "connected"
-              ? "Domain settings"
-              : stage === "fix"
-                ? "See the fix"
-                : "Continue setup"}
+          {!pro
+            ? "See plans"
+            : !stage
+              ? "Set up"
+              : stage === "connected"
+                ? "Domain settings"
+                : stage === "fix"
+                  ? "See the fix"
+                  : "Continue setup"}
         </Link>
       </SideCard>
     </div>
   );
 }
 
-async function MessagesCard({ site, userId }: { site: OwnedSite; userId: string }) {
+async function MessagesCard({
+  site,
+  userId,
+  pro,
+}: {
+  site: OwnedSite;
+  userId: string;
+  pro: boolean;
+}) {
   const db = getDb();
   const [counts, newest] = await Promise.all([
     countContactMessages(db, { userId, siteId: site.id }),
     listContactMessages(db, { userId, siteId: site.id, limit: 3 }),
   ]);
-  const empty = emptyInbox(site, counts.total > 0);
+  const empty = emptyInbox(site, counts.total > 0, pro);
   return (
     <section {...enter(4)} aria-label="Messages" className="cm-enter">
       <Blueprint className="bg-neutral-100">
@@ -473,10 +502,12 @@ async function Overview() {
   }
 
   const db = getDb();
-  const [domainRow, weekly] = await Promise.all([
+  const [domainRow, weekly, plan] = await Promise.all([
     getSiteDomain(db, { userId: session.user.id, siteId: site.id }),
     getWeeklyVisitors(db, { userId: session.user.id, siteId: site.id }),
+    planFor(session.user.id),
   ]);
+  const pro = isPro(plan);
   const domain = domainRow ? toDomainView(domainRow) : null;
   const liveDomain = domain?.stage === "connected" ? domain.domain : null;
   const parts = siteAddressParts();
@@ -497,10 +528,11 @@ async function Overview() {
           domain={domain}
           address={`${parts.prefix}${site.subdomain}${parts.suffix}`}
           example={example}
+          pro={pro}
         />
       </div>
       <Suspense fallback={<MessagesSkeleton />}>
-        <MessagesCard site={site} userId={session.user.id} />
+        <MessagesCard site={site} userId={session.user.id} pro={pro} />
       </Suspense>
       <section
         {...enter(5)}

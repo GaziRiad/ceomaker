@@ -20,6 +20,7 @@ import type { RewriteMode } from "@/lib/ai/draft";
 import { SECTION_LABELS, type FieldErrors } from "./editor-model";
 import { RemoveButton, TextAreaField, TextField } from "./fields";
 import { PortraitField } from "./portrait-field";
+import { UpgradePrompt } from "@/components/pro";
 
 const REWRITE_OPTIONS: RewriteMode[] = ["Sharper", "More formal", "Shorter"];
 
@@ -52,6 +53,8 @@ export interface ContentPanelProps {
   revision: number;
   /** The current template, for settings only some templates show (the contact form). */
   template: { name: string; contactForm: boolean };
+  /** The contact form can only be switched on with Pro. */
+  pro: boolean;
   onSelect: (id: string) => void;
   onSections: (sections: Section[]) => void;
   onSection: (id: string, update: (section: Section) => Section) => void;
@@ -230,7 +233,13 @@ function SectionForm(props: ContentPanelProps & { section: Editable }) {
       return <QuotesForm section={section} error={error} update={update} />;
     case "contact":
       return (
-        <ContactForm section={section} error={error} update={update} template={props.template} />
+        <ContactForm
+          section={section}
+          error={error}
+          update={update}
+          template={props.template}
+          pro={props.pro}
+        />
       );
   }
 }
@@ -834,8 +843,10 @@ function ContactForm({
   error,
   update,
   template,
-}: FormProps<"contact"> & { template: ContentPanelProps["template"] }) {
-  const formOn = section.form?.enabled !== false;
+  pro,
+}: FormProps<"contact"> & { template: ContentPanelProps["template"]; pro: boolean }) {
+  // On the free plan the form is off on the live site whatever is saved, so show it off.
+  const formOn = pro && section.form?.enabled !== false;
   const formHint = !template.contactForm
     ? `${template.name} doesn't show a contact form. Meridian does.`
     : formOn
@@ -955,6 +966,7 @@ function ContactForm({
               <input
                 type="radio"
                 name="contact-form"
+                disabled={!pro}
                 checked={formOn === (key === "on")}
                 onChange={() =>
                   update((current) => ({
@@ -967,7 +979,14 @@ function ContactForm({
             </label>
           ))}
         </div>
-        <span className="text-xs text-neutral-600">{formHint}</span>
+        {pro ? (
+          <span className="text-xs text-neutral-600">{formHint}</span>
+        ) : (
+          <UpgradePrompt title="Let visitors write to you">
+            With Pro, visitors send you messages from your site without seeing your email address,
+            and you read them in your dashboard.
+          </UpgradePrompt>
+        )}
       </div>
     </>
   );

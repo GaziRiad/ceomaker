@@ -67,6 +67,16 @@ export function Info(props: IconProps) {
   );
 }
 
+export function CircleAlert(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </Icon>
+  );
+}
+
 export function Alert(props: IconProps) {
   return (
     <Icon {...props}>
