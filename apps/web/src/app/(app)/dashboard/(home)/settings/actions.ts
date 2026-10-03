@@ -153,7 +153,7 @@ export async function deleteAccountAction(confirmation: string): Promise<{ ok: t
     return { ok: false, error: "Type your email exactly as shown to confirm." };
   }
   try {
-    await cancelFreemiusSubscriptions(session.user.id);
+    await cancelFreemiusSubscriptions(session.user.id, "Account deleted");
   } catch (error) {
     console.error("Cancelling the subscription before deleting an account failed", error);
     return {
@@ -172,6 +172,19 @@ export async function deleteAccountAction(confirmation: string): Promise<{ ok: t
   }
   // The sessions went with the account; this clears this browser's cookies too.
   await getAuth().api.signOut({ headers: await headers() });
+  return { ok: true };
+}
+
+/** Switches off renewal of Pro. It stays on to the end of the period already paid for. */
+export async function cancelProAction(): Promise<{ ok: true } | Failure> {
+  const session = await getSession();
+  if (!session) return SIGNED_OUT;
+  try {
+    await cancelFreemiusSubscriptions(session.user.id, "Cancelled in CEOMaker Settings");
+  } catch (error) {
+    console.error("Cancelling a subscription failed", error);
+    return { ok: false, error: "Your subscription couldn't be cancelled just now. Try again." };
+  }
   return { ok: true };
 }
 

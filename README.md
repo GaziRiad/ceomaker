@@ -227,7 +227,7 @@ Live pages are cached, so after a change by hand the owner should publish once f
 
 ### Payments (Freemius)
 
-Freemius is the merchant of record: it takes the payment, charges VAT and sales tax, sends receipts and handles refunds. Settings › Billing sends the owner to Freemius's hosted checkout (monthly or yearly, with their account email fixed), and Freemius's customer portal handles their card, invoices and cancelling. Production takes real payments; previews and local development use Freemius's sandbox (test cards), and each ignores the other's licenses.
+Freemius is the merchant of record: it takes the payment, charges VAT and sales tax, sends receipts and handles refunds. Settings › Billing sends the owner to Freemius's hosted checkout (monthly or yearly, with their account email fixed). Everything after that stays in the app: Billing shows the cycle, price and renewal or end date (read live from Freemius), cancels renewal, and lists invoices as PDF downloads. Only typing a new card leaves the app, for Freemius's secure page, which returns to Billing; card details never reach our servers. Production takes real payments; previews and local development use Freemius's sandbox (test cards), and each ignores the other's licenses.
 
 1. **Freemius product:** one paid plan, Pro, at $9.99 monthly and $99 yearly (the prices shown in the app live in `apps/web/src/lib/plan-copy.ts`), one license, no trial, a 14-day refund policy, and the terms URL `https://www.ceomaker.app/terms`.
 2. **Keys:** from the product's (not the store's) Settings › API & Keys, set `FREEMIUS_PRODUCT_ID`, `FREEMIUS_PUBLIC_KEY`, `FREEMIUS_SECRET_KEY` and `FREEMIUS_API_KEY` (the API bearer token) in Vercel. Without all four, the Upgrade button says payments are coming soon.
