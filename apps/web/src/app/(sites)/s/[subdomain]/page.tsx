@@ -15,6 +15,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
 import { asEntitled } from "@/lib/plan";
+import { SHARE_CARD_PATH, shareCardVersion } from "@/lib/share-card";
 import { appUrl, routingConfigFromEnv, siteUrl } from "@/lib/routing";
 import { getTenantSite } from "@/lib/sites";
 import { SiteStatus } from "../../site-status";
@@ -62,9 +63,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const routing = routingConfigFromEnv();
   // A live custom domain is the site's real address; its own address forwards there.
   const url = site.customDomain ? `https://${site.customDomain}` : siteUrl(subdomain, routing);
-  // Uploads are served on every host, so the share image is addressed on the site's own one.
-  const shareImage = meta?.shareImage && {
-    url: `${url}${meta.shareImage}`,
+  // The uploaded share image, else the card drawn for the site; both served on its own host.
+  const shareImage = {
+    url: meta?.shareImage
+      ? `${url}${meta.shareImage}`
+      : `${url}${SHARE_CARD_PATH}?v=${shareCardVersion(site)}`,
     width: SHARE_IMAGE.width,
     height: SHARE_IMAGE.height,
     alt: title,
@@ -75,17 +78,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     alternates: { canonical: url },
     icons: {
       icon: meta?.favicon
-        ? { url: meta.favicon, type: "image/png", sizes: "512x512" }
+        ? // Served through the site so a missing upload falls back to the monogram.
+          { url: `/site-icon.png?v=${shareCardVersion(site)}`, type: "image/png", sizes: "512x512" }
         : monogramIconDataUri(name, colors),
     },
-    openGraph: {
-      type: "profile",
-      title,
-      description,
-      url,
-      ...(shareImage && { images: [shareImage] }),
-    },
-    twitter: { card: shareImage ? "summary_large_image" : "summary", title, description },
+    openGraph: { type: "profile", title, description, url, images: [shareImage] },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

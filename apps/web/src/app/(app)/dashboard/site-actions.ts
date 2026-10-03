@@ -16,6 +16,7 @@ import {
   makeVersionLive,
   publishSite,
   saveDraft,
+  setEditorDevice,
   SiteNotFoundError,
   startAiUsage,
   SubdomainTakenError,
@@ -48,6 +49,7 @@ import { releaseFromProvider } from "@/lib/domains/service";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
+import { isDevice } from "./sites/[id]/edit/devices";
 
 // Every action re-checks the session and passes the user id to queries that scope by owner.
 
@@ -99,6 +101,15 @@ export async function saveDraftAction(
  * Template picker: switches the draft's template, keeping content and colours. A template the
  * site already uses keeps its design; any other starts on its newest.
  */
+/** Remembers the editor's canvas size on the account, so it opens the same on any computer. */
+export async function saveEditorDeviceAction(device: string): Promise<{ ok: true } | Failure> {
+  const userId = await currentUserId();
+  if (!userId) return SIGNED_OUT;
+  if (!isDevice(device)) return { ok: false, error: "Unknown size." };
+  await setEditorDevice(getDb(), userId, device);
+  return { ok: true };
+}
+
 export async function chooseTemplateAction(
   siteId: string,
   templateKey: string,

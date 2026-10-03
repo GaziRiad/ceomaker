@@ -6,21 +6,35 @@ import {
   isPublishableColors,
   MIN_TEXT_CONTRAST,
   resolveSiteColors,
+  roleFromEyebrow,
+  siteDescription,
+  siteTitle,
   type Section,
   type SiteColors,
   type SiteMeta,
   type TemplateKey,
   type TemplateRef,
 } from "@ceomaker/schema";
-import { designOnChoosing, getTemplate, newerDesign, TemplateView } from "@ceomaker/templates";
+import {
+  designOnChoosing,
+  getTemplate,
+  initialsOf,
+  newerDesign,
+  TemplateView,
+} from "@ceomaker/templates";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScaledFrame } from "@/components/scaled-frame";
-import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
+import { ArrowRight, Wordmark } from "@/components/ui";
 import type { RewriteMode } from "@/lib/ai/draft";
-import { rewriteHeadlineAction, saveDraftAction } from "../../../site-actions";
+import {
+  rewriteHeadlineAction,
+  saveDraftAction,
+  saveEditorDeviceAction,
+} from "../../../site-actions";
 import { BrandPanel } from "./brand-panel";
 import { ContentPanel } from "./content-panel";
+import { DeviceCanvas } from "./device-canvas";
+import type { Device } from "./devices";
 import {
   canEditInPlace,
   editInPlace,
@@ -30,22 +44,26 @@ import {
   prepareForSave,
   previewContent,
   sectionIdOfField,
+  SECTION_LABELS,
   sectionOf,
   updateLastValid,
   type Draft,
   type FieldErrors,
 } from "./editor-model";
 import { InlineEditing } from "./inline-editing";
+import { SharingPanel, SharingPreviews, type ShareView } from "./sharing";
+import { sectionElement, sectionIdAt } from "./section-dom";
 import { PublishDialog, type PublishedResult } from "./publish-dialog";
 import { TemplatePanel } from "./template-panel";
 
-type Tab = "content" | "brand" | "design";
+type Tab = "content" | "brand" | "design" | "share";
 type SaveState = "saved" | "saving" | "invalid" | "error";
 
 const TABS: [Tab, string][] = [
   ["content", "Content"],
   ["brand", "Brand"],
   ["design", "Template"],
+  ["share", "Sharing"],
 ];
 
 const PREVIEW_DATE = new Date();
@@ -68,6 +86,8 @@ export function Editor({
   initials,
   notice,
   pro,
+  initialDevice,
+  customDomain,
 }: {
   siteId: string;
   subdomain: string;
@@ -83,6 +103,10 @@ export function Editor({
   notice: string | null;
   /** The account is on Pro: premium templates publish and the contact form can be on. */
   pro: boolean;
+  /** The canvas size the owner last picked, on any computer. */
+  initialDevice: Device;
+  /** The site's own domain, when connected and the account is on Pro. */
+  customDomain: string | null;
 }) {
   // The draft and, for the preview, the last valid version of each section, updated together.
   const [state, setState] = useState(() => {
@@ -115,6 +139,9 @@ export function Editor({
   const [rewriteError, setRewriteError] = useState<string | null>(null);
   const [banner, setBanner] = useState(notice);
   const [formRevision, setFormRevision] = useState(0);
+  const [device, setDevice] = useState(initialDevice);
+  // Bumped by picks in the sidebar, so the canvas scrolls to them (page clicks don't scroll).
+  const [selectionScroll, setSelectionScroll] = useState(0);
 
   const latest = useRef(draft);
   const savedPrint = useRef(fingerprint(initialDraft));
@@ -308,6 +335,38 @@ export function Editor({
   };
 
   const address = `${addressPrefix}${subdomain}${addressSuffix}`;
+  const selected = draft.content.sections.find((section) => section.id === selectedId);
+  const hero = sectionOf(draft.content, "hero");
+  const meta = draft.content.meta;
+  const shareView: ShareView = {
+    template: draft.templateKey,
+    templateName: template.name,
+    colors,
+    name: meta.name,
+    initials: initialsOf(meta.name),
+    role: meta.role || roleFromEyebrow(hero?.eyebrow) || undefined,
+    organization: meta.company || undefined,
+    photo: hero?.image?.src,
+    domain: customDomain ?? address,
+    title: meta.title ?? "",
+    description: meta.description ?? "",
+    autoTitle: siteTitle({ ...meta, title: undefined }, hero),
+    autoDescription: siteDescription({ ...meta, description: undefined }, hero) ?? "",
+    shareImage: meta.shareImage,
+    favicon: meta.favicon,
+  };
+  const chooseDevice = (next: Device) => {
+    setDevice(next);
+    void saveEditorDeviceAction(next).catch(() => undefined);
+  };
+  const selectFromSidebar = (id: string) => {
+    setSelectedId(id);
+    setSelectionScroll((count) => count + 1);
+  };
+  const selectFromPage = (id: string) => {
+    setTab("content");
+    setSelectedId(id);
+  };
   const saveLabel = {
     saved: "All changes saved",
     saving: "Saving…",
@@ -367,9 +426,9 @@ export function Editor({
           className="flex min-h-0 flex-col border-divider bg-neutral-100 lg:overflow-auto lg:border-r"
         >
           <div className="border-b border-divider" style={{ padding: "14px 16px" }}>
-            <div className="seg grid w-full grid-cols-3" role="radiogroup" aria-label="Panel">
+            <div className="seg grid w-full grid-cols-4" role="radiogroup" aria-label="Panel">
               {TABS.map(([key, label]) => (
-                <label key={key} className="seg-opt justify-center">
+                <label key={key} className="seg-opt justify-center" style={{ paddingInline: 4 }}>
                   <input
                     type="radio"
                     name="editor-tab"
@@ -425,7 +484,7 @@ export function Editor({
               revision={formRevision}
               template={{ name: template.name, contactForm: template.contactForm }}
               pro={pro}
-              onSelect={setSelectedId}
+              onSelect={selectFromSidebar}
               onSections={setSections}
               onSection={updateSection}
               onMeta={updateMeta}
@@ -440,6 +499,8 @@ export function Editor({
               onColors={setColors}
               onReset={resetColors}
             />
+          ) : tab === "share" ? (
+            <SharingPanel view={shareView} onMeta={updateMeta} />
           ) : (
             <TemplatePanel
               current={{ key: draft.templateKey, version: draft.templateVersion }}
@@ -452,27 +513,34 @@ export function Editor({
             />
           )}
         </aside>
-        <div className="min-h-0 overflow-auto bg-surface p-4 sm:p-7">
-          <p className="mx-auto mt-0 mb-3 max-w-[1280px] text-[13px] text-neutral-700">
-            Click any text on the page to edit it. Enter saves it, Esc cancels.
-          </p>
-          <Blueprint className="mx-auto max-w-[1280px] bg-neutral-100 shadow-md">
-            <AddressBar address={address} />
-            <ScaledFrame initialZoom={0.7} interactive>
-              <InlineEditing onStart={startInlineEdit} onCommit={commitInlineEdit}>
-                <TemplateView
-                  templateKey={draft.templateKey}
-                  templateVersion={draft.templateVersion}
-                  colors={colors}
-                  content={renderable}
-                  publishedAt={PREVIEW_DATE}
-                  preview
-                  editable
-                />
-              </InlineEditing>
-            </ScaledFrame>
-          </Blueprint>
-        </div>
+        {tab === "share" ? (
+          <SharingPreviews view={shareView} />
+        ) : (
+          <DeviceCanvas
+            device={device}
+            onDevice={chooseDevice}
+            address={address}
+            selectedLabel={
+              selected?.visible && selected.type !== "cta" ? SECTION_LABELS[selected.type] : null
+            }
+            findSection={(root) => (selected ? sectionElement(root, selected) : null)}
+            sectionAt={(root, target) => sectionIdAt(root, draft.content.sections, target)}
+            onSelect={selectFromPage}
+            scrollKey={selectionScroll}
+          >
+            <InlineEditing onStart={startInlineEdit} onCommit={commitInlineEdit}>
+              <TemplateView
+                templateKey={draft.templateKey}
+                templateVersion={draft.templateVersion}
+                colors={colors}
+                content={renderable}
+                publishedAt={PREVIEW_DATE}
+                preview
+                editable
+              />
+            </InlineEditing>
+          </DeviceCanvas>
+        )}
       </div>
       <PublishDialog
         open={publishOpen}

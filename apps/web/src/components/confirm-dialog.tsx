@@ -94,6 +94,7 @@ export function Modal({
   open,
   labelledBy,
   locked = false,
+  width = 520,
   onClose,
   onSubmit,
   children,
@@ -101,6 +102,7 @@ export function Modal({
   open: boolean;
   labelledBy: string;
   locked?: boolean;
+  width?: number;
   onClose: () => void;
   onSubmit: () => void;
   children: ReactNode;
@@ -122,7 +124,8 @@ export function Modal({
     <dialog
       ref={dialog}
       aria-labelledby={labelledBy}
-      className="m-auto w-[min(520px,calc(100%-24px))] overflow-visible bg-transparent p-0 backdrop:bg-[color-mix(in_srgb,var(--color-neutral-900)_40%,transparent)] backdrop:backdrop-blur-[3px]"
+      style={{ width: `min(${width}px, calc(100% - 24px))` }}
+      className="m-auto overflow-visible bg-transparent p-0 backdrop:bg-[color-mix(in_srgb,var(--color-neutral-900)_40%,transparent)] backdrop:backdrop-blur-[3px]"
       onCancel={(event) => {
         event.preventDefault();
         close();

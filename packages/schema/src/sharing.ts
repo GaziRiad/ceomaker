@@ -112,34 +112,50 @@ export function arialWidth(text: string, sizePx: number): number {
   return (width / 1000) * sizePx;
 }
 
-/**
- * Where Google will cut a title: the last whole word that fits in front of " ...", or null when
- * the whole title shows.
- */
-export function titleCutAfter(title: string): string | null {
-  if (arialWidth(title, 20) <= GOOGLE_TITLE_PX) return null;
-  const room = GOOGLE_TITLE_PX - arialWidth(" ...", 20);
-  const words = title.split(/\s+/).filter(Boolean);
-  let shown = "";
-  let last: string | null = null;
-  for (const word of words) {
-    const next = shown ? `${shown} ${word}` : word;
-    if (arialWidth(next, 20) > room) break;
-    shown = next;
-    if (/[\p{L}\p{N}]/u.test(word)) last = word.replace(/[,;:·]+$/u, "");
+export interface Cut {
+  /** The text as Google shows it: whole, or cut at a word with " …" after it. */
+  text: string;
+  cut: boolean;
+  /** Characters that show before the cut. */
+  shown: number;
+  /** The last word that shows, when cut. */
+  last: string | null;
+}
+
+/** Cuts a text where Google would, at a word, so that it and " …" fit in maxPx of Arial. */
+export function cutToWidth(text: string, sizePx: number, maxPx: number): Cut {
+  if (arialWidth(text, sizePx) <= maxPx) {
+    return { text, cut: false, shown: text.length, last: null };
   }
-  return last;
+  const characters = [...text];
+  let fits = 0;
+  let width = arialWidth(" …", sizePx);
+  for (const character of characters) {
+    width += arialWidth(character, sizePx);
+    if (width > maxPx) break;
+    fits += 1;
+  }
+  let end = characters.slice(0, fits + 1).lastIndexOf(" ");
+  if (end < fits * 0.6) end = fits;
+  const kept = characters
+    .slice(0, end)
+    .join("")
+    .replace(/[\s,·.;:–-]+$/u, "");
+  return {
+    text: `${kept} …`,
+    cut: true,
+    shown: [...kept].length,
+    last: kept.split(/\s+/).pop() ?? null,
+  };
+}
+
+/** Where Google will cut a title: the last word that shows, or null when all of it shows. */
+export function titleCutAfter(title: string): string | null {
+  return cutToWidth(title, 20, GOOGLE_TITLE_PX).last;
 }
 
 /** About how many characters of a description Google shows, or null when all of it shows. */
 export function descriptionShownChars(description: string): number | null {
-  if (arialWidth(description, 14) <= GOOGLE_DESCRIPTION_PX) return null;
-  let count = 0;
-  let width = arialWidth(" ...", 14);
-  for (const character of description) {
-    width += arialWidth(character, 14);
-    if (width > GOOGLE_DESCRIPTION_PX) break;
-    count += 1;
-  }
-  return count;
+  const cut = cutToWidth(description, 14, GOOGLE_DESCRIPTION_PX);
+  return cut.cut ? cut.shown : null;
 }

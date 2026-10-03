@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Blueprint, Wordmark } from "@/components/ui";
+import { getDb, getEditorDevice, getSiteDomain } from "@ceomaker/db";
 import { isPro } from "@ceomaker/schema";
 import { draftNoticeText } from "@/lib/ai/events";
 import { planFor } from "@/lib/plan";
 import { siteAddressParts } from "@/lib/routing";
 import { initialsFor, loadOwnedSite, toEditableDraft } from "@/lib/site-data";
 import { Editor } from "./editor";
+import { isDevice } from "./devices";
 import { liveFingerprint } from "./editor-model";
 
 export const metadata: Metadata = { title: "Editor", robots: { index: false } };
@@ -20,7 +22,11 @@ async function EditSite({
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const { user, site, draft } = await loadOwnedSite(id, `/dashboard/sites/${id}/edit`);
-  const plan = await planFor(user.id);
+  const [plan, device, domain] = await Promise.all([
+    planFor(user.id),
+    getEditorDevice(getDb(), user.id),
+    getSiteDomain(getDb(), { userId: user.id, siteId: site.id }),
+  ]);
   const address = siteAddressParts();
   const notice = draftNoticeText(query.notice);
   const live = site.published ? toEditableDraft(site.published) : null;
@@ -39,6 +45,8 @@ async function EditSite({
       initials={initialsFor(draft.content.meta.name || user.name, user.email)}
       notice={notice}
       pro={isPro(plan)}
+      initialDevice={isDevice(device) ? device : "desktop"}
+      customDomain={isPro(plan) && domain?.stage === "connected" ? domain.domain : null}
     />
   );
 }

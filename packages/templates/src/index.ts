@@ -16,3 +16,11 @@ export {
 export { DESIGN_WIDTH, FONT_VARIABLES, FONTS } from "./fonts";
 export { themeToStyle } from "./theme-style";
 export type { SendContactMessage, TemplateDefinition, TemplateProps } from "./types";
+export {
+  meridianNameSize,
+  monumentNameSize,
+  SHARE_CARD_HEIGHT,
+  SHARE_CARD_WIDTH,
+  ShareCard,
+  type ShareCardProps,
+} from "./share-card";

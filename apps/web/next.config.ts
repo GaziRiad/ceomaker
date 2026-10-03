@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   transpilePackages: ["@ceomaker/schema", "@ceomaker/db", "@ceomaker/templates"],
+  // Fonts for the generated share images, read from disk at request time.
+  outputFileTracingIncludes: {
+    "/s/[subdomain]/share-card.png": ["./assets/share-fonts/**"],
+  },
   experimental: {
     globalNotFound: true,
   },
