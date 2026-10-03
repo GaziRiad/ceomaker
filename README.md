@@ -234,6 +234,11 @@ Freemius is the merchant of record: it takes the payment, charges VAT and sales 
 3. **Webhook** (Settings › Webhooks): `https://<app>/api/billing/freemius/webhook`, with the events `license.created`, `license.extended`, `license.shortened`, `license.updated`, `license.cancelled`, `license.expired`, `license.plan.changed`, `license.deleted` and `subscription.cancelled`. Every event is checked against the secret key and the license is read again from Freemius, so an event can't grant anything by itself.
 4. **Redirect after purchase** (Settings › Checkout & Redirection): `https://<app>/api/billing/freemius/return`. It applies the purchase at once and returns the owner to Billing; without it the webhook still does, moments later.
 
+5. **Branding** (all in the Freemius dashboard; Freemius stays the seller on receipts and invoices, as merchant of record):
+   - Product title `CEOMaker` and icon `design/brand/ceomaker-app-icon-512.png` (Settings › Information): shown on checkout, emails, invoices.
+   - Checkout and card-update pages: Plans › Customization › Custom Checkout CSS file, `https://<app>/brand/freemius-checkout.css` (our colours and Barlow; the fonts next to it are served with a CORS header).
+   - Emails: Emails › Styling with the logo `https://<app>/brand/ceomaker-lockup-600.png`, tone Professional, and the colours in `freemius-checkout.css`. Sender address on our domain (Emails), verified with DKIM (CNAME records added in Vercel's DNS for `ceomaker.app`), or Freemius falls back to its own address.
+
 `<app>` is `preview.ceomaker.app` while testing with the sandbox and `www.ceomaker.app` for real payments. A purchase is matched to the account with the buyer's email, which checkout doesn't let them change. Deleting an account cancels its subscription first.
 
 ### Domain setup

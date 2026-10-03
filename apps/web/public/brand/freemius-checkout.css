@@ -1,0 +1,86 @@
+/*
+ * CEOMaker's look for Freemius's checkout and card-update pages. Freemius loads this file from
+ * Plans › Customization › "Custom Checkout CSS file". It only changes Freemius's documented
+ * design variables (see their "Customize Checkout Style with CSS") and the type, so their
+ * updates don't break it. Colours match the app's "Industry" tokens in globals.css; the accent is
+ * the darker steel blue (accent-700) so white button text stays readable. The fonts are Barlow
+ * and Barlow Condensed from @fontsource (SIL Open Font License 1.1), served next to this file
+ * with a CORS header (next.config.ts), since the checkout loads them from another origin.
+ */
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/barlow-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/barlow-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/barlow-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/barlow-condensed-latin-600-normal.woff2") format("woff2");
+}
+
+:root {
+  /* Freemius's own brand colours, used as the primary accent. */
+  --fs-ds-freemius-500: #416180;
+  --fs-ds-freemius-600: #2c455d;
+  --fs-ds-freemius-blue: #416180;
+  --fs-ds-freemius-green: #2b7a4b;
+  --fs-ds-freemius-red: #a4402a;
+
+  /* The complementary blue scale, as CEOMaker's accent scale. */
+  --fs-ds-blue-10: #eef6ff;
+  --fs-ds-blue-100: #d6ebff;
+  --fs-ds-blue-200: #b5d9fd;
+  --fs-ds-blue-300: #94bce3;
+  --fs-ds-blue-400: #749dc4;
+  --fs-ds-blue-500: #597ea3;
+  --fs-ds-blue-600: #416180;
+  --fs-ds-blue-700: #2c455d;
+  --fs-ds-blue-800: #1d2d3d;
+  --fs-ds-blue-900: #141f2a;
+
+  /* Themes: the accent, states and the cool neutral ground of the app. */
+  --fs-ds-theme-primary-accent-color: #416180;
+  --fs-ds-theme-primary-accent-color-hover: #2c455d;
+  --fs-ds-theme-primary-green-color: #2b7a4b;
+  --fs-ds-theme-primary-red-color: #a4402a;
+  --fs-ds-theme-background-color: #f2f2f3;
+  --fs-ds-theme-background-shade: #e9e9ea;
+  --fs-ds-theme-background-accented: #e7e7ea;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Barlow", system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
