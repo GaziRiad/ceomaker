@@ -13,7 +13,7 @@ const BEZEL = {
 } as const;
 const MIN_SCREEN = 420;
 /** How long the selection ring stays before fading. */
-const RING_MS = 2500;
+const RING_MS = 1500;
 const TOOLBAR = 56;
 const GUTTER = 24;
 const BOTTOM = 28;

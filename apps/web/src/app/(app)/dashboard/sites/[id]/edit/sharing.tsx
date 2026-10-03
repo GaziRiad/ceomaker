@@ -181,7 +181,7 @@ function FileButton({
 }) {
   return (
     <label
-      className="btn btn-secondary cursor-pointer bg-neutral-100 has-[:disabled]:cursor-default has-[:disabled]:opacity-60"
+      className="btn btn-secondary relative cursor-pointer bg-neutral-100 has-[:disabled]:cursor-default has-[:disabled]:opacity-60"
       style={{ fontSize: 13, padding: "5px 10px" }}
     >
       {label}
