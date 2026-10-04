@@ -1,5 +1,6 @@
 import type {
   ContactMessageInput,
+  PhotoGrade,
   SendContactMessageResult,
   SiteColors,
   TemplateKey,
@@ -18,6 +19,8 @@ export interface TemplateProps {
   publishedAt: Date;
   /** The site's three colours, for templates that derive contrast-safe roles from them. */
   colors: SiteColors;
+  /** The site's photo treatment, for templates that grade photos. */
+  photoGrade: PhotoGrade;
   /** Present on live sites only. Previews show the contact form without sending anything. */
   sendMessage?: SendContactMessage | undefined;
 }
@@ -33,5 +36,25 @@ export interface TemplateDefinition {
   tagline: string;
   /** Whether the template shows the contact form (so visitors can write without an email). */
   contactForm: boolean;
+  /**
+   * Optional content only some templates show. The editor offers it only on those, and keeps it
+   * when the owner switches to a template that ignores it.
+   */
+  shows: {
+    /** More photos after the hero image. */
+    gallery: boolean;
+    /** A photo beside each testimonial. */
+    quotePhotos: boolean;
+    /** The site-wide photo treatment. */
+    photoGrade: boolean;
+    /** The closing call to action. */
+    cta: boolean;
+    /** Photos cropped around their focus point. */
+    focal: boolean;
+    /** A photo in the About section. */
+    aboutImage: boolean;
+    /** Photos on selected work. */
+    workImages: boolean;
+  };
   Component: (props: TemplateProps) => ReactNode;
 }

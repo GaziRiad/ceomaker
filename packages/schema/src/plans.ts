@@ -19,7 +19,10 @@ export function isPro(plan: Plan): boolean {
 }
 
 /** Templates only Pro sites can publish. Free sites may try them in the draft. */
-export const PREMIUM_TEMPLATES: ReadonlySet<TemplateKey> = new Set<TemplateKey>(["monument"]);
+export const PREMIUM_TEMPLATES: ReadonlySet<TemplateKey> = new Set<TemplateKey>([
+  "monument",
+  "salon",
+]);
 
 export function isPremiumTemplate(key: TemplateKey): boolean {
   return PREMIUM_TEMPLATES.has(key);

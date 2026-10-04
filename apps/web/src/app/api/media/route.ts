@@ -6,8 +6,11 @@ import { DAY_MS } from "@/lib/ai/client";
 import { imageInfo } from "@/lib/image-info";
 import { isSameOrigin } from "@/lib/same-origin";
 
-/** Portrait uploads per user per rolling day. */
-const DAILY_UPLOADS = 30;
+/**
+ * Image uploads per user per rolling day. Room for a full Salon site in one sitting: portrait,
+ * twelve gallery photos, an About photo, twelve work images and ten quote photos, with retries.
+ */
+const DAILY_UPLOADS = 60;
 
 function json(status: number, body: Record<string, unknown>) {
   return Response.json(body, { status });

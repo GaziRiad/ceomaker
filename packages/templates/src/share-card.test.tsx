@@ -1,8 +1,15 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { meridianNameSize, monumentNameSize, ShareCard } from "./share-card";
+import { meridianNameSize, monumentNameSize, salonNameSize, ShareCard } from "./share-card";
 
-const fonts = { serif: "serif", sans: "sans", display: "display", body: "body" };
+const fonts = {
+  serif: "serif",
+  sans: "sans",
+  display: "display",
+  body: "body",
+  salonDisplay: "salon-display",
+  salonBody: "salon-body",
+};
 const colors = { bg: "#f3f0e8", ink: "#15130f", accent: "#ff5a1f" };
 
 describe("share card", () => {
@@ -21,8 +28,15 @@ describe("share card", () => {
     );
   });
 
+  it("fits Salon names to their column without breaking a word", () => {
+    expect(salonNameSize("Amelia Hart", false)).toBe(150);
+    expect(salonNameSize("Alexandra Montgomery-Fitzgerald", false)).toBeLessThan(110);
+    expect(salonNameSize("Amelia Hart", true)).toBeLessThan(salonNameSize("Amelia Hart", false));
+    expect(salonNameSize("Maximilianaconstantinopolous", true)).toBeLessThan(45);
+  });
+
   it("draws each template with the name, role line and address", () => {
-    for (const template of ["meridian", "monument", "retired-key"]) {
+    for (const template of ["meridian", "monument", "salon", "retired-key"]) {
       const html = renderToStaticMarkup(
         <ShareCard
           template={template}
@@ -35,7 +49,8 @@ describe("share card", () => {
         />,
       );
       expect(html).toContain("eloise.ceomaker.app");
-      expect(html).toContain("ÉH");
+      // Salon sets the name alone; the others carry the initials.
+      if (template !== "salon") expect(html).toContain("ÉH");
       expect(html).toMatch(/Éloïse Hart|ÉLOÏSE/);
     }
   });

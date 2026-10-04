@@ -2,6 +2,7 @@ import {
   demoSiteContent,
   parseSiteContent,
   withResolvedColors,
+  type SectionOf,
   type SiteContent,
 } from "@ceomaker/schema";
 import { describe, expect, it } from "vitest";
@@ -175,11 +176,126 @@ describe("editInPlace", () => {
     }
   });
 
+  it("edits the closing section and gives it a button to the contact section", () => {
+    const content = demo();
+    const shown = editInPlace(
+      {
+        ...content,
+        sections: content.sections.map((section) =>
+          section.type === "cta" ? { ...section, visible: true, headline: "Let's talk" } : section,
+        ),
+      },
+      "cta.headline",
+      "Let's talk",
+      " Let's  build something ",
+    )!;
+    expect(sectionOf(shown, "cta")?.headline).toBe("Let's build something");
+    const buttoned = editInPlace(shown, "cta.button.label", "", "Write to me")!;
+    expect(sectionOf(buttoned, "cta")?.button).toEqual({ label: "Write to me", href: "#contact" });
+    expect(editInPlace(shown, "cta.button.label", "", "")).toBeNull();
+    expect(editInPlace(shown, "cta.heading", "", "x")).toBeNull();
+  });
+
   it("finds the form a field lives in", () => {
     const content = demo();
     expect(sectionIdOfField(content, "meta.location")).toBe("hero");
     expect(sectionIdOfField(content, "work.items.1.title")).toBe("work");
     expect(sectionIdOfField(content, "nowhere.title")).toBeNull();
+  });
+});
+
+describe("the closing section", () => {
+  it("is offered hidden and empty before contact, and isn't saved until it's filled in", () => {
+    const content = demo();
+    const types = content.sections.map((section) => section.type);
+    expect(types.at(-2)).toBe("cta");
+    expect(sectionOf(content, "cta")).toMatchObject({ visible: false, headline: "" });
+    const saved = prepareForSave(content);
+    expect(saved.ok && saved.content.sections.some((section) => section.type === "cta")).toBe(
+      false,
+    );
+    // Shown but still blank, it's left out rather than blocking the save.
+    const shownBlank = {
+      ...content,
+      sections: content.sections.map((section) =>
+        section.type === "cta" ? { ...section, visible: true } : section,
+      ),
+    };
+    expect(prepareForSave(shownBlank).ok).toBe(true);
+    const filled = {
+      ...content,
+      sections: content.sections.map((section) =>
+        section.type === "cta"
+          ? { ...section, visible: true, headline: "Let's talk", body: " ", button: undefined }
+          : section,
+      ),
+    };
+    const kept = prepareForSave(filled);
+    expect(kept.ok && sectionOf(kept.content, "cta")).toEqual({
+      id: "cta",
+      type: "cta",
+      visible: true,
+      headline: "Let's talk",
+      body: undefined,
+      button: undefined,
+    });
+  });
+});
+
+describe("hidden sections", () => {
+  const withSection = (
+    content: SiteContent,
+    type: string,
+    change: (section: never) => unknown,
+  ) => ({
+    ...content,
+    sections: content.sections.map((section) =>
+      section.type === type ? (change(section as never) as typeof section) : section,
+    ),
+  });
+
+  it("never block saving: rows that don't validate yet are left out of the saved copy", () => {
+    const content = demo();
+    const half = (visible: boolean) =>
+      withSection(content, "experience", (section: SectionOf<"experience">) => ({
+        ...section,
+        visible,
+        items: [...section.items, { role: "Chair", organization: "" }],
+      }));
+    const blocked = prepareForSave(half(true));
+    expect(!blocked.ok && blocked.errors.get("experience.items.3.organization")).toBe("Required");
+    const saved = prepareForSave(half(false));
+    expect(saved.ok && sectionOf(saved.content, "experience")?.items).toEqual(
+      sectionOf(content, "experience")?.items,
+    );
+  });
+
+  it("drop a call to action whose button was typed and emptied, or keep what's valid", () => {
+    const content = demo();
+    const emptied = withSection(content, "cta", (section: SectionOf<"cta">) => ({
+      ...section,
+      visible: true,
+      button: { label: "", href: "#contact" },
+    }));
+    const saved = prepareForSave(emptied);
+    expect(saved.ok && saved.content.sections.some((section) => section.type === "cta")).toBe(
+      false,
+    );
+    const badLink = withSection(content, "cta", (section: SectionOf<"cta">) => ({
+      ...section,
+      headline: "Let's talk",
+      button: { label: "Write", href: "javascript:alert(1)" },
+    }));
+    const kept = prepareForSave(badLink);
+    expect(kept.ok && sectionOf(kept.content, "cta")).toMatchObject({
+      headline: "Let's talk",
+      button: undefined,
+    });
+    expect(
+      prepareForSave(
+        withSection(badLink, "cta", (s: SectionOf<"cta">) => ({ ...s, visible: true })),
+      ).ok,
+    ).toBe(false);
   });
 });
 
@@ -202,6 +318,15 @@ describe("comparing the draft with the live site", () => {
     };
     expect(liveFingerprint(otherTemplate)).toBe(liveFingerprint(draft));
     expect(fingerprint(otherTemplate)).not.toBe(fingerprint(draft));
+  });
+
+  it("counts a change of photo grade", () => {
+    expect(liveFingerprint({ ...draft, theme: { palettes: {}, photoGrade: "original" } })).toBe(
+      liveFingerprint(draft),
+    );
+    expect(liveFingerprint({ ...draft, theme: { palettes: {}, photoGrade: "mono" } })).not.toBe(
+      liveFingerprint(draft),
+    );
   });
 
   it("compares the design that would render, and saves the one chosen", () => {

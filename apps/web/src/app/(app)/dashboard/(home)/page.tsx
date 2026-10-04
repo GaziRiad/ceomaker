@@ -7,7 +7,12 @@ import {
   listContactMessages,
   type OwnedSite,
 } from "@ceomaker/db";
-import { isPro, parseSiteContentForRender, resolveSiteColors } from "@ceomaker/schema";
+import {
+  isPro,
+  parseSiteContentForRender,
+  resolvePhotoGrade,
+  resolveSiteColors,
+} from "@ceomaker/schema";
 import { getTemplate, newerDesign, TemplateView } from "@ceomaker/templates";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -101,6 +106,7 @@ function SiteCard({ site, liveDomain }: { site: OwnedSite; liveDomain: string | 
                 templateKey={shown.templateKey}
                 templateVersion={shown.templateVersion}
                 colors={resolveSiteColors(shown.theme, shown.templateKey, shown.templateVersion)}
+                photoGrade={resolvePhotoGrade(shown.theme)}
                 content={parseSiteContentForRender(shown.content)}
                 publishedAt={PREVIEW_DATE}
                 preview

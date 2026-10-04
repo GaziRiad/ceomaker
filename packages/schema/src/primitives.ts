@@ -77,9 +77,22 @@ export const imageSrc = z
 /** An image uploaded to CEOMaker; external URLs are not accepted. */
 export const mediaSrc = z.string().trim().regex(MEDIA_PATH, "Must be an uploaded image");
 
+/**
+ * Where a photo's subject sits, from 0 to 1 across and down. Templates that crop a photo to
+ * different shapes keep this point in view; without one they use FOCAL_DEFAULT.
+ */
+export const focalPoint = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+});
+
+/** Centred, a little above the middle: where a face usually is. */
+export const FOCAL_DEFAULT = { x: 0.5, y: 0.35 } as const;
+
 export const imageRef = z.object({
   src: imageSrc,
   alt: text(200),
+  focal: focalPoint.optional(),
 });
 
 export const callToAction = z.object({
@@ -93,4 +106,5 @@ export const sectionId = z
   .regex(/^[a-z0-9][a-z0-9_-]{0,31}$/i, "Section ids are 1-32 letters, digits, - or _");
 
 export type ImageRef = z.output<typeof imageRef>;
+export type FocalPoint = z.output<typeof focalPoint>;
 export type CallToAction = z.output<typeof callToAction>;

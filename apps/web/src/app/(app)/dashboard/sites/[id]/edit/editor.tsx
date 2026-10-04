@@ -5,10 +5,12 @@ import {
   isPremiumTemplate,
   isPublishableColors,
   MIN_TEXT_CONTRAST,
+  resolvePhotoGrade,
   resolveSiteColors,
   roleFromEyebrow,
   siteDescription,
   siteTitle,
+  type PhotoGrade,
   type Section,
   type SiteColors,
   type SiteMeta,
@@ -142,6 +144,8 @@ export function Editor({
   const [device, setDevice] = useState(initialDevice);
   // Bumped by picks in the sidebar, so the canvas scrolls to them (page clicks don't scroll).
   const [selectionScroll, setSelectionScroll] = useState(0);
+  // Bumped by "Fix" in the save status, so the form opens at the first field that needs fixing.
+  const [fixRequest, setFixRequest] = useState(0);
 
   const latest = useRef(draft);
   const savedPrint = useRef(fingerprint(initialDraft));
@@ -156,7 +160,12 @@ export function Editor({
     chain.current = chain.current.then(async () => {
       const target = latest.current;
       const print = fingerprint(target);
-      if (print === savedPrint.current) return true;
+      if (print === savedPrint.current) {
+        // Back to what's saved (say a section with errors was hidden again): nothing to fix.
+        setErrors((current) => (current.size ? new Map() : current));
+        setSaveState((current) => (current === "invalid" ? "saved" : current));
+        return true;
+      }
       const prepared = prepareForSave(target.content);
       if (!prepared.ok) {
         setErrors(prepared.errors);
@@ -188,10 +197,10 @@ export function Editor({
 
   // Autosave shortly after the last change.
   useEffect(() => {
-    if (fingerprint(draft) === savedPrint.current) return;
+    if (fingerprint(draft) === savedPrint.current && saveState !== "invalid") return;
     const timer = setTimeout(() => void save(), AUTOSAVE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [draft, save]);
+  }, [draft, save, saveState]);
 
   // Warn before leaving with unsaved edits.
   useEffect(() => {
@@ -228,14 +237,19 @@ export function Editor({
   const setColors = (colors: SiteColors) =>
     setDraft((current) => ({
       ...current,
-      theme: { palettes: { ...current.theme.palettes, [current.templateKey]: colors } },
+      theme: {
+        ...current.theme,
+        palettes: { ...current.theme.palettes, [current.templateKey]: colors },
+      },
     }));
   const resetColors = () =>
     setDraft((current) => {
       const palettes = { ...current.theme.palettes };
       delete palettes[current.templateKey];
-      return { ...current, theme: { palettes } };
+      return { ...current, theme: { ...current.theme, palettes } };
     });
+  const setPhotoGrade = (photoGrade: PhotoGrade) =>
+    setDraft((current) => ({ ...current, theme: { ...current.theme, photoGrade } }));
   // Switching templates keeps the design the site already uses for that template; moving to a
   // newer design is its own choice (setDesign), made in the Template tab.
   const setTemplate = (templateKey: TemplateKey) =>
@@ -367,6 +381,15 @@ export function Editor({
     setTab("content");
     setSelectedId(id);
   };
+  /** Opens the form at the first field that needs fixing, and shows its section on the page. */
+  const showFirstError = () => {
+    const [path] = errors.keys();
+    const sectionId = path ? sectionIdOfField(draft.content, path) : null;
+    if (!sectionId) return;
+    setTab("content");
+    selectFromSidebar(sectionId);
+    setFixRequest((count) => count + 1);
+  };
   const saveLabel = {
     saved: "All changes saved",
     saving: "Saving…",
@@ -401,7 +424,17 @@ export function Editor({
             className="size-[7px] rounded-full transition-[background] duration-300"
             style={{ background: saveDot }}
           />
-          <span className="hidden sm:inline">{saveLabel}</span>
+          {saveState === "invalid" ? (
+            <button
+              type="button"
+              className="hidden underline decoration-danger underline-offset-4 hover:text-text sm:inline"
+              onClick={showFirstError}
+            >
+              Fix highlighted fields to save
+            </button>
+          ) : (
+            <span className="hidden sm:inline">{saveLabel}</span>
+          )}
           {saveState === "error" ? (
             <button type="button" className="btn btn-ghost" onClick={() => void save()}>
               Retry
@@ -482,7 +515,12 @@ export function Editor({
               rewriting={rewriting}
               rewriteError={rewriteError}
               revision={formRevision}
-              template={{ name: template.name, contactForm: template.contactForm }}
+              fixRequest={fixRequest}
+              template={{
+                name: template.name,
+                contactForm: template.contactForm,
+                shows: template.shows,
+              }}
               pro={pro}
               onSelect={selectFromSidebar}
               onSections={setSections}
@@ -498,6 +536,8 @@ export function Editor({
               colors={colors}
               onColors={setColors}
               onReset={resetColors}
+              photoGrade={template.shows.photoGrade ? resolvePhotoGrade(draft.theme) : null}
+              onPhotoGrade={setPhotoGrade}
             />
           ) : tab === "share" ? (
             <SharingPanel view={shareView} onMeta={updateMeta} />
@@ -521,7 +561,9 @@ export function Editor({
             onDevice={chooseDevice}
             address={address}
             selectedLabel={
-              selected?.visible && selected.type !== "cta" ? SECTION_LABELS[selected.type] : null
+              selected?.visible && (selected.type !== "cta" || template.shows.cta)
+                ? SECTION_LABELS[selected.type]
+                : null
             }
             findSection={(root) => (selected ? sectionElement(root, selected) : null)}
             sectionAt={(root, target) => sectionIdAt(root, draft.content.sections, target)}
@@ -533,6 +575,7 @@ export function Editor({
                 templateKey={draft.templateKey}
                 templateVersion={draft.templateVersion}
                 colors={colors}
+                photoGrade={resolvePhotoGrade(draft.theme)}
                 content={renderable}
                 publishedAt={PREVIEW_DATE}
                 preview

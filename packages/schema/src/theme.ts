@@ -27,6 +27,15 @@ export const siteColorsSchema = z.object({
 export type SiteColors = z.output<typeof siteColorsSchema>;
 
 /**
+ * How photos are shown across the site. "original" keeps each photo's own colours; "tinted"
+ * turns them grey and washes them in the accent colour, so mixed photos read as one set; "mono"
+ * is black and white. Templates that don't treat photos ignore it.
+ */
+export const PHOTO_GRADES = ["original", "tinted", "mono"] as const;
+export type PhotoGrade = (typeof PHOTO_GRADES)[number];
+export const DEFAULT_PHOTO_GRADE: PhotoGrade = "original";
+
+/**
  * Stored on every version. Each template remembers its own colours, so switching templates and
  * back never loses a palette. Templates without an entry use their default palette.
  */
@@ -45,6 +54,7 @@ export const themeSettingsSchema = z.object({
       z.partialRecord(z.enum(TEMPLATE_KEYS), siteColorsSchema),
     )
     .default({}),
+  photoGrade: z.enum(PHOTO_GRADES).optional(),
 });
 
 export type ThemeSettings = z.output<typeof themeSettingsSchema>;
@@ -62,7 +72,7 @@ function palette(name: string, bg: string, ink: string, accent: string): NamedPa
 }
 
 /**
- * Six presets per template design. The first one is that design's default. A new design of a
+ * Five or six presets per template design. The first one is that design's default. A new design of a
  * template gets its own list; the old design keeps its defaults.
  */
 export const TEMPLATE_PALETTES: {
@@ -86,6 +96,15 @@ export const TEMPLATE_PALETTES: {
       palette("Oxblood", "#f4efe9", "#1a1414", "#7a1f2b"),
       palette("Acid night", "#0f100d", "#efeee6", "#c6f36b"),
       palette("Ember night", "#14110f", "#f3ede4", "#ff6b2c"),
+    ],
+  },
+  salon: {
+    1: [
+      palette("Noir", "#0e0e0d", "#ebe6dd", "#c8a273"),
+      palette("Ivory", "#f4f0e7", "#151412", "#9a6a3a"),
+      palette("Bordeaux", "#1b1013", "#f1e7e3", "#e0948a"),
+      palette("Atlantic", "#0d151b", "#e4eaee", "#8db6cf"),
+      palette("Linen", "#e8e6dd", "#1a1e19", "#56704d"),
     ],
   },
 };
@@ -140,7 +159,17 @@ export function parseThemeSettingsForRender(raw: unknown): ThemeSettings {
       if (parsed.success) palettes[key] = parsed.data;
     }
   }
-  return { palettes };
+  const grade = z
+    .enum(PHOTO_GRADES)
+    .safeParse(
+      typeof raw === "object" && raw !== null ? (raw as { photoGrade?: unknown }).photoGrade : null,
+    );
+  return grade.success ? { palettes, photoGrade: grade.data } : { palettes };
+}
+
+/** The photo treatment a site renders with. */
+export function resolvePhotoGrade(settings: ThemeSettings): PhotoGrade {
+  return settings.photoGrade ?? DEFAULT_PHOTO_GRADE;
 }
 
 function channelToLinear(channel: number): number {

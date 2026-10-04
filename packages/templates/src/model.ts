@@ -1,5 +1,7 @@
 import {
+  FOCAL_DEFAULT,
   roleFromEyebrow,
+  type ImageRef,
   type RenderableSiteContent,
   type RichTextParagraph,
   type RichTextSpan,
@@ -25,6 +27,8 @@ export interface ModelLink {
 }
 
 export interface ModelContactLink extends ModelLink {
+  /** What the link points at, for templates that show an icon: set by the owner, else guessed. */
+  kind: SocialKind;
   field: FieldPath;
 }
 
@@ -40,6 +44,8 @@ export interface ModelText {
 export interface ModelImage {
   src: string;
   alt: string;
+  /** CSS object-position that keeps the photo's subject in view when it's cropped: "50% 35%". */
+  position: string;
 }
 
 export interface ModelExperience {
@@ -92,7 +98,18 @@ export interface ModelQuote {
   initials: string;
   /** "Jonas Weber, Chair, Meridian Freight Group" */
   attribution: string;
+  photo: ModelImage | null;
   fields: { quote: FieldPath; author: FieldPath; role: FieldPath };
+}
+
+/** The closing invitation before contact, for templates that have one. */
+export interface ModelCta {
+  headline: string;
+  body: string;
+  button: ModelLink | null;
+  /** How many of `order` come before it: it sits between those and the rest. */
+  after: number;
+  fields: { headline: FieldPath; body: FieldPath; button: FieldPath };
 }
 
 export interface ModelStat {
@@ -153,6 +170,8 @@ export interface SiteModel {
     image: ModelImage | null;
     fields: { eyebrow: FieldPath; headline: FieldPath; subheadline: FieldPath; cta: FieldPath };
   };
+  /** More photos after the hero image, for templates that hang several. */
+  gallery: ModelImage[];
   /** Visible, non-empty middle sections in the order the user arranged them. */
   order: MiddleKind[];
   /** Section titles the owner wrote. Empty: the template's own label. */
@@ -167,6 +186,8 @@ export interface SiteModel {
   testimonials: ModelQuote[];
   /** The first testimonial, for templates that show a single pull-quote. */
   pullQuote: ModelQuote | null;
+  /** Visible and filled in; null otherwise. Templates without a closing section ignore it. */
+  cta: ModelCta | null;
   contact: {
     blurb: string;
     email: string;
@@ -198,6 +219,40 @@ export function orgInitials(name: string): string {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+}
+
+const KIND_HOSTS: [RegExp, SocialKind][] = [
+  [/(^|\.)linkedin\.com$/, "linkedin"],
+  [/(^|\.)(x|twitter)\.com$/, "x"],
+  [/(^|\.)github\.com$/, "github"],
+  [/(^|\.)instagram\.com$/, "instagram"],
+  [/(^|\.)(youtube\.com|youtu\.be)$/, "youtube"],
+];
+
+/** The owner's choice, else guessed from the address: web pages are "website". */
+function linkKind(link: { kind?: SocialKind | undefined; href: string }): SocialKind {
+  if (link.kind) return link.kind;
+  try {
+    const url = new URL(link.href);
+    const host = url.hostname.toLowerCase();
+    const known = KIND_HOSTS.find(([pattern]) => pattern.test(host));
+    if (known) return known[1];
+    return url.protocol === "https:" || url.protocol === "http:" ? "website" : "other";
+  } catch {
+    return "other";
+  }
+}
+
+/** A displayed image, with its focal point as an object-position. */
+function imageOf(image: ImageRef | undefined, fallbackAlt: string): ModelImage | null {
+  if (!image) return null;
+  const focal = image.focal ?? FOCAL_DEFAULT;
+  const percent = (value: number) => `${Math.round(value * 1000) / 10}%`;
+  return {
+    src: image.src,
+    alt: image.alt || fallbackAlt,
+    position: `${percent(focal.x)} ${percent(focal.y)}`,
+  };
 }
 
 function linkLabel(link: {
@@ -243,7 +298,7 @@ const MIDDLE_KIND: Partial<Record<Section["type"], MiddleKind>> = {
 };
 
 function quoteOf(
-  item: { quote: string; author: string; role?: string | undefined },
+  item: { quote: string; author: string; role?: string | undefined; photo?: ImageRef | undefined },
   at: FieldPath,
 ): ModelQuote {
   return {
@@ -252,6 +307,7 @@ function quoteOf(
     role: item.role ?? "",
     initials: initialsOf(item.author),
     attribution: item.role ? `${item.author}, ${item.role}` : item.author,
+    photo: imageOf(item.photo, item.author),
     fields: { quote: `${at}.quote`, author: `${at}.author`, role: `${at}.role` },
   };
 }
@@ -294,7 +350,7 @@ export function buildSiteModel(
               field: `${about.id}.body.${index + 1}`,
             }))
             .filter((paragraph) => paragraph.text),
-          image: about.image ? { src: about.image.src, alt: about.image.alt || name } : null,
+          image: imageOf(about.image, name),
           fields: { lead: `${about.id}.body.0` },
         }
       : null;
@@ -327,7 +383,7 @@ export function buildSiteModel(
       href: item.href ?? null,
       context: item.meta ?? "",
       description: item.description ?? "",
-      image: item.image ? { src: item.image.src, alt: item.image.alt || item.title } : null,
+      image: imageOf(item.image, item.title),
       fields: {
         title: `${work.id}.items.${index}.title`,
         context: `${work.id}.items.${index}.meta`,
@@ -365,7 +421,10 @@ export function buildSiteModel(
     headingFields[kind] = `${section?.id ?? kind}.heading`;
   }
   const order: MiddleKind[] = [];
+  const cta = firstVisible(sections, "cta");
+  let ctaAfter = 0;
   for (const section of sections) {
+    if (section === cta) ctaAfter = order.length;
     const kind = MIDDLE_KIND[section.type];
     if (kind && section.visible && present[kind] && !order.includes(kind)) order.push(kind);
   }
@@ -400,7 +459,7 @@ export function buildSiteModel(
       headline: hero?.headline ?? (draft ? "" : name),
       subheadline: hero?.subheadline ?? "",
       cta: hero?.primaryCta ? { label: hero.primaryCta.label, href: hero.primaryCta.href } : null,
-      image: hero?.image ? { src: hero.image.src, alt: hero.image.alt || name } : null,
+      image: imageOf(hero?.image, name),
       fields: {
         eyebrow: `${heroId}.eyebrow`,
         headline: `${heroId}.headline`,
@@ -408,6 +467,7 @@ export function buildSiteModel(
         cta: `${heroId}.primaryCta.label`,
       },
     },
+    gallery: (hero?.gallery ?? []).map((photo) => imageOf(photo, "")!),
     order,
     headings,
     headingFields,
@@ -418,12 +478,26 @@ export function buildSiteModel(
     work: present.work ? workItems : [],
     testimonials: present.testimonials ? quotes : [],
     pullQuote: present.testimonials ? (quotes[0] ?? null) : null,
+    cta: cta
+      ? {
+          headline: cta.headline,
+          body: cta.body ?? "",
+          button: cta.button ? { label: cta.button.label, href: cta.button.href } : null,
+          after: ctaAfter,
+          fields: {
+            headline: `${cta.id}.headline`,
+            body: `${cta.id}.body`,
+            button: `${cta.id}.button.label`,
+          },
+        }
+      : null,
     contact: {
       blurb: contact?.blurb ?? "",
       email: contact?.email ?? "",
       links: (contact?.links ?? []).map((link, index) => ({
         label: linkLabel(link),
         href: link.href,
+        kind: linkKind(link),
         field: `${contact?.id ?? "contact"}.links.${index}.label`,
       })),
       form: {

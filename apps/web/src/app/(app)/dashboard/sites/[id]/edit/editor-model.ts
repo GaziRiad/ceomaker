@@ -1,14 +1,19 @@
 import {
+  achievementItem,
   EDITABLE_SECTION_TYPES,
+  experienceItem,
   FIXED_SECTION_TYPES,
   LABEL_KEY,
   normalizeTemplateKey,
   parseSiteContent,
   parseThemeSettingsForRender,
+  portfolioItem,
+  resolvePhotoGrade,
   resolveSiteColors,
   resolveTemplateRef,
   sectionSchema,
   siteMetaSchema,
+  testimonialItem,
   themeSettingsSchema,
   type EditableSectionType,
   type RenderableSiteContent,
@@ -28,6 +33,7 @@ export const SECTION_LABELS: Record<EditableSectionType, string> = {
   experience: "Experience",
   portfolio: "Selected work",
   testimonials: "What colleagues say",
+  cta: "Call to action",
   contact: "Let's talk",
 };
 
@@ -38,6 +44,7 @@ const DEFAULT_IDS: Record<EditableSectionType, string> = {
   experience: "experience",
   portfolio: "work",
   testimonials: "testimonials",
+  cta: "cta",
   contact: "contact",
 };
 
@@ -63,6 +70,8 @@ function emptySection(type: EditableSectionType, meta: SiteMeta): Section {
     case "portfolio":
     case "testimonials":
       return { id, type, visible: false, items: [] };
+    case "cta":
+      return { id, type, visible: false, headline: "" };
   }
 }
 
@@ -174,9 +183,26 @@ function cleanSection(section: Section): Section {
           .filter((link) => !blank(link.label) || !blank(link.href))
           .map((link) => ({ ...link, label: optional(link.label) })),
       };
+    case "cta": {
+      const button = section.button;
+      // The form fills in "#contact" as the link; with no label left, there's no button.
+      const used =
+        button && (!blank(button.label) || (!blank(button.href) && button.href !== "#contact"));
+      return { ...section, body: optional(section.body), button: used ? button : undefined };
+    }
     default:
       return section;
   }
+}
+
+/**
+ * A closing section that was never filled in isn't saved, shown or not, so it never blocks a
+ * save: the editor adds it back, hidden and empty, whenever the site is opened.
+ */
+function untouched(section: Section): boolean {
+  return (
+    section.type === "cta" && blank(section.headline) && blank(section.body) && !section.button
+  );
 }
 
 /** Rewritten wording without emptied entries; none left is none at all. */
@@ -201,7 +227,62 @@ function cleanMeta(meta: SiteMeta): SiteMeta {
   };
 }
 
+const ITEM_SCHEMAS = {
+  achievements: achievementItem,
+  experience: experienceItem,
+  portfolio: portfolioItem,
+  testimonials: testimonialItem,
+};
+
+/**
+ * A hidden section never stops the draft saving: whatever doesn't validate yet (a half-filled
+ * row, a call to action without a headline) is left out of the saved copy. The editor keeps
+ * showing it as typed, and its fields are checked again once the section is shown.
+ */
+function salvage(section: Section): Section | null {
+  if (section.visible || sectionSchema.safeParse(section).success) return section;
+  switch (section.type) {
+    case "achievements":
+    case "experience":
+    case "portfolio":
+    case "testimonials": {
+      const schema = ITEM_SCHEMAS[section.type];
+      const items = (section.items as unknown[]).filter((item) => schema.safeParse(item).success);
+      return { ...section, items } as Section;
+    }
+    case "cta": {
+      const valid = (candidate: Section) => sectionSchema.safeParse(candidate).success;
+      const bare = { ...section, body: undefined, button: undefined };
+      if (!valid(bare)) return null;
+      return {
+        ...bare,
+        body: valid({ ...bare, body: section.body }) ? section.body : undefined,
+        button: valid({ ...bare, button: section.button }) ? section.button : undefined,
+      };
+    }
+    default:
+      return section;
+  }
+}
+
 export type FieldErrors = Map<string, string>;
+
+/** The schema's message in the owner's words: "Required", not "expected string to have >=1". */
+function plainMessage(issue: {
+  code: string;
+  message: string;
+  minimum?: unknown;
+  maximum?: unknown;
+  origin?: unknown;
+}): string {
+  if (issue.code === "too_small" && issue.origin === "string") {
+    return Number(issue.minimum) <= 1 ? "Required" : `At least ${issue.minimum} characters`;
+  }
+  if (issue.code === "too_big" && issue.origin === "string") {
+    return `Up to ${issue.maximum} characters`;
+  }
+  return issue.message;
+}
 
 export type Prepared = { ok: true; content: SiteContent } | { ok: false; errors: FieldErrors };
 
@@ -210,7 +291,11 @@ export function prepareForSave(content: SiteContent): Prepared {
   const cleaned = {
     ...content,
     meta: cleanMeta(content.meta),
-    sections: content.sections.map(cleanSection),
+    sections: content.sections
+      .map(cleanSection)
+      .filter((section) => !untouched(section))
+      .map(salvage)
+      .filter((section) => section !== null),
   };
   const parsed = parseSiteContent(cleaned);
   if (parsed.success) return { ok: true, content: parsed.data };
@@ -223,7 +308,7 @@ export function prepareForSave(content: SiteContent): Prepared {
       if (section) path.splice(0, 2, section.id);
     }
     const key = path.join(".");
-    if (!errors.has(key)) errors.set(key, issue.message);
+    if (!errors.has(key)) errors.set(key, plainMessage(issue));
   }
   return { ok: false, errors };
 }
@@ -294,8 +379,15 @@ export function liveFingerprint(draft: {
   content: unknown;
 }): string {
   const { key, version } = resolveTemplateRef(draft.templateKey, draft.templateVersion);
-  const colors = resolveSiteColors(parseThemeSettingsForRender(draft.theme), key, version);
-  return JSON.stringify([key, version, colors, canonicalContent(draft.content)]);
+  const theme = parseThemeSettingsForRender(draft.theme);
+  const colors = resolveSiteColors(theme, key, version);
+  return JSON.stringify([
+    key,
+    version,
+    colors,
+    resolvePhotoGrade(theme),
+    canonicalContent(draft.content),
+  ]);
 }
 
 export function sectionOf<T extends EditableSectionType>(content: SiteContent, type: T) {
@@ -466,6 +558,16 @@ function editSection(section: Section, rest: string[], before: string, after: st
       }
       return null;
     }
+    case "cta":
+      if (rest.length === 1 && (field === "headline" || field === "body")) {
+        return { ...section, [field]: value };
+      }
+      if (rest.join(".") === "button.label") {
+        if (!section.button && !value) return null;
+        const button = section.button ?? { label: "", href: "#contact" };
+        return { ...section, button: { ...button, label: value } };
+      }
+      return null;
     case "about": {
       const paragraph = /^\d+$/.test(index ?? "") ? section.body[Number(index)] : undefined;
       if (field !== "body" || rest.length !== 2 || !paragraph) return null;

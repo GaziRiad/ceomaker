@@ -5,6 +5,7 @@
  */
 @import "./meridian/v1/meridian.css";
 @import "./monument/v1/monument.css";
+@import "./salon/v1/salon.css";
 @source "./";
 
 @theme inline {

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/styles.css">
+<script src="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Italiana&family=Hanken+Grotesk:wght@400;500;600&display=swap">
+<style>body{margin:0;background:var(--color-surface)} a{color:var(--color-accent-700)} a:hover{color:var(--color-accent-600)}</style>
+</helmet>
+<section data-screen-label="Salon board" style="padding:80px;display:flex;flex-direction:column;gap:128px;width:max-content;font-family:var(--font-body);color:var(--color-text)">
+  <div style="display:flex;flex-direction:column;gap:16px;max-width:1080px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">CEOMaker · Site template · Pro · Round 3</span>
+    <h1 style="margin:0;font-family:'Italiana',serif;font-weight:400;font-size:132px;line-height:0.9;letter-spacing:0.02em;text-transform:uppercase">Salon</h1>
+    <span style="font-size:20px;line-height:1.5;color:var(--color-neutral-800)">Your name in a large serif, hung salon-style among your own photographs. For leaders whose work is seen as much as read.</span>
+    <span style="font-size:16px;line-height:1.6;color:var(--color-neutral-700);max-width:980px">Built for executives in fashion, media, design, hospitality, architecture and consumer brands, and for speakers, authors and consumer investors. A dark gallery ground, Italiana set large and uppercase, Hanken Grotesk for reading, thin corner brackets around photos and buttons, and a collage that forms from three photos up. Every frame below is the live template. All copy belongs to a fictional owner, Elena Marlowe.</span>
+    <span style="margin-top:8px;padding:14px 18px;max-width:980px;background:var(--color-neutral-100);border:1px solid var(--color-divider);font-size:15px;line-height:1.55">The dashed tiles are image slots standing in for photos. Drag a photo onto any of them. Slots share ids across frames (sl-portrait, sl-g1 to sl-g12, sl-about, sl-w1 to sl-w12, sl-q1 to sl-q10), so a photo dropped once fills every frame after a reload. On a live site an empty slot never renders: the layout closes up instead.</span>
+  </div>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+    <div style="display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">{{ g.n }}</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase;white-space:nowrap">{{ g.title }}</h2><span style="font-size:17px;line-height:1.5;color:var(--color-neutral-700);max-width:1100px">{{ g.note }}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:64px;align-items:flex-start;max-width:4400px">
+        <sc-for list="{{ g.frames }}" as="f" hint-placeholder-count="3">
+          <div id="{{ f.id }}" style="flex:none;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;gap:12px"><span class="tag tag-accent">{{ f.id }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">{{ f.label }}</span><span style="font-size:14px;color:var(--color-neutral-700)">{{ f.wl }}</span></div>
+            <div style="width:{{ f.ow }}px;height:{{ f.oh }};border-radius:{{ f.r }};overflow:hidden;box-shadow:var(--shadow-lg);background:{{ f.bg }}">
+              <div style="width:{{ f.w }}px;zoom:{{ f.z }}">
+                <sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><dc-import name="Salon" device="{{ f.dev }}" sample="{{ f.sample }}" preset="{{ f.preset }}" grade="{{ f.grade }}" patch="{{ f.patch }}" only="{{ f.only }}" photos="{{ f.photos }}" form-demo="{{ f.formDemo }}" hide="{{ f.hide }}" menu="{{ f.menu }}" motion="{{ false }}" hint-size="{{ f.hint }}"></dc-import></sc-if>
+                <sc-if value="{{ f.off }}" hint-placeholder-val="{{ true }}"><div style="height:{{ f.ph }};display:flex;align-items:center;justify-content:center;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#8a8780">Loading frame…</div></sc-if>
+              </div>
+            </div>
+            <sc-if value="{{ f.hasNote }}" hint-placeholder-val="{{ false }}"><span style="max-width:{{ f.ow }}px;font-size:15px;line-height:1.55;color:var(--color-neutral-800)">{{ f.note }}</span></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+<div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">T</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Token sheet</h2><span style="font-size:17px;color:var(--color-neutral-700)">Type, spacing, derived colours, image treatments and motion. Sizes are relative to the page's own width (cqw), not the viewport, so the editor frame at 1280, 820 and 390 lays out like a real screen.</span></div>
+    <div id="T1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:64px 72px;font-family:'Hanken Grotesk',sans-serif;color:#151412">
+      <div style="display:flex;flex-direction:column">
+        <span style="font-weight:600;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#7a5530;margin-bottom:14px">Type · Italiana (display, one weight) + Hanken Grotesk 400/500/600 · Google Fonts</span>
+        <sc-for list="{{ type }}" as="t" hint-placeholder-count="12"><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 300px;gap:20px;align-items:baseline;padding:14px 0;border-top:1px solid #e6e2da"><span style="font-size:13px;color:#5d5a55">{{ t.role }}</span><span style="font-family:{{ t.ff }};font-weight:{{ t.fw }};font-size:{{ t.size }};line-height:1.05;text-transform:{{ t.tt }};letter-spacing:{{ t.ls }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.sample }}</span><span style="font-size:13px;line-height:1.5">{{ t.spec }}</span></div></sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <span style="font-weight:600;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#7a5530;margin-bottom:14px">Spacing · desktop / tablet / phone</span>
+        <sc-for list="{{ space }}" as="sp" hint-placeholder-count="10"><div style="display:grid;grid-template-columns:170px 150px minmax(0,1fr);gap:16px;align-items:center;padding:11px 0;border-top:1px solid #e6e2da;font-size:14px"><span style="color:#5d5a55">{{ sp.role }}</span><span>{{ sp.val }}</span><span style="height:10px;width:{{ sp.w }};background:#c8a273"></span></div></sc-for>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column">
+        <span style="font-weight:600;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#7a5530;margin-bottom:14px">Colour roles · the owner sets three; every other shade is mixed in CSS with color-mix() and stepped until it passes</span>
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="11"><div style="display:grid;grid-template-columns:200px minmax(0,1fr) 380px;gap:20px;padding:11px 0;border-top:1px solid #e6e2da;font-size:14px;line-height:1.5"><span style="font-weight:600">{{ r.name }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:13px">{{ r.formula }}</span><span style="color:#5d5a55">{{ r.use }}</span></div></sc-for>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column;gap:16px">
+        <span style="font-weight:600;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#7a5530">Presets · derived values and contrast against Surface 2, the darkest ground text sits on</span>
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px">
+          <sc-for list="{{ presets }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:12px;min-width:0;padding:20px;background:{{ p.bg }};color:{{ p.ink }}">
+              <span style="font-family:'Italiana',serif;font-size:40px;line-height:1;text-transform:uppercase">{{ p.name }}</span>
+              <span style="display:flex;gap:6px"><span style="width:30px;height:30px;background:{{ p.bg }};box-shadow:inset 0 0 0 1px {{ p.rule }}"></span><span style="width:30px;height:30px;background:{{ p.ink }}"></span><span style="width:30px;height:30px;background:{{ p.ac }}"></span><span style="width:30px;height:30px;background:{{ p.sf2 }}"></span></span>
+              <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.7">bg {{ p.bg }}<br>text {{ p.ink }}<br>accent {{ p.ac }}</span>
+              <span style="font-size:13px;line-height:1.7;border-top:1px solid {{ p.rule }};padding-top:10px">Body {{ p.r1 }}<br><span style="color:{{ p.ink2 }}">Secondary {{ p.ink2 }} · {{ p.r2 }}</span><br><span style="color:{{ p.act }}">Accent text {{ p.act }} · {{ p.ra }}</span><br>Brackets, fields {{ p.br }} · {{ p.rb }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column">
+        <span style="font-weight:600;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#7a5530;margin-bottom:14px">Image slots · ratio, crop and focal behaviour, treatment, and what happens when the image is missing</span>
+        <div style="display:grid;grid-template-columns:200px 170px minmax(0,1.2fr) minmax(0,1fr);gap:20px;padding-bottom:10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5d5a55"><span>Slot</span><span>Ratio · size</span><span>Crop and focal point</span><span>When missing</span></div>
+        <sc-for list="{{ images }}" as="x" hint-placeholder-count="7"><div style="display:grid;grid-template-columns:200px 170px minmax(0,1.2fr) minmax(0,1fr);gap:20px;padding:12px 0;border-top:1px solid #e6e2da;font-size:14px;line-height:1.5"><span style="font-weight:600">{{ x.slot }}</span><span>{{ x.ratio }}</span><span>{{ x.crop }}</span><span style="color:#45423d">{{ x.empty }}</span></div></sc-for>
+        <div style="margin-top:24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+          <sc-for list="{{ grades }}" as="gr" hint-placeholder-count="3"><div style="padding:18px 20px;border:1px solid #e6e2da;display:flex;flex-direction:column;gap:8px"><span style="font-family:'Italiana',serif;font-size:30px;line-height:1;text-transform:uppercase">{{ gr.name }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.6">{{ gr.css }}</span><span style="font-size:14px;line-height:1.5;color:#45423d">{{ gr.why }}</span></div></sc-for>
+        </div>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column">
+        <span style="font-weight:600;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#7a5530;margin-bottom:14px">Motion · CSS only · easing cubic-bezier(.2,.7,.2,1) throughout</span>
+        <div style="display:grid;grid-template-columns:200px 230px 200px minmax(0,1fr) 260px;gap:20px;padding-bottom:10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5d5a55"><span>Moment</span><span>Trigger</span><span>Duration</span><span>Movement</span><span>Reduced motion</span></div>
+        <sc-for list="{{ motion }}" as="m" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:200px 230px 200px minmax(0,1fr) 260px;gap:20px;padding:14px 0;border-top:1px solid #e6e2da;font-size:14px;line-height:1.5"><span style="font-family:'Italiana',serif;font-size:24px;line-height:1.1">{{ m.name }}</span><span>{{ m.trigger }}</span><span>{{ m.dur }}</span><span>{{ m.dist }}</span><span style="color:#45423d">{{ m.reduced }}</span></div></sc-for>
+        <p style="margin:20px 0 0;max-width:1100px;font-size:15px;line-height:1.6;color:#45423d">Every animation is a CSS keyframe or a scroll-driven timeline, so nothing waits on JavaScript and nothing stays hidden without it. Entrance keyframes use fill-mode both and run on load; scroll reveals are wrapped in @supports (animation-timeline: view()), so browsers without it show everything in place. prefers-reduced-motion removes all of it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">M</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Content map</h2><span style="font-size:17px;color:var(--color-neutral-700)">Every visible element and the field it shows. Anything not listed is not on the page.</span></div>
+    <div id="M1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;font-family:'Hanken Grotesk',sans-serif;color:#151412">
+      <div style="display:grid;grid-template-columns:160px 300px minmax(0,1fr) 110px minmax(0,1fr);gap:20px;padding-bottom:10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#5d5a55"><span>Section</span><span>Element</span><span>Field</span><span>Kind</span><span>Notes</span></div>
+      <sc-for list="{{ cmap }}" as="r" hint-placeholder-count="30"><div style="display:grid;grid-template-columns:160px 300px minmax(0,1fr) 110px minmax(0,1fr);gap:20px;padding:10px 0;border-top:1px solid #e6e2da;font-size:14px;line-height:1.5"><span style="font-weight:600">{{ r.sec }}</span><span>{{ r.el }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:13px">{{ r.field }}</span><span><span style="padding:2px 8px;font-size:12px;font-weight:600;background:{{ r.kbg }};color:{{ r.kfg }}">{{ r.kind }}</span></span><span style="color:#45423d">{{ r.note }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span class="tag" style="background:#fdf3e2;color:#7a4b0c;font-size:15px">New fields</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Proposed content</h2><span style="font-size:17px;color:var(--color-neutral-700)">All optional. Existing sites have none of them and still look finished: see the 0-photo hero, the typographic CTA and quotes without photos.</span></div>
+    <div id="N1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:56px;font-family:'Hanken Grotesk',sans-serif;color:#151412">
+      <sc-for list="{{ proposed }}" as="pr" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:12px"><span style="font-family:'Italiana',serif;font-size:48px;line-height:0.95;text-transform:uppercase">{{ pr.name }}</span><span style="font-size:13px;line-height:1.6;font-family:ui-monospace,Menlo,monospace">{{ pr.fields }}</span><span style="font-size:15px;line-height:1.6">{{ pr.why }}</span><span style="font-size:15px;line-height:1.6;color:#45423d">{{ pr.how }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">E</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Editing notes</h2><span style="font-size:17px;color:var(--color-neutral-700)">What the owner can click, and what they see while editing.</span></div>
+    <div id="E1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:72px;font-family:'Hanken Grotesk',sans-serif;color:#151412">
+      <sc-for list="{{ edits }}" as="e" hint-placeholder-count="12"><div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid #e6e2da;font-size:14px;line-height:1.55"><span style="font-weight:600">{{ e.t }}</span><span style="color:#45423d">{{ e.d }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">P</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Template picker</h2><span style="font-size:17px;color:var(--color-neutral-700)">Name and two-line description, as they appear beside Meridian and Monument.</span></div>
+    <div id="P1" style="display:flex;gap:48px;align-items:flex-start">
+      <div style="position:relative;width:420px;background:var(--color-neutral-100);border:1px solid var(--color-divider);box-shadow:var(--shadow-md)">
+        <div style="height:300px;overflow:hidden;border-bottom:1px solid var(--color-divider);background:#0e0e0d"><div style="width:1280px;zoom:0.328"><sc-if value="{{ pickerOn }}" hint-placeholder-val="{{ false }}"><dc-import name="Salon" device="desktop" sample="typical" only="hero" motion="{{ false }}" hint-size="1280px,900px"></dc-import></sc-if></div></div>
+        <div style="padding:22px 24px 26px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="font-family:var(--font-heading);font-weight:600;font-size:30px;line-height:1;text-transform:uppercase">Salon</span><span class="tag tag-accent">Pro</span></div>
+          <span style="font-size:16px;line-height:1.5">Your name in a large serif, hung salon-style among your own photographs.</span>
+          <span style="font-size:16px;line-height:1.5;color:var(--color-neutral-700)">For leaders whose work is seen as much as read.</span>
+        </div>
+      </div>
+      <div style="max-width:620px;display:flex;flex-direction:column;gap:14px;font-size:16px;line-height:1.6">
+        <span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase">Why Salon</span>
+        <span>A salon hang is the way galleries have shown many pictures on one wall for three centuries: frames of different sizes arranged around a centre. That is what the hero does around the owner's name. The word is short, works in English, French and Portuguese, and sits alongside Meridian and Monument without describing a profession.</span>
+        <span style="color:var(--color-neutral-700)">Line 1 describes what you see. Line 2 says who it suits. Both stay under 80 characters for the picker card.</span>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DW = { desktop: 1280, tablet: 820, phone: 390 };
+const im = (slot, caption) => ({ slot, caption });
+const LINKS3 = [{ type: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/" }, { type: "instagram", label: "Instagram", href: "https://www.instagram.com/" }, { type: "website", label: "North House Hotels", href: "https://example.com/" }];
+const BLURB = "For partnerships, speaking and press, write to me directly. My office replies within two working days.";
+const CONTACT_OFF = { heading: "Contact", blurb: BLURB, email: "studio@elenamarlowe.com", links: LINKS3, form: { enabled: false } };
+const CONTACT_FORM_ONLY = { heading: "Contact", form: { enabled: true, topics: ["Partnerships", "Speaking", "Press", "Something else"] } };
+const LONG_NAME = { name: "Alexandra Montgomery-Fitzgerald", hero: { eyebrow: "Group Chief Executive and Creative Director · Montgomery-Fitzgerald Hotels & Spas", headline: "Alexandra Montgomery-Fitzgerald", sub: "I lead a family-controlled group of fourteen hotels, nine restaurants and two members' clubs across Britain, Ireland and Portugal. Since 2018 we have restored six listed buildings, trained more than four hundred apprentices and kept every house open through two difficult years.", button: { label: "Arrange a conversation", href: "#sl-contact" }, image: im("sl-portrait", "Alexandra Montgomery-Fitzgerald") } };
+const LONG_TITLE = { name: "Alexandra Montgomery-Fitzgerald", hero: { ...LONG_NAME.hero, headline: "Building hotels, restaurants and members' clubs that feel as though they have always belonged to the street outside them" } };
+const LONG_ITEMS = {
+  experience: { heading: "What fifteen years of building hotels taught me about the street outside the door", items: [{ role: "Group Chief Executive Officer and Executive Vice-Chair of the Supervisory Board, Hospitality Division", org: "Montgomery-Fitzgerald Hospitality Group, Members' Clubs, Hotels and Restaurants in Britain and Ireland", loc: "London, Dublin and Lisbon", start: "September 2018", end: "Present", summary: "Took a family group of four hotels to fourteen houses, nine restaurants and two members' clubs. Restored six listed buildings with local craftspeople and opened an apprenticeship school that has trained more than four hundred people in kitchens, housekeeping, joinery and front of house. Kept every house open and profitable through two very difficult years, and handed the operating role to a successor chosen from inside the business." }, { role: "Chief Operating Officer", org: "Montgomery-Fitzgerald Hotels & Spas", loc: "London", start: "2012", end: "2018" }] },
+  portfolio: { heading: "Selected work", items: [{ title: "A field guide to restoring listed buildings as hotels without losing the craftspeople, the neighbours or the original rooms", kind: "Book and lecture series", meta: "Published with the Society for the Protection of Ancient Buildings, and given as twelve lectures across Britain and Ireland", year: "2024", desc: "Six restorations told room by room: what we kept, what we had to rebuild, and how we paid for it. Written with the joiners, plasterers and conservation officers who did the work, with drawings and costings for every project so that other owners can repeat it.", href: "https://example.com/", img: im("sl-w2", "A field guide to restoring listed buildings") }, { title: "Montgomery House Dublin", kind: "Hotel", year: "2021", meta: "38 rooms in a Georgian terrace" }, { title: "The apprentice school", kind: "Founder", year: "Since 2019" }] }
+};
+const SECTIONS = [
+  ["about", "About · statement", "First paragraph becomes the centred statement; bold turns accent. Later paragraphs sit beneath in Hanken. Contact links follow as icons around the hero button."],
+  ["achievements", "Achievements", "One figure is set large and alone; up to four sit in one row, five to eight wrap to two rows of four. Each figure is fitted to its column."],
+  ["portfolio", "Portfolio · highlighted work", "Cards with images use a 4:5 frame inside corner brackets; the middle column hangs 64px lower. Items without an image become typographic tiles in the same frame. With no images at all, tiles size to their text."],
+  ["experience", "Experience", "Thin numbered rows: number, role in Italiana with organisation and summary beneath, dates and location right-aligned. Holds 20 rows without changing shape."],
+  ["testimonials", "Testimonials", "One quote at a time on a native scroll-snap track, so it swipes and scrolls with no JavaScript. Arrows and the counter are an enhancement. A quote with a photo moves left with the photo beside it."],
+  ["cta", "Call to action", "Gallery photos float at both sides, newest last. With fewer than two photos the block closes up into a typographic frame with large corner brackets."]
+];
+
+const PRE = { noir: ["Noir", "#0e0e0d", "#ebe6dd", "#c8a273"], ivory: ["Ivory", "#f4f0e7", "#151412", "#9a6a3a"], bordeaux: ["Bordeaux", "#1b1013", "#f1e7e3", "#e0948a"], atlantic: ["Atlantic", "#0d151b", "#e4eaee", "#8db6cf"], linen: ["Linen", "#e8e6dd", "#1a1e19", "#56704d"] };
+const rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = Array.isArray(a) ? a : rgb(a), B = Array.isArray(b) ? b : rgb(b); return A.map((v, i) => Math.round(v * p + B[i] * (1 - p))); };
+const hex = c => "#" + c.map(v => v.toString(16).padStart(2, "0")).join("");
+const r1 = x => x.toFixed(1) + ":1";
+const IT = "'Italiana',serif", HG = "'Hanken Grotesk',sans-serif";
+const TYPE = [["Name (h1)", "ELENA MARLOWE", IT, 400, "64px", "uppercase", "0.01em", "Fitted to the longest word. ≤26 chars: 15.5cqw with no photo, 12cqw with photos; 27–50: 8cqw; 51–85: 5.8cqw; 86–120: 4.8cqw. Tablet ×1.2, phone ×1.6 (max 21cqw). lh 0.94 / 1.04"],
+  ["Section title", "SELECTED WORK", IT, 400, "52px", "uppercase", "0.01em", "7.2 / 9 / 12.5cqw; ×0.8 over 16 chars, ×0.6 over 28, ×0.45 over 48; never wider than its longest word. lh 0.96"],
+  ["CTA headline", "LET'S MAKE SOMEWHERE", IT, 400, "44px", "uppercase", "0.01em", "With photos 6 / 4.4 / 3.4cqw by length, within a 48cqw column; without 8 / 5.6 / 4.2cqw. Tablet ×1.15, phone ×1.6"],
+  ["Statement", "I started North House with one guesthouse", IT, 400, "34px", "none", "0", "≤170 chars 3.5cqw, ≤320 2.9cqw, longer 2.4cqw; tablet ×1.3; phone 28 / 24 / 21px. lh 1.16, max 24em, balanced"],
+  ["Quote", "“Generous with her time”", IT, 400, "32px", "none", "0", "≤120 chars 3.1cqw, ≤280 2.3cqw, longer 1.75cqw; tablet ×1.35; phone 27 / 22 / 19px. lh 1.2"],
+  ["Figure", "€210M", IT, 400, "56px", "none", "0", "14cqw alone, 10 for two, 8 for three, 7 for four or more; fitted to its column. lh 1"],
+  ["Role, card title", "Founder and Chief Executive", IT, 400, "27px", "none", "0", "Role 27 / 24 / 22px; card title 26 / 24 / 24px; tile title 2.5 / 1.9 / 1.55cqw by length. lh 1.12–1.15"],
+  ["Site name", "ELENA MARLOWE", IT, 400, "20px", "uppercase", "0.2em", "Header, menu and footer · 20px · +0.2em"],
+  ["Body", "I still sketch every floor plan before the architects do.", HG, 400, "16px", "none", "0", "16 / 1.65 all widths; summaries and descriptions 15 / 1.6; figure labels 14 / 1.5"],
+  ["Label", "KEYNOTE · 2025", HG, 600, "12px", "uppercase", "0.16em", "12px · +0.16em (eyebrow +0.18em) · nav, kind · year, dates, form labels"],
+  ["Button", "START A CONVERSATION", HG, 600, "12px", "uppercase", "0.16em", "12px · +0.16em · 48px tall · brackets at the corners"],
+  ["Input", "sofia@harbourlane.example", HG, 400, "16px", "none", "0", "16px so iOS never zooms · 48px tall · bottom rule only"]].map(([role, sample, ff, fw, size, tt, ls, spec]) => ({ role, sample, ff, fw, size, tt, ls, spec }));
+const SPACE = [["Page margin", "48 / 36 / 20", 48], ["Content max width", "1184", 260], ["Section padding", "128 / 104 / 80", 128], ["Title to content", "64 / 64 / 40", 64], ["Card grid gap", "64 × 40 / 64 × 32", 64], ["Portfolio hang", "middle column +64", 64], ["Header", "72 / 72 / 60", 72], ["Bracket arm · offset", "12 · 10 out (CTA box 32)", 12], ["Button height", "48", 48], ["Tap target min", "44 × 44", 44]].map(([role, val, px]) => ({ role, val, w: Math.min(px * 2, 260) + "px" }));
+const ROLES = [["Background", "set by owner", "Page ground"], ["Text", "set by owner", "Headings, body, button labels"], ["Accent", "set by owner", "Hairline under links, quote rule, photo tint, selected chip"], ["Surface", "color-mix(text 5%, bg)", "Typographic tiles, form panel"], ["Surface 2", "color-mix(text 9%, bg)", "Photo backing, empty slot in the editor; the ground every check below is run against"], ["Secondary text", "mix(text p%, bg), p from 56 up until ≥ 4.5:1 on Surface 2", "Subheadline, paragraphs, summaries, labels"], ["Accent text", "mix(accent p%, text), p down from 100 until ≥ 4.5:1 on Surface 2", "Eyebrow, About label, bold in the statement, tile labels, focus ring"], ["Bracket and field", "mix(text p%, bg), p from 28 up until ≥ 3:1 on Surface 2", "Corner brackets on buttons and photos, input underlines"], ["Rule", "color-mix(text 14%, bg)", "Decorative hairlines only, never a control's only edge"], ["Wash", "color-mix(text 7%, bg)", "Hover on buttons and icons"], ["On accent", "bg or text, whichever contrasts more with accent", "Text on a selected topic chip"]].map(([name, formula, use]) => ({ name, formula, use }));
+const IMAGES = [["Hero portrait", "4:5 · 24 / 34 / 62cqw", "Cover, centred on the owner's focal point (default 50% x, 35% y, where faces sit). Owner can reposition and zoom.", "0 photos: typographic hero, name at its largest."], ["Hero collage", "Fixed per position: 4:5, 3:4 or 1:1 · 9–17cqw", "Cover at the focal point. The hero image takes position 1, gallery photos fill 2–9 in order. Phones use 6 positions.", "Fewer photos fill fewer positions; under 3 the portrait layout takes over."], ["About image", "4:5 · 13 / 20 / 42cqw", "Cover at the focal point, centred above the statement.", "Statement moves up."], ["Portfolio image", "4:5 · column width", "Cover at the focal point; gentle 1.03 zoom on hover.", "Typographic tile in the same frame. With no images in the section, tiles size to their text."], ["Testimonial photo (NEW)", "4:5 · 20 / 26cqw · 48cqw on phone", "Cover at the focal point, beside the quote; above it on phones.", "Quote centres across the full width."], ["CTA photos", "Fixed per position · 9–12cqw", "Gallery in reverse order, up to 6 (4 on phones). Cover at the focal point.", "Fewer than 2: a typographic block inside a large bracket frame."], ["Alt text", "–", "Gallery and testimonial captions; portrait uses the owner's name; portfolio uses the title.", "Decorative overlays are aria-hidden."]].map(([slot, ratio, crop, empty]) => ({ slot, ratio, crop, empty }));
+const GRADES = [["Tinted", "filter: grayscale(1) contrast(1.06) brightness(.94); + accent layer, mix-blend-mode: color, opacity .32", "Default. Turns phone snaps, press shots and studio portraits into one duotone set in the site's own colour."], ["Mono", "filter: grayscale(1) contrast(1.08)", "For owners who want pure black and white."], ["Natural", "filter: saturate(.82) contrast(1.03); + accent layer at .08", "Keeps colour (product, food, fashion) and pulls it slightly together."]].map(([name, css, why]) => ({ name, css, why }));
+const MOTION = [["Photo drift", "Page load, hero only", "1800ms; 120ms stagger from 300ms", "Each photo fades in from 18px outward and 14px above or below, at 97% scale", "None. Photos are in place."], ["Name rise", "Page load", "Name 1300ms at 150ms; eyebrow 900ms; intro and button 1000ms at 450–550ms", "Rises 0.14em and fades in", "None."], ["Scroll reveal", "Each block entering the viewport (animation-timeline: view(), entry 0–30%)", "Tied to scroll", "Rises 28px and fades in; CTA photos rise the same way", "None. Without support, everything is visible."], ["Hover", "Pointer or keyboard focus", "300–400ms; image zoom 900ms", "Button and icon wash, nav underline grows, contact links indent 8px, portfolio image scales 1.03", "Instant."], ["Testimonials", "Swipe, scroll, arrow keys or buttons", "Native smooth scroll", "Scroll-snap, one quote per stop", "Arrows jump without smoothing."], ["Phone menu", "Menu button", "600ms; 50ms stagger", "Links rise 0.14em in order", "Appears at once."]].map(([name, trigger, dur, dist, reduced]) => ({ name, trigger, dur, dist, reduced }));
+const K = { E: ["Text", "#eef2f7", "#2f4a66"], I: ["Image", "#e9f3ea", "#2c5a33"], N: ["NEW", "#fdf3e2", "#7a4b0c"], D: ["Derived", "#f1f0ee", "#4d4a45"] };
+const CMAP = [["Header", "Name, centre or left", "owner name (account profile)", "E", "The same name Sharing uses. Ellipsis if it would collide with the nav."], ["Header", "Navigation links", "section headings", "E", "Visible sections only, in page order; default names if a heading is empty."], ["Header", "Menu / Close", "template wording", "E", "Shown when the links don't fit either side of the name."], ["Hero", "Small line above the name", "hero.eyebrow", "E", "Accent text, uppercase. Left out when empty."], ["Hero", "Huge serif title (h1)", "hero.headline", "E", "Usually the name; any line up to 120 characters."], ["Hero", "Portrait, or collage position 1", "hero.image", "I", ""], ["Hero", "Collage positions 2–9", "gallery[0–7]", "N", "Positions 2–6 on phones."], ["Hero", "Paragraph under the name", "hero.subheadline", "E", ""], ["Hero", "Bracket button", "hero.button.label · .link", "E", ""], ["About", "Small label", "about.heading", "E", "Optional; section is labelled 'About' for screen readers."], ["About", "Framed photo", "about.image", "I", ""], ["About", "Centred statement", "about.body · paragraph 1", "E", "Bold shows in accent text; italic and links kept."], ["About", "Paragraphs beneath", "about.body · paragraphs 2+", "E", "Two columns on desktop when there are two or more."], ["About", "Icon row", "contact.links[].type · .link", "E", "Icon chosen by link type; label used as its accessible name."], ["About", "Button among the icons", "hero.button", "E", "Falls back to the Contact heading, linking to Contact."], ["Achievements", "Title · figure · label", "achievements.heading · items[].value · .label", "E", ""], ["Portfolio", "Title", "portfolio.heading", "E", ""], ["Portfolio", "Card image", "portfolio.items[].image", "I", ""], ["Portfolio", "Kind · year line, ↗", "items[].kind · .year · .link", "E", "↗ only when a link is set."], ["Portfolio", "Card title, meta, description", "items[].title · .meta · .description", "E", ""], ["Experience", "Row number", "position in the list", "D", "Not editable; follows the order."], ["Experience", "Role · organisation · summary", "items[].role · .organisation · .summary", "E", ""], ["Experience", "Right-hand label", "items[].start – .end · .location", "E", "En dash added between start and end."], ["Testimonials", "Quote, author, role", "testimonials.items[].quote · .author · .role", "E", ""], ["Testimonials", "Photo beside quote", "testimonials.items[].photo", "N", ""], ["Testimonials", "Counter 01 / 03 and arrows", "position in the list", "D", "Only with two or more quotes."], ["CTA", "Headline · body · button", "cta.headline · .body · .button", "E", ""], ["CTA", "Floating photos", "gallery (reversed)", "N", "Reuses the gallery; nothing extra to upload."], ["Contact", "Title · blurb · email", "contact.heading · .blurb · .email", "E", ""], ["Contact", "Link list or chips", "contact.links[]", "E", "List beside the form; chips when the form is off."], ["Contact", "Form and topics", "contact.form.enabled · .topics", "E", "Field labels, Send message and the note are template wording."], ["Footer", "Name · links · Back to top", "owner name · section headings · template wording", "E", "No copyright line or year."]].map(([sec, el, field, k, note]) => ({ sec, el, field, kind: K[k][0], kbg: K[k][1], kfg: K[k][2], note }));
+const PROPOSED = [{ name: "Gallery", fields: "gallery: 0–12 photos · image (JPEG, PNG or WebP, any shape, 1200px+ on the long edge) · caption (optional, 120 chars) · focal point (x, y)", why: "This audience has event, product and press photos but nowhere to show them except a portfolio card. A gallery lets the hero and closing section carry them without inventing a new page.", how: "Edited from the Hero panel as 'Photos': a tray of thumbnails to drag into order. Photo 1 of the hero is the hero image; the gallery fills positions 2–9, and the closing section uses it in reverse. Captions are alt text, never shown. Other templates ignore it, so switching keeps it safe." }, { name: "Testimonial photo", fields: "testimonials.items[].photo: optional · portrait, 600px+ · focal point · alt from the author's name", why: "A face beside a quote reads as more credible, and editorial pages often pair them. Most owners won't have these, so the quote must stand alone.", how: "Each quote decides for itself: with a photo it sits left with the photo beside it; without, it centres. Mixed sets are fine." }, { name: "Focal point", fields: "on every image: focal { x: 0–1, y: 0–1 } · default 0.5, 0.35", why: "The collage crops the same photo to 4:5, 3:4 and 1:1 at different positions. Without a focal point, heads get cut.", how: "In the editor the owner taps the face once on the photo. Templates use it as object-position. Meridian and Monument can use it too." }];
+const EDITS = [["Text", "Every visible word is edited in place: click, type, done. Limits follow section 1; a counter appears at 80% of the limit. Rich text (statement and About paragraphs) gets a small toolbar: bold, italic, link."], ["Links on buttons", "Clicking a button edits its label in place; a popover holds the link, with section anchors offered first."], ["Image slots", "Hero image, Gallery, About image, portfolio images, testimonial photos. Click to upload, replace, set the focal point, add a caption or remove."], ["Empty slots, editor only", "A quiet tile in Surface 2 with a dashed hairline and 'Drop a portrait' or 'Drop an image'. The hero shows one ghost tile with 'Add photos to form a collage'. Published pages never show any of this."], ["Adding items", "'+ Add role', '+ Add work', '+ Add quote' and '+ Add figure' sit after the last item while the section is selected. Limits: 20 roles, 12 works, 10 quotes, 8 figures, 12 photos, 10 links, 8 topics."], ["Removing items", "Item toolbar → Remove. An undo toast stays for 6 seconds."], ["Reordering", "Drag the handle on the item toolbar, or use ↑ ↓ for keyboard and touch. Gallery photos reorder in the photo tray; the first is the most prominent."], ["Testimonials while editing", "The track stays scrollable; the item toolbar adds ← → so each quote can be reached and edited."], ["Sections", "Add, hide, remove and reorder from the Content tab. Hidden sections leave the navigation. Hero first and Contact last are fixed."], ["Template wording", "Menu, Close, Back to top, Previous, Next, form labels and Send message are editable under Brand → Wording (60 chars)."], ["Colours and grade", "Brand tab: pick a preset or three colours; derived shades update live and a warning shows only if a chosen pair can't reach the minimum. Photo grade: Tinted, Mono or Natural."], ["Switching templates", "Nothing is lost. Gallery and testimonial photos stay stored and reappear if the owner switches back."]].map(([t, d]) => ({ t, d }));
+
+class Component extends DCLogic {
+  state = { n: 0 };
+  componentDidMount() { this._t = setInterval(() => { if (this.state.n >= this._total) return clearInterval(this._t); this.setState(s => ({ n: s.n + 1 })); }, 300); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    let gi = 0, fi = 0;
+    const fr = (id, label, dev, props, note) => { const w = DW[dev], z = props && props.z || 1; const idx = fi++; const on = idx < this.state.n; return { id, label, dev, w, wl: w + " px", z, ow: Math.round(w * z), oh: props && props.oh || "auto", r: dev === "phone" ? "28px" : dev === "tablet" ? "16px" : "0", hint: w + "px," + (dev === "phone" ? 1600 : 1200) + "px", ph: (dev === "phone" ? 900 : 700) + "px", bg: "#0e0e0d", sample: "typical", on, off: !on, note: note || "", hasNote: !!note, ...props }; };
+    const g = (title, note, frames) => ({ n: String(++gi), title, note, frames: frames.flat() });
+    const CODE = { about: "AB", achievements: "AC", portfolio: "PF", experience: "EX", testimonials: "TS", cta: "CT" };
+    const trio = (key, extra) => ["minimal", "typical", "full"].map(smp => ["desktop", "phone"].map(dev => fr(CODE[key] + "·" + smp[0] + "·" + dev[0], smp[0].toUpperCase() + smp.slice(1), dev, { sample: smp, only: key, ...(extra || {}) }))).flat();
+    const groups = [
+      g("Full page", "Typical content: one portrait plus two event photos, so the collage forms. Shown at the three editor widths. The header splits the navigation around the name when it fits and falls back to a menu when it doesn't.", [fr("1a", "Desktop", "desktop", {}), fr("1b", "Tablet", "tablet", {}), fr("1c", "Phone", "phone", {}), fr("1d", "Phone menu", "phone", { menu: true, oh: "844px" })]),
+      g("Hero · photo count", "Hero image plus Gallery. 0: typographic, the name at its largest. 1–2: the portrait leads, centred in brackets. 3+: the collage forms around the name; positions fill in a fixed order so 3, 6 and 9 each balance. Phones show up to 6.", [
+        [0, 1, 3, 6, 9].map(n => fr("2·" + n + "·d", n + (n === 1 ? " photo" : " photos"), "desktop", { sample: "full", only: "hero", photos: n })),
+        [3, 9].map(n => fr("2·" + n + "·t", n + " photos", "tablet", { sample: "full", only: "hero", photos: n })),
+        [0, 1, 3, 6].map(n => fr("2·" + n + "·p", n + (n === 1 ? " photo" : " photos"), "phone", { sample: "full", only: "hero", photos: n }))
+      ]),
+      ...SECTIONS.map(([key, title, note]) => g(title, note + " Minimal, typical and full at 1280 and 390.", [trio(key), key === "portfolio" || key === "testimonials" || key === "cta" ? [fr(CODE[key] + "·f·t", "Full", "tablet", { sample: "full", only: key })] : []])),
+      g("Contact", "Form on: two columns on desktop, stacked below. Form off: blurb, email and link chips centred. Errors appear under the field in plain words; the message is kept.", [
+        ["desktop", "tablet", "phone"].map(d => fr("C·on·" + d[0], "Form on", d, { only: "contact" })),
+        ["desktop", "phone"].map(d => fr("C·off·" + d[0], "Form off", d, { only: "contact", patch: { contact: CONTACT_OFF } })),
+        ["desktop", "phone"].map(d => fr("C·err·" + d[0], "Errors", d, { only: "contact", formDemo: "error" })),
+        ["desktop", "phone"].map(d => fr("C·sent·" + d[0], "Sent", d, { only: "contact", formDemo: "sent" })),
+        fr("C·min·d", "Form only, no email or links", "desktop", { only: "contact", patch: { contact: CONTACT_FORM_ONLY } })
+      ]),
+      g("Long content", "The name is measured and sized to its longest word, breaking only between words or after a hyphen. A 120-character headline steps down to a smaller size and balances its lines.", [
+        ["desktop", "phone"].map(d => fr("L·name·" + d[0], "Longest name, 80-char eyebrow, 280-char intro", d, { only: "hero", sample: "full", photos: 6, patch: LONG_NAME })),
+        ["desktop", "phone"].map(d => fr("L·title·" + d[0], "120-character headline", d, { only: "hero", sample: "full", photos: 1, patch: LONG_TITLE })),
+        ["desktop", "phone"].map(d => fr("L·exp·" + d[0], "100-char role and organisation, 80-char heading", d, { only: "experience", patch: LONG_ITEMS })),
+        ["desktop", "phone"].map(d => fr("L·work·" + d[0], "120-char work title, longest meta and description", d, { only: "portfolio", patch: LONG_ITEMS }))
+      ]),
+      g("Colour presets", "Five presets. The owner can also set any three colours; every other shade is mixed from them and checked for contrast. Tops of the typical page at half scale.", ["noir", "ivory", "bordeaux", "atlantic", "linen"].map(k => fr("P·" + k, k[0].toUpperCase() + k.slice(1), "desktop", { preset: k, z: 0.5, oh: "1000px" }))),
+      g("Photo grade", "One treatment for every photo so mixed uploads read as one set. Owner picks it under Brand. Drop real photos into the slots to see the difference.", ["tinted", "mono", "natural"].map(k => fr("G·" + k, k[0].toUpperCase() + k.slice(1), "desktop", { grade: k, sample: "full", only: "hero", photos: 6, z: 0.5 })))
+    ];
+    this._total = fi + 1;
+    const presets = Object.keys(PRE).map(k => { const [name, bg, ink, ac] = PRE[k], sf2 = mix(ink, bg, 0.09);
+      let p2 = 56; while (p2 < 100 && ratio(mix(ink, bg, p2 / 100), sf2) < 4.6) p2 += 2;
+      let pb = 28; while (pb < 100 && ratio(mix(ink, bg, pb / 100), sf2) < 3.1) pb += 2;
+      let pa = 100; while (pa > 0 && ratio(mix(ac, ink, pa / 100), sf2) < 4.6) pa -= 2;
+      const i2 = mix(ink, bg, p2 / 100), b2 = mix(ink, bg, pb / 100), a2 = mix(ac, ink, pa / 100);
+      return { name, bg, ink, ac, sf2: hex(sf2), rule: hex(mix(ink, bg, 0.14)), ink2: hex(i2), br: hex(b2), act: hex(a2), r1: r1(ratio(ink, sf2)), r2: r1(ratio(i2, sf2)), rb: r1(ratio(b2, sf2)), ra: r1(ratio(a2, sf2)) }; });
+    return { groups, type: TYPE, space: SPACE, roles: ROLES, presets, images: IMAGES, grades: GRADES, motion: MOTION, cmap: CMAP, proposed: PROPOSED, edits: EDITS, pickerOn: this.state.n >= fi };
+  }
+}
+</script>
+</body>
+</html>

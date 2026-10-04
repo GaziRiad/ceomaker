@@ -9,9 +9,20 @@ import {
 } from "@ceomaker/schema";
 import { MeridianTemplate as MeridianV1 } from "./meridian/v1";
 import { MonumentTemplate as MonumentV1 } from "./monument/v1";
+import { SalonTemplate as SalonV1 } from "./salon/v1";
 import type { TemplateDefinition } from "./types";
 
 type Design = Omit<TemplateDefinition, "key" | "version">;
+
+const NONE: Design["shows"] = {
+  gallery: false,
+  quotePhotos: false,
+  photoGrade: false,
+  cta: false,
+  focal: false,
+  aboutImage: false,
+  workImages: false,
+};
 
 /**
  * Every design of every template. Each listed version of TEMPLATE_VERSIONS must have one here;
@@ -26,6 +37,7 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
         "A serif masthead on white with a monogram seal and a private contact form. For chief executives and chairs.",
       tagline: "A serif masthead on white with a monogram seal. For chief executives and chairs.",
       contactForm: true,
+      shows: NONE,
       Component: MeridianV1,
     },
   },
@@ -36,7 +48,28 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
         "Your name stacked edge to edge on a full field of colour, then bold alternating sections. For leaders who want to be remembered.",
       tagline: "Your name on a full field of colour. For leaders who want to be remembered.",
       contactForm: true,
+      shows: { ...NONE, aboutImage: true, workImages: true },
       Component: MonumentV1,
+    },
+  },
+  salon: {
+    1: {
+      name: "Salon",
+      description:
+        "Your name in a large serif, hung salon-style among your own photographs, on a gallery ground. For leaders whose work is seen as much as read.",
+      tagline:
+        "Your name in a large serif, hung salon-style among your own photographs. For leaders whose work is seen as much as read.",
+      contactForm: true,
+      shows: {
+        gallery: true,
+        quotePhotos: true,
+        photoGrade: true,
+        cta: true,
+        focal: true,
+        aboutImage: true,
+        workImages: true,
+      },
+      Component: SalonV1,
     },
   },
 };
