@@ -14,12 +14,13 @@ import {
   type SiteMeta,
   type TestimonialItem,
 } from "@ceomaker/schema";
+import type { TemplateDefinition } from "@ceomaker/templates";
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import { Blueprint, Spinner } from "@/components/ui";
 import type { RewriteMode } from "@/lib/ai/draft";
 import { SECTION_LABELS, type FieldErrors } from "./editor-model";
 import { RemoveButton, TextAreaField, TextField } from "./fields";
-import { PortraitField } from "./portrait-field";
+import { ImageField, PhotosField, PortraitField } from "./portrait-field";
 import { UpgradePrompt } from "@/components/pro";
 
 const REWRITE_OPTIONS: RewriteMode[] = ["Sharper", "More formal", "Shorter"];
@@ -51,8 +52,8 @@ export interface ContentPanelProps {
   rewriteError: string | null;
   /** Bumped when text is edited in the preview, so forms that keep local text re-read it. */
   revision: number;
-  /** The current template, for settings only some templates show (the contact form). */
-  template: { name: string; contactForm: boolean };
+  /** The current template, for settings only some templates show (the contact form, photos). */
+  template: Pick<TemplateDefinition, "name" | "contactForm" | "shows">;
   /** The contact form can only be switched on with Pro. */
   pro: boolean;
   onSelect: (id: string) => void;
@@ -62,9 +63,14 @@ export interface ContentPanelProps {
   onRewrite: (mode: RewriteMode) => void;
 }
 
+/** Sections the current template shows. The rest stay in the content, untouched. */
+function offered(template: ContentPanelProps["template"]) {
+  return (section: Section) => section.type !== "cta" || template.shows.cta;
+}
+
 export function ContentPanel(props: ContentPanelProps) {
   const { content, selectedId } = props;
-  const sections = content.sections as Editable[];
+  const sections = (content.sections as Editable[]).filter(offered(props.template));
   const selected = sections.find((section) => section.id === selectedId) ?? sections[0]!;
   return (
     <>
@@ -82,15 +88,15 @@ export function ContentPanel(props: ContentPanelProps) {
 }
 
 function SectionList({
+  content,
   sections,
   selectedId,
+  template,
   onSelect,
   onSections,
 }: ContentPanelProps & { sections: Editable[] }) {
   const rows = useRef(new Map<string, HTMLDivElement>());
   const [dragging, setDragging] = useState<string | null>(null);
-  const first = sections[0]!;
-  const last = sections[sections.length - 1]!;
   const middle = sections.slice(1, -1);
 
   const move = (id: string, to: number) => {
@@ -99,7 +105,14 @@ function SectionList({
     const next = [...middle];
     const [moved] = next.splice(from, 1);
     next.splice(to, 0, moved!);
-    onSections([first, ...next, last]);
+    // Sections this template doesn't offer keep their places among the others.
+    const shown = offered(template);
+    let at = 0;
+    onSections(
+      content.sections.map((section) =>
+        shown(section) && !FIXED_SECTION_TYPES.has(section.type) ? next[at++]! : section,
+      ),
+    );
   };
 
   const onPointerMove = (event: PointerEvent, id: string) => {
@@ -127,7 +140,7 @@ function SectionList({
 
   const toggle = (id: string) =>
     onSections(
-      sections.map((section) =>
+      content.sections.map((section) =>
         section.id === id ? { ...section, visible: !section.visible } : section,
       ),
     );
@@ -222,15 +235,27 @@ function SectionForm(props: ContentPanelProps & { section: Editable }) {
     case "hero":
       return <HeroForm {...props} section={section} error={error} update={update} />;
     case "about":
-      return <AboutForm section={section} error={error} update={update} />;
+      return (
+        <AboutForm
+          section={section}
+          error={error}
+          update={update}
+          template={props.template}
+          name={props.content.meta.name}
+        />
+      );
     case "achievements":
       return <ImpactForm section={section} error={error} update={update} />;
     case "experience":
       return <ExperienceForm section={section} error={error} update={update} />;
     case "portfolio":
-      return <WorkForm section={section} error={error} update={update} />;
+      return <WorkForm section={section} error={error} update={update} template={props.template} />;
     case "testimonials":
-      return <QuotesForm section={section} error={error} update={update} />;
+      return (
+        <QuotesForm section={section} error={error} update={update} template={props.template} />
+      );
+    case "cta":
+      return <CtaForm section={section} error={error} update={update} />;
     case "contact":
       return (
         <ContactForm
@@ -249,6 +274,8 @@ type FormProps<T extends EditableSectionType> = {
   error: (path: string) => string | undefined;
   update: (change: (current: SectionOf<T>) => SectionOf<T>) => void;
 };
+
+type TemplateProps = { template: ContentPanelProps["template"] };
 
 function HiddenNote({ section, count, noun }: { section: Section; count: number; noun: string }) {
   if (!section.visible) {
@@ -279,6 +306,7 @@ function HeroForm({
   onMeta,
   onRewrite,
   errors,
+  template,
 }: FormProps<"hero"> & ContentPanelProps) {
   const meta = content.meta;
   const cta = section.primaryCta ?? { label: "", href: "" };
@@ -290,8 +318,20 @@ function HeroForm({
         image={section.image}
         initials={initials}
         name={meta.name}
+        focus={template.shows.focal}
         onChange={(image) => update((current) => ({ ...current, image }))}
       />
+      {template.shows.gallery ? (
+        <PhotosField
+          photos={section.gallery ?? []}
+          onChange={(change) =>
+            update((current) => {
+              const gallery = change(current.gallery ?? []);
+              return { ...current, gallery: gallery.length ? gallery : undefined };
+            })
+          }
+        />
+      ) : null}
       <TextField
         label="Eyebrow"
         value={section.eyebrow}
@@ -444,7 +484,13 @@ function HeroForm({
   );
 }
 
-function AboutForm({ section, error, update }: FormProps<"about">) {
+function AboutForm({
+  section,
+  error,
+  update,
+  template,
+  name,
+}: FormProps<"about"> & TemplateProps & { name: string }) {
   const [opening, setOpening] = useState(section.body[0] ? paragraphToMarkup(section.body[0]) : "");
   const [rest, setRest] = useState(richTextToPlain(section.body.slice(1)));
   const commit = (nextOpening: string, nextRest: string) =>
@@ -477,6 +523,15 @@ function AboutForm({ section, error, update }: FormProps<"about">) {
           commit(opening, value);
         }}
       />
+      {template.shows.aboutImage ? (
+        <ImageField
+          label="Photo"
+          image={section.image}
+          alt={name}
+          focus={template.shows.focal}
+          onChange={(image) => update((current) => ({ ...current, image }))}
+        />
+      ) : null}
       <HiddenNote section={section} count={section.body.length} noun="paragraph" />
     </>
   );
@@ -696,7 +751,7 @@ function ExperienceForm({ section, error, update }: FormProps<"experience">) {
   );
 }
 
-function WorkForm({ section, error, update }: FormProps<"portfolio">) {
+function WorkForm({ section, error, update, template }: FormProps<"portfolio"> & TemplateProps) {
   const setItem = (index: number, patch: Partial<PortfolioItem>) =>
     update((current) => ({
       ...current,
@@ -766,6 +821,15 @@ function WorkForm({ section, error, update }: FormProps<"portfolio">) {
               error={error(`items.${index}.href`)}
               onChange={(href) => setItem(index, { href: href.trim() })}
             />
+            {template.shows.workImages ? (
+              <ImageField
+                label="Image (optional)"
+                image={item.image}
+                alt=""
+                focus={template.shows.focal}
+                onChange={(image) => setItem(index, { image })}
+              />
+            ) : null}
           </>
         )}
       />
@@ -774,7 +838,12 @@ function WorkForm({ section, error, update }: FormProps<"portfolio">) {
   );
 }
 
-function QuotesForm({ section, error, update }: FormProps<"testimonials">) {
+function QuotesForm({
+  section,
+  error,
+  update,
+  template,
+}: FormProps<"testimonials"> & TemplateProps) {
   const setItem = (index: number, patch: Partial<TestimonialItem>) =>
     update((current) => ({
       ...current,
@@ -827,6 +896,16 @@ function QuotesForm({ section, error, update }: FormProps<"testimonials">) {
               maxLength={100}
               onChange={(role) => setItem(index, { role })}
             />
+            {template.shows.quotePhotos ? (
+              <ImageField
+                label="Their photo (optional)"
+                image={item.photo}
+                alt=""
+                emptyHint="A portrait beside the quote. Without one, the quote stands alone."
+                focus={template.shows.focal}
+                onChange={(photo) => setItem(index, { photo })}
+              />
+            ) : null}
           </>
         )}
       />
@@ -834,6 +913,61 @@ function QuotesForm({ section, error, update }: FormProps<"testimonials">) {
         Only publish quotes you have permission to use.
       </span>
       <HiddenNote section={section} count={section.items.length} noun="quote" />
+    </>
+  );
+}
+
+function CtaForm({ section, error, update }: FormProps<"cta">) {
+  const button = section.button ?? { label: "", href: "" };
+  return (
+    <>
+      <TextAreaField
+        label="Headline"
+        value={section.headline}
+        error={error("headline")}
+        minHeight={76}
+        maxLength={120}
+        onChange={(headline) => update((current) => ({ ...current, headline }))}
+      />
+      <TextAreaField
+        label="A line under it (optional)"
+        value={section.body}
+        error={error("body")}
+        minHeight={76}
+        maxLength={280}
+        onChange={(body) => update((current) => ({ ...current, body }))}
+      />
+      <div className="grid grid-cols-2 gap-2">
+        <TextField
+          label="Button label"
+          value={button.label}
+          error={error("button.label")}
+          maxLength={40}
+          onChange={(label) =>
+            update((current) => ({
+              ...current,
+              button: { label, href: current.button?.href || "#contact" },
+            }))
+          }
+        />
+        <TextField
+          label="Button link"
+          value={button.href}
+          error={error("button.href")}
+          placeholder="#contact"
+          spellCheck={false}
+          onChange={(href) =>
+            update((current) => ({ ...current, button: { ...button, href: href.trim() } }))
+          }
+        />
+      </div>
+      <span className="text-[13px] text-neutral-700">
+        {!section.visible
+          ? "Hidden on your site. Use Show in the list above when it's ready."
+          : section.headline.trim()
+            ? "A closing invitation just before your contact details."
+            : "Add a headline to show this section."}
+      </span>
     </>
   );
 }

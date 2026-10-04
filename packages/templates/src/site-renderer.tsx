@@ -1,8 +1,11 @@
 import {
+  DEFAULT_PHOTO_GRADE,
   parseSiteContentForRender,
   parseThemeSettingsForRender,
+  resolvePhotoGrade,
   resolveSiteColors,
   resolveTemplateRef,
+  type PhotoGrade,
   type RenderableSiteContent,
   type SiteColors,
   type TemplateKey,
@@ -17,6 +20,8 @@ export interface TemplateViewProps {
   /** The design of the template: a stored version keeps the look it was saved with. */
   templateVersion: number;
   colors: SiteColors;
+  /** The site's photo treatment; templates that don't grade photos ignore it. */
+  photoGrade?: PhotoGrade | undefined;
   content: RenderableSiteContent;
   publishedAt: Date;
   /** Inside an editor or thumbnail frame: don't stretch to the viewport height. */
@@ -36,6 +41,7 @@ export function TemplateView({
   templateKey,
   templateVersion,
   colors,
+  photoGrade = DEFAULT_PHOTO_GRADE,
   content,
   publishedAt,
   preview = false,
@@ -55,6 +61,7 @@ export function TemplateView({
         model={buildSiteModel(content, { editable, draft })}
         publishedAt={publishedAt}
         colors={colors}
+        photoGrade={photoGrade}
         sendMessage={sendMessage}
       />
     </div>
@@ -85,11 +92,13 @@ export function SiteRenderer({
   sendMessage,
 }: SiteRendererProps) {
   const { key, version } = resolveTemplateRef(templateKey, templateVersion);
+  const settings = parseThemeSettingsForRender(theme);
   return (
     <TemplateView
       templateKey={key}
       templateVersion={version}
-      colors={resolveSiteColors(parseThemeSettingsForRender(theme), key, version)}
+      colors={resolveSiteColors(settings, key, version)}
+      photoGrade={resolvePhotoGrade(settings)}
       content={parseSiteContentForRender(content)}
       publishedAt={publishedAt}
       sendMessage={sendMessage}

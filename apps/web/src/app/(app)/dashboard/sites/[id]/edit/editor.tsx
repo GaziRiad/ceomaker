@@ -5,10 +5,12 @@ import {
   isPremiumTemplate,
   isPublishableColors,
   MIN_TEXT_CONTRAST,
+  resolvePhotoGrade,
   resolveSiteColors,
   roleFromEyebrow,
   siteDescription,
   siteTitle,
+  type PhotoGrade,
   type Section,
   type SiteColors,
   type SiteMeta,
@@ -228,14 +230,19 @@ export function Editor({
   const setColors = (colors: SiteColors) =>
     setDraft((current) => ({
       ...current,
-      theme: { palettes: { ...current.theme.palettes, [current.templateKey]: colors } },
+      theme: {
+        ...current.theme,
+        palettes: { ...current.theme.palettes, [current.templateKey]: colors },
+      },
     }));
   const resetColors = () =>
     setDraft((current) => {
       const palettes = { ...current.theme.palettes };
       delete palettes[current.templateKey];
-      return { ...current, theme: { palettes } };
+      return { ...current, theme: { ...current.theme, palettes } };
     });
+  const setPhotoGrade = (photoGrade: PhotoGrade) =>
+    setDraft((current) => ({ ...current, theme: { ...current.theme, photoGrade } }));
   // Switching templates keeps the design the site already uses for that template; moving to a
   // newer design is its own choice (setDesign), made in the Template tab.
   const setTemplate = (templateKey: TemplateKey) =>
@@ -482,7 +489,11 @@ export function Editor({
               rewriting={rewriting}
               rewriteError={rewriteError}
               revision={formRevision}
-              template={{ name: template.name, contactForm: template.contactForm }}
+              template={{
+                name: template.name,
+                contactForm: template.contactForm,
+                shows: template.shows,
+              }}
               pro={pro}
               onSelect={selectFromSidebar}
               onSections={setSections}
@@ -498,6 +509,8 @@ export function Editor({
               colors={colors}
               onColors={setColors}
               onReset={resetColors}
+              photoGrade={template.shows.photoGrade ? resolvePhotoGrade(draft.theme) : null}
+              onPhotoGrade={setPhotoGrade}
             />
           ) : tab === "share" ? (
             <SharingPanel view={shareView} onMeta={updateMeta} />
@@ -521,7 +534,9 @@ export function Editor({
             onDevice={chooseDevice}
             address={address}
             selectedLabel={
-              selected?.visible && selected.type !== "cta" ? SECTION_LABELS[selected.type] : null
+              selected?.visible && (selected.type !== "cta" || template.shows.cta)
+                ? SECTION_LABELS[selected.type]
+                : null
             }
             findSection={(root) => (selected ? sectionElement(root, selected) : null)}
             sectionAt={(root, target) => sectionIdAt(root, draft.content.sections, target)}
@@ -533,6 +548,7 @@ export function Editor({
                 templateKey={draft.templateKey}
                 templateVersion={draft.templateVersion}
                 colors={colors}
+                photoGrade={resolvePhotoGrade(draft.theme)}
                 content={renderable}
                 publishedAt={PREVIEW_DATE}
                 preview

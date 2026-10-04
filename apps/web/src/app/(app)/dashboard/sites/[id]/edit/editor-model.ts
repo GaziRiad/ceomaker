@@ -5,6 +5,7 @@ import {
   normalizeTemplateKey,
   parseSiteContent,
   parseThemeSettingsForRender,
+  resolvePhotoGrade,
   resolveSiteColors,
   resolveTemplateRef,
   sectionSchema,
@@ -28,6 +29,7 @@ export const SECTION_LABELS: Record<EditableSectionType, string> = {
   experience: "Experience",
   portfolio: "Selected work",
   testimonials: "What colleagues say",
+  cta: "Call to action",
   contact: "Let's talk",
 };
 
@@ -38,6 +40,7 @@ const DEFAULT_IDS: Record<EditableSectionType, string> = {
   experience: "experience",
   portfolio: "work",
   testimonials: "testimonials",
+  cta: "cta",
   contact: "contact",
 };
 
@@ -63,6 +66,8 @@ function emptySection(type: EditableSectionType, meta: SiteMeta): Section {
     case "portfolio":
     case "testimonials":
       return { id, type, visible: false, items: [] };
+    case "cta":
+      return { id, type, visible: false, headline: "" };
   }
 }
 
@@ -174,9 +179,27 @@ function cleanSection(section: Section): Section {
           .filter((link) => !blank(link.label) || !blank(link.href))
           .map((link) => ({ ...link, label: optional(link.label) })),
       };
+    case "cta": {
+      const button = section.button;
+      return {
+        ...section,
+        body: optional(section.body),
+        button: button && (!blank(button.label) || !blank(button.href)) ? button : undefined,
+      };
+    }
     default:
       return section;
   }
+}
+
+/**
+ * A closing section that was never filled in isn't saved, shown or not, so it never blocks a
+ * save: the editor adds it back, hidden and empty, whenever the site is opened.
+ */
+function untouched(section: Section): boolean {
+  return (
+    section.type === "cta" && blank(section.headline) && blank(section.body) && !section.button
+  );
 }
 
 /** Rewritten wording without emptied entries; none left is none at all. */
@@ -210,7 +233,7 @@ export function prepareForSave(content: SiteContent): Prepared {
   const cleaned = {
     ...content,
     meta: cleanMeta(content.meta),
-    sections: content.sections.map(cleanSection),
+    sections: content.sections.map(cleanSection).filter((section) => !untouched(section)),
   };
   const parsed = parseSiteContent(cleaned);
   if (parsed.success) return { ok: true, content: parsed.data };
@@ -294,8 +317,15 @@ export function liveFingerprint(draft: {
   content: unknown;
 }): string {
   const { key, version } = resolveTemplateRef(draft.templateKey, draft.templateVersion);
-  const colors = resolveSiteColors(parseThemeSettingsForRender(draft.theme), key, version);
-  return JSON.stringify([key, version, colors, canonicalContent(draft.content)]);
+  const theme = parseThemeSettingsForRender(draft.theme);
+  const colors = resolveSiteColors(theme, key, version);
+  return JSON.stringify([
+    key,
+    version,
+    colors,
+    resolvePhotoGrade(theme),
+    canonicalContent(draft.content),
+  ]);
 }
 
 export function sectionOf<T extends EditableSectionType>(content: SiteContent, type: T) {
@@ -466,6 +496,16 @@ function editSection(section: Section, rest: string[], before: string, after: st
       }
       return null;
     }
+    case "cta":
+      if (rest.length === 1 && (field === "headline" || field === "body")) {
+        return { ...section, [field]: value };
+      }
+      if (rest.join(".") === "button.label") {
+        if (!section.button && !value) return null;
+        const button = section.button ?? { label: "", href: "#contact" };
+        return { ...section, button: { ...button, label: value } };
+      }
+      return null;
     case "about": {
       const paragraph = /^\d+$/.test(index ?? "") ? section.body[Number(index)] : undefined;
       if (field !== "body" || rest.length !== 2 || !paragraph) return null;

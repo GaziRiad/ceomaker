@@ -12,6 +12,7 @@ import {
   demoSiteContent,
   encodeAnswers,
   formTopicsFromGoals,
+  imageRef,
   imageSrc,
   isPublishableColors,
   isValidSubdomain,
@@ -24,6 +25,7 @@ import {
   parseThemeSettingsForRender,
   previewFromAnswers,
   readableTextOn,
+  resolvePhotoGrade,
   resolveSiteColors,
   resolveTemplateRef,
   resolveTemplateVersion,
@@ -187,11 +189,12 @@ describe("subdomains", () => {
 });
 
 describe("theme", () => {
-  it("ships six readable presets per template design, the first being the default", () => {
+  it("ships five or six readable presets per template design, the first being the default", () => {
     for (const key of TEMPLATE_KEYS) {
       for (const version of TEMPLATE_VERSIONS[key]) {
         const presets = templatePalettes(key, version);
-        expect(presets).toHaveLength(6);
+        expect(presets.length).toBeGreaterThanOrEqual(5);
+        expect(presets.length).toBeLessThanOrEqual(6);
         for (const preset of presets) {
           expect(isPublishableColors(preset.colors)).toBe(true);
         }
@@ -250,6 +253,18 @@ describe("theme", () => {
       palettes: {},
     });
     expect(parseThemeSettingsForRender(null)).toEqual({ palettes: {} });
+  });
+
+  it("keeps a valid photo grade, defaults to tinted and drops anything else", () => {
+    expect(themeSettingsSchema.parse({ photoGrade: "mono" }).photoGrade).toBe("mono");
+    expect(themeSettingsSchema.safeParse({ photoGrade: "sepia" }).success).toBe(false);
+    expect(resolvePhotoGrade(themeSettingsSchema.parse({}))).toBe("tinted");
+    expect(
+      parseThemeSettingsForRender({ palettes: { meridian: "bad" }, photoGrade: "natural" }),
+    ).toEqual({ palettes: {}, photoGrade: "natural" });
+    expect(parseThemeSettingsForRender({ palettes: { meridian: "bad" }, photoGrade: 3 })).toEqual({
+      palettes: {},
+    });
   });
 
   it("grades contrast like the editor readout", () => {
@@ -311,6 +326,45 @@ describe("images", () => {
     "data:image/png;base64,AAAA",
   ])("rejects %s", (src) => {
     expect(imageSrc.safeParse(src).success).toBe(false);
+  });
+
+  it("takes an optional focal point inside the photo", () => {
+    const src = "/media/0b546125-b657-4ed2-b39f-846f38c86be4";
+    expect(imageRef.safeParse({ src, alt: "" }).success).toBe(true);
+    expect(imageRef.safeParse({ src, alt: "", focal: { x: 0.2, y: 1 } }).success).toBe(true);
+    expect(imageRef.safeParse({ src, alt: "", focal: { x: 1.2, y: 0.5 } }).success).toBe(false);
+  });
+});
+
+describe("photos and the closing section", () => {
+  const photo = { src: "/media/0b546125-b657-4ed2-b39f-846f38c86be4", alt: "" };
+  const [hero, ...rest] = demoSiteContent.sections;
+
+  it("keeps sites without the new fields valid", () => {
+    expect(parseSiteContent(demoSiteContent).success).toBe(true);
+  });
+
+  it("holds up to twelve gallery photos with short captions", () => {
+    const withGallery = (gallery: unknown[]) =>
+      parseSiteContent({ ...demoSiteContent, sections: [{ ...hero, gallery }, ...rest] }).success;
+    expect(withGallery(Array.from({ length: 12 }, () => photo))).toBe(true);
+    expect(withGallery(Array.from({ length: 13 }, () => photo))).toBe(false);
+    expect(withGallery([{ ...photo, alt: "x".repeat(121) }])).toBe(false);
+  });
+
+  it("accepts a photo on a testimonial and a closing section without a button", () => {
+    const content = {
+      ...demoSiteContent,
+      sections: [
+        ...demoSiteContent.sections.map((section) =>
+          section.type === "testimonials"
+            ? { ...section, items: section.items.map((item) => ({ ...item, photo })) }
+            : section,
+        ),
+        { id: "cta", type: "cta", headline: "Let's talk" },
+      ],
+    };
+    expect(parseSiteContent(content).success).toBe(true);
   });
 });
 
@@ -490,6 +544,7 @@ describe("plans", () => {
     expect(planOf("PRO")).toBe("free");
     expect(planOf(undefined)).toBe("free");
     expect(isPremiumTemplate("monument")).toBe(true);
+    expect(isPremiumTemplate("salon")).toBe(true);
     expect(isPremiumTemplate("meridian")).toBe(false);
   });
 

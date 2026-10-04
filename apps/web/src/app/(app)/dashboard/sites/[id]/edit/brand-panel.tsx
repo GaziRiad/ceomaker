@@ -4,7 +4,9 @@ import {
   contrastRatio,
   defaultColors,
   MIN_TEXT_CONTRAST,
+  PHOTO_GRADES,
   templatePalettes,
+  type PhotoGrade,
   type SiteColors,
   type TemplateKey,
 } from "@ceomaker/schema";
@@ -18,6 +20,15 @@ const COLOR_ROWS: { key: keyof SiteColors; label: string; hint: string }[] = [
   { key: "ink", label: "Text", hint: "Headlines and body copy" },
   { key: "accent", label: "Accent", hint: "Buttons, numbers and highlights" },
 ];
+
+const GRADES: Record<PhotoGrade, { label: string; hint: string }> = {
+  tinted: {
+    label: "Tinted",
+    hint: "Grey, washed in your accent colour, so phone snaps and press shots read as one set.",
+  },
+  mono: { label: "Mono", hint: "Black and white." },
+  natural: { label: "Natural", hint: "Keeps the colour, pulled slightly together." },
+};
 
 function HexInput({
   value,
@@ -61,6 +72,8 @@ export function BrandPanel({
   colors,
   onColors,
   onReset,
+  photoGrade,
+  onPhotoGrade,
 }: {
   templateKey: TemplateKey;
   templateVersion: number;
@@ -68,6 +81,9 @@ export function BrandPanel({
   colors: SiteColors;
   onColors: (colors: SiteColors) => void;
   onReset: () => void;
+  /** Null when the template doesn't treat photos. */
+  photoGrade: PhotoGrade | null;
+  onPhotoGrade: (grade: PhotoGrade) => void;
 }) {
   const ratio = contrastRatio(colors.ink, colors.bg);
   const ok = ratio >= MIN_TEXT_CONTRAST;
@@ -180,6 +196,27 @@ export function BrandPanel({
       >
         Reset to {templateName} default
       </button>
+      {photoGrade ? (
+        <div className="flex flex-col gap-2">
+          <span className="kicker">Photos</span>
+          <div className="seg grid w-full grid-cols-3" role="radiogroup" aria-label="Photo grade">
+            {PHOTO_GRADES.map((grade) => (
+              <label key={grade} className="seg-opt justify-center">
+                <input
+                  type="radio"
+                  name="photo-grade"
+                  checked={photoGrade === grade}
+                  onChange={() => onPhotoGrade(grade)}
+                />
+                {GRADES[grade].label}
+              </label>
+            ))}
+          </div>
+          <span className="text-xs text-neutral-700">
+            {GRADES[photoGrade].hint} Applies to every photo on the site.
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }

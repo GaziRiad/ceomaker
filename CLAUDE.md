@@ -3,7 +3,7 @@
 # CEOMaker
 
 A website builder for busy, non-technical executives (CEOs, founders, chairs). They answer a few
-questions, AI drafts a personal site in their voice from one of two templates (Meridian, Monument), they edit it in
+questions, AI drafts a personal site in their voice from one of three templates (Meridian, Monument, Salon), they edit it in
 place and publish. Live at `www.ceomaker.app` (the apex forwards there), customer sites at
 `<name>.ceomaker.app`; previews at `preview.ceomaker.app` and `<name>.preview.ceomaker.app`.
 
@@ -43,9 +43,12 @@ Vercel (Hobby, `fra1`).
 
 - `packages/schema`: zod content contract (sites, sections, theme, templates, domains, analytics).
 - `packages/db`: Drizzle schema, migrations, queries, integration tests (need local Postgres).
-- `packages/templates`: `buildSiteModel` (one view model for all templates) and the two templates.
-  Meridian (`meridian/v1`, the quiet one) and Monument (`monument/v1`, the loud one) both support
-  in-place editing of every visible text and the contact form. Retired keys render as Meridian.
+- `packages/templates`: `buildSiteModel` (one view model for all templates) and the three
+  templates: Meridian (`meridian/v1`, the quiet one), Monument (`monument/v1`, the loud one) and
+  Salon (`salon/v1`, the name among the owner's photographs). All support in-place editing of
+  every visible text and the contact form. Retired keys render as Meridian. Optional content only
+  some templates show (gallery, quote photos, call to action, photo grade) is flagged per design
+  in `registry.ts` (`shows`), so the editor offers it only there.
 - `apps/web`: the app. Customer sites `src/app/(sites)`, dashboard `src/app/(app)/dashboard`,
   editor `dashboard/sites/[id]/edit`, domains `src/lib/domains`, analytics `src/lib/analytics`,
   billing `src/lib/billing.ts` and `src/lib/freemius.ts` (routes in `src/app/api/billing/freemius`).

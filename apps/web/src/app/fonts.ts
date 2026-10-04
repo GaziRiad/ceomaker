@@ -2,7 +2,9 @@ import {
   Barlow,
   Barlow_Condensed,
   Big_Shoulders,
+  Hanken_Grotesk,
   Inter,
+  Italiana,
   Newsreader,
   Public_Sans,
 } from "next/font/google";
@@ -56,6 +58,21 @@ export const publicSans = Public_Sans({
   preload: false,
 });
 
+export const italiana = Italiana({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-italiana",
+  display: "swap",
+  preload: false,
+});
+export const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin", "latin-ext"],
+  style: ["normal", "italic"],
+  variable: "--font-hanken-grotesk",
+  display: "swap",
+  preload: false,
+});
+
 // The same families for the "not live" and "paused" cards on customer addresses, without
 // preloading: published sites never use them.
 export const barlowLazy = Barlow({
@@ -73,7 +90,7 @@ export const barlowCondensedLazy = Barlow_Condensed({
   preload: false,
 });
 
-const siteFonts = [inter, newsreader, bigShoulders, publicSans];
+const siteFonts = [inter, newsreader, bigShoulders, publicSans, italiana, hankenGrotesk];
 
 export const siteFontVariables = [...siteFonts, barlowLazy, barlowCondensedLazy]
   .map((font) => font.variable)

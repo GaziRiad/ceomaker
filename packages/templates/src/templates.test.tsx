@@ -120,7 +120,8 @@ describe.each(DESIGNS)("%s v%i template", (key, version) => {
     expect(html).toContain('id="contact"');
     expect(html).toContain('<nav aria-label="Sections"');
     expect(html).toContain('href="#main"');
-    expect(html).toContain("© 2026 Amelia Hart");
+    // Salon's footer carries the name without a copyright line.
+    if (key !== "salon") expect(html).toContain("© 2026 Amelia Hart");
   });
 
   it("opens contact links in a new tab with rel=me and no opener", () => {
@@ -235,6 +236,102 @@ describe("site model", () => {
       "LinkedIn",
       "Meridian Freight Group",
     ]);
+  });
+});
+
+describe("photos, links and the closing section", () => {
+  const photo = (n: number) => ({
+    src: `/media/0b546125-b657-4ed2-b39f-846f38c86b${String(n).padStart(2, "0")}`,
+    alt: `Photo ${n}`,
+  });
+  const withPhotos = (count: number, extra: SectionInput[] = []) =>
+    withSections([
+      {
+        ...demoHero,
+        image: count > 0 ? photo(0) : undefined,
+        gallery: Array.from({ length: Math.max(0, count - 1) }, (_, index) => photo(index + 1)),
+      },
+      ...demoRest.slice(0, -1),
+      ...extra,
+      demoRest.at(-1)!,
+    ]);
+  const cta: SectionInput = {
+    id: "cta",
+    type: "cta",
+    headline: "Let's make something worth the journey",
+    button: { label: "Start a conversation", href: "#contact" },
+  };
+
+  it("adds the gallery, focal points, quote photos, link kinds and the closing section", () => {
+    const content = withSections([
+      { ...demoHero, image: { ...photo(0), focal: { x: 0.25, y: 0.6 } }, gallery: [photo(1)] },
+      ...demoRest.map((section) =>
+        section.type === "testimonials"
+          ? { ...section, items: section.items.map((item) => ({ ...item, photo: photo(9) })) }
+          : section,
+      ),
+      cta,
+    ]);
+    const model = buildSiteModel(parseSiteContentForRender(content));
+    expect(model.hero.image?.position).toBe("25% 60%");
+    expect(model.gallery).toEqual([{ ...photo(1), position: "50% 35%" }]);
+    expect(model.testimonials[0]?.photo?.src).toBe(photo(9).src);
+    expect(model.contact.links.map((link) => link.kind)).toEqual(["linkedin", "website"]);
+    expect(model.cta).toMatchObject({
+      headline: cta.type === "cta" ? cta.headline : "",
+      after: model.order.length,
+      fields: { button: "cta.button.label" },
+    });
+  });
+
+  it("leaves the closing section out when it's hidden", () => {
+    const model = buildSiteModel(
+      parseSiteContentForRender(withSections([...demoSections, { ...cta, visible: false }])),
+    );
+    expect(model.cta).toBeNull();
+  });
+
+  it("keeps Meridian and Monument unchanged by the new fields", () => {
+    for (const key of ["meridian", "monument"] as const) {
+      const plain = render(key, 1, withPhotos(1));
+      const extended = render(key, 1, withPhotos(6, [cta]));
+      expect(extended.replace(/ src="[^"]*"/g, "")).toBe(plain.replace(/ src="[^"]*"/g, ""));
+    }
+  });
+
+  it("lays Salon's hero out by the number of photos", () => {
+    const mode = (html: string) => /class="sl-hero" data-mode="(\w+)"/.exec(html)?.[1];
+    expect(mode(render("salon", 1, withPhotos(0)))).toBe("type");
+    expect(mode(render("salon", 1, withPhotos(2)))).toBe("portrait");
+    const collage = render("salon", 1, withPhotos(12));
+    expect(mode(collage)).toBe("collage");
+    // Nine places on wide pages; the last three are hidden on phones.
+    expect(collage.match(/class="sl-float"/g)).toHaveLength(9);
+    expect(collage.match(/class="sl-float" data-wide="true"/g)).toHaveLength(3);
+  });
+
+  it("shows Salon's closing section where it sits, floating the gallery from two photos", () => {
+    const html = render("salon", 1, withPhotos(3, [cta]));
+    expect(html).toContain("Let&#x27;s make something worth the journey");
+    expect(html.indexOf('class="sl-cta"')).toBeGreaterThan(html.indexOf('id="testimonials"'));
+    expect(html.indexOf('class="sl-cta"')).toBeLessThan(html.indexOf('id="contact"'));
+    expect(html).toMatch(/class="sl-cta" data-float="true"/);
+    expect(render("salon", 1, withPhotos(2, [cta]))).not.toMatch(/sl-cta" data-float/);
+  });
+
+  it("grades Salon's photos as the owner chose", () => {
+    const html = renderToStaticMarkup(
+      <TemplateView
+        templateKey="salon"
+        templateVersion={1}
+        colors={defaultColors("salon", 1)}
+        photoGrade="mono"
+        content={parseSiteContentForRender(withPhotos(1))}
+        publishedAt={publishedAt}
+      />,
+    );
+    expect(html).toContain("--sl-gf:grayscale(1) contrast(1.08);--sl-go:0");
+    expect(html).toContain('style="object-position:50% 35%"');
   });
 });
 

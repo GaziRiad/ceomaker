@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  resolvePhotoGrade,
   resolveSiteColors,
   type RenderableSiteContent,
   type TemplateKey,
@@ -113,6 +114,7 @@ export function TemplatePanel({
                   templateKey={template.key}
                   templateVersion={template.version}
                   colors={resolveSiteColors(theme, template.key, template.version)}
+                  photoGrade={resolvePhotoGrade(theme)}
                   content={content}
                   publishedAt={PREVIEW_DATE}
                   preview

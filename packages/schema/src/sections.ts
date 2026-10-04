@@ -21,6 +21,9 @@ const base = {
  */
 const heading = text(80).optional();
 
+export const MAX_GALLERY_PHOTOS = 12;
+export const GALLERY_CAPTION_LIMIT = 120;
+
 export const heroSection = z.object({
   ...base,
   type: z.literal("hero"),
@@ -29,6 +32,14 @@ export const heroSection = z.object({
   subheadline: longText(280).optional(),
   primaryCta: callToAction.optional(),
   image: imageRef.optional(),
+  /**
+   * More photos: events, products, press. Templates that hang several pictures (Salon) show them
+   * after the hero image; others ignore them. The alt text is the photo's caption.
+   */
+  gallery: z
+    .array(imageRef.extend({ alt: text(GALLERY_CAPTION_LIMIT) }))
+    .max(MAX_GALLERY_PHOTOS)
+    .optional(),
 });
 
 export const aboutSection = z.object({
@@ -93,6 +104,8 @@ export const testimonialItem = z.object({
   quote: requiredText(500),
   author: requiredText(80),
   role: text(100).optional(),
+  /** The person quoted. Shown by templates that pair a quote with a face (Salon). */
+  photo: imageRef.optional(),
 });
 
 export const testimonialsSection = z.object({
@@ -141,13 +154,16 @@ export const contactSection = z.object({
   form: contactFormSettings.optional(),
 });
 
-/** Kept so older content stays valid; the current templates do not render it. */
+/**
+ * A closing invitation before the contact section. Templates that have one (Salon) show it;
+ * others leave it out.
+ */
 export const ctaSection = z.object({
   ...base,
   type: z.literal("cta"),
   headline: requiredText(120),
   body: longText(280).optional(),
-  button: callToAction,
+  button: callToAction.optional(),
 });
 
 export const sectionSchema = z.discriminatedUnion("type", [
@@ -191,6 +207,7 @@ export const EDITABLE_SECTION_TYPES = [
   "experience",
   "portfolio",
   "testimonials",
+  "cta",
   "contact",
 ] as const satisfies readonly SectionType[];
 

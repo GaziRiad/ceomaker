@@ -175,11 +175,69 @@ describe("editInPlace", () => {
     }
   });
 
+  it("edits the closing section and gives it a button to the contact section", () => {
+    const content = demo();
+    const shown = editInPlace(
+      {
+        ...content,
+        sections: content.sections.map((section) =>
+          section.type === "cta" ? { ...section, visible: true, headline: "Let's talk" } : section,
+        ),
+      },
+      "cta.headline",
+      "Let's talk",
+      " Let's  build something ",
+    )!;
+    expect(sectionOf(shown, "cta")?.headline).toBe("Let's build something");
+    const buttoned = editInPlace(shown, "cta.button.label", "", "Write to me")!;
+    expect(sectionOf(buttoned, "cta")?.button).toEqual({ label: "Write to me", href: "#contact" });
+    expect(editInPlace(shown, "cta.button.label", "", "")).toBeNull();
+    expect(editInPlace(shown, "cta.heading", "", "x")).toBeNull();
+  });
+
   it("finds the form a field lives in", () => {
     const content = demo();
     expect(sectionIdOfField(content, "meta.location")).toBe("hero");
     expect(sectionIdOfField(content, "work.items.1.title")).toBe("work");
     expect(sectionIdOfField(content, "nowhere.title")).toBeNull();
+  });
+});
+
+describe("the closing section", () => {
+  it("is offered hidden and empty before contact, and isn't saved until it's filled in", () => {
+    const content = demo();
+    const types = content.sections.map((section) => section.type);
+    expect(types.at(-2)).toBe("cta");
+    expect(sectionOf(content, "cta")).toMatchObject({ visible: false, headline: "" });
+    const saved = prepareForSave(content);
+    expect(saved.ok && saved.content.sections.some((section) => section.type === "cta")).toBe(
+      false,
+    );
+    // Shown but still blank, it's left out rather than blocking the save.
+    const shownBlank = {
+      ...content,
+      sections: content.sections.map((section) =>
+        section.type === "cta" ? { ...section, visible: true } : section,
+      ),
+    };
+    expect(prepareForSave(shownBlank).ok).toBe(true);
+    const filled = {
+      ...content,
+      sections: content.sections.map((section) =>
+        section.type === "cta"
+          ? { ...section, visible: true, headline: "Let's talk", body: " ", button: undefined }
+          : section,
+      ),
+    };
+    const kept = prepareForSave(filled);
+    expect(kept.ok && sectionOf(kept.content, "cta")).toEqual({
+      id: "cta",
+      type: "cta",
+      visible: true,
+      headline: "Let's talk",
+      body: undefined,
+      button: undefined,
+    });
   });
 });
 
@@ -202,6 +260,15 @@ describe("comparing the draft with the live site", () => {
     };
     expect(liveFingerprint(otherTemplate)).toBe(liveFingerprint(draft));
     expect(fingerprint(otherTemplate)).not.toBe(fingerprint(draft));
+  });
+
+  it("counts a change of photo grade", () => {
+    expect(liveFingerprint({ ...draft, theme: { palettes: {}, photoGrade: "tinted" } })).toBe(
+      liveFingerprint(draft),
+    );
+    expect(liveFingerprint({ ...draft, theme: { palettes: {}, photoGrade: "mono" } })).not.toBe(
+      liveFingerprint(draft),
+    );
   });
 
   it("compares the design that would render, and saves the one chosen", () => {
