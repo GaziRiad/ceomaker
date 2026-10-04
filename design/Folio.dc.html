@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<script src="./image-slot.js"></script>
+<style>body{margin:0}
+[data-folio] a{color:inherit}
+[data-folio] a:hover{color:inherit}
+[data-folio] :is(h1,h2,h3,h4){font-family:inherit;text-transform:none;color:inherit;letter-spacing:normal}
+[data-folio] :is(p,a,button,input,textarea,label,legend,blockquote,li,figcaption){font-family:inherit}
+[data-folio] :focus-visible{outline:2px solid var(--acg);outline-offset:3px}
+[data-folio] image-slot::part(frame){background:var(--sf2);border:0;border-radius:0;box-shadow:none}
+[data-folio] [data-track]::-webkit-scrollbar,[data-folio] [data-strip]::-webkit-scrollbar{display:none}
+[data-folio] [data-track][data-free]{scroll-snap-type:none !important}
+[data-folio] [data-track][data-drag]{cursor:grabbing !important;user-select:none}
+[data-folio] [data-track][data-drag] *{pointer-events:none}
+[data-folio] details>summary{list-style:none}
+[data-folio] details>summary::-webkit-details-marker{display:none}
+[data-folio] details[open]>summary{display:none}
+@keyframes fo-up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes fo-in{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
+@keyframes fo-marq{to{transform:translateX(-50%)}}
+@keyframes fo-spin{to{transform:rotate(360deg)}}
+@keyframes fo-drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@supports (animation-timeline:view()){[data-folio]:not([data-still="1"]) [data-rv]{animation:fo-up linear both;animation-timeline:view();animation-range:entry 0% entry 40%}[data-folio]:not([data-still="1"]) [data-rvi]{animation:fo-in linear both;animation-timeline:view();animation-range:entry 0% entry 55%}}
+[data-folio] [data-marq]{animation:fo-marq var(--md,60s) linear infinite}
+[data-folio] [data-strip]:hover [data-marq],[data-folio] [data-strip]:focus-within [data-marq]{animation-play-state:paused}
+[data-folio][data-still="1"] *{animation:none !important}
+[data-folio][data-still="1"] [data-dup]{display:none !important}
+@media (prefers-reduced-motion:reduce){[data-folio] *{animation:none !important;transition:none !important}[data-folio] [data-dup]{display:none !important}}</style>
+</helmet>
+<div data-folio="" data-still="{{ still }}" ref="{{ rootRef }}" lang="{{ lang }}" style="position:relative;container-type:inline-size;--bg:{{ th.bg }};--ink:{{ th.ink }};--ac:{{ th.ac }};--ink2:{{ th.ink2 }};--br:{{ th.br }};--rule:{{ th.rule }};--sf:{{ th.sf }};--sf2:{{ th.sf2 }};--tint:{{ th.tint }};--acg:{{ th.acg }};--act:{{ th.act }};--wash:{{ th.wash }};--iink2:{{ th.iink2 }};--iacg:{{ th.iacg }};--irule:{{ th.irule }};--gf:{{ G.f }};--go:{{ G.o }};--ease:cubic-bezier(.2,.7,.2,1);background:var(--bg);color:var(--ink);font-family:'Geist',system-ui,sans-serif;font-size:17px;line-height:1.6;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;min-height:{{ L.minH }}">
+
+<sc-if value="{{ show.header }}" hint-placeholder-val="{{ true }}">
+<header style="order:0;position:sticky;top:0;z-index:30;padding:{{ L.headPad }}">
+  <div style="max-width:1184px;margin:0 auto;height:{{ L.headH }};padding:0 8px 0 18px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:14px;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px var(--rule)">
+    <a href="#fo-top" style="min-width:0;display:flex;align-items:center;gap:10px;padding:10px 0;font-size:16px;font-weight:600;letter-spacing:-0.01em;text-decoration:none;white-space:nowrap"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:3px;background:var(--acg)"></span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span></a>
+    <sc-if value="{{ L.full }}" hint-placeholder-val="{{ true }}"><nav aria-label="Sections" style="display:flex;gap:2px;min-width:0"><sc-for list="{{ nav }}" as="n" hint-placeholder-count="4"><a href="{{ n.href }}" style="padding:9px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--ink2);text-decoration:none;white-space:nowrap;transition:background-color .3s var(--ease),color .3s var(--ease)" style-hover="background-color:var(--wash);color:var(--ink)">{{ n.label }}</a></sc-for></nav></sc-if>
+    <sc-if value="{{ L.full }}" hint-placeholder-val="{{ true }}"><a href="{{ c.headHref }}" style="flex:none;height:44px;padding:0 20px;display:inline-flex;align-items:center;border-radius:999px;background:var(--ink);color:var(--bg);font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap;transition:opacity .3s var(--ease)" style-hover="color:var(--bg);opacity:0.86">{{ c.headBtn }}</a></sc-if>
+    <sc-if value="{{ L.compact }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ menuToggle }}" aria-expanded="{{ menuOpen }}" style="flex:none;height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--ink);color:var(--bg);font:inherit;font-size:14px;font-weight:500;cursor:pointer">{{ words.menu }}</button></sc-if>
+  </div>
+</header>
+</sc-if>
+
+<sc-if value="{{ show.menu }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-label="{{ words.menu }}" style="position:{{ L.menuPos }};inset:0;z-index:40;background:var(--bg);padding:{{ L.headPad }};display:flex;flex-direction:column;overflow:auto">
+  <div style="height:{{ L.headH }};padding:0 8px 0 18px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:16px;border-radius:14px;box-shadow:inset 0 0 0 1px var(--rule)"><span style="min-width:0;display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:3px;background:var(--acg)"></span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span></span><button type="button" onClick="{{ menuToggle }}" style="flex:none;height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--wash);color:var(--ink);font:inherit;font-size:14px;font-weight:500;cursor:pointer">{{ words.close }}</button></div>
+  <nav aria-label="Sections" style="margin-top:20px;padding:0 6px;display:flex;flex-direction:column">
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="5"><a href="{{ n.href }}" onClick="{{ menuToggle }}" style="min-height:60px;padding:10px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--rule);font-size:{{ L.menuFs }};font-weight:600;line-height:1.1;letter-spacing:-0.035em;text-decoration:none;animation:fo-drop .5s var(--ease) {{ n.d }} both"><span style="min-width:0;overflow-wrap:break-word">{{ n.label }}</span><span aria-hidden="true" style="flex:none;font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;font-weight:400;letter-spacing:0;color:var(--ink2)">{{ n.num }}</span></a></sc-for>
+  </nav>
+  <sc-if value="{{ has.btn }}" hint-placeholder-val="{{ true }}"><a href="{{ c.btnHref }}" onClick="{{ menuToggle }}" style="margin:28px 6px 8px;min-height:52px;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:15px;font-weight:500;text-decoration:none">{{ c.btn }} <span aria-hidden="true">→</span></a></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.hero }}" hint-placeholder-val="{{ true }}">
+<section id="fo-top" aria-label="{{ c.name }}" style="order:1;padding:{{ H.pad }}">
+  <div style="max-width:1184px;margin:0 auto;display:grid;grid-template-columns:{{ H.cols }};gap:{{ H.gap }};align-items:end">
+    <div style="min-width:0;display:flex;flex-direction:column;gap:{{ H.tGap }}">
+      <sc-if value="{{ has.eyebrow }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:36em;font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;line-height:1.5;letter-spacing:0.04em;text-transform:uppercase;color:var(--act);text-wrap:balance;animation:fo-up .8s var(--ease) .05s both">{{ c.eyebrow }}</p></sc-if>
+      <h1 style="margin:0;max-width:100%;font-size:{{ H.nameFs }};font-weight:600;line-height:0.94;letter-spacing:-0.045em;text-wrap:balance;overflow-wrap:normal;word-break:normal;hyphens:manual;animation:fo-up 1s var(--ease) .1s both">{{ c.name }}</h1>
+      <sc-if value="{{ has.headline }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:{{ H.posMax }};font-size:{{ H.posFs }};font-weight:500;line-height:1.16;letter-spacing:-0.025em;text-wrap:balance;animation:fo-up 1s var(--ease) .2s both">{{ c.headline }}</p></sc-if>
+    </div>
+    <sc-if value="{{ H.portrait }}" hint-placeholder-val="{{ true }}">
+      <div style="position:relative;width:100%;aspect-ratio:4 / 5;border-radius:{{ L.rImg }};overflow:hidden;isolation:isolate;background:var(--sf2);animation:fo-in 1.2s var(--ease) .15s both">
+        <span role="img" aria-label="{{ H.por.alt }}" style="position:absolute;inset:0"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ H.por.slot }}" src="{{ H.por.src }}" placeholder="{{ H.por.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ H.por.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ has.foot }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width:1184px;margin:{{ H.footM }} auto 0;padding-top:28px;border-top:1px solid var(--rule);display:grid;grid-template-columns:{{ H.cols2 }};gap:24px {{ H.gap }};align-items:start;animation:fo-up 1s var(--ease) .35s both">
+      <sc-if value="{{ has.sub }}" hint-placeholder-val="{{ true }}"><p style="grid-column:{{ H.subCol }};grid-row:1;margin:0;max-width:30em;font-size:{{ H.subFs }};line-height:1.55;color:var(--ink2);text-wrap:pretty">{{ c.sub }}</p></sc-if>
+      <sc-if value="{{ has.btn }}" hint-placeholder-val="{{ true }}"><a href="{{ c.btnHref }}" style="grid-column:1;grid-row:{{ H.btnRow }};justify-self:start;width:{{ L.btnW }};min-height:52px;padding:0 26px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:12px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:15px;font-weight:500;text-decoration:none;transition:gap .4s var(--ease),opacity .3s var(--ease)" style-hover="color:var(--bg);gap:18px;opacity:0.9">{{ c.btn }}<span aria-hidden="true">→</span></a></sc-if>
+    </div>
+  </sc-if>
+  <sc-if value="{{ GA.stat }}" hint-placeholder-val="{{ false }}">
+    <ul data-strip="" style="list-style:none;max-width:1184px;margin:{{ GA.m }} auto 0;padding:0;display:{{ GA.disp }};grid-template-columns:{{ GA.cols }};gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none">
+      <sc-for list="{{ GA.items }}" as="g" hint-placeholder-count="2"><li data-rv="" style="flex:0 0 78%;min-width:0;scroll-snap-align:start;display:flex;flex-direction:column;gap:10px"><span role="img" aria-label="{{ g.alt }}" style="position:relative;display:block;aspect-ratio:3 / 2;border-radius:{{ L.rImg }};overflow:hidden;isolation:isolate;background:var(--sf2)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ g.slot }}" src="{{ g.src }}" placeholder="{{ g.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ g.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span><sc-if value="{{ g.hasCap }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;line-height:1.45;color:var(--ink2)">{{ g.cap }}</span></sc-if></li></sc-for>
+    </ul>
+  </sc-if>
+</section>
+</sc-if>
+<sc-if value="{{ GA.marq }}" hint-placeholder-val="{{ false }}">
+<div data-strip="" role="region" aria-label="{{ words.gallery }}" tabIndex="0" style="order:1;margin:{{ GA.mq }} 0 0;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)">
+  <div data-marq="" style="--md:{{ GA.md }};display:flex;width:max-content">
+    <ul style="list-style:none;margin:0;padding:0 8px;display:flex;gap:16px">
+      <sc-for list="{{ GA.items }}" as="g" hint-placeholder-count="4"><li style="flex:none;width:{{ GA.w }};display:flex;flex-direction:column;gap:10px"><span role="img" aria-label="{{ g.alt }}" style="position:relative;display:block;height:{{ GA.h }};border-radius:{{ L.rImg }};overflow:hidden;isolation:isolate;background:var(--sf2)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ g.slot }}" src="{{ g.src }}" placeholder="{{ g.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ g.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span><sc-if value="{{ g.hasCap }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;line-height:1.45;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.cap }}</span></sc-if></li></sc-for>
+    </ul>
+    <sc-if value="{{ GA.dup }}" hint-placeholder-val="{{ false }}"><ul data-dup="" aria-hidden="true" style="list-style:none;margin:0;padding:0 8px;display:flex;gap:16px">
+      <sc-for list="{{ GA.items }}" as="g" hint-placeholder-count="4"><li style="flex:none;width:{{ GA.w }};display:flex;flex-direction:column;gap:10px"><span style="position:relative;display:block;height:{{ GA.h }};border-radius:{{ L.rImg }};overflow:hidden;isolation:isolate;background:var(--sf2)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ g.slot }}" src="{{ g.src }}" placeholder="{{ g.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ g.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span><sc-if value="{{ g.hasCap }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;line-height:1.45;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.cap }}</span></sc-if></li></sc-for>
+    </ul></sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sec.about.show }}" hint-placeholder-val="{{ true }}">
+<section id="fo-about" aria-label="{{ sec.about.aria }}" style="order:{{ sec.about.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1184px;margin:0 auto">
+    <sc-if value="{{ sec.about.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-rv="" style="margin:0 0 {{ L.tGap }};font-size:{{ sec.about.tfs }};font-weight:600;line-height:0.96;letter-spacing:-0.045em;text-wrap:balance">{{ sec.about.t1 }}<span style="white-space:nowrap">{{ sec.about.t2 }}<span aria-hidden="true" style="display:{{ sec.about.sq }};width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:var(--acg)"></span></span></h2></sc-if>
+    <div style="display:grid;grid-template-columns:{{ A.cols }};gap:{{ A.gap }};align-items:start">
+      <sc-if value="{{ A.hasImg }}" hint-placeholder-val="{{ false }}"><div data-rvi="" style="position:relative;aspect-ratio:4 / 5;border-radius:{{ L.rImg }};overflow:hidden;isolation:isolate;background:var(--sf2)"><span role="img" aria-label="{{ A.img.alt }}" style="position:absolute;inset:0"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ A.img.slot }}" src="{{ A.img.src }}" placeholder="{{ A.img.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ A.img.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></div></sc-if>
+      <div style="min-width:0;display:flex;flex-direction:column;gap:{{ A.innerGap }}">
+        <p data-rv="" style="margin:0;max-width:{{ A.leadMax }};font-size:{{ A.fs }};font-weight:500;line-height:1.26;letter-spacing:-0.022em;text-wrap:pretty;overflow-wrap:break-word"><sc-for list="{{ A.lead }}" as="g" hint-placeholder-count="2"><sc-if value="{{ g.b }}" hint-placeholder-val="{{ false }}"><strong style="font-weight:600;background:linear-gradient(var(--tint),var(--tint)) no-repeat 0 88% / 100% 0.36em">{{ g.t }}</strong></sc-if><sc-if value="{{ g.i }}" hint-placeholder-val="{{ false }}"><em>{{ g.t }}</em></sc-if><sc-if value="{{ g.a }}" hint-placeholder-val="{{ false }}"><a href="{{ g.href }}" style="text-decoration:underline;text-decoration-color:var(--acg);text-decoration-thickness:2px;text-underline-offset:0.16em">{{ g.t }}</a></sc-if><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if></sc-for></p>
+        <sc-if value="{{ A.hasRest }}" hint-placeholder-val="{{ true }}">
+          <div data-rv="" style="width:100%;max-width:{{ A.restMax }};margin-left:{{ A.restML }};display:grid;grid-template-columns:{{ A.restCols }};gap:18px 40px">
+            <sc-for list="{{ A.rest }}" as="r" hint-placeholder-count="2"><p style="margin:0;color:var(--ink2);text-wrap:pretty"><sc-for list="{{ r.segs }}" as="g" hint-placeholder-count="1"><sc-if value="{{ g.b }}" hint-placeholder-val="{{ false }}"><strong style="font-weight:600;color:var(--ink)">{{ g.t }}</strong></sc-if><sc-if value="{{ g.i }}" hint-placeholder-val="{{ false }}"><em>{{ g.t }}</em></sc-if><sc-if value="{{ g.a }}" hint-placeholder-val="{{ false }}"><a href="{{ g.href }}" style="color:var(--ink);text-decoration:underline;text-decoration-color:var(--acg);text-underline-offset:0.2em">{{ g.t }}</a></sc-if><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if></sc-for></p></sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.achievements.show }}" hint-placeholder-val="{{ true }}">
+<section id="fo-achievements" aria-label="{{ sec.achievements.aria }}" style="order:{{ sec.achievements.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1184px;margin:0 auto">
+    <sc-if value="{{ sec.achievements.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-rv="" style="margin:0 0 {{ L.tGap }};font-size:{{ sec.achievements.tfs }};font-weight:600;line-height:0.96;letter-spacing:-0.045em;text-wrap:balance">{{ sec.achievements.t1 }}<span style="white-space:nowrap">{{ sec.achievements.t2 }}<span aria-hidden="true" style="display:{{ sec.achievements.sq }};width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:var(--acg)"></span></span></h2></sc-if>
+    <ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:{{ AC.cols }};gap:{{ AC.gap }}">
+      <sc-for list="{{ AC.items }}" as="x" hint-placeholder-count="3"><li data-rv="" style="min-width:0;min-height:{{ AC.minH }};box-sizing:border-box;padding:{{ AC.padC }};border-radius:{{ L.rCard }};background:var(--sf);display:flex;flex-direction:column;justify-content:space-between;gap:28px"><span style="font-size:{{ x.fs }};font-weight:600;line-height:1;letter-spacing:-0.045em;white-space:nowrap;font-variant-numeric:tabular-nums">{{ x.v }}</span><sc-if value="{{ x.hasL }}" hint-placeholder-val="{{ true }}"><span style="max-width:22em;font-size:15px;line-height:1.45;color:var(--ink2);text-wrap:balance">{{ x.l }}</span></sc-if></li></sc-for>
+    </ul>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.focus.show }}" hint-placeholder-val="{{ true }}">
+<section id="fo-focus" aria-label="{{ sec.focus.aria }}" style="order:{{ sec.focus.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1184px;margin:0 auto;display:grid;grid-template-columns:{{ FO.cols }};gap:{{ FO.gap }};align-items:start">
+    <sc-if value="{{ sec.focus.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-rv="" style="position:{{ FO.hPos }};top:112px;margin:0;font-size:{{ sec.focus.tfs }};font-weight:600;line-height:0.96;letter-spacing:-0.045em;text-wrap:balance">{{ sec.focus.t1 }}<span style="white-space:nowrap">{{ sec.focus.t2 }}<span aria-hidden="true" style="display:{{ sec.focus.sq }};width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:var(--acg)"></span></span></h2></sc-if>
+    <ul style="grid-column:{{ FO.listCol }};list-style:none;margin:0;padding:0;display:grid;grid-template-columns:{{ FO.lcols }};gap:16px">
+      <sc-for list="{{ FO.items }}" as="x" hint-placeholder-count="4"><li data-rv="" style="min-width:0;min-height:{{ FO.minH }};box-sizing:border-box;padding:{{ FO.padC }};border-radius:{{ L.rCard }};background:var(--sf);display:flex;flex-direction:column;gap:14px"><span aria-hidden="true" style="font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;color:var(--act)">{{ x.num }}</span><h3 style="margin:auto 0 0;font-size:{{ FO.tFs }};font-weight:600;line-height:1.15;letter-spacing:-0.025em;text-wrap:balance;overflow-wrap:break-word">{{ x.t }}</h3><sc-if value="{{ x.hasD }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:15px;line-height:1.55;color:var(--ink2);text-wrap:pretty">{{ x.d }}</p></sc-if></li></sc-for>
+    </ul>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.experience.show }}" hint-placeholder-val="{{ true }}">
+<section id="fo-experience" aria-label="{{ sec.experience.aria }}" style="order:{{ sec.experience.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1184px;margin:0 auto">
+    <sc-if value="{{ sec.experience.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-rv="" style="margin:0 0 {{ L.tGap }};font-size:{{ sec.experience.tfs }};font-weight:600;line-height:0.96;letter-spacing:-0.045em;text-wrap:balance">{{ sec.experience.t1 }}<span style="white-space:nowrap">{{ sec.experience.t2 }}<span aria-hidden="true" style="display:{{ sec.experience.sq }};width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:var(--acg)"></span></span></h2></sc-if>
+    <ol style="list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)">
+      <sc-for list="{{ EX.head }}" as="e" hint-placeholder-count="4"><li data-rv="" style="border-bottom:1px solid var(--rule)"><div style="display:grid;grid-template-columns:{{ EX.cols }};gap:8px 32px;align-items:center;margin:0 {{ EX.mx }};padding:{{ EX.padR }};border-radius:12px;transition:background-color .35s var(--ease)" style-hover="background-color:var(--sf)"><div style="min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:{{ EX.roleFs }};font-weight:600;line-height:1.25;letter-spacing:-0.015em;text-wrap:balance;overflow-wrap:break-word">{{ e.role }}</span><sc-if value="{{ e.hasOrg }}" hint-placeholder-val="{{ true }}"><span style="font-size:16px;line-height:1.45;color:var(--ink2);overflow-wrap:break-word">{{ e.org }}</span></sc-if><sc-if value="{{ e.hasSum }}" hint-placeholder-val="{{ false }}"><span style="margin-top:6px;max-width:46em;font-size:15px;line-height:1.55;color:var(--ink2);text-wrap:pretty">{{ e.summary }}</span></sc-if></div><span style="grid-row:{{ EX.dRow }};font-size:{{ EX.dFs }};font-weight:500;line-height:1.2;letter-spacing:-0.02em;white-space:nowrap;text-align:{{ EX.dTA }};font-variant-numeric:tabular-nums;color:{{ EX.dCol }}">{{ e.dates }}</span></div></li></sc-for>
+    </ol>
+    <sc-if value="{{ EX.hasTail }}" hint-placeholder-val="{{ false }}">
+      <details style="display:block">
+        <summary style="margin-top:28px;width:max-content;min-height:48px;padding:0 22px;display:flex;align-items:center;gap:10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--br);font-size:15px;font-weight:500;cursor:pointer;transition:background-color .3s var(--ease)" style-hover="background-color:var(--wash)">{{ EX.more }} <span aria-hidden="true">↓</span></summary>
+        <ol start="{{ EX.tailStart }}" style="list-style:none;margin:0;padding:0">
+          <sc-for list="{{ EX.tail }}" as="e" hint-placeholder-count="2"><li style="border-bottom:1px solid var(--rule)"><div style="display:grid;grid-template-columns:{{ EX.cols }};gap:8px 32px;align-items:center;margin:0 {{ EX.mx }};padding:{{ EX.padR }};border-radius:12px;transition:background-color .35s var(--ease)" style-hover="background-color:var(--sf)"><div style="min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:{{ EX.roleFs }};font-weight:600;line-height:1.25;letter-spacing:-0.015em;text-wrap:balance;overflow-wrap:break-word">{{ e.role }}</span><sc-if value="{{ e.hasOrg }}" hint-placeholder-val="{{ true }}"><span style="font-size:16px;line-height:1.45;color:var(--ink2);overflow-wrap:break-word">{{ e.org }}</span></sc-if><sc-if value="{{ e.hasSum }}" hint-placeholder-val="{{ false }}"><span style="margin-top:6px;max-width:46em;font-size:15px;line-height:1.55;color:var(--ink2);text-wrap:pretty">{{ e.summary }}</span></sc-if></div><span style="grid-row:{{ EX.dRow }};font-size:{{ EX.dFs }};font-weight:500;line-height:1.2;letter-spacing:-0.02em;white-space:nowrap;text-align:{{ EX.dTA }};font-variant-numeric:tabular-nums;color:{{ EX.dCol }}">{{ e.dates }}</span></div></li></sc-for>
+        </ol>
+      </details>
+    </sc-if>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.portfolio.show }}" hint-placeholder-val="{{ true }}">
+<section id="fo-portfolio" aria-label="{{ sec.portfolio.aria }}" style="order:{{ sec.portfolio.order }};padding:{{ L.secPadV }} 0;overflow:hidden">
+  <div style="max-width:1184px;margin:0 auto {{ PF.headGap }};box-sizing:content-box;padding:0 {{ L.pad }};display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+    <sc-if value="{{ sec.portfolio.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-rv="" style="margin:0;min-width:0;font-size:{{ sec.portfolio.tfs }};font-weight:600;line-height:0.96;letter-spacing:-0.045em;text-wrap:balance">{{ sec.portfolio.t1 }}<span style="white-space:nowrap">{{ sec.portfolio.t2 }}<span aria-hidden="true" style="display:{{ sec.portfolio.sq }};width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:var(--acg)"></span></span></h2></sc-if>
+    <sc-if value="{{ PF.ctlTop }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:none;margin-left:auto;display:flex;align-items:center;gap:10px">
+        <span aria-live="polite" style="margin-right:12px;font-family:'Geist Mono',ui-monospace,monospace;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap"><span>{{ PF.cur }}</span><span style="color:var(--ink2)"> / {{ PF.count }}</span></span>
+        <button type="button" onClick="{{ PF.prev }}" disabled="{{ PF.prevDis }}" aria-label="{{ words.prev }}" style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 1px var(--br);color:var(--ink);cursor:pointer;opacity:{{ PF.prevOp }};transition:background-color .3s var(--ease),opacity .3s var(--ease)" style-hover="background-color:var(--wash)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></button>
+        <button type="button" onClick="{{ PF.next }}" disabled="{{ PF.nextDis }}" aria-label="{{ words.next }}" style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:var(--ink);color:var(--bg);cursor:pointer;opacity:{{ PF.nextOp }};outline:{{ PF.demoRing }};outline-offset:3px;transition:opacity .3s var(--ease)" style-hover="opacity:0.86"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"></path></svg></button>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ PF.single }}" hint-placeholder-val="{{ false }}">
+    <article data-rv="" style="max-width:1184px;margin:0 auto;box-sizing:content-box;padding:0 {{ L.pad }};display:grid;grid-template-columns:{{ PF.fCols }};gap:{{ PF.fGap }};align-items:center">
+      <div style="position:relative;aspect-ratio:{{ PF.ar }};border-radius:{{ L.rImg }};overflow:hidden;isolation:isolate;background:var(--tint)">
+        <sc-if value="{{ PF.one.hasImg }}" hint-placeholder-val="{{ false }}"><span role="img" aria-label="{{ PF.one.img.alt }}" style="position:absolute;inset:0;transition:transform .9s var(--ease)" style-hover="transform:scale(1.035)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ PF.one.img.slot }}" src="{{ PF.one.img.src }}" placeholder="{{ PF.one.img.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ PF.one.img.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></sc-if>
+        <sc-if value="{{ PF.one.tile }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;box-sizing:border-box;padding:{{ PF.tilePad }};display:flex;flex-direction:column;justify-content:space-between;gap:24px"><span aria-hidden="true" style="display:flex;justify-content:space-between;gap:16px;font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;letter-spacing:0.04em;text-transform:uppercase"><span style="min-width:0">{{ PF.one.kind }}</span><span>{{ PF.one.year }}</span></span><span aria-hidden="true" style="font-size:{{ PF.one.tileFs }};font-weight:600;line-height:1.02;letter-spacing:-0.04em;text-wrap:balance">{{ PF.one.title }}</span></span></sc-if>
+      </div>
+      <div style="min-width:0;display:flex;flex-direction:column;gap:12px">
+        <sc-if value="{{ PF.one.hasKY }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:var(--act)">{{ PF.one.ky }}</span></sc-if>
+        <h3 style="margin:0;font-size:{{ PF.fTitleFs }};font-weight:600;line-height:1.06;letter-spacing:-0.035em;text-wrap:balance;overflow-wrap:break-word">{{ PF.one.title }}</h3>
+        <sc-if value="{{ PF.one.hasMeta }}" hint-placeholder-val="{{ true }}"><span style="font-size:16px;font-weight:500;line-height:1.45">{{ PF.one.meta }}</span></sc-if>
+        <sc-if value="{{ PF.one.hasDesc }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:32em;font-size:16px;line-height:1.6;color:var(--ink2);text-wrap:pretty">{{ PF.one.desc }}</p></sc-if>
+        <sc-if value="{{ PF.one.hasHref }}" hint-placeholder-val="{{ true }}"><a href="{{ PF.one.href }}" target="_blank" rel="noopener" style="align-self:flex-start;margin-top:12px;min-height:48px;padding:0 22px;display:inline-flex;align-items:center;gap:10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--br);font-size:15px;font-weight:500;text-decoration:none;transition:background-color .3s var(--ease)" style-hover="background-color:var(--wash)">{{ words.view }} <span aria-hidden="true">↗</span></a></sc-if>
+      </div>
+    </article>
+  </sc-if>
+
+  <sc-if value="{{ PF.carousel }}" hint-placeholder-val="{{ true }}">
+    <div data-rv="">
+      <div data-track="" ref="{{ PF.ref }}" tabIndex="0" role="region" aria-roledescription="carousel" aria-label="{{ sec.portfolio.aria }}" onScroll="{{ PF.onScroll }}" onKeyDown="{{ PF.onKey }}" onPointerDown="{{ PF.onDown }}" onClickCapture="{{ PF.onClickCap }}" onDragStart="{{ PF.noDrag }}" style="position:relative;display:flex;gap:{{ PF.gap }};overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:{{ PF.snap }};scroll-padding-left:{{ PF.padL }};padding:6px {{ PF.padR }} 10px {{ PF.padL }};scrollbar-width:none;cursor:grab;outline-offset:-3px">
+        <sc-for list="{{ PF.items }}" as="w" hint-placeholder-count="3">
+          <article data-slide="" role="group" aria-roledescription="slide" aria-label="{{ w.label }}" onClick="{{ w.pick }}" style="flex:0 0 {{ PF.slideW }};min-width:0;scroll-snap-align:start;display:flex;flex-direction:column;gap:20px;opacity:{{ w.op }};transition:opacity .6s var(--ease)">
+            <div style="position:relative;aspect-ratio:{{ PF.ar }};border-radius:{{ L.rImg }};overflow:hidden;isolation:isolate;background:var(--tint)">
+              <sc-if value="{{ w.hasImg }}" hint-placeholder-val="{{ true }}"><span role="img" aria-label="{{ w.img.alt }}" style="position:absolute;inset:0;transform:{{ w.zoom }};transition:transform .9s var(--ease)" style-hover="transform:scale(1.035)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ w.img.slot }}" src="{{ w.img.src }}" placeholder="{{ w.img.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ w.img.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></sc-if>
+              <sc-if value="{{ w.tile }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;box-sizing:border-box;padding:{{ PF.tilePad }};display:flex;flex-direction:column;justify-content:space-between;gap:24px"><span aria-hidden="true" style="display:flex;justify-content:space-between;gap:16px;font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;letter-spacing:0.04em;text-transform:uppercase"><span style="min-width:0">{{ w.kind }}</span><span>{{ w.year }}</span></span><span aria-hidden="true" style="font-size:{{ w.tileFs }};font-weight:600;line-height:1.02;letter-spacing:-0.04em;text-wrap:balance">{{ w.title }}</span></span></sc-if>
+            </div>
+            <div style="min-width:0;display:flex;flex-direction:column;gap:8px">
+              <sc-if value="{{ w.hasKY }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:var(--act)">{{ w.ky }}</span></sc-if>
+              <h3 style="margin:0;font-size:{{ w.titleFs }};font-weight:600;line-height:1.1;letter-spacing:-0.03em;text-wrap:balance;overflow-wrap:break-word">{{ w.title }}</h3>
+              <sc-if value="{{ w.hasMeta }}" hint-placeholder-val="{{ true }}"><span style="font-size:16px;font-weight:500;line-height:1.45">{{ w.meta }}</span></sc-if>
+              <sc-if value="{{ w.hasDesc }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:36em;font-size:15.5px;line-height:1.6;color:var(--ink2);text-wrap:pretty">{{ w.desc }}</p></sc-if>
+              <sc-if value="{{ w.hasHref }}" hint-placeholder-val="{{ false }}"><a href="{{ w.href }}" target="_blank" rel="noopener" tabIndex="{{ w.tab }}" style="align-self:flex-start;min-height:44px;display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:500;text-decoration:underline;text-decoration-color:var(--acg);text-decoration-thickness:{{ w.ul }};text-underline-offset:6px;transition:text-decoration-thickness .3s var(--ease)" style-hover="text-decoration-thickness:2px">{{ words.view }} <span aria-hidden="true">↗</span></a></sc-if>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+      <div style="max-width:1184px;margin:{{ PF.progM }} auto 0;box-sizing:content-box;padding:0 {{ L.pad }};display:flex;align-items:center;gap:20px">
+        <div aria-hidden="true" style="flex:1;height:2px;border-radius:2px;background:var(--rule);overflow:hidden"><div style="height:100%;width:{{ PF.prog }};background:var(--acg);transition:width .6s var(--ease)"></div></div>
+        <sc-if value="{{ PF.ctlBottom }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:none;display:flex;align-items:center;gap:8px">
+            <span aria-live="polite" style="margin-right:6px;font-family:'Geist Mono',ui-monospace,monospace;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap"><span>{{ PF.cur }}</span><span style="color:var(--ink2)"> / {{ PF.count }}</span></span>
+            <button type="button" onClick="{{ PF.prev }}" disabled="{{ PF.prevDis }}" aria-label="{{ words.prev }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:transparent;box-shadow:inset 0 0 0 1px var(--br);color:var(--ink);cursor:pointer;opacity:{{ PF.prevOp }}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></button>
+            <button type="button" onClick="{{ PF.next }}" disabled="{{ PF.nextDis }}" aria-label="{{ words.next }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:var(--ink);color:var(--bg);cursor:pointer;opacity:{{ PF.nextOp }}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"></path></svg></button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.testimonials.show }}" hint-placeholder-val="{{ true }}">
+<section id="fo-testimonials" aria-label="{{ sec.testimonials.aria }}" style="order:{{ sec.testimonials.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1184px;margin:0 auto">
+    <sc-if value="{{ sec.testimonials.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-rv="" style="margin:0 0 {{ L.tGap }};font-size:{{ sec.testimonials.tfs }};font-weight:600;line-height:0.96;letter-spacing:-0.045em;text-wrap:balance">{{ sec.testimonials.t1 }}<span style="white-space:nowrap">{{ sec.testimonials.t2 }}<span aria-hidden="true" style="display:{{ sec.testimonials.sq }};width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:var(--acg)"></span></span></h2></sc-if>
+    <sc-if value="{{ TS.one }}" hint-placeholder-val="{{ false }}">
+      <figure data-rv="" style="margin:0;max-width:980px;display:flex;flex-direction:column;gap:32px">
+        <blockquote style="margin:0;font-size:{{ TS.bigFs }};font-weight:500;line-height:1.22;letter-spacing:-0.025em;text-wrap:pretty;overflow-wrap:break-word">“{{ TS.first.quote }}”</blockquote>
+        <figcaption style="display:flex;align-items:center;gap:16px"><sc-if value="{{ TS.first.hasPh }}" hint-placeholder-val="{{ false }}"><span role="img" aria-label="{{ TS.first.ph.alt }}" style="position:relative;flex:none;width:64px;height:64px;border-radius:50%;overflow:hidden;isolation:isolate;background:var(--sf2)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ TS.first.ph.slot }}" src="{{ TS.first.ph.src }}" placeholder="{{ TS.first.ph.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ TS.first.ph.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></sc-if><span style="min-width:0;display:flex;flex-direction:column"><span style="font-size:17px;font-weight:600">{{ TS.first.author }}</span><sc-if value="{{ TS.first.hasRole }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px;line-height:1.45;color:var(--ink2)">{{ TS.first.role }}</span></sc-if></span></figcaption>
+      </figure>
+    </sc-if>
+    <sc-if value="{{ TS.many }}" hint-placeholder-val="{{ true }}">
+      <div style="columns:{{ TS.cols }};column-gap:16px">
+        <sc-for list="{{ TS.items }}" as="q" hint-placeholder-count="3">
+          <figure data-rv="" style="break-inside:avoid;margin:0 0 16px;box-sizing:border-box;padding:{{ TS.padC }};border-radius:{{ L.rCard }};background:var(--sf);display:flex;flex-direction:column;gap:24px">
+            <blockquote style="margin:0;font-size:{{ q.fs }};font-weight:500;line-height:1.4;letter-spacing:-0.012em;text-wrap:pretty;overflow-wrap:break-word">“{{ q.quote }}”</blockquote>
+            <figcaption style="display:flex;align-items:center;gap:14px"><sc-if value="{{ q.hasPh }}" hint-placeholder-val="{{ false }}"><span role="img" aria-label="{{ q.ph.alt }}" style="position:relative;flex:none;width:48px;height:48px;border-radius:50%;overflow:hidden;isolation:isolate;background:var(--sf2)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ q.ph.slot }}" src="{{ q.ph.src }}" placeholder="{{ q.ph.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ q.ph.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></sc-if><span style="min-width:0;display:flex;flex-direction:column"><span style="font-size:15px;font-weight:600;line-height:1.4">{{ q.author }}</span><sc-if value="{{ q.hasRole }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;line-height:1.45;color:var(--ink2)">{{ q.role }}</span></sc-if></span></figcaption>
+          </figure>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.cta.show }}" hint-placeholder-val="{{ true }}">
+<section id="fo-cta" aria-label="{{ CT.headline }}" style="order:{{ sec.cta.order }};padding:{{ L.ctaPad }}">
+  <div data-rv="" style="max-width:1184px;margin:0 auto;box-sizing:border-box;padding:{{ CT.pad }};border-radius:{{ CT.r }};background:var(--ink);color:var(--bg);display:grid;grid-template-columns:{{ CT.cols }};gap:{{ CT.gap }};align-items:end">
+    <div style="min-width:0;display:flex;flex-direction:column;gap:28px">
+      <div style="display:flex;align-items:center;gap:14px"><sc-if value="{{ CT.hasAv }}" hint-placeholder-val="{{ true }}"><span role="img" aria-label="{{ CT.av.alt }}" style="position:relative;flex:none;width:56px;height:56px;border-radius:50%;overflow:hidden;isolation:isolate;background:var(--irule)"><sc-if value="{{ IMG.slots }}" hint-placeholder-val="{{ true }}"><image-slot id="{{ CT.av.slot }}" src="{{ CT.av.src }}" placeholder="{{ CT.av.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></sc-if><sc-if value="{{ IMG.lite }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box;text-align:center;font-size:13px;line-height:1.3;color:var(--ink2);background:repeating-linear-gradient(135deg,var(--sf2) 0 10px,var(--sf) 10px 20px)">{{ CT.av.ph }}</span></sc-if><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></sc-if><span style="min-width:0;display:flex;flex-direction:column"><span style="font-size:17px;font-weight:600;line-height:1.3;overflow-wrap:break-word">{{ c.name }}</span><sc-if value="{{ has.eyebrow }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;line-height:1.45;color:var(--iink2)">{{ c.eyebrow }}</span></sc-if></span></div>
+      <sc-if value="{{ CT.hasBody }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:26em;font-size:16px;line-height:1.55;color:var(--iink2);text-wrap:pretty">{{ CT.body }}</p></sc-if>
+      <sc-if value="{{ CT.hasBtn }}" hint-placeholder-val="{{ true }}"><a href="{{ CT.href }}" style="align-self:flex-start;width:{{ L.btnW }};min-height:52px;padding:0 26px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:12px;border-radius:999px;background:var(--bg);color:var(--ink);font-size:15px;font-weight:500;text-decoration:none;transition:gap .4s var(--ease)" style-hover="color:var(--ink);gap:18px">{{ CT.btn }}<span aria-hidden="true">→</span></a></sc-if>
+    </div>
+    <h2 style="order:{{ CT.hOrder }};margin:0;min-width:0;font-size:{{ CT.hfs }};font-weight:600;line-height:0.98;letter-spacing:-0.045em;text-wrap:balance">{{ CT.h1 }}<span style="white-space:nowrap">{{ CT.h2 }}<span aria-hidden="true" style="display:{{ CT.sq }};width:0.15em;height:0.15em;margin-left:0.05em;border-radius:0.03em;background:var(--iacg)"></span></span></h2>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.contact }}" hint-placeholder-val="{{ true }}">
+<section id="fo-contact" aria-label="{{ CO.title }}" style="order:30;padding:{{ L.secPad }}">
+  <div style="max-width:1184px;margin:0 auto">
+    <h2 data-rv="" style="margin:0 0 {{ L.tGap }};text-align:{{ CO.hTA }};font-size:{{ CO.tfs }};font-weight:600;line-height:0.96;letter-spacing:-0.045em;text-wrap:balance">{{ CO.t1 }}<span style="white-space:nowrap">{{ CO.t2 }}<span aria-hidden="true" style="display:{{ CO.sq }};width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:var(--acg)"></span></span></h2>
+    <div style="display:grid;grid-template-columns:{{ CO.cols }};gap:48px 64px;align-items:start">
+      <sc-if value="{{ CO.direct }}" hint-placeholder-val="{{ true }}">
+        <div data-rv="" style="min-width:0;width:100%;max-width:{{ CO.max }};margin:0 auto;display:flex;flex-direction:column;align-items:{{ CO.align }};text-align:{{ CO.ta }};gap:28px">
+          <sc-if value="{{ CO.hasBlurb }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:22em;font-size:{{ CO.blurbFs }};font-weight:500;line-height:1.3;letter-spacing:-0.02em;text-wrap:pretty">{{ CO.blurb }}</p></sc-if>
+          <sc-if value="{{ CO.hasEmail }}" hint-placeholder-val="{{ true }}"><a href="{{ CO.mailto }}" style="max-width:100%;min-height:44px;display:inline-flex;align-items:center;font-size:{{ CO.emailFs }};font-weight:500;line-height:1.25;letter-spacing:-0.02em;text-decoration:underline;text-decoration-color:var(--acg);text-decoration-thickness:2px;text-underline-offset:0.2em;overflow-wrap:anywhere">{{ CO.email }}</a></sc-if>
+          <sc-if value="{{ CO.list }}" hint-placeholder-val="{{ true }}">
+            <ul style="list-style:none;margin:0;padding:0;width:100%;border-top:1px solid var(--rule)">
+              <sc-for list="{{ links }}" as="l" hint-placeholder-count="3"><li style="border-bottom:1px solid var(--rule)"><a href="{{ l.href }}" target="_blank" rel="noopener me" style="min-height:54px;display:flex;align-items:center;gap:14px;font-size:16px;font-weight:500;text-decoration:none;transition:padding .35s var(--ease)" style-hover="padding-left:8px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="{{ l.d }}"></path></svg><span style="flex:1;min-width:0;overflow-wrap:anywhere">{{ l.label }}</span><span aria-hidden="true" style="color:var(--ink2)">↗</span></a></li></sc-for>
+            </ul>
+          </sc-if>
+          <sc-if value="{{ CO.chips }}" hint-placeholder-val="{{ false }}">
+            <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:10px">
+              <sc-for list="{{ links }}" as="l" hint-placeholder-count="3"><li><a href="{{ l.href }}" target="_blank" rel="noopener me" style="min-height:48px;padding:0 20px;display:flex;align-items:center;gap:10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--br);font-size:15px;font-weight:500;text-decoration:none;transition:background-color .3s var(--ease)" style-hover="background-color:var(--wash)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="{{ l.d }}"></path></svg>{{ l.label }}</a></li></sc-for>
+            </ul>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ fm.on }}" hint-placeholder-val="{{ true }}">
+        <div data-rv="" style="min-width:0;width:100%;max-width:{{ CO.formMax }};margin:0 auto;box-sizing:border-box;padding:{{ L.formPad }};border-radius:{{ CO.formR }};background:var(--sf)">
+          <sc-if value="{{ fm.form }}" hint-placeholder-val="{{ true }}">
+            <form onSubmit="{{ fm.submit }}" noValidate="{{ true }}" aria-label="Contact form" style="position:relative;display:flex;flex-direction:column;gap:22px">
+              <div style="display:grid;grid-template-columns:{{ L.fCols }};gap:22px 16px">
+                <label style="min-width:0;display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">{{ words.fName }}</span><input name="name" autoComplete="name" value="{{ f.name }}" onChange="{{ on.name }}" disabled="{{ fm.busy }}" aria-invalid="{{ fe.name.inv }}" style="height:52px;width:100%;box-sizing:border-box;padding:0 16px;border:0;border-radius:10px;box-shadow:inset 0 0 0 {{ fe.name.bw }} {{ fe.name.bc }};background:var(--bg);color:var(--ink);font:inherit;font-size:16px;outline:none;opacity:{{ fm.op }}" style-focus="box-shadow:inset 0 0 0 2px var(--ink)"><sc-if value="{{ fe.name.show }}" hint-placeholder-val="{{ false }}"><span role="alert" style="display:flex;gap:8px;font-size:14px;line-height:1.45"><span aria-hidden="true" style="flex:none;width:6px;height:6px;margin-top:7px;border-radius:2px;background:var(--act)"></span>{{ fe.name.msg }}</span></sc-if></label>
+                <label style="min-width:0;display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">{{ words.fEmail }}</span><input name="email" type="email" inputMode="email" autoComplete="email" value="{{ f.email }}" onChange="{{ on.email }}" disabled="{{ fm.busy }}" aria-invalid="{{ fe.email.inv }}" style="height:52px;width:100%;box-sizing:border-box;padding:0 16px;border:0;border-radius:10px;box-shadow:inset 0 0 0 {{ fe.email.bw }} {{ fe.email.bc }};background:var(--bg);color:var(--ink);font:inherit;font-size:16px;outline:none;opacity:{{ fm.op }}" style-focus="box-shadow:inset 0 0 0 2px var(--ink)"><sc-if value="{{ fe.email.show }}" hint-placeholder-val="{{ false }}"><span role="alert" style="display:flex;gap:8px;font-size:14px;line-height:1.45"><span aria-hidden="true" style="flex:none;width:6px;height:6px;margin-top:7px;border-radius:2px;background:var(--act)"></span>{{ fe.email.msg }}</span></sc-if></label>
+              </div>
+              <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">{{ words.fOrg }}<span style="font-weight:400;color:var(--ink2)"> · {{ words.optional }}</span></span><input name="organisation" autoComplete="organization" value="{{ f.org }}" onChange="{{ on.org }}" disabled="{{ fm.busy }}" style="height:52px;width:100%;box-sizing:border-box;padding:0 16px;border:0;border-radius:10px;box-shadow:inset 0 0 0 1px var(--br);background:var(--bg);color:var(--ink);font:inherit;font-size:16px;outline:none;opacity:{{ fm.op }}" style-focus="box-shadow:inset 0 0 0 2px var(--ink)"></label>
+              <sc-if value="{{ fm.hasTopics }}" hint-placeholder-val="{{ true }}">
+                <fieldset style="margin:0;padding:0;border:0;min-width:0">
+                  <legend style="padding:0;margin-bottom:10px;font-size:14px;font-weight:500">{{ words.fTopic }}<span style="font-weight:400;color:var(--ink2)"> · {{ words.optional }}</span></legend>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ fm.topics }}" as="t" hint-placeholder-count="4"><button type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.on }}" disabled="{{ fm.busy }}" style="min-height:44px;padding:0 18px;border:0;border-radius:999px;box-shadow:inset 0 0 0 1px {{ t.bc }};background:{{ t.bg }};color:{{ t.fg }};font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background-color .25s var(--ease),color .25s var(--ease)">{{ t.label }}</button></sc-for></div>
+                </fieldset>
+              </sc-if>
+              <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">{{ words.fMsg }}</span><textarea name="message" rows="4" value="{{ f.msg }}" onChange="{{ on.msg }}" disabled="{{ fm.busy }}" aria-invalid="{{ fe.msg.inv }}" style="min-height:132px;width:100%;box-sizing:border-box;padding:14px 16px;border:0;border-radius:10px;box-shadow:inset 0 0 0 {{ fe.msg.bw }} {{ fe.msg.bc }};background:var(--bg);color:var(--ink);font:inherit;font-size:16px;line-height:1.55;resize:vertical;outline:none;opacity:{{ fm.op }}" style-focus="box-shadow:inset 0 0 0 2px var(--ink)"></textarea><sc-if value="{{ fe.msg.show }}" hint-placeholder-val="{{ false }}"><span role="alert" style="display:flex;gap:8px;font-size:14px;line-height:1.45"><span aria-hidden="true" style="flex:none;width:6px;height:6px;margin-top:7px;border-radius:2px;background:var(--act)"></span>{{ fe.msg.msg }}</span></sc-if></label>
+              <input name="website" tabIndex="-1" autoComplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px">
+                <button type="submit" disabled="{{ fm.busy }}" style="width:{{ L.btnW }};min-height:52px;padding:0 26px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:12px;border:0;border-radius:999px;background:var(--ink);color:var(--bg);font:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .3s var(--ease)" style-hover="opacity:0.88">{{ fm.btnLabel }}{{ fm.btnIcon }}</button>
+                <span style="flex:1 1 200px;font-size:14px;line-height:1.45;color:var(--ink2)">{{ fm.note }}</span>
+              </div>
+            </form>
+          </sc-if>
+          <sc-if value="{{ fm.sent }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="min-height:{{ L.sentMin }};display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:14px;animation:fo-up .6s var(--ease) both">
+              <span aria-hidden="true" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--ink);color:var(--bg)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+              <span style="font-size:{{ L.sentFs }};font-weight:600;line-height:1.05;letter-spacing:-0.035em">Message sent</span>
+              <span style="max-width:28em;line-height:1.55;color:var(--ink2)">{{ fm.sentLine }}</span>
+              <button type="button" onClick="{{ fm.reset }}" style="min-height:44px;padding:0;border:0;background:none;color:var(--ink);font:inherit;font-size:15px;font-weight:500;text-decoration:underline;text-decoration-color:var(--acg);text-underline-offset:6px;cursor:pointer">Send another message</button>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.footer }}" hint-placeholder-val="{{ true }}">
+<footer style="order:31;padding:0 {{ L.pad }}">
+  <div style="max-width:1184px;margin:0 auto;border-top:1px solid var(--rule);padding:24px 0 32px;display:flex;flex-direction:{{ L.footDir }};align-items:{{ L.footAlign }};justify-content:space-between;gap:8px 32px">
+    <a href="#fo-top" style="min-width:0;max-width:100%;padding:10px 0;display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;text-decoration:none;overflow-wrap:break-word"><span aria-hidden="true" style="flex:none;width:12px;height:12px;border-radius:3px;background:var(--acg)"></span>{{ c.name }}</a>
+    <sc-if value="{{ L.D }}" hint-placeholder-val="{{ true }}"><nav aria-label="Footer" style="display:flex;flex-wrap:wrap;justify-content:center;gap:0 22px;min-width:0"><sc-for list="{{ nav }}" as="n" hint-placeholder-count="4"><a href="{{ n.href }}" style="padding:12px 0;font-size:14px;color:var(--ink2);text-decoration:none;transition:color .3s var(--ease)" style-hover="color:var(--ink)">{{ n.label }}</a></sc-for></nav></sc-if>
+    <a href="#fo-top" style="padding:12px 0;font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap">{{ words.top }} ↑</a>
+  </div>
+</footer>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;sample&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;minimal&quot;,&quot;typical&quot;,&quot;full&quot;],&quot;default&quot;:&quot;typical&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;paper&quot;,&quot;graphite&quot;,&quot;cobalt&quot;,&quot;sage&quot;,&quot;midnight&quot;],&quot;default&quot;:&quot;paper&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;grade&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;original&quot;,&quot;tinted&quot;,&quot;mono&quot;],&quot;default&quot;:&quot;original&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;tablet&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;portrait&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;gallery&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;min&quot;:0,&quot;max&quot;:12,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;smooth&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;content&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;patch&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;theme&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;hide&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;order&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string[]&quot;},&quot;only&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;works&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number | number[]&quot;},&quot;workImg&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;pfStart&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;},&quot;pfDemo&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;formDemo&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;menu&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;photos&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;number&quot;}}">
+const MID = ["about", "achievements", "focus", "experience", "portfolio", "testimonials", "cta"];
+const T_DEF = { about: "About", achievements: "Achievements", focus: "Focus", portfolio: "Work", experience: "Experience", testimonials: "Testimonials", contact: "Contact" };
+const W_DEF = { menu: "Menu", close: "Close", top: "Back to top", send: "Send message", prev: "Previous project", next: "Next project", view: "View project", more: "Show {n} more", gallery: "Gallery", fName: "Your name", fEmail: "Email", fOrg: "Organisation", fTopic: "Topic", fMsg: "Message", optional: "optional" };
+const DEV = { desktop: 1280, tablet: 820, phone: 390 };
+const ICON = {
+  linkedin: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
+  x: "M4 4l16 16M20 4l-6.5 6.5M10.5 13.5L4 20",
+  github: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.050-.85 1.65-.17.6-.22 1.23-.15 1.85v4M9 18c-4.51 2-5-2-7-2",
+  instagram: "M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zM16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37zM17.5 6.5h.01",
+  youtube: "M2.5 17a24 24 0 0 1 0-10a2 2 0 0 1 1.4-1.4a49.6 49.6 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24 24 0 0 1 0 10a2 2 0 0 1-1.4 1.4a49.6 49.6 0 0 1-16.2 0A2 2 0 0 1 2.5 17M10 15l5-3l-5-3z",
+  website: "M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10a15.3 15.3 0 0 1-4 10a15.3 15.3 0 0 1-4-10a15.3 15.3 0 0 1 4-10z",
+  other: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+};
+const im = (slot, caption, ph) => ({ slot, caption, ph });
+const GAL = ["Opening the Malmö cross-dock", "Keynote at the Nordic Supply Chain Summit", "With the night shift in Gothenburg", "Launching the cargo-bike pilot in Malmö", "Board offsite with Kaltwasser Foods", "Northline's first three trucks", "Book launch in Stockholm", "Walking the Gdańsk terminal", "On a panel at Founders North", "Women in Freight annual dinner", "Presenting the Cold Chain Index", "Recording Supply Talks"].map((c, i) => im("fo-g" + (i + 1), c, "Drop a gallery photo"));
+const X = (role, org, loc, start, end, summary) => ({ role, org, loc, start, end, summary });
+const EXP = [
+  X("Founder and Chief Executive", "Northline Freight", "Stockholm", "2014", "Present", "Built a cold-chain carrier from three trucks into a network across six countries, moving food and medicine for 400 customers."),
+  X("Managing Partner", "Lindqvist Ventures", "Stockholm", "2020", "Present", "First cheques for founders building software for carriers, ports and warehouses."),
+  X("Interim Chief Operating Officer", "Havenkade Logistics", "Rotterdam", "2018", "2019", "Led the turnaround of a loss-making port operator, back to profit within eighteen months."),
+  X("Co-founder", "Ordo", "Copenhagen", "2017", "2021", "Routing software for regional carriers. Acquired in 2021."),
+  X("Non-executive Director", "Kaltwasser Foods", "Hamburg", "2020", "Present", ""), X("Board Member", "Fjordcraft", "Oslo", "2021", "Present", ""),
+  X("Head of Operations, Nordics", "Brightwater Shipping", "Gothenburg", "2010", "2014", "Ran four terminals and 600 people across Sweden, Norway and Finland."),
+  X("Chair, Cold Chain Council", "Nordic Freight Association", "", "2022", "Present", ""), X("Advisor", "Baltica Terminals", "Gdańsk", "2018", "2020", ""),
+  X("Founder", "Women in Freight", "", "2016", "Present", ""), X("Operations Manager", "Brightwater Shipping", "Gothenburg", "2007", "2010", ""),
+  X("Visiting Lecturer", "Stockholm School of Logistics", "Stockholm", "2015", "2019", ""), X("Supply Chain Analyst", "Nordvik Retail", "Stockholm", "2004", "2007", ""),
+  X("Mentor", "Founders North", "", "2019", "Present", ""), X("Juror", "European Logistics Awards", "", "2021", "2023", ""),
+  X("Trustee", "Food Bridge Foundation", "", "2017", "Present", ""), X("Advisor", "Pallet Labs", "Berlin", "2022", "2024", ""),
+  X("Board Observer", "Coldbox", "Helsinki", "2021", "2023", ""), X("Graduate Trainee", "Nordvik Retail", "Stockholm", "2003", "2004", ""),
+  X("Research Assistant", "Stockholm School of Logistics", "Stockholm", "2002", "2003", "")
+];
+const PW = (title, kind, meta, year, desc, href, i, ph) => ({ title, kind, meta, year, desc, href, img: i ? im("fo-w" + i, title, ph || "Drop a project image") : null });
+const WORK = [
+  PW("Northline Freight", "Venture", "Founder and CEO", "2014", "A cold-chain carrier built from three trucks into a network across six countries.", "https://example.com/", 1, "Drop a wide product shot"),
+  PW("Turning around Havenkade", "Turnaround", "Interim COO, Havenkade Logistics", "2019", "A loss-making port operator back to profit in eighteen months, without closing a terminal.", "https://example.com/", 2, "Drop an event photo"),
+  PW("Moving What Matters", "Book", "Halden Press", "2022", "How food and medicine really reach us, and what breaks when nobody is watching.", "https://example.com/", 3, "Drop a portrait book cover"),
+  PW("Fjordcraft", "Investment", "Seed investor and board member", "2021", "Electric workboats for Norway's fish farms, now in service in eleven fjords.", "", 4, "Drop a square logo"),
+  PW("Cargo bikes for Malmö", "Launch", "With the City of Malmö", "2023", "A last-mile pilot that moved 40% of city-centre deliveries onto electric cargo bikes.", "https://example.com/", 5),
+  PW("Resilience is a design choice", "Keynote", "Nordic Supply Chain Summit", "2024", "Why the strongest networks are built for the bad week, not the average one.", "https://example.com/", 6),
+  PW("Kaltwasser Foods", "Board seat", "Non-executive director", "Since 2020", "Guiding a family food producer through its first acquisition.", "", 7),
+  PW("Ordo", "Venture", "Co-founder", "2017", "Routing software for regional carriers. Acquired in 2021.", "", 8),
+  PW("The Gdańsk terminal expansion", "Project", "Advisor to Baltica Terminals", "2018", "", "", 9),
+  PW("Women in Freight", "Programme", "Founder", "Since 2016", "A mentoring network for women stepping into operations leadership, now 900 members.", "https://example.com/", 10),
+  PW("Cold Chain Index", "Research", "Annual report with the Stockholm School of Logistics", "2025", "", "https://example.com/", 11),
+  PW("Supply Talks", "Podcast", "24 conversations with the people who keep goods moving", "2024", "", "https://example.com/", 12)
+];
+const Q = (quote, author, role, i) => ({ quote, author, role, photo: i ? im("fo-q" + i, author, "Drop a photo") : null });
+const QUOTES = [
+  Q("Maya walked into a business losing money every week and gave every terminal manager a plan they believed in. Eighteen months later we were profitable.", "Pieter de Vries", "Chair, Havenkade Logistics", 1),
+  Q("The most prepared board member I have worked with, and the first to say when she doesn't know.", "Greta Kaltwasser", "Chief Executive, Kaltwasser Foods", 2),
+  Q("She backed us when we had one boat and a spreadsheet.", "Erik Solheim", "Co-founder, Fjordcraft", 3),
+  Q("Clear, specific and generous with her time. The room was still talking about her keynote at dinner.", "Amira Haddad", "Programme Director, Nordic Supply Chain Summit", 4),
+  Q("Maya hired me as a dispatcher and trusted me to run a depot two years later.", "Jonas Berg", "Depot Manager, Northline Freight", 5),
+  Q("Exact about what matters and relaxed about what doesn't.", "Lena Marsh", "Partner, Harbour Lane Capital", 6),
+  Q("Her book is now required reading for our first-year students.", "Professor Karin Ek", "Stockholm School of Logistics", 7),
+  Q("A rare operator who reads a balance sheet and a dock schedule with the same care.", "Tomasz Nowak", "Chief Executive, Baltica Terminals", 8),
+  Q("She treats every driver and supplier as part of the company, and it shows.", "Sofia Andersson", "Head of People, Northline Freight", 9),
+  Q("I have commissioned keynotes for twelve years and Maya's is the one people still mention. She arrived with photographs of our own loading bays, showed where the network would break first, and turned a talk about logistics into a conversation about who every business depends on. She stayed all afternoon and answered every question from the floor.", "Henrik Dahl", "Director, Founders North", 10)
+];
+const LINKS = [["linkedin", "LinkedIn"], ["x", "X"], ["youtube", "YouTube"], ["instagram", "Instagram"], ["github", "GitHub"], ["website", "Northline Freight"], ["website", "Lindqvist Ventures"], ["other", "Supply Talks podcast"], ["other", "Women in Freight"], ["other", "Speaking agency"]].map(([type, label]) => ({ type, label, href: "https://example.com/" }));
+const TOPICS = ["Board roles", "Investment", "Speaking", "Press", "Partnerships", "Advisory", "Careers", "Something else"];
+const ABOUT = [
+  [["I started Northline with three refrigerated trucks and a belief that "], ["supply should be boring", "b"], [": food and medicine arriving cold, on time, every time. Ten years later we run a network across six countries."]],
+  [["Before Northline I spent seven years at Brightwater Shipping, running terminals across the Nordics. I still ride along with a night shift every month."]],
+  [["Today I divide my time between Northline, "], ["Lindqvist Ventures", "https://example.com/"], [", which backs "], ["founders building for carriers and ports", "i"], [", and two boards in food and logistics."]]
+];
+const ACH = [["6", "Countries in the Northline network"], ["1,900", "People across Northline"], ["€340M", "Revenue in 2025"], ["12", "Founders backed"], ["98.7%", "Deliveries on time in 2025"], ["3", "Board seats"], ["40", "Cities served daily"], ["2", "Companies founded"]].map(([value, label]) => ({ value, label }));
+const FOCUS = [["Cold-chain networks", "Designing freight networks for food and medicine that stay at temperature from farm to shelf."], ["Turnarounds", "Stepping in as interim operator when a logistics business needs to get back to profit."], ["Early-stage investing", "First cheques for founders building software for carriers, ports and warehouses."], ["Board work", "Non-executive roles with food and logistics companies preparing to scale."], ["Mentoring", "Women in Freight, a network for women stepping into operations leadership."], ["Speaking", "Keynotes on resilience, supply and the people who keep goods moving."]].map(([title, desc]) => ({ title, desc }));
+const HERO = { eyebrow: "Founder and CEO · Northline Freight", headline: "I build supply networks that keep working when everything else stops.", sub: "For twenty years I have built, fixed and funded the companies that move food and medicine across Northern Europe.", button: { label: "Get in touch", href: "#fo-contact" }, image: im("fo-portrait", "Maya Lindqvist", "Drop a portrait") };
+const CTA = { headline: "Building something that has to work?", body: "I take on a few board and advisory roles each year, and always make time for founders in logistics.", button: { label: "Start a conversation", href: "#fo-contact" } };
+const FULL = {
+  name: "Maya Lindqvist", hero: HERO, gallery: GAL,
+  about: { heading: "About", body: ABOUT, image: im("fo-about", "Maya Lindqvist at the Stockholm depot", "Drop a photo") },
+  achievements: { heading: "In numbers", items: ACH }, focus: { heading: "Focus", items: FOCUS }, portfolio: { heading: "Selected work", items: WORK },
+  experience: { heading: "Career", items: EXP }, testimonials: { heading: "Kind words", items: QUOTES }, cta: CTA,
+  contact: { heading: "Contact", blurb: "For board roles, investment and speaking, write to me directly. My office replies within two working days.", email: "office@mayalindqvist.com", links: LINKS, form: { enabled: true, topics: TOPICS } }
+};
+const TYPICAL = {
+  name: "Maya Lindqvist", hero: HERO,
+  about: { heading: "About", body: ABOUT.slice(0, 2) },
+  achievements: { heading: "In numbers", items: ACH.slice(0, 3) }, focus: { heading: "Focus", items: FOCUS.slice(0, 4) }, portfolio: { heading: "Selected work", items: WORK.slice(0, 4).map((w, i) => ({ ...w, img: i === 0 || i === 2 ? w.img : null })) },
+  experience: { heading: "Experience", items: EXP.slice(0, 4) }, testimonials: { heading: "Kind words", items: QUOTES.slice(0, 3).map(q => ({ ...q, photo: null })) }, cta: CTA,
+  contact: { heading: "Contact", blurb: FULL.contact.blurb, email: "office@mayalindqvist.com", links: LINKS.slice(0, 3), form: { enabled: true, topics: TOPICS.slice(0, 4) } }
+};
+const MINIMAL = {
+  name: "Maya Lindqvist", hero: { headline: "I build supply networks that keep working." },
+  about: { body: [[["Founder of Northline Freight, a cold-chain carrier in six countries."]]] },
+  achievements: { heading: "In numbers", items: ACH.slice(0, 1) }, focus: { heading: "Focus", items: FOCUS.slice(0, 2).map(f => ({ title: f.title })) }, portfolio: { heading: "Work", items: [{ title: "Northline Freight", kind: "Venture", year: "2014" }] },
+  experience: { heading: "Experience", items: EXP.slice(0, 2).map(e => ({ ...e, summary: "", loc: "" })) }, testimonials: { heading: "Kind words", items: [{ quote: "Exact about what matters and relaxed about what doesn't.", author: "Lena Marsh" }] },
+  cta: { headline: "Let's talk" }, contact: { heading: "Contact", email: "office@mayalindqvist.com", form: { enabled: true } }
+};
+const SAMPLES = { minimal: MINIMAL, typical: TYPICAL, full: FULL };
+const PRESETS = {
+  paper: { name: "Paper", bg: "#f6f1e9", ink: "#1b1a17", accent: "#d0501f" },
+  graphite: { name: "Graphite", bg: "#151515", ink: "#eeebe5", accent: "#ff6b3d" },
+  cobalt: { name: "Cobalt", bg: "#eef0f3", ink: "#121721", accent: "#2d55d8" },
+  sage: { name: "Sage", bg: "#e6e9de", ink: "#1b2219", accent: "#55782f" },
+  midnight: { name: "Midnight", bg: "#0f1626", ink: "#e9edf4", accent: "#8fb0ff" }
+};
+const GRADES = { original: { f: "none", o: "0" }, tinted: { f: "grayscale(1) contrast(1.05)", o: "0.38" }, mono: { f: "grayscale(1) contrast(1.08)", o: "0" } };
+const EMPTY_F = { name: "", email: "", org: "", msg: "", topic: null };
+const DEMO_F = { name: "Sofia Lind", email: "sofia@harbourlane.example", org: "Harbour Lane Capital", msg: "We're raising for a cold-storage platform in the Baltics and would value an hour of your time.", topic: "Investment" };
+const FORM_DEMO = { error: { f: { ...DEMO_F, email: "sofia@harbourlane", msg: "" }, err: { email: "Check the email address.", msg: "Add a short message." } }, sending: { f: DEMO_F, status: "sending" }, sent: { f: DEMO_F, status: "sent" } };
+const rgb = h => { const n = parseInt(String(h).replace("#", ""), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = Array.isArray(a) ? a : rgb(a), B = Array.isArray(b) ? b : rgb(b); return A.map((v, i) => Math.round(v * p + B[i] * (1 - p))); };
+const cm = (a, p, b) => "color-mix(in srgb,var(" + a + ") " + p + "%,var(" + b + "))";
+function derive({ bg, ink, accent }) {
+  const sf2 = mix(ink, bg, 0.08), tint = mix(accent, bg, 0.16), worst = (c, gs) => Math.min(...gs.map(g => ratio(c, g)));
+  const toward = (a, b, gs, min, from) => { let q = from; while (q < 100 && worst(mix(a, b, q / 100), gs) < min) q += 2; return Math.min(q, 100); };
+  const keep = (a, b, gs, min) => { let q = 100; while (q > 0 && worst(mix(a, b, q / 100), gs) < min) q -= 2; return q; };
+  const p2 = toward(ink, bg, [bg, sf2, tint], 4.6, 50), pb = toward(ink, bg, [bg, mix(ink, bg, 0.04)], 3.1, 24);
+  const pg = keep(accent, ink, [bg, sf2], 3.05), pa = keep(accent, ink, [bg, mix(ink, bg, 0.04)], 4.6);
+  const pi2 = toward(bg, ink, [ink], 4.6, 50), pig = keep(accent, bg, [ink], 3.05);
+  return { bg, ink, ac: accent, ink2: cm("--ink", p2, "--bg"), br: cm("--ink", pb, "--bg"), rule: cm("--ink", 13, "--bg"), sf: cm("--ink", 4, "--bg"), sf2: cm("--ink", 8, "--bg"), tint: cm("--ac", 16, "--bg"), wash: cm("--ink", 7, "--bg"),
+    acg: pg >= 100 ? "var(--ac)" : cm("--ac", pg, "--ink"), act: pa >= 100 ? "var(--ac)" : cm("--ac", pa, "--ink"), iink2: cm("--bg", pi2, "--ink"), iacg: pig >= 100 ? "var(--ac)" : cm("--ac", pig, "--bg"), irule: cm("--bg", 16, "--ink") };
+}
+const units = t => String(t || "").trim().split(/\s+/).filter(Boolean).flatMap(w => w.split(/(?<=-)/));
+const plain = para => Array.isArray(para) ? para.map(s => s[0]).join("") : String(para || "");
+const segs = para => (Array.isArray(para) ? para : [[String(para)]]).map(s => { const mk = s[1] || "", href = /^(https?:|mailto:|#)/.test(mk) ? mk : ""; return { t: s[0], b: mk === "b", i: mk === "i", a: !!href, href: href || undefined, plain: !mk }; });
+const IM = (o, ph) => o && (o.slot || o.src) ? { slot: o.slot || undefined, src: o.src || undefined, alt: o.caption || o.alt || "", ph: o.ph || ph || "Drop a photo", cap: o.caption || "", hasCap: !!o.caption } : null;
+const sqOf = t => /[\p{L}\p{N}]$/u.test(String(t || "").trim()) ? "inline-block" : "none";
+const split2 = t => { const ws = String(t || "").trim().split(/\s+/); const last = ws.pop() || ""; return [ws.length ? ws.join(" ") + " " : "", last]; };
+const easeOut = t => 1 - Math.pow(1 - t, 3), expo = t => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+
+class Component extends DCLogic {
+  state = { w: 0, m: null, f: { ...EMPTY_F }, err: {}, status: "idle", menu: false, pi: 0 };
+  rootRef = el => {
+    this.root = el;
+    if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    if (!el || DEV[this.props.device]) return;
+    this._ro = new ResizeObserver(() => { const w = el.offsetWidth; if (w && Math.abs(w - (this.state.w || 0)) > 4) this.setState({ w }); });
+    this._ro.observe(el);
+  };
+  trackRef = el => { this.track = el; };
+  motionOK() { return this.props.motion !== false && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  src() {
+    const p = this.props, base = p.content ?? SAMPLES[p.sample || "typical"] ?? TYPICAL, s = { ...base, ...(p.patch || {}) };
+    if (p.portrait === false && s.hero) s.hero = { ...s.hero, image: null };
+    if (p.gallery != null) s.gallery = GAL.slice(0, p.gallery);
+    if (p.works != null) { const pick = Array.isArray(p.works) ? p.works.map(i => WORK[i]) : WORK.slice(0, p.works); s.portfolio = { heading: (s.portfolio || {}).heading || "Selected work", items: pick }; }
+    if (p.workImg === "none" && s.portfolio) s.portfolio = { ...s.portfolio, items: s.portfolio.items.map(w => ({ ...w, img: null })) };
+    return s;
+  }
+  measure() {
+    const s = this.src(), h = s.hero || {}, strs = [s.name, (s.cta || {}).headline, ...["about", "achievements", "focus", "portfolio", "experience", "testimonials", "contact"].map(k => (s[k] || {}).heading), ...((s.achievements || {}).items || []).map(x => x.value), ...((s.portfolio || {}).items || []).map(x => x.title)].filter(Boolean);
+    const all = [...new Set(strs.flatMap(units))];
+    const run = () => { const cx = document.createElement("canvas").getContext("2d"); cx.font = '600 100px "Geist"'; try { cx.letterSpacing = "-4.5px"; } catch (e) {} const m = { __sp: cx.measureText(" ").width / 100 }; all.forEach(u => { m[u] = cx.measureText(u).width / 100; }); this.setState({ m }); };
+    const f = document.fonts; if (f && f.load) f.load('600 100px "Geist"', "Aa").then(run, run); else run();
+  }
+  slides() { return this.track ? [...this.track.querySelectorAll("[data-slide]")] : []; }
+  offs(i) { const el = this.track, s = this.slides()[i]; if (!el || !s) return 0; return s.offsetLeft - (parseFloat(getComputedStyle(el).paddingLeft) || 0); }
+  nearest() { const el = this.track; if (!el) return 0; let best = 0, bd = 1e9; this.slides().forEach((s, i) => { const d = Math.abs(this.offs(i) - el.scrollLeft); if (d < bd) { bd = d; best = i; } }); return best; }
+  glide(to, dur) {
+    const el = this.track; if (!el) return; cancelAnimationFrame(this._gr);
+    if (!this.motionOK()) { el.scrollLeft = to; delete el.dataset.free; return; }
+    const from = el.scrollLeft, t0 = performance.now(), d = dur || 700; el.dataset.free = "1";
+    const step = now => { const t = Math.min(1, (now - t0) / d); el.scrollLeft = from + (to - from) * easeOut(t); if (t < 1) this._gr = requestAnimationFrame(step); else delete el.dataset.free; };
+    this._gr = requestAnimationFrame(step);
+  }
+  goTo = i => { const n = this.slides().length; if (!n) return; i = Math.max(0, Math.min(n - 1, i)); this.setState({ pi: i }); this.glide(this.offs(i)); };
+  onPfScroll = () => { if (this._pr || this._dr || this.track && this.track.dataset.free) return; this._pr = requestAnimationFrame(() => { this._pr = 0; const i = this.nearest(); if (i !== this.state.pi) this.setState({ pi: i }); }); };
+  onPfKey = e => { const k = e.key, i = this.state.pi, n = this.slides().length; const to = k === "ArrowRight" ? i + 1 : k === "ArrowLeft" ? i - 1 : k === "Home" ? 0 : k === "End" ? n - 1 : null; if (to == null || e.target !== e.currentTarget) return; e.preventDefault(); this.goTo(to); };
+  onPfDown = e => {
+    if (e.pointerType !== "mouse" || e.button !== 0 || !this.track) return;
+    cancelAnimationFrame(this._gr); this._dr = { x: e.clientX, sl: this.track.scrollLeft, moved: 0, i: this.state.pi };
+    window.addEventListener("pointermove", this.onPfMove); window.addEventListener("pointerup", this.onPfUp);
+  };
+  onPfMove = e => { const d = this._dr, el = this.track; if (!d || !el) return; const dx = e.clientX - d.x; d.moved = Math.max(d.moved, Math.abs(dx)); if (d.moved > 5) { el.dataset.free = "1"; el.dataset.drag = "1"; el.scrollLeft = d.sl - dx; } };
+  onPfUp = e => {
+    window.removeEventListener("pointermove", this.onPfMove); window.removeEventListener("pointerup", this.onPfUp);
+    const d = this._dr, el = this.track; this._dr = null; if (!d || !el) return; delete el.dataset.drag;
+    if (d.moved <= 5) { delete el.dataset.free; return; }
+    this._noClick = true; setTimeout(() => { this._noClick = false; }, 60);
+    const dx = e.clientX - d.x; let i = this.nearest(); if (i === d.i && Math.abs(dx) > 60) i += dx < 0 ? 1 : -1; this.goTo(i);
+  };
+  onPfClickCap = e => { if (this._noClick) { e.preventDefault(); e.stopPropagation(); this._noClick = false; } };
+  noDrag = e => e.preventDefault();
+  initSmooth() {
+    if (this._sm || DEV[this.props.device] || this.props.smooth === false || !this.motionOK()) return;
+    const se = document.scrollingElement || document.documentElement, fine = matchMedia("(pointer: fine)").matches;
+    let target = se.scrollTop, cur = target, raf = 0, anim = null;
+    const max = () => se.scrollHeight - innerHeight;
+    const tick = now => {
+      if (anim) { const t = Math.min(1, (now - anim.t0) / anim.dur); cur = anim.from + (anim.to - anim.from) * expo(t); if (t >= 1) { anim = null; target = cur; } }
+      else { cur += (target - cur) * 0.1; if (Math.abs(target - cur) < 0.5) cur = target; }
+      se.scrollTop = cur; raf = anim || cur !== target ? requestAnimationFrame(tick) : 0;
+    };
+    const wheel = e => {
+      if (!fine || e.ctrlKey || e.defaultPrevented || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (e.target.closest && e.target.closest("textarea,[role=dialog]")) return;
+      e.preventDefault(); if (!raf) cur = target = se.scrollTop; anim = null;
+      const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * innerHeight : e.deltaY;
+      target = Math.max(0, Math.min(max(), target + dy)); if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const sync = () => { if (!raf) cur = target = se.scrollTop; };
+    const click = e => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a || !this.root || !this.root.contains(a)) return;
+      const id = a.getAttribute("href").slice(1), el = id && document.getElementById(id); if (!el) return; e.preventDefault();
+      const from = se.scrollTop, to = Math.max(0, Math.min(max(), el.getBoundingClientRect().top + from));
+      anim = { from, to, t0: performance.now(), dur: Math.min(1600, 700 + Math.abs(to - from) * 0.15) }; cur = from; if (!raf) raf = requestAnimationFrame(tick);
+    };
+    addEventListener("wheel", wheel, { passive: false }); addEventListener("scroll", sync, { passive: true }); document.addEventListener("click", click);
+    this._sm = () => { removeEventListener("wheel", wheel); removeEventListener("scroll", sync); document.removeEventListener("click", click); cancelAnimationFrame(raf); };
+  }
+  seed() { const d = FORM_DEMO[this.props.formDemo]; if (d) this.setState({ f: { ...EMPTY_F, ...d.f }, err: d.err || {}, status: d.status || "idle" }); }
+  startAt() { const i = this.props.pfStart; if (!i) return; requestAnimationFrame(() => requestAnimationFrame(() => { const el = this.track; if (!el) return; el.scrollLeft = this.offs(i); this.setState({ pi: i }); })); }
+  mkey() { const p = this.props; try { return JSON.stringify([p.patch, p.sample, p.content, p.works, p.workImg]); } catch (e) { return "x"; } }
+  componentDidMount() { if (this.props.defer) this._df = setTimeout(() => this.setState({ ready: true }, () => this.startAt()), this.props.defer); this._pp = this.props; this._mk = this.mkey(); this.seed(); if (this.props.menu) this.setState({ menu: true }); this.measure(); this.initSmooth(); setTimeout(() => this.startAt(), 120); }
+  componentDidUpdate() {
+    const pp = this._pp || this.props, p = this.props; this._pp = p;
+    if (pp.formDemo !== p.formDemo) this.seed();
+    if (pp.menu !== p.menu) this.setState({ menu: !!p.menu });
+    const mk = this.mkey(); if (mk !== this._mk) { this._mk = mk; this.measure(); }
+    if (pp.pfStart !== p.pfStart) this.startAt();
+  }
+  componentWillUnmount() { clearTimeout(this._df); this._ro && this._ro.disconnect(); this._sm && this._sm(); clearTimeout(this._st); cancelAnimationFrame(this._gr); window.removeEventListener("pointermove", this.onPfMove); window.removeEventListener("pointerup", this.onPfUp); }
+
+  renderVals() {
+    const p = this.props, s = this.state, src = this.src();
+    const W = DEV[p.device] || s.w || 1280, P = W < 600, T = !P && W < 1000, D = !P && !T;
+    const pad = P ? 20 : T ? 36 : 48, inner = Math.min(W - 2 * pad, 1184), gut = (W - inner) / 2, only = p.only || null;
+    const th = derive({ ...(PRESETS[p.preset] || PRESETS.paper), ...(p.theme || {}) });
+    const G = GRADES[p.grade] || GRADES.original, words = { ...W_DEF, ...(src.words || {}) };
+    const hero = src.hero || {}, about = src.about || {}, ex = src.experience || {}, ac = src.achievements || {}, fo = src.focus || {}, pf = src.portfolio || {}, ts = src.testimonials || {}, co = src.contact || {}, ct = src.cta || {};
+    const m = s.m || {}, em = u => m[u] || [...u].length * 0.55, sp = m.__sp || 0.22;
+    const wEm = t => { const ws = String(t || "").trim().split(/\s+/).filter(Boolean); return ws.reduce((a, w) => a + w.split(/(?<=-)/).reduce((b, u) => b + em(u), 0), 0) + Math.max(0, ws.length - 1) * sp; };
+    const maxU = t => Math.max(0.5, ...units(t).map(em));
+    const fit = (t, cap, room, lines) => { let f = Math.min(cap, room * 0.95 / maxU(t)); if (lines) f = Math.min(f, room * lines / (wEm(t) * 1.1)); return Math.max(15, Math.floor(f)); };
+    const tier = (n, a) => n <= a[0] ? 1 : n <= a[1] ? 0.76 : n <= a[2] ? 0.56 : 0.44;
+    const tSize = (t, room) => fit(t, (D ? 96 : T ? 76 : 50) * tier(String(t).length, [12, 24, 44]), room || inner, 3) + "px";
+    const rCard = D ? "18px" : T ? "16px" : "14px", rImg = D ? "16px" : T ? "14px" : "12px";
+
+    const paras = (about.body || []).filter(x => plain(x).trim());
+    const exI = (ex.items || []).filter(e => e && (e.role || e.org)).slice(0, 20);
+    const acI = (ac.items || []).filter(x => x && x.value).slice(0, 8);
+    const foI = (fo.items || []).filter(x => x && x.title).slice(0, 6);
+    const pfI = (pf.items || []).filter(x => x && x.title).slice(0, 12);
+    const tsI = (ts.items || []).filter(x => x && x.quote).slice(0, 10);
+    const links = (co.links || []).filter(l => l && l.href).slice(0, 10).map(l => ({ href: l.href, label: l.label || l.type, d: ICON[l.type] || ICON.other }));
+    const present = { about: paras.length > 0, achievements: acI.length > 0, focus: foI.length > 0, portfolio: pfI.length > 0, experience: exI.length > 0, testimonials: tsI.length > 0, cta: !!ct.headline };
+    const hide = { ...(src.hide || {}), ...(p.hide || {}) };
+    const order = (p.order || src.order || MID).filter(k => MID.includes(k)); MID.forEach(k => { if (!order.includes(k)) order.push(k); });
+    const vis = order.filter(k => present[k] && !hide[k] && (!only || only === k));
+    const heading = k => (src[k] || {}).heading || "";
+    const focusSide = D && !!heading("focus");
+    const sec = {}; MID.forEach(k => { const i = vis.indexOf(k), t = heading(k), [t1, t2] = split2(t); sec[k] = { show: i >= 0, order: 10 + Math.max(i, 0), t1, t2, sq: sqOf(t), hasTitle: !!t, tfs: t ? tSize(t, k === "focus" && focusSide ? inner * 5 / 12 - 32 : inner) : "0", aria: t || T_DEF[k] || "" }; });
+    const contactT = co.heading || T_DEF.contact;
+    const nav = [...vis.filter(k => k !== "cta").map(k => ({ href: "#fo-" + k, label: heading(k) || T_DEF[k] })), { href: "#fo-contact", label: contactT }].map((n, i) => ({ ...n, num: String(i + 1).padStart(2, "0"), d: (0.04 + i * 0.04).toFixed(2) + "s" }));
+
+    const name = String(src.name || "").trim(), headline = String(hero.headline || "").trim();
+    const por = p.photos === 0 ? null : IM(hero.image, "Drop a portrait"), hasPor = !!por;
+    const colW = P ? inner : hasPor ? (D ? inner * 8 / 12 - 32 : inner * 7 / 12 - 24) : inner;
+    const nCap = (P ? 64 : D ? (hasPor ? 128 : 168) : (hasPor ? 84 : 120)) * (name.length <= 16 ? 1 : name.length <= 26 ? 0.82 : name.length <= 40 ? 0.66 : 0.54);
+    const btn = hero.button && hero.button.label ? hero.button : null;
+    const H = {
+      pad: (P ? "28px " : T ? "56px " : "72px ") + pad + "px " + (P ? "56px" : T ? "80px" : "96px"),
+      cols: P ? "minmax(0,1fr)" : hasPor ? (D ? "minmax(0,8fr) minmax(0,4fr)" : "minmax(0,7fr) minmax(0,5fr)") : "minmax(0,1fr)",
+      cols2: P ? "minmax(0,1fr)" : hasPor ? (D ? "minmax(0,8fr) minmax(0,4fr)" : "minmax(0,7fr) minmax(0,5fr)") : "minmax(0,7fr) minmax(0,5fr)",
+      gap: P ? "28px" : D ? "64px" : "40px", tGap: P ? "18px" : "24px", portrait: hasPor, por: por || {},
+      nameFs: fit(name || " ", nCap, colW, P ? 3 : 2) + "px", posFs: Math.round((P ? 24 : D ? (hasPor ? 34 : 40) : (hasPor ? 26 : 32)) * (headline.length > 90 ? 0.88 : 1)) + "px", posMax: hasPor ? "100%" : "22em",
+      footM: P ? "36px" : D ? "64px" : "48px", subCol: P ? "1" : "2", btnRow: P ? "2" : "1", subFs: P ? "16px" : "17px"
+    };
+
+    const gal = (src.gallery || []).slice(0, 12).map(g => IM(g, "Drop a gallery photo")).filter(Boolean);
+    const gH = D ? 240 : T ? 200 : 160;
+    const GA = { stat: (!only || only === "hero") && gal.length > 0 && gal.length < 4, marq: (!only || only === "hero") && gal.length >= 4, items: gal, disp: P && gal.length > 1 ? "flex" : "grid", cols: "repeat(" + gal.length + ",minmax(0,1fr))", m: P ? "40px" : "56px", mq: "0", h: gH + "px", w: Math.round(gH * 4 / 3) + "px", md: (gal.length * 6) + "s", dup: p.motion !== false };
+    if (GA.marq) H.pad = H.pad.replace(/ (\d+px)$/, P ? " 40px" : " 56px");
+
+    const leadLen = paras[0] ? plain(paras[0]).length : 0, rest = paras.slice(1), aImg = IM(about.image, "Drop a photo"), aIm = !!aImg;
+    const lf = aIm ? (P ? 22 : D ? 30 : 24) : (P ? (leadLen < 160 ? 26 : 22) : D ? (leadLen < 160 ? 46 : leadLen < 320 ? 38 : 32) : (leadLen < 160 ? 36 : 30));
+    const A = {
+      img: aImg || {}, hasImg: aIm, cols: aIm && !P ? "minmax(0,5fr) minmax(0,7fr)" : "minmax(0,1fr)", gap: P ? "28px" : D ? "56px" : "36px", innerGap: P ? "24px" : "40px",
+      lead: paras[0] ? segs(paras[0]) : [], fs: lf + "px", leadMax: aIm ? "100%" : "26em",
+      rest: rest.map(x => ({ segs: segs(x) })), hasRest: rest.length > 0, restCols: !P && !aIm && rest.length >= 2 ? "repeat(2,minmax(0,1fr))" : "minmax(0,1fr)", restMax: aIm ? "34em" : D ? "760px" : "100%", restML: aIm || !D ? "0" : "auto"
+    };
+
+    const nA = acI.length, aCols = P ? (nA === 1 ? 1 : 2) : T ? (nA <= 3 ? nA : 2) : Math.min(nA, 4), aGap = P ? 12 : 16, aPad = P ? 20 : D ? 28 : 24;
+    const cellW = (inner - (aCols - 1) * aGap) / aCols - 2 * aPad, aCap = nA === 1 ? (D ? 168 : T ? 128 : 88) : (D ? 88 : T ? 72 : 44);
+    const AC = { cols: "repeat(" + aCols + ",minmax(0,1fr))", gap: aGap + "px", padC: aPad + "px", minH: P ? "150px" : D ? "220px" : "190px", items: acI.map(x => ({ v: x.value, l: x.label || "", hasL: !!x.label, fs: Math.max(24, Math.floor(Math.min(aCap, cellW * 0.95 / wEm(x.value)))) + "px" })) };
+
+    const FO = { cols: focusSide ? "minmax(0,5fr) minmax(0,7fr)" : "minmax(0,1fr)", gap: focusSide ? "48px" : L_tGap(P, T), hPos: focusSide ? "sticky" : "static", listCol: focusSide || !heading("focus") ? "auto" : "1", lcols: P || foI.length === 1 ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))", minH: P ? "0px" : "200px", padC: P ? "22px" : "28px", tFs: P ? "20px" : "22px",
+      items: foI.map((x, i) => ({ num: String(i + 1).padStart(2, "0"), t: x.title, d: x.desc || "", hasD: !!x.desc })) };
+
+    const nP = pfI.length, pS = p.motion === false && p.pfStart ? Math.min(p.pfStart, nP - 1) : 0, pi = pS || Math.max(0, Math.min(s.pi, nP - 1)), slideW = Math.round(D ? inner * 0.64 : T ? inner * 0.8 : inner * 0.86);
+    const tilePad = P ? 20 : D ? 32 : 26, tileRoom = slideW - 2 * tilePad;
+    const tileFs = (t, room) => fit(t, (t.length <= 40 ? (D ? 60 : T ? 48 : 32) : t.length <= 80 ? (D ? 46 : T ? 38 : 27) : (D ? 36 : T ? 30 : 23)), room, 4) + "px";
+    const mk = (x, i) => { const img = IM(x.img, "Drop a project image"), ky = [x.kind, x.year].filter(Boolean).join(" · "), tl = x.title.length; return { title: x.title, kind: x.kind || "", year: x.year || "", ky, hasKY: !!ky, meta: x.meta || "", hasMeta: !!x.meta, desc: x.desc || "", hasDesc: !!x.desc, href: x.href || undefined, hasHref: !!x.href, img: img || {}, hasImg: !!img, tile: !img, tileFs: tileFs(x.title, tileRoom), titleFs: (P ? (tl <= 40 ? 24 : tl <= 80 ? 21 : 19) : D ? (tl <= 40 ? 34 : tl <= 80 ? 28 : 24) : (tl <= 40 ? 30 : tl <= 80 ? 25 : 22)) + "px", label: (i + 1) + " / " + nP }; };
+    const one = nP ? mk(pfI[0], 0) : {};
+    if (nP === 1) one.tileFs = tileFs(one.title, (P ? inner : inner * 7 / 12) - 2 * tilePad);
+    const demo = p.pfDemo === "hover";
+    const PF = {
+      single: nP === 1, carousel: nP > 1, ctlTop: nP > 1 && !P, ctlBottom: nP > 1 && P, ref: this.trackRef, onScroll: this.onPfScroll, onKey: this.onPfKey, onDown: this.onPfDown, onClickCap: this.onPfClickCap, noDrag: this.noDrag,
+      snap: p.motion === false ? "none" : "x mandatory", headGap: P ? "32px" : "48px", ar: P ? "4 / 5" : "3 / 2", tilePad: tilePad + "px", gap: (D ? 24 : T ? 20 : 12) + "px", slideW: slideW + "px", padL: gut + "px", padR: Math.max(gut, W - gut - slideW) + "px", progM: P ? "24px" : "36px",
+      cur: String(pi + 1).padStart(2, "0"), count: String(nP).padStart(2, "0"), prog: ((pi + 1) / Math.max(1, nP) * 100).toFixed(2) + "%",
+      prev: () => this.goTo(pi - 1), next: () => this.goTo(pi + 1), prevDis: pi <= 0, nextDis: pi >= nP - 1, prevOp: pi <= 0 ? 0.35 : 1, nextOp: pi >= nP - 1 ? 0.35 : 1, demoRing: demo ? "2px solid var(--acg)" : "none",
+      fCols: P ? "minmax(0,1fr)" : "minmax(0,7fr) minmax(0,5fr)", fGap: P ? "24px" : D ? "56px" : "36px", fTitleFs: fit(one.title || " ", D ? 52 : T ? 38 : 30, P ? inner : inner * 5 / 12 - 28, 4) + "px", one,
+      items: pfI.map((x, i) => ({ ...mk(x, i), op: i === pi ? 1 : 0.45, pick: i === pi ? undefined : () => this.goTo(i), tab: i === pi ? 0 : -1, zoom: demo && i === pi ? "scale(1.035)" : "none", ul: demo && i === pi ? "2px" : "1px" })).slice(pS)
+    };
+
+    const exRow = e => ({ role: e.role || e.org, org: e.role ? [e.org, e.loc].filter(Boolean).join(" · ") : e.loc || "", hasOrg: !!(e.role && (e.org || e.loc)), dates: [e.start, e.end].filter(Boolean).join(" – "), summary: e.summary || "", hasSum: !!e.summary });
+    const cut = exI.length > 10 ? 8 : exI.length;
+    const EX = { cols: P ? "minmax(0,1fr)" : "minmax(0,1fr) auto", mx: P ? "0px" : "-20px", padR: P ? "20px 0" : "24px 20px", roleFs: P ? "18px" : "20px", dFs: P ? "14px" : D ? "26px" : "22px", dRow: P ? "1" : "auto", dTA: P ? "left" : "right", dCol: P ? "var(--act)" : "var(--ink)",
+      head: exI.slice(0, cut).map(exRow), tail: exI.slice(cut).map(exRow), hasTail: exI.length > cut, tailStart: String(cut + 1), more: words.more.replace("{n}", String(exI.length - cut)) };
+
+    const nT = tsI.length, tq = q => { const ph = IM(q.photo && { ...q.photo, ph: "Photo" }, "Photo"), ql = q.quote.length; return { quote: q.quote, author: q.author || "", role: q.role || "", hasRole: !!q.role, ph: ph || {}, hasPh: !!ph, fs: (ql <= 110 ? (P ? 19 : 21) : ql <= 260 ? (P ? 17 : 18) : 16) + "px" }; };
+    const first = nT ? tq(tsI[0]) : {}, fl = nT ? tsI[0].quote.length : 0;
+    const TS = { one: nT === 1, many: nT > 1, first, bigFs: (P ? (fl <= 140 ? 26 : 21) : D ? (fl <= 140 ? 44 : fl <= 300 ? 34 : 28) : (fl <= 140 ? 34 : 27)) + "px", cols: P ? "1" : T || nT === 2 ? "2" : "3", padC: P ? "22px" : "28px", items: tsI.map(tq) };
+
+    const cPadX = P ? 24 : D ? 64 : 44, cRoom = D ? (inner - 2 * cPadX) * 8 / 12 - 32 : inner - 2 * cPadX, chl = String(ct.headline || "").length;
+    const cCap = chl <= 32 ? (D ? 88 : T ? 72 : 44) : chl <= 64 ? (D ? 68 : T ? 56 : 36) : (D ? 52 : T ? 44 : 30);
+    const [ch1, ch2] = split2(ct.headline || "");
+    const CT = { headline: ct.headline || "", h1: ch1, h2: ch2, sq: sqOf(ct.headline), body: ct.body || "", hasBody: !!ct.body, btn: (ct.button && ct.button.label) || "", href: (ct.button && ct.button.href) || "#fo-contact", hasBtn: !!(ct.button && ct.button.label),
+      av: por ? { ...por, ph: "Photo" } : {}, hasAv: hasPor, cols: D ? "minmax(0,4fr) minmax(0,8fr)" : "minmax(0,1fr)", gap: P ? "36px" : D ? "64px" : "44px", hOrder: D ? 0 : -1,
+      pad: (P ? "40px " : D ? "72px " : "56px ") + cPadX + "px", r: P ? "20px" : "28px", hfs: fit(ct.headline || " ", cCap, cRoom, 5) + "px" };
+
+    const fc = co.form || {}, formOn = fc.enabled !== false, topics = (fc.topics || []).filter(Boolean).slice(0, 8);
+    const hasEmail = !!co.email, hasDirect = hasEmail || links.length > 0 || !!co.blurb, two = D && formOn && hasDirect, [ct1, ct2] = split2(contactT);
+    const CO = { title: contactT, t1: ct1, t2: ct2, sq: sqOf(contactT), tfs: tSize(contactT), hTA: formOn ? "left" : "center", blurb: co.blurb || "", hasBlurb: !!co.blurb, email: co.email || "", hasEmail, mailto: "mailto:" + (co.email || ""), direct: hasDirect,
+      cols: two ? "minmax(0,5fr) minmax(0,7fr)" : "minmax(0,1fr)", align: formOn ? "flex-start" : "center", ta: formOn ? "left" : "center", max: formOn ? "none" : "880px",
+      blurbFs: formOn ? (P ? "21px" : "26px") : (P ? "24px" : D ? "36px" : "30px"), emailFs: Math.floor(formOn ? (P ? 19 : 22) : Math.min(D ? 52 : T ? 40 : 24, inner * 0.94 / (String(co.email || "").length * 0.56))) + "px",
+      list: formOn && links.length > 0, chips: !formOn && links.length > 0, formMax: formOn && !hasDirect ? "760px" : "none", formR: P ? "16px" : "22px" };
+
+    const navW = nav.reduce((t, x) => t + x.label.length * 7.6 + 26, 0), nameW = Math.min(260, name.length * 9.4) + 40, btnL = btn ? btn.label : contactT, btnWpx = btnL.length * 7.8 + 44;
+    const full = D && navW + nameW + btnWpx + 80 <= inner;
+    const L = { D, full, compact: !full, pad: pad + "px", headH: P ? "56px" : "60px", headPad: (P ? "10px " : "14px ") + (P ? 12 : pad) + "px 0", menuPos: DEV[p.device] ? "absolute" : "fixed", menuFs: P ? "30px" : "40px",
+      secPad: (P ? 80 : T ? 112 : 136) + "px " + pad + "px", secPadV: (P ? 80 : T ? 112 : 136) + "px", ctaPad: (P ? 40 : T ? 64 : 80) + "px " + (P ? 12 : pad) + "px", minH: s.menu && !full ? "760px" : "0px", tGap: L_tGap(P, T), btnW: P ? "100%" : "auto",
+      rCard, rImg, fCols: P ? "minmax(0,1fr)" : "minmax(0,1fr) minmax(0,1fr)", formPad: P ? "22px 18px" : D ? "40px" : "32px", sentMin: P ? "auto" : "440px", sentFs: P ? "34px" : "48px", footDir: P ? "column" : "row", footAlign: P ? "flex-start" : "center" };
+
+    const f = s.f, busy = s.status === "sending", firstName = name.split(/\s+/)[0] || "";
+    const setF = (k, v) => this.setState(st => ({ f: { ...st.f, [k]: v }, err: st.err[k] ? { ...st.err, [k]: undefined } : st.err }));
+    const fe = {}; ["name", "email", "msg"].forEach(k => { const mm = s.err[k]; fe[k] = { show: !!mm, msg: mm || "", inv: mm ? "true" : "false", bc: mm ? "var(--act)" : "var(--br)", bw: mm ? "2px" : "1px" }; });
+    const submit = e => {
+      e.preventDefault(); if (this.state.status !== "idle") return;
+      const v = this.state.f, er = {};
+      if (!v.name.trim()) er.name = "Add your name.";
+      if (!v.email.trim()) er.email = firstName ? "Add your email so " + firstName + " can reply." : "Add your email so we can reply.";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email.trim())) er.email = "Check the email address.";
+      if (!v.msg.trim()) er.msg = "Add a short message.";
+      if (Object.keys(er).length) return this.setState({ err: er });
+      this.setState({ status: "sending", err: {} }); clearTimeout(this._st); this._st = setTimeout(() => this.setState({ status: "sent" }), 1300);
+    };
+    const spinner = React.createElement("span", { "aria-hidden": true, style: { width: 15, height: 15, boxSizing: "border-box", borderRadius: "50%", border: "1.5px solid currentColor", borderTopColor: "transparent", animation: "fo-spin .8s linear infinite" } });
+    const sender = f.name.split(/\s+/)[0] || "";
+    const fm = {
+      on: formOn, form: s.status !== "sent", sent: s.status === "sent", busy, op: busy ? 0.6 : 1, hasTopics: topics.length > 0,
+      topics: topics.map(t => { const on = f.topic === t; return { label: t, on, pick: () => setF("topic", on ? null : t), bg: on ? "var(--ink)" : "var(--bg)", fg: on ? "var(--bg)" : "var(--ink)", bc: on ? "var(--ink)" : "var(--br)" }; }),
+      submit, btnLabel: busy ? "Sending…" : words.send, btnIcon: busy ? spinner : React.createElement("span", { "aria-hidden": true }, "→"),
+      note: firstName ? "Goes straight to " + firstName + ". Your details aren't shared." : "Your details aren't shared.",
+      sentLine: (sender ? "Thanks, " + sender + ". " : "Thanks. ") + (firstName ? firstName + " will reply to " : "You'll get a reply at ") + (f.email.trim() || "your email") + ".",
+      reset: () => this.setState({ status: "idle", f: { ...EMPTY_F }, err: {} })
+    };
+    const menuToggle = () => this.setState(st => ({ menu: !st.menu }));
+    const wait = !!p.defer && !s.ready;
+    if (wait) { MID.forEach(k => { sec[k].show = false; }); GA.stat = GA.marq = false; L.minH = "900px"; }
+    return {
+      IMG: { slots: !p.lite, lite: !!p.lite }, th, G, L, H, GA, A, AC, FO, PF, EX, TS, CT, CO, sec, words, links, nav,
+      still: p.motion === false ? "1" : undefined, lang: src.lang || "en", rootRef: this.rootRef, menuToggle, menuOpen: s.menu ? "true" : "false",
+      show: { header: !wait && (!only || only === "hero"), hero: !wait && (!only || only === "hero"), menu: !wait && s.menu && !full, contact: !wait && (!only || only === "contact"), footer: !wait && (!only || only === "contact" || only === "footer") },
+      has: { eyebrow: !!hero.eyebrow, headline: !!headline, sub: !!hero.sub, btn: !!btn, foot: !!(hero.sub || btn) },
+      c: { name, eyebrow: hero.eyebrow || "", headline, sub: hero.sub || "", btn: btn ? btn.label : "", btnHref: btn ? btn.href || "#fo-contact" : "#fo-contact", headBtn: btnL, headHref: btn ? btn.href || "#fo-contact" : "#fo-contact" },
+      fm, f, fe, on: { name: e => setF("name", e.target.value), email: e => setF("email", e.target.value), org: e => setF("org", e.target.value), msg: e => setF("msg", e.target.value) }
+    };
+  }
+}
+function L_tGap(P, T) { return P ? "36px" : T ? "52px" : "64px"; }
+</script>
+</body>
+</html>
