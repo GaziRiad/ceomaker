@@ -23,7 +23,15 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders(isDev) }];
+    return [
+      { source: "/:path*", headers: securityHeaders(isDev) },
+      // Freemius's checkout (another origin) loads public/brand/freemius-checkout.css, and the
+      // fonts it names are only used across origins when they allow it.
+      {
+        source: "/brand/fonts/:file",
+        headers: [{ key: "Access-Control-Allow-Origin", value: "*" }],
+      },
+    ];
   },
 };
 

@@ -30,3 +30,20 @@ export const FREE_FALLBACK_TEMPLATE = { key: "meridian", version: 1 } as const;
 
 /** AI on the free plan: one first draft per account, ever, and a few headline rewrites a day. */
 export const FREE_AI_LIMITS = { drafts: 1, rewritesPerDay: 5 } as const;
+
+/**
+ * A Pro subscription's state, the same whichever billing provider sells it: each provider's
+ * webhook maps its own states onto these. "past_due" means a renewal payment failed and the
+ * provider is retrying it.
+ */
+export const SUBSCRIPTION_STATUSES = ["active", "past_due", "paused", "canceled"] as const;
+export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
+
+/**
+ * Pro holds while a subscription is active or its payment is being retried: the provider's retry
+ * schedule is the grace period. It ends when the provider pauses or cancels the subscription,
+ * which for a cancellation is at the end of the period already paid for.
+ */
+export function subscriptionGrantsPro(status: SubscriptionStatus): boolean {
+  return status === "active" || status === "past_due";
+}

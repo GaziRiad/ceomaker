@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   isPremiumTemplate,
   planOf,
+  subscriptionGrantsPro,
   buildStarterContent,
   contactMessageSchema,
   contrastLevel,
@@ -490,5 +491,12 @@ describe("plans", () => {
     expect(planOf(undefined)).toBe("free");
     expect(isPremiumTemplate("monument")).toBe(true);
     expect(isPremiumTemplate("meridian")).toBe(false);
+  });
+
+  it("keeps Pro while a payment is retried, and ends it when paused or canceled", () => {
+    expect(subscriptionGrantsPro("active")).toBe(true);
+    expect(subscriptionGrantsPro("past_due")).toBe(true);
+    expect(subscriptionGrantsPro("paused")).toBe(false);
+    expect(subscriptionGrantsPro("canceled")).toBe(false);
   });
 });

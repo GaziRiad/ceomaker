@@ -145,6 +145,7 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    | `VERCEL_PROJECT_ID`            | see Custom domains  | (leave unset)            |
    | `VERCEL_TEAM_ID`               | see Custom domains  | (leave unset)            |
    | `CRON_SECRET`                  | new random value    | (leave unset)            |
+   | `FREEMIUS_*` (4 variables)     | see Payments        | same (sandbox)           |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
    - Set `ROOT_DOMAIN` and `APP_URL` as described in "Domain setup" below. Without a domain, customer sites can't be reached on a `*.vercel.app` address.
 
@@ -214,13 +215,31 @@ Every account starts on the free plan: a site on Meridian at `<name>.ceomaker.ap
 
 Free accounts can try Pro templates in the draft but not publish them. When an account isn't Pro, its live site is shown as Meridian, its form is off, its custom domain forwards to its own address and the badge appears; nothing stored changes, so Pro brings it all back.
 
-Until Paddle is connected, Pro is granted by hand (for example for your own accounts):
+**Billing.** Pro is sold through Freemius (see [Payments](#payments-freemius)). Its webhook hands each change to `syncSubscription` (`apps/web/src/lib/billing.ts`), which records it in the `subscription` table and sets `user.plan` from all of the account's subscriptions: Pro while any is active or its payment is being retried (the provider's retry schedule is the grace period), free once it's paused or canceled. Events arriving out of order or twice change nothing. When the plan changes, the owner's live pages are rebuilt on their next visit, so nobody has to republish. Accounts without a subscription are never touched by billing.
+
+Pro can also be granted by hand (for example for your own accounts, or a customer who paid by invoice):
 
 ```sql
 update "user" set plan = 'pro' where email = 'someone@example.com';
 ```
 
-Live pages are cached, so the owner should publish once afterwards for their live site to pick up the change.
+Live pages are cached, so after a change by hand the owner should publish once for their live site to pick it up.
+
+### Payments (Freemius)
+
+Freemius is the merchant of record: it takes the payment, charges VAT and sales tax, sends receipts and handles refunds. Settings › Billing sends the owner to Freemius's hosted checkout (monthly or yearly, with their account email fixed). Everything after that stays in the app: Billing shows the cycle, price and renewal or end date (read live from Freemius), cancels renewal, and lists invoices as PDF downloads. Only typing a new card leaves the app, for Freemius's secure page, which returns to Billing; card details never reach our servers. Production takes real payments; previews and local development use Freemius's sandbox (test cards), and each ignores the other's licenses.
+
+1. **Freemius product:** one paid plan, Pro, at $9.99 monthly and $99 yearly (the prices shown in the app live in `apps/web/src/lib/plan-copy.ts`), one license, no trial, a 14-day refund policy, and the terms URL `https://www.ceomaker.app/terms`.
+2. **Keys:** from the product's (not the store's) Settings › API & Keys, set `FREEMIUS_PRODUCT_ID`, `FREEMIUS_PUBLIC_KEY`, `FREEMIUS_SECRET_KEY` and `FREEMIUS_API_KEY` (the API bearer token) in Vercel. Without all four, the Upgrade button says payments are coming soon.
+3. **Webhook** (Settings › Webhooks): `https://<app>/api/billing/freemius/webhook`, with the events `license.created`, `license.extended`, `license.shortened`, `license.updated`, `license.cancelled`, `license.expired`, `license.plan.changed`, `license.deleted` and `subscription.cancelled`. Every event is checked against the secret key and the license is read again from Freemius, so an event can't grant anything by itself.
+4. **Redirect after purchase** (Settings › Checkout & Redirection): `https://<app>/api/billing/freemius/return`. It applies the purchase at once and returns the owner to Billing; without it the webhook still does, moments later.
+
+5. **Branding** (all in the Freemius dashboard; Freemius stays the seller on receipts and invoices, as merchant of record):
+   - Product title `CEOMaker` and icon `design/brand/ceomaker-app-icon-512.png` (Settings › Information): shown on checkout, emails, invoices.
+   - Checkout and card-update pages: Plans › Customization › Custom Checkout CSS file, `https://<app>/brand/freemius-checkout.css` (our colours and Barlow; the fonts next to it are served with a CORS header).
+   - Emails: Emails › Styling with the logo `https://<app>/brand/ceomaker-lockup-600.png`, tone Professional, and the colours in `freemius-checkout.css`. Sender address on our domain (Emails), verified with DKIM (CNAME records added in Vercel's DNS for `ceomaker.app`), or Freemius falls back to its own address.
+
+`<app>` is `preview.ceomaker.app` while testing with the sandbox and `www.ceomaker.app` for real payments. A purchase is matched to the account with the buyer's email, which checkout doesn't let them change. Deleting an account cancels its subscription first.
 
 ### Domain setup
 

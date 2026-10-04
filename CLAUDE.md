@@ -47,7 +47,8 @@ Vercel (Hobby, `fra1`).
   Meridian (`meridian/v1`, the quiet one) and Monument (`monument/v1`, the loud one) both support
   in-place editing of every visible text and the contact form. Retired keys render as Meridian.
 - `apps/web`: the app. Customer sites `src/app/(sites)`, dashboard `src/app/(app)/dashboard`,
-  editor `dashboard/sites/[id]/edit`, domains `src/lib/domains`, analytics `src/lib/analytics`.
+  editor `dashboard/sites/[id]/edit`, domains `src/lib/domains`, analytics `src/lib/analytics`,
+  billing `src/lib/billing.ts` and `src/lib/freemius.ts` (routes in `src/app/api/billing/freemius`).
 - `design/`: Claude Design handoff files (reference only).
 
 ## Environment notes
