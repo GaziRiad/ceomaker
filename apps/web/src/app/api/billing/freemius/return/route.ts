@@ -3,8 +3,8 @@ import { freemius, syncFreemiusLicense } from "@/lib/freemius";
 import { appUrl } from "@/lib/routing";
 
 /**
- * Where Freemius sends the buyer after paying or changing their card (set under Settings ›
- * Checkout & Redirection). The signed redirect is checked, the license is read from Freemius and
+ * Where Freemius sends the buyer after paying or changing their card (Plans › Customization,
+ * "Redirect Checkout to a custom URL"). The signed redirect is checked, the license is read from Freemius and
  * applied, so Billing shows Pro straight away; the webhook would get there too, moments later.
  */
 export async function GET(request: Request) {
