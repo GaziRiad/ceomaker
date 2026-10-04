@@ -276,7 +276,7 @@ The app follows the handoff in `design/` (see `design/README.md`): the Industry 
 
 **Merged (PR #2):** the Overview's site preview fills the height beside the side cards; smooth section links on live sites; every visible text in Meridian editable in place.
 
-**Merged since (all live):** Monument rebuilt from the Claude Design round 2 board, Free and Pro plans, device preview and sharing, and the new brand (symbol, lockup, favicons, email header; PR #4).
+**Merged since (all live):** Monument rebuilt from the Claude Design round 2 board, Free and Pro plans, device preview and sharing, the new brand (symbol, lockup, favicons, email header; PR #4), and billing through Freemius (subscription table, checkout, webhook, in-app subscription management, branded checkout; merged October 2026, real payments start once the FREEMIUS_* variables are set in Production).
 
 **Parked, revisit around launch:**
 
