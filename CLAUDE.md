@@ -20,6 +20,9 @@ decisions, and "Current state" at the end: what's done, parked and next).
   the production Neon database. Never force-push `main`. Never commit `.env`. No PRs unless asked.
 - **Answers:** brief and direct, conclusion first, plain English. No em dashes. Avoid filler words
   (actually, certainly, leverage, seamless, robust, comprehensive). Long explanations get skimmed.
+- **Claude Design prompts:** always one single prompt per template, which the owner runs at max
+  effort with no follow-ups. Build it from the standing brief in `design/BRIEF.md` plus a short
+  "This template" section, and keep its deliverables slim (only what can't be done in code).
 - **Verification, sized to risk.** Default: format, lint, typecheck and the tests of the packages
   touched. Full checks (all tests, production build, screenshots at 1280px and 390px, a browser
   run) only for changes to live sites, templates, data, auth, domains or payments, or when asked.
