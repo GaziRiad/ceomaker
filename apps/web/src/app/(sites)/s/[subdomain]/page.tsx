@@ -17,7 +17,8 @@ import { BrandSymbol } from "@/components/ui";
 import { PLATFORM_ICON_DATA_URI } from "@/lib/brand";
 import { asEntitled } from "@/lib/plan";
 import { SHARE_CARD_PATH, shareCardVersion } from "@/lib/share-card";
-import { appUrl, routingConfigFromEnv, siteUrl } from "@/lib/routing";
+import { appUrl } from "@/lib/routing";
+import { canonicalSiteUrl, jsonLd, siteStructuredData } from "@/lib/seo";
 import { getTenantSite } from "@/lib/sites";
 import { SiteStatus } from "../../site-status";
 import { Beacon } from "./beacon";
@@ -61,9 +62,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const description = meta ? siteDescription(meta, hero) : undefined;
   const { key, version } = resolveTemplateRef(site.templateKey, site.templateVersion);
   const colors = resolveSiteColors(parseThemeSettingsForRender(site.theme), key, version);
-  const routing = routingConfigFromEnv();
   // A live custom domain is the site's real address; its own address forwards there.
-  const url = site.customDomain ? `https://${site.customDomain}` : siteUrl(subdomain, routing);
+  const url = canonicalSiteUrl(site);
   // The uploaded share image, else the card drawn for the site; both served on its own host.
   const shareImage = {
     url: meta?.shareImage
@@ -143,8 +143,15 @@ async function TenantSite({ params }: { params: Params }) {
   if (tenant.status === "paused") return <SiteStatus variant="paused" />;
 
   const site = asEntitled(tenant.site, tenant.site.ownerPlan);
+  const structured = siteStructuredData(site, canonicalSiteUrl(site));
   return (
     <>
+      {structured ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(structured) }}
+        />
+      ) : null}
       <SiteRenderer
         templateKey={site.templateKey}
         templateVersion={site.templateVersion}

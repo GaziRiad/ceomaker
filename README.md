@@ -260,6 +260,15 @@ Buying the domain also unblocks email sign-in for everyone (Resend needs a domai
 
 If you ever self-host behind a CDN instead of Vercel, the CDN honours the long `s-maxage` on customer pages. Publishing must then also purge the CDN cache for that address, or edits won't show until the cache expires.
 
+### Search engines (Google Search Console)
+
+Only production is open to search engines (`isIndexable` in `src/lib/seo.ts`): previews and local runs send `X-Robots-Tag: noindex` and a closed `robots.txt`.
+
+- **The product** (`www.ceomaker.app`): `/robots.txt` (keeps `/dashboard` and `/api/` out), `/sitemap.xml` (landing, privacy, terms), a canonical address, a share image (`(app)/opengraph-image.tsx`) and structured data describing CEOMaker on the landing page.
+- **Each customer site**, on its own host (subdomain or custom domain): `/robots.txt` pointing to its own `/sitemap.xml` (its one page, dated by the last publish), and structured data about the person (name, role, organisation, portrait, LinkedIn and other profiles). Drafts and paused sites stay closed. Customer sites aren't listed in the product's sitemap: each host is its own site to search engines.
+
+Setup, once: in [Google Search Console](https://search.google.com/search-console), add a **Domain** property for `ceomaker.app` and verify it with the TXT record it gives you (Vercel › Domains › ceomaker.app › DNS records). One property covers www and every `*.ceomaker.app` customer site. Then submit `https://www.ceomaker.app/sitemap.xml` under Sitemaps. Optionally import the property into Bing Webmaster Tools.
+
 ## Tooling notes
 
 - **TypeScript 6.0**, not 7. TS 7 (the native Go port) drops the JS API that Next's build type-check and typescript-eslint use.

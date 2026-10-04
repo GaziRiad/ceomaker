@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense, type CSSProperties } from "react";
 import { RevealOnScroll } from "@/components/reveal";
 import { Blueprint, Check, Wordmark } from "@/components/ui";
 import { getSession } from "@/lib/auth";
+import { PRO_PRICES } from "@/lib/plan-copy";
+import { appUrl } from "@/lib/routing";
+import { jsonLd, productStructuredData } from "@/lib/seo";
 import { SignOutButton } from "./dashboard/sign-out-button";
 import {
   audiences,
@@ -528,9 +532,29 @@ function Footer() {
   );
 }
 
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "CEOMaker",
+    url: "/",
+    title: "CEOMaker: personal websites for leaders",
+    description:
+      "Answer a few questions. CEOMaker drafts a polished personal site in your voice, and it goes live at your own address in minutes.",
+  },
+};
+
 export default function LandingPage() {
   return (
     <div className="min-h-dvh">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(
+            productStructuredData(appUrl(), PRO_PRICES.monthly.amount, PRO_PRICES.annual.amount),
+          ),
+        }}
+      />
       <Header />
       <main>
         <Hero />
