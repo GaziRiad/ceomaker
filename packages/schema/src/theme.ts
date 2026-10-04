@@ -27,14 +27,13 @@ export const siteColorsSchema = z.object({
 export type SiteColors = z.output<typeof siteColorsSchema>;
 
 /**
- * One treatment for every photo on the site, so phone snaps, press shots and studio portraits
- * read as one set. "tinted" turns them grey and washes them in the accent colour, "mono" is
- * black and white, "natural" keeps colour and pulls it slightly together. Templates that don't
- * treat photos ignore it.
+ * How photos are shown across the site. "original" keeps each photo's own colours; "tinted"
+ * turns them grey and washes them in the accent colour, so mixed photos read as one set; "mono"
+ * is black and white. Templates that don't treat photos ignore it.
  */
-export const PHOTO_GRADES = ["tinted", "mono", "natural"] as const;
+export const PHOTO_GRADES = ["original", "tinted", "mono"] as const;
 export type PhotoGrade = (typeof PHOTO_GRADES)[number];
-export const DEFAULT_PHOTO_GRADE: PhotoGrade = "tinted";
+export const DEFAULT_PHOTO_GRADE: PhotoGrade = "original";
 
 /**
  * Stored on every version. Each template remembers its own colours, so switching templates and

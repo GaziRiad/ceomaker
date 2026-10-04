@@ -15,10 +15,17 @@ import {
   type TestimonialItem,
 } from "@ceomaker/schema";
 import type { TemplateDefinition } from "@ceomaker/templates";
-import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { Blueprint, Spinner } from "@/components/ui";
 import type { RewriteMode } from "@/lib/ai/draft";
-import { SECTION_LABELS, type FieldErrors } from "./editor-model";
+import { SECTION_LABELS, sectionIdOfField, type FieldErrors } from "./editor-model";
 import { RemoveButton, TextAreaField, TextField } from "./fields";
 import { ImageField, PhotosField, PortraitField } from "./portrait-field";
 import { UpgradePrompt } from "@/components/pro";
@@ -52,6 +59,8 @@ export interface ContentPanelProps {
   rewriteError: string | null;
   /** Bumped when text is edited in the preview, so forms that keep local text re-read it. */
   revision: number;
+  /** Bumped by "Fix" in the save status: the form opens at its first field with an error. */
+  fixRequest: number;
   /** The current template, for settings only some templates show (the contact form, photos). */
   template: Pick<TemplateDefinition, "name" | "contactForm" | "shows">;
   /** The contact form can only be switched on with Pro. */
@@ -72,16 +81,32 @@ export function ContentPanel(props: ContentPanelProps) {
   const { content, selectedId } = props;
   const sections = (content.sections as Editable[]).filter(offered(props.template));
   const selected = sections.find((section) => section.id === selectedId) ?? sections[0]!;
+  const form = useRef<HTMLDivElement>(null);
+  const { fixRequest } = props;
+
+  // After "Fix", the form has remounted with the failing row open: go to its first bad field.
+  useEffect(() => {
+    if (!fixRequest) return;
+    const frame = requestAnimationFrame(() => {
+      const field = form.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+      const target = field ?? form.current;
+      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      field?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [fixRequest]);
+
   return (
     <>
       <SectionList {...props} sections={sections} />
       <div
         key={selected.id}
+        ref={form}
         className="cm-rise flex flex-col gap-3.5 border-t border-divider"
         style={{ padding: "16px 16px 40px", "--delay": "0ms" } as React.CSSProperties}
       >
         <span className="kicker">{SECTION_LABELS[selected.type]}</span>
-        <SectionForm key={props.revision} {...props} section={selected} />
+        <SectionForm key={`${props.revision}-${fixRequest}`} {...props} section={selected} />
       </div>
     </>
   );
@@ -92,10 +117,12 @@ function SectionList({
   sections,
   selectedId,
   template,
+  errors,
   onSelect,
   onSections,
 }: ContentPanelProps & { sections: Editable[] }) {
   const rows = useRef(new Map<string, HTMLDivElement>());
+  const failing = new Set([...errors.keys()].map((path) => sectionIdOfField(content, path)));
   const [dragging, setDragging] = useState<string | null>(null);
   const middle = sections.slice(1, -1);
 
@@ -200,7 +227,15 @@ function SectionList({
                 ⋮⋮
               </button>
             )}
-            <span className="flex-1 text-[15px]">{label}</span>
+            <span className="flex flex-1 items-center gap-2 text-[15px]">
+              {label}
+              {failing.has(section.id) ? (
+                <span className="flex items-center gap-1.5 text-xs text-danger">
+                  <span aria-hidden className="size-1.5 rounded-full bg-danger" />
+                  Needs fixing
+                </span>
+              ) : null}
+            </span>
             {fixed ? (
               <span className="px-2 text-xs text-neutral-500">Fixed</span>
             ) : (
@@ -227,7 +262,12 @@ function SectionList({
 
 function SectionForm(props: ContentPanelProps & { section: Editable }) {
   const { section } = props;
-  const error = (path: string) => props.errors.get(`${section.id}.${path}`);
+  const error = (path: string, prefix = false) => {
+    const key = `${section.id}.${path}`;
+    if (!prefix) return props.errors.get(key);
+    for (const [found, message] of props.errors) if (found.startsWith(key)) return message;
+    return undefined;
+  };
   const update = <T extends Editable>(change: (current: T) => T) =>
     props.onSection(section.id, (current) => change(current as T));
 
@@ -271,7 +311,8 @@ function SectionForm(props: ContentPanelProps & { section: Editable }) {
 
 type FormProps<T extends EditableSectionType> = {
   section: SectionOf<T>;
-  error: (path: string) => string | undefined;
+  /** The error of a field; with `prefix`, the first error of any field under that path. */
+  error: (path: string, prefix?: boolean) => string | undefined;
   update: (change: (current: SectionOf<T>) => SectionOf<T>) => void;
 };
 
@@ -609,6 +650,7 @@ function ItemList<T>({
   onRemove,
   removeLabel,
   max,
+  invalid,
 }: {
   items: T[];
   summary: (item: T) => ReactNode;
@@ -618,12 +660,21 @@ function ItemList<T>({
   onRemove: (index: number) => void;
   removeLabel: string;
   max: number;
+  /** Rows with a field that needs fixing: marked, and the first one opens. */
+  invalid: (index: number) => boolean;
 }) {
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<number | null>(() => {
+    const first = items.findIndex((_, index) => invalid(index));
+    return first >= 0 ? first : null;
+  });
   return (
     <>
       {items.map((item, index) => (
-        <div key={index} className="flex flex-col border border-divider">
+        <div
+          key={index}
+          className="flex flex-col border"
+          style={{ borderColor: invalid(index) ? "var(--color-danger)" : "var(--color-divider)" }}
+        >
           <button
             type="button"
             className="flex flex-col gap-0.5 p-3 text-left hover:bg-accent-100"
@@ -631,6 +682,7 @@ function ItemList<T>({
             onClick={() => setOpen(open === index ? null : index)}
           >
             {summary(item)}
+            {invalid(index) ? <span className="text-xs text-danger">Needs fixing</span> : null}
           </button>
           {open === index ? (
             <div className="flex flex-col gap-2.5 border-t border-divider bg-bg p-3">
@@ -677,6 +729,7 @@ function ExperienceForm({ section, error, update }: FormProps<"experience">) {
     <>
       <ItemList
         items={section.items}
+        invalid={(index) => Boolean(error(`items.${index}.`, true))}
         max={20}
         addLabel="+ Add a role"
         removeLabel="Remove this role"
@@ -761,6 +814,7 @@ function WorkForm({ section, error, update, template }: FormProps<"portfolio"> &
     <>
       <ItemList
         items={section.items}
+        invalid={(index) => Boolean(error(`items.${index}.`, true))}
         max={12}
         addLabel="+ Add a talk, article or board seat"
         removeLabel="Remove this item"
@@ -853,6 +907,7 @@ function QuotesForm({
     <>
       <ItemList
         items={section.items}
+        invalid={(index) => Boolean(error(`items.${index}.`, true))}
         max={10}
         addLabel="+ Add a quote"
         removeLabel="Remove this quote"

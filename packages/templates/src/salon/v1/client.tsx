@@ -4,6 +4,59 @@ import type { SocialKind } from "@ceomaker/schema";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./icons";
 
+/**
+ * Depth for the hero's photos: they shift a little against the pointer, nearer ones more, and
+ * part from the name as the page scrolls. Sets --sl-mx, --sl-my (pointer, -1 to 1) and --sl-sp
+ * (how far the hero has scrolled away, 0 to 1); salon.css turns them into movement. Nothing
+ * runs under reduced motion or in thumbnails, and without it the photos simply stay put.
+ */
+export function SalonDrift() {
+  const marker = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const hero = marker.current?.closest<HTMLElement>(".sl-hero");
+    if (!hero || hero.closest("[data-still]")) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const clamp = (value: number) => Math.min(1, Math.max(-1, value));
+    const target = { x: 0, y: 0 };
+    const now = { x: 0, y: 0 };
+    let frame = 0;
+    const tick = () => {
+      frame = 0;
+      now.x += (target.x - now.x) * 0.06;
+      now.y += (target.y - now.y) * 0.06;
+      const box = hero.getBoundingClientRect();
+      const scrolled = Math.min(1, Math.max(0, -box.top / Math.max(1, box.height)));
+      hero.style.setProperty("--sl-mx", now.x.toFixed(4));
+      hero.style.setProperty("--sl-my", now.y.toFixed(4));
+      hero.style.setProperty("--sl-sp", scrolled.toFixed(4));
+      // Keep easing toward the pointer until it's there.
+      if (Math.abs(target.x - now.x) + Math.abs(target.y - now.y) > 0.002) schedule();
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(tick);
+    };
+    const onPointer = (event: PointerEvent) => {
+      const box = hero.getBoundingClientRect();
+      if (box.bottom < 0 || box.top > window.innerHeight) return;
+      target.x = clamp((event.clientX - (box.left + box.width / 2)) / (box.width / 2));
+      target.y = clamp((event.clientY - (box.top + box.height / 2)) / (box.height / 2));
+      schedule();
+    };
+    const pointer = window.matchMedia("(pointer: fine)").matches;
+    if (pointer) window.addEventListener("pointermove", onPointer, { passive: true });
+    // Scroll events don't bubble; capturing them catches the editor's scrolling canvas too.
+    window.addEventListener("scroll", schedule, { passive: true, capture: true });
+    schedule();
+    return () => {
+      cancelAnimationFrame(frame);
+      if (pointer) window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("scroll", schedule, { capture: true });
+      for (const name of ["--sl-mx", "--sl-my", "--sl-sp"]) hero.style.removeProperty(name);
+    };
+  }, []);
+  return <span ref={marker} hidden />;
+}
+
 export interface MenuItem {
   href: string;
   label: string;

@@ -347,6 +347,9 @@ interface Placement {
   /** Where it drifts in from: outward and from its own edge. */
   dx: string;
   dy: string;
+  /** Which way it moves away from the centre as the page scrolls: -1 or 1, across and down. */
+  sx: number;
+  sy: number;
 }
 
 interface Collage {
@@ -374,6 +377,8 @@ function placeAll(count: number, slots: Slot[], scale: number) {
       ratio: String(at.r),
       dx: `${left + width / 2 < 50 ? -18 : 18}px`,
       dy: `${at.top ? -14 : 14}px`,
+      sx: left + width / 2 < 50 ? -1 : 1,
+      sy: at.top ? -1 : 1,
     };
   });
   return { places, top, bottom };
@@ -401,6 +406,34 @@ function collage(
   };
 }
 
+/**
+ * How each hero photo keeps moving once it's in: how near it seems (nearer ones move more with
+ * the pointer and the scroll), and the length, start and reach of its slow float. Varied by
+ * place so no two photos move in step.
+ */
+const DRIFT = [
+  { depth: 1.2, seconds: 13, start: 0, reach: 1.1 },
+  { depth: 0.8, seconds: 11, start: 3, reach: 0.8 },
+  { depth: 1.0, seconds: 15, start: 6, reach: 1.3 },
+  { depth: 1.4, seconds: 12, start: 2, reach: 0.9 },
+  { depth: 0.9, seconds: 16, start: 8, reach: 1.2 },
+  { depth: 0.7, seconds: 10, start: 5, reach: 0.7 },
+  { depth: 1.1, seconds: 14, start: 1, reach: 1.0 },
+  { depth: 0.6, seconds: 12.5, start: 7, reach: 0.8 },
+  { depth: 1.3, seconds: 11.5, start: 4, reach: 1.1 },
+];
+
+export function driftVars(index: number): CSSProperties {
+  const drift = DRIFT[index % DRIFT.length]!;
+  return {
+    "--sl-depth": String(drift.depth),
+    "--sl-bob-t": `${drift.seconds}s`,
+    // A negative start puts each photo part way through its loop, so they never move in step.
+    "--sl-bob-d": `-${drift.start}s`,
+    "--sl-reach": `${drift.reach}cqw`,
+  } as CSSProperties;
+}
+
 export function heroCollage(count: number): Collage {
   return collage(Math.min(count, HERO_PHOTOS.wide), HERO_SLOTS, 1.25);
 }
@@ -422,6 +455,8 @@ export function placeVars(place: Record<Device, Placement | null>): CSSPropertie
     vars[`--sl-ratio-${device}`] = at.ratio;
     vars[`--sl-dx-${device}`] = at.dx;
     vars[`--sl-dy-${device}`] = at.dy;
+    vars[`--sl-sx-${device}`] = String(at.sx);
+    vars[`--sl-sy-${device}`] = String(at.sy);
   }
   return vars as CSSProperties;
 }
@@ -498,12 +533,12 @@ export function salonRoleStyle(colors: SiteColors): CSSProperties {
 
 /** One treatment for every photo: a filter, and the accent laid over it in colour blend. */
 const GRADES: Record<PhotoGrade, { filter: string; overlay: string }> = {
+  original: { filter: "none", overlay: "0" },
   tinted: { filter: "grayscale(1) contrast(1.06) brightness(0.94)", overlay: "0.32" },
   mono: { filter: "grayscale(1) contrast(1.08)", overlay: "0" },
-  natural: { filter: "saturate(0.82) contrast(1.03)", overlay: "0.08" },
 };
 
 export function gradeStyle(grade: PhotoGrade): CSSProperties {
-  const { filter, overlay } = GRADES[grade] ?? GRADES.tinted;
+  const { filter, overlay } = GRADES[grade] ?? GRADES.original;
   return { "--sl-gf": filter, "--sl-go": overlay } as CSSProperties;
 }

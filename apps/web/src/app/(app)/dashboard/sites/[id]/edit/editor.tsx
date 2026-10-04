@@ -144,6 +144,8 @@ export function Editor({
   const [device, setDevice] = useState(initialDevice);
   // Bumped by picks in the sidebar, so the canvas scrolls to them (page clicks don't scroll).
   const [selectionScroll, setSelectionScroll] = useState(0);
+  // Bumped by "Fix" in the save status, so the form opens at the first field that needs fixing.
+  const [fixRequest, setFixRequest] = useState(0);
 
   const latest = useRef(draft);
   const savedPrint = useRef(fingerprint(initialDraft));
@@ -158,7 +160,12 @@ export function Editor({
     chain.current = chain.current.then(async () => {
       const target = latest.current;
       const print = fingerprint(target);
-      if (print === savedPrint.current) return true;
+      if (print === savedPrint.current) {
+        // Back to what's saved (say a section with errors was hidden again): nothing to fix.
+        setErrors((current) => (current.size ? new Map() : current));
+        setSaveState((current) => (current === "invalid" ? "saved" : current));
+        return true;
+      }
       const prepared = prepareForSave(target.content);
       if (!prepared.ok) {
         setErrors(prepared.errors);
@@ -190,10 +197,10 @@ export function Editor({
 
   // Autosave shortly after the last change.
   useEffect(() => {
-    if (fingerprint(draft) === savedPrint.current) return;
+    if (fingerprint(draft) === savedPrint.current && saveState !== "invalid") return;
     const timer = setTimeout(() => void save(), AUTOSAVE_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [draft, save]);
+  }, [draft, save, saveState]);
 
   // Warn before leaving with unsaved edits.
   useEffect(() => {
@@ -374,6 +381,15 @@ export function Editor({
     setTab("content");
     setSelectedId(id);
   };
+  /** Opens the form at the first field that needs fixing, and shows its section on the page. */
+  const showFirstError = () => {
+    const [path] = errors.keys();
+    const sectionId = path ? sectionIdOfField(draft.content, path) : null;
+    if (!sectionId) return;
+    setTab("content");
+    selectFromSidebar(sectionId);
+    setFixRequest((count) => count + 1);
+  };
   const saveLabel = {
     saved: "All changes saved",
     saving: "Saving…",
@@ -408,7 +424,17 @@ export function Editor({
             className="size-[7px] rounded-full transition-[background] duration-300"
             style={{ background: saveDot }}
           />
-          <span className="hidden sm:inline">{saveLabel}</span>
+          {saveState === "invalid" ? (
+            <button
+              type="button"
+              className="hidden underline decoration-danger underline-offset-4 hover:text-text sm:inline"
+              onClick={showFirstError}
+            >
+              Fix highlighted fields to save
+            </button>
+          ) : (
+            <span className="hidden sm:inline">{saveLabel}</span>
+          )}
           {saveState === "error" ? (
             <button type="button" className="btn btn-ghost" onClick={() => void save()}>
               Retry
@@ -489,6 +515,7 @@ export function Editor({
               rewriting={rewriting}
               rewriteError={rewriteError}
               revision={formRevision}
+              fixRequest={fixRequest}
               template={{
                 name: template.name,
                 contactForm: template.contactForm,

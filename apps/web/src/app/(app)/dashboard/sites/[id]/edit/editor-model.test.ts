@@ -2,6 +2,7 @@ import {
   demoSiteContent,
   parseSiteContent,
   withResolvedColors,
+  type SectionOf,
   type SiteContent,
 } from "@ceomaker/schema";
 import { describe, expect, it } from "vitest";
@@ -241,6 +242,63 @@ describe("the closing section", () => {
   });
 });
 
+describe("hidden sections", () => {
+  const withSection = (
+    content: SiteContent,
+    type: string,
+    change: (section: never) => unknown,
+  ) => ({
+    ...content,
+    sections: content.sections.map((section) =>
+      section.type === type ? (change(section as never) as typeof section) : section,
+    ),
+  });
+
+  it("never block saving: rows that don't validate yet are left out of the saved copy", () => {
+    const content = demo();
+    const half = (visible: boolean) =>
+      withSection(content, "experience", (section: SectionOf<"experience">) => ({
+        ...section,
+        visible,
+        items: [...section.items, { role: "Chair", organization: "" }],
+      }));
+    const blocked = prepareForSave(half(true));
+    expect(!blocked.ok && blocked.errors.get("experience.items.3.organization")).toBe("Required");
+    const saved = prepareForSave(half(false));
+    expect(saved.ok && sectionOf(saved.content, "experience")?.items).toEqual(
+      sectionOf(content, "experience")?.items,
+    );
+  });
+
+  it("drop a call to action whose button was typed and emptied, or keep what's valid", () => {
+    const content = demo();
+    const emptied = withSection(content, "cta", (section: SectionOf<"cta">) => ({
+      ...section,
+      visible: true,
+      button: { label: "", href: "#contact" },
+    }));
+    const saved = prepareForSave(emptied);
+    expect(saved.ok && saved.content.sections.some((section) => section.type === "cta")).toBe(
+      false,
+    );
+    const badLink = withSection(content, "cta", (section: SectionOf<"cta">) => ({
+      ...section,
+      headline: "Let's talk",
+      button: { label: "Write", href: "javascript:alert(1)" },
+    }));
+    const kept = prepareForSave(badLink);
+    expect(kept.ok && sectionOf(kept.content, "cta")).toMatchObject({
+      headline: "Let's talk",
+      button: undefined,
+    });
+    expect(
+      prepareForSave(
+        withSection(badLink, "cta", (s: SectionOf<"cta">) => ({ ...s, visible: true })),
+      ).ok,
+    ).toBe(false);
+  });
+});
+
 describe("comparing the draft with the live site", () => {
   const draft = {
     templateKey: "meridian" as const,
@@ -263,7 +321,7 @@ describe("comparing the draft with the live site", () => {
   });
 
   it("counts a change of photo grade", () => {
-    expect(liveFingerprint({ ...draft, theme: { palettes: {}, photoGrade: "tinted" } })).toBe(
+    expect(liveFingerprint({ ...draft, theme: { palettes: {}, photoGrade: "original" } })).toBe(
       liveFingerprint(draft),
     );
     expect(liveFingerprint({ ...draft, theme: { palettes: {}, photoGrade: "mono" } })).not.toBe(

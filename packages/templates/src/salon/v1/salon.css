@@ -485,6 +485,8 @@
   aspect-ratio: var(--sl-ratio-p);
   --sl-dx: var(--sl-dx-p);
   --sl-dy: var(--sl-dy-p);
+  --sl-sx: var(--sl-sx-p);
+  --sl-sy: var(--sl-sy-p);
 }
 
 .sl-float[data-wide] {
@@ -495,8 +497,26 @@
   box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.6);
 }
 
+/* The hero's photos keep moving once they're in: each floats slowly on its own loop, shifts a
+   little against the pointer (nearer ones more) and parts from the name as the page scrolls.
+   SalonDrift (client.tsx) sets --sl-mx, --sl-my and --sl-sp; without it they stay put. */
 .sl-hero .sl-float {
   animation: sl-drift 1800ms var(--sl-ease) both;
+  translate: calc(
+      var(--sl-mx, 0) * var(--sl-depth, 1) * -1.8cqw + var(--sl-sp, 0) * var(--sl-sx, 0) *
+        var(--sl-depth, 1) * 8cqw
+    )
+    calc(
+      var(--sl-my, 0) * var(--sl-depth, 1) * -1.4cqw + var(--sl-sp, 0) * var(--sl-sy, 0) *
+        var(--sl-depth, 1) * 8cqw
+    );
+  will-change: transform, translate;
+}
+
+.sl-bob {
+  position: absolute;
+  inset: 0;
+  animation: sl-bob var(--sl-bob-t, 12s) ease-in-out var(--sl-bob-d, 0s) infinite;
 }
 
 @container (min-width: 600px) {
@@ -508,6 +528,8 @@
     aspect-ratio: var(--sl-ratio-t);
     --sl-dx: var(--sl-dx-t);
     --sl-dy: var(--sl-dy-t);
+    --sl-sx: var(--sl-sx-t);
+    --sl-sy: var(--sl-sy-t);
   }
 
   .sl-float[data-wide] {
@@ -524,6 +546,8 @@
     aspect-ratio: var(--sl-ratio-d);
     --sl-dx: var(--sl-dx-d);
     --sl-dy: var(--sl-dy-d);
+    --sl-sx: var(--sl-sx-d);
+    --sl-sy: var(--sl-sy-d);
   }
 }
 
@@ -1811,6 +1835,22 @@
   }
 }
 
+@keyframes sl-bob {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(var(--sl-reach), calc(var(--sl-reach) * -0.7)) rotate(0.6deg);
+  }
+  50% {
+    transform: translate(calc(var(--sl-reach) * 0.3), calc(var(--sl-reach) * -1.4)) rotate(0deg);
+  }
+  75% {
+    transform: translate(calc(var(--sl-reach) * -0.8), calc(var(--sl-reach) * -0.6)) rotate(-0.6deg);
+  }
+}
+
 @keyframes sl-spin {
   to {
     transform: rotate(360deg);
@@ -1829,4 +1869,12 @@
 .sl[data-static] *:not(.sl-spinner),
 .ceomaker-site[data-still] .sl * {
   animation: none !important;
+}
+
+/* The hero's photos still float in the editor, so the owner sees them as visitors will; the
+   float never hides anything. */
+@media (prefers-reduced-motion: no-preference) {
+  .sl[data-static] .sl-hero .sl-bob {
+    animation: sl-bob var(--sl-bob-t, 12s) ease-in-out var(--sl-bob-d, 0s) infinite !important;
+  }
 }

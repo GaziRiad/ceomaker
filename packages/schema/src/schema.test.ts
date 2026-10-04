@@ -255,13 +255,13 @@ describe("theme", () => {
     expect(parseThemeSettingsForRender(null)).toEqual({ palettes: {} });
   });
 
-  it("keeps a valid photo grade, defaults to tinted and drops anything else", () => {
+  it("keeps a valid photo grade, defaults to original colours and drops anything else", () => {
     expect(themeSettingsSchema.parse({ photoGrade: "mono" }).photoGrade).toBe("mono");
     expect(themeSettingsSchema.safeParse({ photoGrade: "sepia" }).success).toBe(false);
-    expect(resolvePhotoGrade(themeSettingsSchema.parse({}))).toBe("tinted");
+    expect(resolvePhotoGrade(themeSettingsSchema.parse({}))).toBe("original");
     expect(
-      parseThemeSettingsForRender({ palettes: { meridian: "bad" }, photoGrade: "natural" }),
-    ).toEqual({ palettes: {}, photoGrade: "natural" });
+      parseThemeSettingsForRender({ palettes: { meridian: "bad" }, photoGrade: "tinted" }),
+    ).toEqual({ palettes: {}, photoGrade: "tinted" });
     expect(parseThemeSettingsForRender({ palettes: { meridian: "bad" }, photoGrade: 3 })).toEqual({
       palettes: {},
     });

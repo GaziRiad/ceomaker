@@ -15,7 +15,7 @@ import {
 } from "../../model";
 import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink } from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
-import { SalonMenu, SalonQuotes } from "./client";
+import { SalonDrift, SalonMenu, SalonQuotes } from "./client";
 import { Icon } from "./icons";
 import {
   ctaCollage,
@@ -34,6 +34,7 @@ import {
   tileSizes,
   titleSizes,
   ctaSizes,
+  driftVars,
   type HeroMode,
 } from "./measure";
 
@@ -93,6 +94,7 @@ function Floats({
   delay,
   stagger,
   rise,
+  drift,
 }: {
   photos: ModelImage[];
   places: ReturnType<typeof heroCollage>["places"];
@@ -102,6 +104,8 @@ function Floats({
   stagger: number;
   /** Rise with the scroll instead of drifting in on load. */
   rise?: boolean;
+  /** Keep moving once in: a slow float, and depth with the pointer and the scroll. */
+  drift?: boolean;
 }) {
   return places.map((place, index) => (
     <span
@@ -111,10 +115,17 @@ function Floats({
       data-wide={index >= phone || undefined}
       style={{
         ...placeVars(place),
+        ...(drift ? driftVars(index) : null),
         animationDelay: rise ? undefined : `${Math.round((delay + index * stagger) * 1000)}ms`,
       }}
     >
-      <Photo image={photos[index]!} eager={!rise} />
+      {drift ? (
+        <span className="sl-bob">
+          <Photo image={photos[index]!} eager />
+        </span>
+      ) : (
+        <Photo image={photos[index]!} eager={!rise} />
+      )}
     </span>
   ));
 }
@@ -230,8 +241,10 @@ function Hero({ model }: { model: SiteModel }) {
             phone={HERO_PHOTOS.phone}
             delay={0.3}
             stagger={0.12}
+            drift
           />
         ) : null}
+        {collage ? <SalonDrift /> : null}
         <div className="sl-hero-centre">
           {mode === "portrait" ? (
             <span className="sl-frame sl-portrait">

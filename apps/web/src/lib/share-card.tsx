@@ -27,6 +27,9 @@ const FONT_FILES = [
   ["Public Sans", "PublicSans-500.ttf", 500],
   ["Public Sans", "PublicSans-600.ttf", 600],
   ["Big Shoulders Display", "BigShouldersDisplay-900.ttf", 900],
+  ["Italiana", "Italiana-400.ttf", 400],
+  ["Hanken Grotesk", "HankenGrotesk-400.ttf", 400],
+  ["Hanken Grotesk", "HankenGrotesk-600.ttf", 600],
 ] as const;
 
 let fonts: Promise<{ name: string; data: Buffer; weight: 400 | 500 | 600 | 900 }[]> | null = null;
@@ -47,6 +50,8 @@ const IMAGE_FONTS = {
   sans: "Inter",
   display: "Big Shoulders Display",
   body: "Public Sans",
+  salonDisplay: "Italiana",
+  salonBody: "Hanken Grotesk",
 };
 
 /** What the card shows for a live site (already entitled), without the portrait's bytes. */

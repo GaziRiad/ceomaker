@@ -2,6 +2,7 @@ import { contrastRatio, type SiteColors } from "@ceomaker/schema";
 import type { CSSProperties } from "react";
 import { mixHex } from "./meridian/v1/measure";
 import { initialsOf } from "./monogram";
+import { salonRoles, textWidth } from "./salon/v1/measure";
 
 // The image shown when a link to a site is shared (LinkedIn, WhatsApp, email): 1200 x 630,
 // drawn from the template's three colours, the name, role and organisation, and the initials or
@@ -13,7 +14,7 @@ export const SHARE_CARD_WIDTH = 1200;
 export const SHARE_CARD_HEIGHT = 630;
 
 export interface ShareCardProps {
-  /** "meridian" or "monument"; anything else is drawn as Meridian. */
+  /** "meridian", "monument" or "salon"; anything else is drawn as Meridian. */
   template: string;
   colors: SiteColors;
   name: string;
@@ -24,7 +25,15 @@ export interface ShareCardProps {
   /** Portrait, as a URL the renderer can load. */
   photo?: string | undefined;
   /** Font families: the browser passes its CSS variables, the image renderer its loaded fonts. */
-  fonts: { serif: string; sans: string; display: string; body: string };
+  fonts: {
+    serif: string;
+    sans: string;
+    display: string;
+    body: string;
+    /** Salon's display serif (Italiana) and its reading face (Hanken Grotesk). */
+    salonDisplay: string;
+    salonBody: string;
+  };
 }
 
 const clamp2: CSSProperties = {
@@ -59,8 +68,27 @@ export function meridianNameSize(name: string): number {
   return name.length <= 14 ? 112 : name.length <= 22 ? 92 : 72;
 }
 
+/**
+ * Name size on Salon, set uppercase in Italiana: as large as fits its column, on at most two
+ * lines without a photo (three beside one), never breaking a word.
+ */
+export function salonNameSize(name: string, withPhoto: boolean): number {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const longest = Math.max(2, ...words.map(textWidth));
+  const total = Math.max(2, textWidth(name));
+  const room = withPhoto ? 600 : 1000;
+  const lines = withPhoto ? 3 : 2;
+  const largest = withPhoto ? 112 : 150;
+  // One line if it fits at a good size; otherwise as many lines as allowed.
+  const oneLine = room / total;
+  const size = oneLine >= largest * 0.7 ? oneLine : (room * lines) / (total * 1.15);
+  return Math.round(Math.min(largest, size, room / longest));
+}
+
 export function ShareCard(props: ShareCardProps) {
-  return props.template === "monument" ? <MonumentCard {...props} /> : <MeridianCard {...props} />;
+  if (props.template === "monument") return <MonumentCard {...props} />;
+  if (props.template === "salon") return <SalonCard {...props} />;
+  return <MeridianCard {...props} />;
 }
 
 function MeridianCard({ colors, name, role, organization, domain, photo, fonts }: ShareCardProps) {
@@ -292,6 +320,163 @@ function MonumentCard({ colors, name, role, organization, domain, photo, fonts }
             height={SHARE_CARD_HEIGHT}
             style={{ width: 400, height: SHARE_CARD_HEIGHT, objectFit: "cover" }}
           />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Four corner brackets inside a box of the given size, as Salon frames photos and buttons.
+ * Placed from the top left only: the image renderer doesn't honour `right` here.
+ */
+function Brackets({
+  width,
+  height,
+  inset,
+  arm,
+  color,
+}: {
+  width: number;
+  height: number;
+  inset: number;
+  arm: number;
+  color: string;
+}) {
+  const stroke = 1.5;
+  const near = inset;
+  const farX = width - inset;
+  const farY = height - inset;
+  const lines: CSSProperties[] = [
+    { left: near, top: near, width: arm, height: stroke },
+    { left: near, top: near, width: stroke, height: arm },
+    { left: farX - arm, top: near, width: arm, height: stroke },
+    { left: farX - stroke, top: near, width: stroke, height: arm },
+    { left: near, top: farY - stroke, width: arm, height: stroke },
+    { left: near, top: farY - arm, width: stroke, height: arm },
+    { left: farX - arm, top: farY - stroke, width: arm, height: stroke },
+    { left: farX - stroke, top: farY - arm, width: stroke, height: arm },
+  ];
+  return (
+    <>
+      {lines.map((style, index) => (
+        <div
+          key={index}
+          style={{ position: "absolute", display: "flex", background: color, ...style }}
+        />
+      ))}
+    </>
+  );
+}
+
+function SalonCard({ colors, name, role, organization, domain, photo, fonts }: ShareCardProps) {
+  const salon = salonRoles(colors);
+  const ink2 = mixHex(colors.ink, colors.bg, salon.secondary / 100);
+  const act = mixHex(colors.accent, colors.ink, salon.accentText / 100);
+  const bracket = mixHex(colors.ink, colors.bg, salon.bracket / 100);
+  const kicker = [role, organization].filter(Boolean).join(" · ");
+  const size = salonNameSize(name, Boolean(photo));
+  const centred = !photo;
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        width: SHARE_CARD_WIDTH,
+        height: SHARE_CARD_HEIGHT,
+        overflow: "hidden",
+        background: colors.bg,
+        color: colors.ink,
+        fontFamily: fonts.salonBody,
+      }}
+    >
+      <Brackets
+        width={SHARE_CARD_WIDTH}
+        height={SHARE_CARD_HEIGHT}
+        inset={36}
+        arm={44}
+        color={bracket}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: centred ? 100 : 96,
+          right: centred ? 100 : 480,
+          top: 92,
+          bottom: 92,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: centred ? "center" : "flex-start",
+          justifyContent: "space-between",
+          textAlign: centred ? "center" : "left",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            fontWeight: 600,
+            fontSize: 18,
+            lineHeight: 1.5,
+            letterSpacing: "0.18em",
+            color: act,
+            maxWidth: centred ? 900 : 600,
+          }}
+        >
+          {kicker.toLocaleUpperCase() || " "}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: centred ? "center" : "flex-start",
+            fontFamily: fonts.salonDisplay,
+            fontWeight: 400,
+            fontSize: size,
+            lineHeight: 1,
+            letterSpacing: "0.01em",
+            textWrap: "balance",
+          }}
+        >
+          {name.toLocaleUpperCase()}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 20, color: ink2 }}>
+          <div style={{ width: 28, height: 1, background: colors.accent }} />
+          <div style={{ display: "flex" }}>{domain}</div>
+          {centred ? <div style={{ width: 28, height: 1, background: colors.accent }} /> : null}
+        </div>
+      </div>
+      {photo ? (
+        <div
+          style={{
+            position: "absolute",
+            right: 106,
+            top: 112,
+            width: 324,
+            height: 406,
+            display: "flex",
+          }}
+        >
+          <Brackets width={324} height={406} inset={-10} arm={14} color={bracket} />
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: 324,
+              height: 406,
+              display: "flex",
+              overflow: "hidden",
+              background: mixHex(colors.ink, colors.bg, 0.09),
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- also drawn by the image renderer */}
+            <img
+              src={photo}
+              alt=""
+              width={324}
+              height={406}
+              style={{ width: 324, height: 406, objectFit: "cover" }}
+            />
+          </div>
         </div>
       ) : null}
     </div>

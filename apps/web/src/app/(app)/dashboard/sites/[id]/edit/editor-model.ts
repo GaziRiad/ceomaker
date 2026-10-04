@@ -1,15 +1,19 @@
 import {
+  achievementItem,
   EDITABLE_SECTION_TYPES,
+  experienceItem,
   FIXED_SECTION_TYPES,
   LABEL_KEY,
   normalizeTemplateKey,
   parseSiteContent,
   parseThemeSettingsForRender,
+  portfolioItem,
   resolvePhotoGrade,
   resolveSiteColors,
   resolveTemplateRef,
   sectionSchema,
   siteMetaSchema,
+  testimonialItem,
   themeSettingsSchema,
   type EditableSectionType,
   type RenderableSiteContent,
@@ -181,11 +185,10 @@ function cleanSection(section: Section): Section {
       };
     case "cta": {
       const button = section.button;
-      return {
-        ...section,
-        body: optional(section.body),
-        button: button && (!blank(button.label) || !blank(button.href)) ? button : undefined,
-      };
+      // The form fills in "#contact" as the link; with no label left, there's no button.
+      const used =
+        button && (!blank(button.label) || (!blank(button.href) && button.href !== "#contact"));
+      return { ...section, body: optional(section.body), button: used ? button : undefined };
     }
     default:
       return section;
@@ -224,7 +227,62 @@ function cleanMeta(meta: SiteMeta): SiteMeta {
   };
 }
 
+const ITEM_SCHEMAS = {
+  achievements: achievementItem,
+  experience: experienceItem,
+  portfolio: portfolioItem,
+  testimonials: testimonialItem,
+};
+
+/**
+ * A hidden section never stops the draft saving: whatever doesn't validate yet (a half-filled
+ * row, a call to action without a headline) is left out of the saved copy. The editor keeps
+ * showing it as typed, and its fields are checked again once the section is shown.
+ */
+function salvage(section: Section): Section | null {
+  if (section.visible || sectionSchema.safeParse(section).success) return section;
+  switch (section.type) {
+    case "achievements":
+    case "experience":
+    case "portfolio":
+    case "testimonials": {
+      const schema = ITEM_SCHEMAS[section.type];
+      const items = (section.items as unknown[]).filter((item) => schema.safeParse(item).success);
+      return { ...section, items } as Section;
+    }
+    case "cta": {
+      const valid = (candidate: Section) => sectionSchema.safeParse(candidate).success;
+      const bare = { ...section, body: undefined, button: undefined };
+      if (!valid(bare)) return null;
+      return {
+        ...bare,
+        body: valid({ ...bare, body: section.body }) ? section.body : undefined,
+        button: valid({ ...bare, button: section.button }) ? section.button : undefined,
+      };
+    }
+    default:
+      return section;
+  }
+}
+
 export type FieldErrors = Map<string, string>;
+
+/** The schema's message in the owner's words: "Required", not "expected string to have >=1". */
+function plainMessage(issue: {
+  code: string;
+  message: string;
+  minimum?: unknown;
+  maximum?: unknown;
+  origin?: unknown;
+}): string {
+  if (issue.code === "too_small" && issue.origin === "string") {
+    return Number(issue.minimum) <= 1 ? "Required" : `At least ${issue.minimum} characters`;
+  }
+  if (issue.code === "too_big" && issue.origin === "string") {
+    return `Up to ${issue.maximum} characters`;
+  }
+  return issue.message;
+}
 
 export type Prepared = { ok: true; content: SiteContent } | { ok: false; errors: FieldErrors };
 
@@ -233,7 +291,11 @@ export function prepareForSave(content: SiteContent): Prepared {
   const cleaned = {
     ...content,
     meta: cleanMeta(content.meta),
-    sections: content.sections.map(cleanSection).filter((section) => !untouched(section)),
+    sections: content.sections
+      .map(cleanSection)
+      .filter((section) => !untouched(section))
+      .map(salvage)
+      .filter((section) => section !== null),
   };
   const parsed = parseSiteContent(cleaned);
   if (parsed.success) return { ok: true, content: parsed.data };
@@ -246,7 +308,7 @@ export function prepareForSave(content: SiteContent): Prepared {
       if (section) path.splice(0, 2, section.id);
     }
     const key = path.join(".");
-    if (!errors.has(key)) errors.set(key, issue.message);
+    if (!errors.has(key)) errors.set(key, plainMessage(issue));
   }
   return { ok: false, errors };
 }

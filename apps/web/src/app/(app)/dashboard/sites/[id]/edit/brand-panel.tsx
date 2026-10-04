@@ -22,12 +22,12 @@ const COLOR_ROWS: { key: keyof SiteColors; label: string; hint: string }[] = [
 ];
 
 const GRADES: Record<PhotoGrade, { label: string; hint: string }> = {
+  original: { label: "Original", hint: "Each photo keeps its own colours." },
   tinted: {
     label: "Tinted",
     hint: "Grey, washed in your accent colour, so phone snaps and press shots read as one set.",
   },
   mono: { label: "Mono", hint: "Black and white." },
-  natural: { label: "Natural", hint: "Keeps the colour, pulled slightly together." },
 };
 
 function HexInput({
