@@ -51,6 +51,7 @@ import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
 import { removeMedia } from "@/lib/media-store";
 import { isDevice } from "./sites/[id]/edit/devices";
+import { trackServerEvent } from "@/lib/product-analytics/server";
 
 // Every action re-checks the session and passes the user id to queries that scope by owner.
 
@@ -108,6 +109,7 @@ export async function saveEditorDeviceAction(device: string): Promise<{ ok: true
   if (!userId) return SIGNED_OUT;
   if (!isDevice(device)) return { ok: false, error: "Unknown size." };
   await setEditorDevice(getDb(), userId, device);
+  trackServerEvent(userId, "device_preview_changed", { device });
   return { ok: true };
 }
 
@@ -130,6 +132,10 @@ export async function chooseTemplateAction(
     { key: draft.templateKey, version: draft.templateVersion },
   ]);
   await saveDraft(db, { userId, siteId, ...draft, templateKey: key.data, templateVersion });
+  trackServerEvent(userId, "template_chosen", {
+    template: key.data,
+    previous: draft.templateKey,
+  });
   return { ok: true };
 }
 
@@ -181,6 +187,10 @@ export async function publishAction(
     }
     const published = await publishSite(db, { userId, siteId });
     updateTag(siteCacheTag(subdomain));
+    trackServerEvent(userId, "site_published", {
+      template: draft.templateKey,
+      first: published.versionNumber === 1,
+    });
     return {
       ok: true,
       versionNumber: published.versionNumber,
@@ -310,6 +320,7 @@ export async function rewriteHeadlineAction(
   const client = anthropic();
   if (!client) {
     const suggestion = fallbackRewrite(site.answers, mode);
+    if (suggestion) trackServerEvent(userId, "ai_rewrite_used", { mode, ai: false });
     return suggestion
       ? { ok: true, headline: suggestion }
       : { ok: false, error: "AI rewriting isn't switched on yet." };
@@ -368,6 +379,7 @@ export async function rewriteHeadlineAction(
     if (!next || message.stop_reason === "refusal") {
       return { ok: false, error: "That rewrite didn't work. Try another option." };
     }
+    trackServerEvent(userId, "ai_rewrite_used", { mode, ai: true });
     return { ok: true, headline: next };
   } catch (error) {
     await finishAiUsage(db, { id: usage.id, status: "failed" });

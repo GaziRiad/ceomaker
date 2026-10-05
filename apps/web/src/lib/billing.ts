@@ -9,13 +9,17 @@ import {
 import { revalidateTag } from "next/cache";
 import { forgetDomainRouting } from "./domain-routing";
 import { siteCacheTag } from "./sites";
+import { trackServerEvent } from "./product-analytics/server";
 
 // What every billing provider's webhook does once it has checked the signature and read the
 // event: record it, and when the plan changes, make the owner's live site show it.
 
 export async function syncSubscription(event: SubscriptionEvent): Promise<SubscriptionSync> {
   const result = await applySubscriptionEvent(getDb(), event);
-  if (result.outcome === "applied" && result.planChanged) await refreshLiveSites(result.userId);
+  if (result.outcome === "applied" && result.planChanged) {
+    await refreshLiveSites(result.userId);
+    trackServerEvent(result.userId, "plan_changed", { plan: result.plan, cause: "billing" });
+  }
   return result;
 }
 

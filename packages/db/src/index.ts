@@ -17,3 +17,5 @@ export * from "./queries/analytics";
 export * from "./queries/billing";
 export * from "./queries/gifts";
 export * from "./queries/admin";
+export * from "./queries/signup";
+export type { SignupSource } from "./schema";

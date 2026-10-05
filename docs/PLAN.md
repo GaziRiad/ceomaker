@@ -358,4 +358,13 @@ Not built yet: a way to refresh live pages after a plan change by hand (the owne
 - `/api/cron/gifts`, daily at 04:29 UTC: ends gifts whose date has passed (the plan flips within a day of the end) and refreshes those owners' live sites; emails owners whose gift ends within 7 days, once per end date, unless they pay. No email when a gift is given: the owner tells people themselves.
 - Not built: editing users' sites, impersonation, roles, a history of gifts beyond the note, CSV export.
 
+**Product analytics: PostHog (October 2026).** Agreed with the owner: PostHog alone (its error tracking instead of Sentry), EU servers, the product's pages only, and nothing stored in the browser, so no consent banner.
+
+- Memory-only ids, not PostHog's "cookieless mode": that mode forbids linking a visitor to an account. The cost: a visitor who comes back later, or reloads, is a new anonymous visitor; unique visitor counts run high.
+- What's recovered without storage: the visit's source (referrer, `utm_*`, landing page) is read on its first page and travels with the sign-in link to `/api/welcome`, which saves it on the account (`user.signup_source`, migration 0013, saved once and only for accounts under a day old) and merges the visit's anonymous id into the account, so the questions and sign-in steps join the sign-up. A referrer on a customer site counts as `customer-site` (the badge). Not built, on the owner's call: a "How did you hear about us?" question.
+- Funnel steps after sign-up are sent from the server with the account id, so blockers can't drop them. Admin accounts carry `internal: true` to filter out.
+- Privacy: no autocapture (clicks would carry the text people type into their site), no recordings, heatmaps or surveys, flags and remote config off, URLs cleaned before sending (the guided answers travel in `/start/finish?a=…`; `/dns/<token>` is private). The relay `/relay` drops cookies before forwarding (PostHog's own snippet for proxy.ts passes the headers to the response instead). Owner step: "Discard client IP data" in PostHog.
+- Trailing slashes: PostHog's paths end in one, so Next's redirect is off and proxy.ts redirects every other path the same way (308; tested, including that `//other.site/` stays on our host).
+- Not built: deleting a person in PostHog when an account is deleted (needs a personal API key; the data is only linked to an account id, which no longer exists then).
+
 **Next:** decide the next template objectives with the owner before building anything. Earlier ideas the owner raised: sub-pages and a simple blog, menu links to sub-pages, bringing custom titles to the other templates. The constraint stands: easy for busy non-technical people, not a Webflow clone.

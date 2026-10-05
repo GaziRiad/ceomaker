@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { forgetAccount } from "@/lib/product-analytics/browser";
 import { clearFlow } from "../start/storage";
 
 export function SignOutButton() {
@@ -19,6 +20,7 @@ export function SignOutButton() {
         // Answers saved in this browser for the questions belong to whoever was signed in.
         clearFlow();
         await authClient.signOut();
+        forgetAccount();
         router.replace("/");
         router.refresh();
       }}

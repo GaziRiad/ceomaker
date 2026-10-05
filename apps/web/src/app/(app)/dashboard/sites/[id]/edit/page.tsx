@@ -10,6 +10,7 @@ import { initialsFor, loadOwnedSite, toEditableDraft } from "@/lib/site-data";
 import { Editor } from "./editor";
 import { isDevice } from "./devices";
 import { liveFingerprint } from "./editor-model";
+import { IdentifyAccount } from "@/components/product-analytics";
 
 export const metadata: Metadata = { title: "Editor", robots: { index: false } };
 
@@ -31,23 +32,26 @@ async function EditSite({
   const notice = draftNoticeText(query.notice);
   const live = site.published ? toEditableDraft(site.published) : null;
   return (
-    <Editor
-      key={site.id}
-      siteId={site.id}
-      subdomain={site.subdomain}
-      addressPrefix={address.prefix}
-      addressSuffix={address.suffix}
-      initialDraft={draft}
-      publishedFingerprint={site.published ? liveFingerprint(site.published) : null}
-      liveTemplate={live ? { key: live.templateKey, version: live.templateVersion } : null}
-      status={site.status}
-      versionCount={site.versionCount}
-      initials={initialsFor(draft.content.meta.name || user.name, user.email)}
-      notice={notice}
-      pro={isPro(plan)}
-      initialDevice={isDevice(device) ? device : "desktop"}
-      customDomain={isPro(plan) && domain?.stage === "connected" ? domain.domain : null}
-    />
+    <>
+      <IdentifyAccount id={user.id} />
+      <Editor
+        key={site.id}
+        siteId={site.id}
+        subdomain={site.subdomain}
+        addressPrefix={address.prefix}
+        addressSuffix={address.suffix}
+        initialDraft={draft}
+        publishedFingerprint={site.published ? liveFingerprint(site.published) : null}
+        liveTemplate={live ? { key: live.templateKey, version: live.templateVersion } : null}
+        status={site.status}
+        versionCount={site.versionCount}
+        initials={initialsFor(draft.content.meta.name || user.name, user.email)}
+        notice={notice}
+        pro={isPro(plan)}
+        initialDevice={isDevice(device) ? device : "desktop"}
+        customDomain={isPro(plan) && domain?.stage === "connected" ? domain.domain : null}
+      />
+    </>
   );
 }
 

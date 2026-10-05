@@ -63,6 +63,15 @@ const sections: LegalSection[] = [
           <strong>Unfinished answers</strong> are kept in your own browser for up to a week so you
           can come back to them, and are cleared once you have a site or sign out.
         </li>
+        <li>
+          <strong>How ceomaker.app is used:</strong> the pages you open and the steps you take (for
+          example finishing the questions, publishing, or opening Billing), where the visit that led
+          to your sign-up came from (such as LinkedIn, Google or a campaign link), errors you run
+          into, your browser and device type, and the country you are in. Once you have an account
+          this is linked to its id, never to your email, and it never includes your site&apos;s
+          text, your answers or your photos. Nothing is stored in your browser for this: before you
+          sign in, each page you open counts as a new, anonymous visitor.
+        </li>
       </ul>
     ),
   },
@@ -71,7 +80,10 @@ const sections: LegalSection[] = [
     title: "What we collect from visitors to our customers' sites",
     body: (
       <>
-        <p>Customer sites set no cookies. To give owners simple visitor statistics we record:</p>
+        <p>
+          Customer sites set no cookies and don&apos;t run our own usage statistics. To give owners
+          simple visitor statistics we record:
+        </p>
         <ul>
           <li>the page viewed, and whether the visitor clicked an email, phone or social link;</li>
           <li>where they came from (for example LinkedIn, Google or another site);</li>
@@ -102,7 +114,8 @@ const sections: LegalSection[] = [
         </li>
         <li>
           <strong>Our legitimate interests:</strong> keeping accounts and sites secure, preventing
-          abuse, and giving owners privacy-friendly statistics about their own sites.
+          abuse, giving owners privacy-friendly statistics about their own sites, and understanding
+          how ceomaker.app is used so we can fix errors and improve it.
         </li>
         <li>
           <strong>Legal obligations:</strong> payment and tax records, kept by our payment provider
@@ -117,8 +130,8 @@ const sections: LegalSection[] = [
     body: (
       <p>
         ceomaker.app uses only the cookies needed to keep you signed in. They are not used for
-        advertising or tracking, and customer sites set none at all. That is why there is no cookie
-        banner.
+        advertising or tracking, and customer sites set none at all. Our usage statistics store
+        nothing on your device either. That is why there is no cookie banner.
       </p>
     ),
   },
@@ -130,7 +143,8 @@ const sections: LegalSection[] = [
         <p>We use a small number of providers, each only for what it does for us:</p>
         <ul>
           <li>
-            <strong>Vercel</strong> hosts the app and the sites (servers in Frankfurt, Germany).
+            <strong>Vercel</strong> hosts the app and the sites (servers in Frankfurt, Germany), and
+            counts visits to ceomaker.app&apos;s own pages without cookies.
           </li>
           <li>
             <strong>Neon</strong> hosts the database (Frankfurt, Germany).
@@ -147,6 +161,11 @@ const sections: LegalSection[] = [
           <li>
             <strong>Freemius</strong> handles payments, once paid plans start, as merchant of
             record.
+          </li>
+          <li>
+            <strong>PostHog</strong> records how ceomaker.app is used and reports errors (servers in
+            Frankfurt, Germany). It works out your country and doesn&apos;t keep your network
+            address.
           </li>
         </ul>
         <p>
@@ -175,6 +194,10 @@ const sections: LegalSection[] = [
         <li>Contact-form messages: until the owner deletes them or deletes the site.</li>
         <li>Sign-in links: they work once and expire after 15 minutes.</li>
         <li>Payment records: as long as tax law requires, kept by Freemius.</li>
+        <li>
+          Usage statistics are linked only to an account id: once your account is deleted, they can
+          no longer be connected to you.
+        </li>
       </ul>
     ),
   },

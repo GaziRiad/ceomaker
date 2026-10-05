@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // PostHog's paths end in a slash (/relay/e/), which Next would redirect away; proxy.ts
+  // redirects every other path the same way Next did.
+  skipTrailingSlashRedirect: true,
   reactStrictMode: true,
   transpilePackages: ["@ceomaker/schema", "@ceomaker/db", "@ceomaker/templates"],
   // Fonts for the generated share images, read from disk at request time.

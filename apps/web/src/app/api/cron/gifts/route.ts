@@ -2,6 +2,7 @@ import { expireProGifts, getDb, listGiftReminders, markGiftReminded } from "@ceo
 import { refreshLiveSites } from "@/lib/billing";
 import { canSendEmail, sendGiftEndingEmail } from "@/lib/email";
 import { serverEnv } from "@/lib/env";
+import { trackServerEvent } from "@/lib/product-analytics/server";
 
 // The daily gift check. Vercel calls it on the schedule in vercel.json with the CRON_SECRET as a
 // bearer token. Gifts of Pro whose date has passed end, and the owner's live site moves to the
@@ -17,7 +18,10 @@ export async function GET(request: Request) {
   }
   const db = getDb();
   const ended = await expireProGifts(db);
-  for (const userId of ended) await refreshLiveSites(userId);
+  for (const userId of ended) {
+    await refreshLiveSites(userId);
+    trackServerEvent(userId, "plan_changed", { plan: "free", cause: "gift_ended" });
+  }
 
   let reminded = 0;
   if (canSendEmail()) {

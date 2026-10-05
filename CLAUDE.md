@@ -60,7 +60,8 @@ Vercel (Hobby, `fra1`).
 - `apps/web`: the app. Customer sites `src/app/(sites)`, dashboard `src/app/(app)/dashboard`,
   editor `dashboard/sites/[id]/edit`, domains `src/lib/domains`, analytics `src/lib/analytics`,
   billing `src/lib/billing.ts` and `src/lib/freemius.ts` (routes in `src/app/api/billing/freemius`),
-  admin page `dashboard/admin` (gifts of Pro; access in `src/lib/admin.ts`).
+  admin page `dashboard/admin` (gifts of Pro; access in `src/lib/admin.ts`), product analytics
+  `src/lib/product-analytics` (PostHog on the product's pages only, relayed through `/relay`).
 - `design/`: Claude Design handoff files (reference only).
 
 ## Environment notes

@@ -146,6 +146,7 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    | `VERCEL_TEAM_ID`               | see Custom domains  | (leave unset)            |
    | `CRON_SECRET`                  | new random value    | (leave unset)            |
    | `ADMIN_EMAILS`                 | your email          | your email               |
+   | `NEXT_PUBLIC_POSTHOG_KEY`      | PostHog project key | (leave unset)            |
    | `FREEMIUS_*` (4 variables)     | see Payments        | same (sandbox)           |
    | `R2_*` (4 variables)           | see Image storage   | same                     |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
@@ -222,6 +223,24 @@ Without these, production says uploads aren't available, and local development k
 Live sites send anonymous page views and clicks on email, phone, LinkedIn and website links to `/api/collect` (no cookies, no stored addresses; a visitor is a keyed hash that changes every day). Country and city come from Vercel's request headers, so they only appear on deployments: locally every visit shows as "Unknown location". Signed-in CEOMaker users and known bots aren't counted.
 
 The product's own pages (landing, sign-in, dashboard, editor) also load Vercel Web Analytics and Speed Insights (`@vercel/analytics`, `@vercel/speed-insights` in the `(app)` layout); enable both in the Vercel project. They only collect on Vercel deployments, and customer sites don't load them.
+
+### Product analytics (PostHog)
+
+PostHog shows how people use the product: the sign-up funnel, editor usage, publishing and upgrades, and errors. It runs on the product's own pages only (customer sites never load it), stores nothing in the browser (no cookies, no local storage, so no consent banner), and uses PostHog's EU servers. Code: `apps/web/src/lib/product-analytics`.
+
+- **Anonymous visitors** get an id that lasts one page load. The steps before signing in (`questions_started`, `questions_completed`, `sign_in_requested`) happen within one page load, so they stay together.
+- **Sign-up joins them to the account.** The sign-in link (and Google) send a new account to `/api/welcome` with that id and where the visit came from (referrer, `utm_*` tags, landing page). It saves the source on the account (`user.signup_source`), merges the visit into the account in PostHog and counts `signed_up` with the source.
+- **Signed-in pages** link each page load to the account id (never the email). Admins (`ADMIN_EMAILS`) get the person property `internal: true`.
+- **Server events** (they can't be blocked): `site_created`, `draft_written`, `template_chosen`, `site_published`, `ai_rewrite_used`, `photo_uploaded`, `domain_added`, `device_preview_changed`, `checkout_started`, `plan_changed` (cause: billing, gift or gift_ended). Server errors are reported from `instrumentation.ts`, browser errors by PostHog itself.
+- **Privacy:** no clicks are captured automatically (they would carry what people type into their site), no recordings or heatmaps, and URLs are cleaned before they leave the browser: our own keep their path (ids masked) and `utm_*` tags only, other sites only their origin. The browser sends to `/relay` on our own domain, which `proxy.ts` forwards to PostHog without cookies. Because PostHog's paths end in a slash, Next's trailing-slash redirect is off (`skipTrailingSlashRedirect`) and `proxy.ts` does the same redirect for every other path.
+
+Setup:
+
+1. Create a PostHog account in the **EU** region and one project for CEOMaker.
+2. In the project's settings, turn on **Discard client IP data**. Leave session replay, surveys and heatmaps off (the code disables them anyway). Accept PostHog's data processing agreement.
+3. In Vercel, set `NEXT_PUBLIC_POSTHOG_KEY` to the project's API key (`phc_…`; it can only send events, so it's safe in the browser) for **Production**, and redeploy (the key is built into the pages). Leave it unset for Preview, or use a second project for testing, so test traffic stays out of the real numbers.
+4. In PostHog, filter out our own accounts: Settings › Product analytics › Filter out internal and test users, with the person property `internal` not equal to `true`.
+5. The funnel: page view of `/` → `questions_started` → `questions_completed` → `sign_in_requested` → `signed_up` → `site_created` → `site_published` → `checkout_started` → `plan_changed` (plan `pro`, cause `billing`). Break `signed_up` down by `source`.
 
 ### Plans (Free and Pro)
 

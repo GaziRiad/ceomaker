@@ -3,6 +3,7 @@ import { subscriptionGrantsPro } from "@ceomaker/schema";
 import { getAuth } from "@/lib/auth";
 import { freemiusCheckoutLink } from "@/lib/freemius";
 import { appUrl } from "@/lib/routing";
+import { trackServerEvent } from "@/lib/product-analytics/server";
 
 const BILLING = "/dashboard/settings/billing";
 
@@ -22,5 +23,6 @@ export async function GET(request: Request) {
   }
   const cycle = new URL(request.url).searchParams.get("cycle") === "monthly" ? "monthly" : "annual";
   const link = await freemiusCheckoutLink(session.user, cycle);
+  if (link) trackServerEvent(session.user.id, "checkout_started", { cycle });
   return Response.redirect(link ?? appUrl() + BILLING, 303);
 }

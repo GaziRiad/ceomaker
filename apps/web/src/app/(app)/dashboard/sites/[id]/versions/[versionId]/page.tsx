@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { isUuid, loadOwnedSite } from "@/lib/site-data";
 import { LocalTime } from "../../../../local-time";
 import { VersionActions } from "./version-actions";
+import { IdentifyAccount } from "@/components/product-analytics";
 
 export const metadata: Metadata = { title: "Version", robots: { index: false } };
 
@@ -32,6 +33,7 @@ async function VersionView({
 
   return (
     <>
+      <IdentifyAccount id={user.id} />
       <header className={bar} style={barPadding}>
         <div className="flex min-h-[60px] flex-wrap items-center gap-x-5 gap-y-2 py-2.5">
           <Link href="/dashboard" className="btn btn-ghost">
