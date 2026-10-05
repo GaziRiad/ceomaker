@@ -40,6 +40,12 @@ const serverEnvSchema = z.object({
   FREEMIUS_API_KEY: optional,
   FREEMIUS_SECRET_KEY: optional,
   FREEMIUS_PUBLIC_KEY: optional,
+  // Uploaded images in Cloudflare R2: an API token limited to one bucket. Without them,
+  // development stores images in .media/ and production turns uploads off.
+  R2_ACCOUNT_ID: optional,
+  R2_ACCESS_KEY_ID: optional,
+  R2_SECRET_ACCESS_KEY: optional,
+  R2_BUCKET: optional,
 });
 
 export type ServerEnv = z.output<typeof serverEnvSchema>;

@@ -31,6 +31,7 @@ import { canSendEmail } from "@/lib/email";
 import { cancelFreemiusSubscriptions } from "@/lib/freemius";
 import { isUuid } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
+import { removeMedia } from "@/lib/media-store";
 
 // Settings changes. Each action re-checks the session; queries scope everything by owner.
 
@@ -162,7 +163,10 @@ export async function deleteAccountAction(confirmation: string): Promise<{ ok: t
     };
   }
   try {
-    const { heldAddresses, domains } = await deleteAccount(getDb(), { userId: session.user.id });
+    const { heldAddresses, domains, mediaIds } = await deleteAccount(getDb(), {
+      userId: session.user.id,
+    });
+    await removeMedia(mediaIds);
     for (const subdomain of heldAddresses) updateTag(siteCacheTag(subdomain));
     for (const domain of domains) await releaseFromProvider(domain);
     if (domains.length) forgetDomainRouting();

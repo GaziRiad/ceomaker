@@ -78,6 +78,13 @@
       "when": 1791059166797,
       "tag": "0010_billing",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791196938810,
+      "tag": "0011_media_in_object_storage",
+      "breakpoints": true
     }
   ]
 }

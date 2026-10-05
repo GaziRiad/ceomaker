@@ -1,4 +1,3 @@
-import { getDb, getMedia } from "@ceomaker/db";
 import {
   isValidSubdomain,
   MEDIA_PATH,
@@ -8,6 +7,7 @@ import {
   resolveTemplateRef,
 } from "@ceomaker/schema";
 import { monogramIconDataUri } from "@ceomaker/templates";
+import { mediaStore } from "@/lib/media-store";
 import { getTenantSite } from "@/lib/sites";
 
 const CACHE = "public, max-age=86400, s-maxage=31536000, immutable";
@@ -29,9 +29,13 @@ export async function GET(
 
   const src = meta?.favicon;
   const media =
-    src && MEDIA_PATH.test(src) ? await getMedia(getDb(), src.slice("/media/".length)) : null;
+    src && MEDIA_PATH.test(src)
+      ? await mediaStore()
+          ?.get(src.slice("/media/".length))
+          .catch(() => null)
+      : null;
   if (media) {
-    return new Response(new Uint8Array(media.data), {
+    return new Response(media.data, {
       headers: { "Content-Type": media.contentType, "Cache-Control": CACHE },
     });
   }

@@ -1,9 +1,10 @@
 import { countMediaSince, getDb, insertMedia, MEDIA_MAX_BYTES } from "@ceomaker/db";
 import { FAVICON_SIZE, mediaPath, SHARE_IMAGE } from "@ceomaker/schema";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { getAuth } from "@/lib/auth";
 import { DAY_MS } from "@/lib/ai/client";
 import { imageInfo } from "@/lib/image-info";
+import { mediaStore } from "@/lib/media-store";
 import { isSameOrigin } from "@/lib/same-origin";
 
 /**
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
   if (!isSameOrigin(request)) return json(403, { error: "Cross-site request refused" });
   const session = await getAuth().api.getSession({ headers: request.headers });
   if (!session) return json(401, { error: "Sign in to upload" });
+  const store = mediaStore();
+  if (!store) return json(503, { error: "Image uploads aren't available right now." });
   if (Number(request.headers.get("content-length") ?? 0) > MEDIA_MAX_BYTES + 64 * 1024) {
     return json(413, { error: "That image is too large." });
   }
@@ -63,13 +66,28 @@ export async function POST(request: Request) {
     return json(422, { error: "Favicons are saved at 512 × 512." });
   }
 
-  const { id } = await insertMedia(db, {
-    userId: session.user.id,
-    contentType: info.contentType,
-    width: info.width,
-    height: info.height,
-    sha256: createHash("sha256").update(data).digest("hex"),
-    data,
-  });
+  // The file goes to storage first, so a row always has its file. If the row can't be saved,
+  // the file is removed again.
+  const id = randomUUID();
+  try {
+    await store.put(id, data, info.contentType);
+  } catch (error) {
+    console.error("Image upload to storage failed", error);
+    return json(502, { error: "The image couldn't be saved. Try again." });
+  }
+  try {
+    await insertMedia(db, {
+      id,
+      userId: session.user.id,
+      contentType: info.contentType,
+      byteSize: data.byteLength,
+      width: info.width,
+      height: info.height,
+      sha256: createHash("sha256").update(data).digest("hex"),
+    });
+  } catch (error) {
+    await store.remove([id]).catch(() => undefined);
+    throw error;
+  }
   return json(201, { id, src: mediaPath(id), width: info.width, height: info.height });
 }

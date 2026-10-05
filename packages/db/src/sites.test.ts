@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
   defaultColors,
   demoSiteContent,
@@ -39,7 +40,7 @@ import {
   removeSiteDomain,
   saveDomainCheck,
 } from "./queries/domains";
-import { getMedia, insertMedia } from "./queries/media";
+import { deleteMediaRows, insertMedia, listUnusedMedia } from "./queries/media";
 import {
   countContactMessages,
   countUnreadMessages,
@@ -307,13 +308,14 @@ describe.skipIf(!url)("sites (integration)", () => {
   it("deletes a site with its versions and images, keeping AI usage", async () => {
     const { id } = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
     await publishSite(db, { userId: "alice", siteId: id });
-    await insertMedia(db, {
+    const image = await insertMedia(db, {
+      id: randomUUID(),
       userId: "alice",
       contentType: "image/jpeg",
+      byteSize: 3,
       width: 1,
       height: 1,
       sha256: "abc",
-      data: new Uint8Array([1, 2, 3]),
     });
     await startAiUsage(db, {
       userId: "alice",
@@ -330,6 +332,7 @@ describe.skipIf(!url)("sites (integration)", () => {
       subdomain: "alice",
       addressHeld: true,
       domain: null,
+      mediaIds: [image.id],
     });
 
     expect(await getPrimarySiteForOwner(db, "alice")).toBeNull();
@@ -371,6 +374,7 @@ describe.skipIf(!url)("sites (integration)", () => {
       subdomain: "draft-only",
       addressHeld: false,
       domain: null,
+      mediaIds: [],
     });
     expect(await isSubdomainAvailable(db, "draft-only", { userId: "mallory" })).toBe(true);
 
@@ -412,19 +416,49 @@ describe.skipIf(!url)("sites (integration)", () => {
     await finishAiUsage(db, { id: a!.id, status: "succeeded", inputTokens: 10, outputTokens: 5 });
   });
 
-  it("stores and serves uploaded media", async () => {
-    const data = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
-    const { id } = await insertMedia(db, {
-      userId: "alice",
-      contentType: "image/jpeg",
-      width: 10,
-      height: 10,
-      sha256: "abc",
-      data,
+  it("finds images no version uses, sparing recent uploads", async () => {
+    const image = (id: string, createdAt: Date) =>
+      db.insert(media).values({
+        id,
+        userId: "alice",
+        contentType: "image/jpeg",
+        byteSize: 3,
+        width: 1,
+        height: 1,
+        sha256: "abc",
+        createdAt,
+      });
+    const old = new Date("2026-01-01T00:00:00Z");
+    const [used, published, unused, recent] = [
+      randomUUID(),
+      randomUUID(),
+      randomUUID(),
+      randomUUID(),
+    ];
+    await Promise.all([
+      image(used, old),
+      image(published, old),
+      image(unused, old),
+      image(recent, new Date()),
+    ]);
+    const withImage = (id: string) => ({
+      ...demoSiteContent,
+      meta: { ...demoSiteContent.meta, favicon: `/media/${id}` },
     });
-    const stored = await getMedia(db, id);
-    expect(stored?.contentType).toBe("image/jpeg");
-    expect(Buffer.from(stored!.data).equals(Buffer.from(data))).toBe(true);
+    const { id: siteId } = await createSite(db, {
+      ...draft,
+      content: withImage(published),
+      userId: "alice",
+      subdomain: "alice",
+    });
+    await publishSite(db, { userId: "alice", siteId });
+    // The draft moves on to another image; the published version still uses the first.
+    await saveDraft(db, { ...draft, content: withImage(used), userId: "alice", siteId });
+
+    const cutoff = new Date(Date.now() - 60_000);
+    expect(await listUnusedMedia(db, cutoff)).toEqual([unused]);
+    await deleteMediaRows(db, [unused]);
+    expect(await listUnusedMedia(db, cutoff)).toEqual([]);
   });
 
   it("enforces subdomain format in the database, even if app validation is bypassed", async () => {
@@ -580,6 +614,7 @@ describe.skipIf(!url)("sites (integration)", () => {
     expect(await deleteAccount(db, { userId: "alice" })).toEqual({
       heldAddresses: ["alice"],
       domains: [{ domain: "alice.example", kind: "apex" }],
+      mediaIds: [],
     });
     expect(await db.select().from(user).where(eq(user.id, "alice"))).toEqual([]);
     expect(await db.select().from(site)).toEqual([]);

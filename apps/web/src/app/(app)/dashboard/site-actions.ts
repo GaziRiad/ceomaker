@@ -49,6 +49,7 @@ import { releaseFromProvider } from "@/lib/domains/service";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
+import { removeMedia } from "@/lib/media-store";
 import { isDevice } from "./sites/[id]/edit/devices";
 
 // Every action re-checks the session and passes the user id to queries that scope by owner.
@@ -271,6 +272,7 @@ export async function deleteSiteAction(
   try {
     const deleted = await deleteSite(db, { userId, siteId });
     updateTag(siteCacheTag(deleted.subdomain));
+    await removeMedia(deleted.mediaIds);
     if (deleted.domain) {
       await releaseFromProvider(deleted.domain);
       forgetDomainRouting();

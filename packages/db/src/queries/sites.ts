@@ -751,6 +751,8 @@ export async function deleteSite(
   addressHeld: boolean;
   /** Its custom domain, for the caller to remove from the hosting provider. */
   domain: { domain: string; kind: DomainKind } | null;
+  /** The account's images, for the caller to remove from storage. */
+  mediaIds: string[];
 }> {
   return db.transaction(async (tx) => {
     const [owned] = await tx
@@ -783,8 +785,17 @@ export async function deleteSite(
       .limit(1);
     // Versions, messages, analytics and the domain go with the site (foreign key cascade).
     await tx.delete(site).where(eq(site.id, owned.id));
-    await tx.delete(media).where(eq(media.userId, input.userId));
-    return { subdomain: owned.subdomain, addressHeld: Boolean(published), domain: domain ?? null };
+    // The account's images go too; the caller removes their files from storage.
+    const removed = await tx
+      .delete(media)
+      .where(eq(media.userId, input.userId))
+      .returning({ id: media.id });
+    return {
+      subdomain: owned.subdomain,
+      addressHeld: Boolean(published),
+      domain: domain ?? null,
+      mediaIds: removed.map((row) => row.id),
+    };
   });
 }
 
@@ -831,6 +842,11 @@ export async function deleteAccount(db: Database, input: { userId: string }) {
       .from(siteDomain)
       .innerJoin(site, eq(site.id, siteDomain.siteId))
       .where(eq(site.userId, input.userId));
+    // The caller removes the images' files from storage.
+    const images = await tx
+      .select({ id: media.id })
+      .from(media)
+      .where(eq(media.userId, input.userId));
     // Sites, versions, messages, domains, media, sessions and AI usage go with the user
     // (cascades); the address holds stay and lose their owner.
     const deleted = await tx
@@ -838,6 +854,10 @@ export async function deleteAccount(db: Database, input: { userId: string }) {
       .where(eq(user.id, input.userId))
       .returning({ id: user.id });
     if (!deleted.length) throw new SiteNotFoundError();
-    return { heldAddresses: published.map((row) => row.subdomain), domains };
+    return {
+      heldAddresses: published.map((row) => row.subdomain),
+      domains,
+      mediaIds: images.map((row) => row.id),
+    };
   });
 }

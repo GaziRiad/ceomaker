@@ -22,3 +22,6 @@ next-env.d.ts
 coverage/
 playwright-report/
 test-results/
+
+# Uploaded images in development (production uses R2)
+/.media/
