@@ -1,3 +1,5 @@
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { appFontVariables } from "../fonts";
@@ -22,7 +24,13 @@ export const viewport: Viewport = {
 export default function AppRootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={appFontVariables}>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Vercel Web Analytics and Speed Insights for the product's own pages. Customer sites
+            (the (sites) layout) keep only our cookieless analytics, which their owners see. */}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
