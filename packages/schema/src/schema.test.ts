@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   isPremiumTemplate,
+  addMonths,
+  giftEndAfter,
+  planFrom,
   planOf,
   subscriptionGrantsPro,
   buildStarterContent,
@@ -571,5 +574,46 @@ describe("plans", () => {
     expect(subscriptionGrantsPro("past_due")).toBe(true);
     expect(subscriptionGrantsPro("paused")).toBe(false);
     expect(subscriptionGrantsPro("canceled")).toBe(false);
+  });
+
+  it("is Pro while a subscription grants it or a gift hasn't ended", () => {
+    const now = new Date("2026-10-05T12:00:00Z");
+    const later = new Date("2026-11-05T12:00:00Z");
+    const earlier = new Date("2026-09-05T12:00:00Z");
+    expect(planFrom([], null, now)).toBe("free");
+    expect(planFrom([], later, now)).toBe("pro");
+    expect(planFrom([], earlier, now)).toBe("free");
+    // A gift ends at its exact moment.
+    expect(planFrom([], now, now)).toBe("free");
+    expect(planFrom(["active"], earlier, now)).toBe("pro");
+    expect(planFrom(["canceled"], later, now)).toBe("pro");
+    expect(planFrom(["canceled", "paused"], null, now)).toBe("free");
+  });
+});
+
+describe("gift dates", () => {
+  it("keeps the day of the month, within shorter months", () => {
+    expect(addMonths(new Date("2026-10-05T12:00:00Z"), 3).toISOString()).toBe(
+      "2027-01-05T12:00:00.000Z",
+    );
+    expect(addMonths(new Date("2027-01-31T08:00:00Z"), 1).toISOString()).toBe(
+      "2027-02-28T08:00:00.000Z",
+    );
+    expect(addMonths(new Date("2028-01-31T08:00:00Z"), 1).toISOString()).toBe(
+      "2028-02-29T08:00:00.000Z",
+    );
+    expect(addMonths(new Date("2026-12-15T00:00:00Z"), 12).toISOString()).toBe(
+      "2027-12-15T00:00:00.000Z",
+    );
+  });
+
+  it("adds a new gift to one that hasn't ended, or counts it from now", () => {
+    const now = new Date("2026-10-05T12:00:00Z");
+    const end = new Date("2026-12-01T00:00:00Z");
+    expect(giftEndAfter(end, 1, now)).toEqual(new Date("2027-01-01T00:00:00Z"));
+    expect(giftEndAfter(null, 1, now)).toEqual(new Date("2026-11-05T12:00:00Z"));
+    expect(giftEndAfter(new Date("2026-09-01T00:00:00Z"), 1, now)).toEqual(
+      new Date("2026-11-05T12:00:00Z"),
+    );
   });
 });

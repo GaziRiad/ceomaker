@@ -1,12 +1,8 @@
-import {
-  planOf,
-  subscriptionGrantsPro,
-  type Plan,
-  type SubscriptionStatus,
-} from "@ceomaker/schema";
+import type { Plan, SubscriptionStatus } from "@ceomaker/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { subscription, user } from "../schema";
+import { lockAccount, settlePlan } from "./plan-state";
 
 // Billing. Each provider's webhook turns its events into a SubscriptionEvent; everything after
 // that (which account, which plan) is decided here, the same for every provider.
@@ -35,12 +31,13 @@ export type SubscriptionSync =
 
 /**
  * Records a subscription change and brings the account's plan in line with all of its
- * subscriptions. Safe to repeat: a redelivered event changes nothing, and an older event never
- * overwrites a newer one.
+ * subscriptions and its gift (a gift that hasn't ended keeps Pro whatever billing says). Safe to
+ * repeat: a redelivered event changes nothing, and an older event never overwrites a newer one.
  */
 export async function applySubscriptionEvent(
   db: Database,
   event: SubscriptionEvent,
+  now: Date = new Date(),
 ): Promise<SubscriptionSync> {
   return db.transaction(async (tx) => {
     const [known] = await tx
@@ -58,11 +55,7 @@ export async function applySubscriptionEvent(
     if (!userId) return { outcome: "unknown" };
 
     // Locks the account, so two events for it at once can't leave the plan out of step.
-    const [account] = await tx
-      .select({ plan: user.plan })
-      .from(user)
-      .where(eq(user.id, userId))
-      .for("update");
+    const account = await lockAccount(tx, userId);
     if (!account) return { outcome: "unknown" };
 
     const values = {
@@ -87,14 +80,7 @@ export async function applySubscriptionEvent(
       .returning({ id: subscription.id });
     if (!written.length) return { outcome: "stale", userId };
 
-    const statuses = await tx
-      .select({ status: subscription.status })
-      .from(subscription)
-      .where(eq(subscription.userId, userId));
-    const plan: Plan = statuses.some((row) => subscriptionGrantsPro(row.status)) ? "pro" : "free";
-    const planChanged = plan !== planOf(account.plan);
-    if (planChanged) await tx.update(user).set({ plan }).where(eq(user.id, userId));
-    return { outcome: "applied", userId, plan, planChanged };
+    return { outcome: "applied", userId, ...(await settlePlan(tx, userId, account, now)) };
   });
 }
 

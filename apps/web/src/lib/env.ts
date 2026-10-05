@@ -32,8 +32,10 @@ const serverEnvSchema = z.object({
   // Optional: a hostname of ours that points at Vercel, given to customers as their www CNAME
   // so moving hosts later doesn't need every customer to edit DNS. Defaults to Vercel's.
   CUSTOM_DOMAIN_CNAME: optional,
-  // Secret for the scheduled domain check (Vercel sends it as a bearer token).
+  // Secret for the scheduled jobs (Vercel sends it as a bearer token).
   CRON_SECRET: optional,
+  // Who can open the admin page (/dashboard/admin): emails separated by commas. Unset: nobody.
+  ADMIN_EMAILS: optional,
   // Payments through Freemius (merchant of record). Upgrading appears only when all four are
   // set: the product's ID and keys from Settings › API & Keys (the API key is the bearer token).
   FREEMIUS_PRODUCT_ID: optional,

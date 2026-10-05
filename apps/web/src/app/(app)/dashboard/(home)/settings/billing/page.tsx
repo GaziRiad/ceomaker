@@ -1,5 +1,5 @@
-import { getDb, listSubscriptions } from "@ceomaker/db";
-import { isPro } from "@ceomaker/schema";
+import { getDb, getProGiftEnd, listSubscriptions } from "@ceomaker/db";
+import { giftGrantsPro, isPro, subscriptionGrantsPro } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
@@ -89,10 +89,11 @@ function Subscription({ billing, pastDue }: { billing: FreemiusBilling; pastDue:
 async function Billing({ searchParams }: { searchParams: Search }) {
   const session = await getSession();
   if (!session) redirect("/sign-in?callbackURL=/dashboard/settings/billing");
-  const [plan, subscriptions, billing, search] = await Promise.all([
+  const [plan, subscriptions, billing, giftEnd, search] = await Promise.all([
     planFor(session.user.id),
     listSubscriptions(getDb(), session.user.id),
     freemiusBilling(session.user.id),
+    getProGiftEnd(getDb(), session.user.id),
     searchParams,
   ]);
   const pro = isPro(plan);
@@ -101,6 +102,14 @@ async function Billing({ searchParams }: { searchParams: Search }) {
   const subscribed = subscriptions.some(
     (row) => row.provider === FREEMIUS && row.status !== "canceled",
   );
+  const paid = subscriptions.some((row) => subscriptionGrantsPro(row.status));
+  // Pro from a gift (see the admin page): the owner can subscribe during it, and paying simply
+  // overlaps the rest of the gift. Pro set by hand, with no gift, isn't offered checkout.
+  const gift = pro && !paid && giftEnd ? giftEnd : null;
+  const giftOn = gift !== null && giftGrantsPro(gift, new Date());
+  // Back from checkout before the payment is confirmed: no second checkout meanwhile.
+  const confirming = search.checkout === "done" && !paid;
+  const mayBuy = (!pro || gift !== null) && !confirming;
   const canBuy = freemius() !== null;
   return (
     <>
@@ -119,7 +128,14 @@ async function Billing({ searchParams }: { searchParams: Search }) {
           {search.card === "unavailable" ? (
             <Note>Your card couldn&apos;t be changed just now. Try again in a minute.</Note>
           ) : null}
-          {!pro && search.checkout === "done" ? (
+          {gift ? (
+            <Note>
+              {giftOn
+                ? `Pro is a gift until ${longDate.format(gift)}. To keep it after that, subscribe below; billing starts the day you subscribe.`
+                : `Your gift of Pro ended on ${longDate.format(gift)}. Subscribe below to keep Pro.`}
+            </Note>
+          ) : null}
+          {confirming ? (
             <Note>
               Thank you. We&apos;re confirming your payment with Freemius: refresh this page in a
               minute to see Pro.
@@ -173,11 +189,11 @@ async function Billing({ searchParams }: { searchParams: Search }) {
             </span>
           </span>
           <Features items={PRO_FEATURES} />
-          {pro ? null : canBuy ? (
+          {!mayBuy ? null : canBuy ? (
             <>
               <span className="flex flex-wrap gap-3">
                 <a className="btn btn-primary" href={`${CHECKOUT}?cycle=annual`}>
-                  Upgrade yearly, {PRO_PRICES.annual.price}
+                  {gift ? "Subscribe" : "Upgrade"} yearly, {PRO_PRICES.annual.price}
                 </a>
                 <a className="btn btn-secondary" href={`${CHECKOUT}?cycle=monthly`}>
                   Monthly, {PRO_PRICES.monthly.price}

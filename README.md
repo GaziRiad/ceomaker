@@ -145,6 +145,7 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    | `VERCEL_PROJECT_ID`            | see Custom domains  | (leave unset)            |
    | `VERCEL_TEAM_ID`               | see Custom domains  | (leave unset)            |
    | `CRON_SECRET`                  | new random value    | (leave unset)            |
+   | `ADMIN_EMAILS`                 | your email          | your email               |
    | `FREEMIUS_*` (4 variables)     | see Payments        | same (sandbox)           |
    | `R2_*` (4 variables)           | see Image storage   | same                     |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
@@ -230,13 +231,11 @@ Free accounts can try Pro templates in the draft but not publish them. When an a
 
 **Billing.** Pro is sold through Freemius (see [Payments](#payments-freemius)). Its webhook hands each change to `syncSubscription` (`apps/web/src/lib/billing.ts`), which records it in the `subscription` table and sets `user.plan` from all of the account's subscriptions: Pro while any is active or its payment is being retried (the provider's retry schedule is the grace period), free once it's paused or canceled. Events arriving out of order or twice change nothing. When the plan changes, the owner's live pages are rebuilt on their next visit, so nobody has to republish. Accounts without a subscription are never touched by billing.
 
-Pro can also be granted by hand (for example for your own accounts, or a customer who paid by invoice):
+**Gifts and the admin page.** `/dashboard/admin` is for the emails in `ADMIN_EMAILS` (separated by commas); anyone else sees a page that doesn't exist. It lists every account, newest first, with a search: sign-up date, last activity, plan, and their site (the live address or Draft, the template, page views in the last 30 days, their own domain). "Gift Pro" gives Pro for 1, 3, 6 or 12 months, added to a gift that hasn't ended, with a note only admins see; "End gift" ends it at once. Live pages show the change straight away.
 
-```sql
-update "user" set plan = 'pro' where email = 'someone@example.com';
-```
+A gift is an end date on the account (`user.pro_until`). The plan is Pro while a subscription pays for it or the gift hasn't ended, so billing and gifts never overwrite each other. A gifted owner can subscribe from Billing at any time (checkout only turns away accounts that already pay): paying starts that day and overlaps the rest of the gift. Every day at 04:29 UTC, `/api/cron/gifts` (with `CRON_SECRET`) moves accounts whose gift has ended to the free plan unless they pay, refreshes their live site, and emails owners whose gift ends within 7 days, once, unless they pay.
 
-Live pages are cached, so after a change by hand the owner should publish once for their live site to pick it up.
+Pro set by hand (`update "user" set plan = 'pro' where email = '…'`) still works for an account without a subscription; the admin page shows it as "set by hand" and can end it. After a change by hand the owner should publish once, since live pages are cached.
 
 ### Payments (Freemius)
 
