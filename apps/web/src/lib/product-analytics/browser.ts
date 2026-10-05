@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import { POSTHOG_UI_HOST, posthogKey, RELAY_PATH } from "./config";
+import { RECORDING_OPTIONS } from "./recording";
 import { scrubEvent } from "./scrub";
 import { encodeVisitSource, readVisitSource, type VisitSource } from "./visit-source";
 
@@ -37,19 +38,23 @@ export function startProductAnalytics(): void {
     person_profiles: "identified_only",
     capture_pageview: "history_change",
     capture_exceptions: true,
-    // Off: clicks would send the text people type into their site; recordings and heatmaps
-    // would show their personal details; the rest isn't used.
+    // Recordings with everything personal hidden (see recording.ts). They start once session
+    // replay is switched on in the PostHog project; the masking here can't be loosened there.
+    session_recording: RECORDING_OPTIONS,
+    enable_recording_console_log: false,
+    // Off: clicks would send the text people type into their site; heatmaps aren't used, nor
+    // the rest.
     autocapture: false,
     rageclick: false,
     capture_dead_clicks: false,
     capture_heatmaps: false,
-    disable_session_recording: true,
     disable_surveys: true,
     disable_product_tours: true,
     disable_conversations: true,
-    capture_performance: false,
-    // Settings come from this code, not from PostHog's dashboard.
-    advanced_disable_flags: true,
+    // Page speed (LCP, CLS, FCP, INP) from Google's web-vitals library; nothing is stored.
+    capture_performance: { web_vitals: true, network_timing: false },
+    // The project's remote settings load (recordings need them); feature flags aren't used.
+    advanced_disable_feature_flags: true,
     mask_personal_data_properties: true,
     before_send: (event) => scrubEvent(event, location.host),
   });

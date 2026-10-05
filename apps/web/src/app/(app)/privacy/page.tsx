@@ -66,11 +66,18 @@ const sections: LegalSection[] = [
         <li>
           <strong>How ceomaker.app is used:</strong> the pages you open and the steps you take (for
           example finishing the questions, publishing, or opening Billing), where the visit that led
-          to your sign-up came from (such as LinkedIn, Google or a campaign link), errors you run
-          into, your browser and device type, and the country you are in. Once you have an account
-          this is linked to its id, never to your email, and it never includes your site&apos;s
-          text, your answers or your photos. Nothing is stored in your browser for this: before you
-          sign in, each page you open counts as a new, anonymous visitor.
+          to your sign-up came from (such as LinkedIn, Google or a campaign link), how fast pages
+          load for you, errors you run into, your browser and device type, and the country you are
+          in. Once you have an account this is linked to its id, never to your email, and it never
+          includes your site&apos;s text, your answers or your photos. Nothing is stored in your
+          browser for this: before you sign in, each page you open counts as a new, anonymous
+          visitor.
+        </li>
+        <li>
+          <strong>Session recordings:</strong> some visits to ceomaker.app are recorded so we can
+          see where the product is hard to use: the layout of the page, clicks, scrolling and
+          timing. Everything you type and every text, image and link on the page is hidden before it
+          leaves your browser, so a recording shows grey shapes, not your content.
         </li>
       </ul>
     ),
@@ -163,9 +170,9 @@ const sections: LegalSection[] = [
             record.
           </li>
           <li>
-            <strong>PostHog</strong> records how ceomaker.app is used and reports errors (servers in
-            Frankfurt, Germany). It works out your country and doesn&apos;t keep your network
-            address.
+            <strong>PostHog</strong> records how ceomaker.app is used, keeps the hidden session
+            recordings and reports errors (servers in Frankfurt, Germany). It works out your country
+            and doesn&apos;t keep your network address.
           </li>
         </ul>
         <p>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isRelayPath, relayTarget } from "./config";
+import { maskAttribute } from "./recording";
 import { scrubEvent, scrubPath, scrubUrl } from "./scrub";
 import { decodeVisitSource, encodeVisitSource, readVisitSource } from "./visit-source";
 
@@ -55,6 +56,26 @@ describe("scrubbing", () => {
       $set_once: { $initial_current_url: "https://www.ceomaker.app/dns/:token" },
     });
     expect(scrubEvent(null, OWN)).toBeNull();
+  });
+
+  it("cleans URLs nested in web vitals measurements", () => {
+    const event = scrubEvent(
+      {
+        properties: {
+          $web_vitals_LCP_event: {
+            name: "LCP",
+            value: 1200,
+            $current_url: "https://www.ceomaker.app/start/finish?a=eyJuYW1lIjoiUGF0In0",
+          },
+        },
+      },
+      OWN,
+    );
+    expect(event?.properties.$web_vitals_LCP_event).toEqual({
+      name: "LCP",
+      value: 1200,
+      $current_url: "https://www.ceomaker.app/start/finish",
+    });
   });
 });
 
@@ -119,5 +140,16 @@ describe("relay", () => {
       "https://eu-assets.i.posthog.com/static/array.js?v=1",
     );
     expect(relayTarget("/relay/i/v0/e/", "?ip=0")).toBe("https://eu.i.posthog.com/i/v0/e/?ip=0");
+  });
+});
+
+describe("recordings", () => {
+  it("masks attributes that can carry someone's content, and keeps the rest", () => {
+    expect(maskAttribute("alt", "Amelia at the Lisbon summit")).toBe("************");
+    expect(maskAttribute("href", "mailto:amelia@example.com")).toBe("************");
+    expect(maskAttribute("aria-label", "Pat")).toBe("***");
+    expect(maskAttribute("class", "mer-name")).toBe("mer-name");
+    expect(maskAttribute("style", "width: 40px")).toBe("width: 40px");
+    expect(maskAttribute("title", "")).toBe("");
   });
 });
