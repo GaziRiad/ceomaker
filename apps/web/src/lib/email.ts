@@ -120,6 +120,24 @@ export async function sendMessageNotification(input: {
   });
 }
 
+/** Tells an owner, once, that their gift of Pro ends within a week. */
+export async function sendGiftEndingEmail(input: { to: string; endsOn: Date }): Promise<void> {
+  const date = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(input.endsOn);
+  await sendLinkEmail({
+    to: input.to,
+    subject: `Your CEOMaker Pro gift ends on ${date}`,
+    intro: `Your free Pro ends on ${date}. Subscribe before then to keep your site exactly as it is. If you don't, it stays live on the free plan: a premium template shows as Meridian, the contact form switches off and a custom domain forwards to your ceomaker.app address.`,
+    button: "Keep Pro",
+    url: `${appUrl()}/dashboard/settings/billing`,
+    footnote: "You're getting this because you were given CEOMaker Pro. We won't remind you again.",
+  });
+}
+
 /** Tells an owner their own domain is live. */
 export async function sendDomainLiveEmail(input: { to: string; domain: string }): Promise<void> {
   if (!emailConfigured() && process.env.NODE_ENV === "production") return;

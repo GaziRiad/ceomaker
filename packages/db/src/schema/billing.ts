@@ -6,8 +6,9 @@ export const subscriptionStatus = pgEnum("subscription_status", SUBSCRIPTION_STA
 
 /**
  * A Pro subscription as the billing provider last reported it. The account's plan (user.plan)
- * follows from these rows: Pro while any of them grants it (see subscriptionGrantsPro). An
- * account with no rows is never changed by billing, so complimentary Pro set by hand stays.
+ * follows from these rows and its gift: Pro while any of them grants it (see
+ * subscriptionGrantsPro) or the gift hasn't ended. An account with no rows is never changed by
+ * billing, so Pro set by hand stays.
  */
 export const subscription = pgTable(
   "subscription",

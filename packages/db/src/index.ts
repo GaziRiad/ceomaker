@@ -15,3 +15,5 @@ export * from "./queries/health";
 export * from "./queries/domains";
 export * from "./queries/analytics";
 export * from "./queries/billing";
+export * from "./queries/gifts";
+export * from "./queries/admin";

@@ -19,10 +19,17 @@ export const user = pgTable("user", {
   image: text("image"),
   /**
    * "free" or "pro" (see PLANS in @ceomaker/schema). Not a Better Auth field: the database default
-   * makes every new account free. Billing keeps it in step with the account's subscriptions
-   * (see subscription); complimentary accounts, which have none, are set by hand.
+   * makes every new account free. Kept in step with the account's subscriptions and its Pro
+   * gift (proUntil) whenever either changes, so everything that reads the plan reads this.
+   * Accounts set to Pro by hand, with neither, stay Pro until a gift or a subscription changes it.
    */
   plan: text("plan").notNull().default("free"),
+  /** Pro given for free (from the admin page) until this moment. Kept after it ends, as history. */
+  proUntil: timestamp("pro_until", { withTimezone: true }),
+  /** Why the gift was given, for the admin page. */
+  proNote: text("pro_note"),
+  /** When the "your gift ends soon" email went out for the current gift. */
+  proRemindedAt: timestamp("pro_reminded_at", { withTimezone: true }),
   /** Last canvas size the owner picked in the editor: "desktop", "tablet" or "phone". */
   editorDevice: text("editor_device"),
   ...timestamps,

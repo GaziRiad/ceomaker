@@ -85,6 +85,13 @@
       "when": 1791196938810,
       "tag": "0011_media_in_object_storage",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791210506807,
+      "tag": "0012_pro_gifts",
+      "breakpoints": true
     }
   ]
 }

@@ -52,3 +52,45 @@ export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 export function subscriptionGrantsPro(status: SubscriptionStatus): boolean {
   return status === "active" || status === "past_due";
 }
+
+/** Gifts of Pro, given from the admin page, last a whole number of months. */
+export const GIFT_MONTHS = [1, 3, 6, 12] as const;
+export type GiftMonths = (typeof GIFT_MONTHS)[number];
+
+/** The "your gift ends soon" email goes out this many days before a gift ends. */
+export const GIFT_REMINDER_DAYS = 7;
+
+/** Whole months later on the calendar (UTC), kept within shorter months: 31 Jan + 1 is 28 Feb. */
+export function addMonths(date: Date, months: number): Date {
+  const result = new Date(date);
+  const day = result.getUTCDate();
+  result.setUTCDate(1);
+  result.setUTCMonth(result.getUTCMonth() + months);
+  const lastDay = new Date(
+    Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  result.setUTCDate(Math.min(day, lastDay));
+  return result;
+}
+
+/** Where a new gift ends: added to a gift that hasn't ended, or counted from now. */
+export function giftEndAfter(current: Date | null, months: number, now: Date): Date {
+  return addMonths(current && giftGrantsPro(current, now) ? current : now, months);
+}
+
+/** A gift of Pro holds until the moment it ends. */
+export function giftGrantsPro(proUntil: Date | null, now: Date): boolean {
+  return proUntil !== null && proUntil.getTime() > now.getTime();
+}
+
+/**
+ * The account's plan: Pro while a subscription grants it or a gift hasn't ended. The two don't
+ * interact, so paying during a gift, or a gift outliving a cancelled subscription, both just work.
+ */
+export function planFrom(
+  statuses: readonly SubscriptionStatus[],
+  proUntil: Date | null,
+  now: Date,
+): Plan {
+  return statuses.some(subscriptionGrantsPro) || giftGrantsPro(proUntil, now) ? "pro" : "free";
+}
