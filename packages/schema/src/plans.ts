@@ -23,6 +23,7 @@ export const PREMIUM_TEMPLATES: ReadonlySet<TemplateKey> = new Set<TemplateKey>(
   "monument",
   "salon",
   "folio",
+  "tempo",
 ]);
 
 export function isPremiumTemplate(key: TemplateKey): boolean {

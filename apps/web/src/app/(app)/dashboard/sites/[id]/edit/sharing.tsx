@@ -55,6 +55,8 @@ const BROWSER_FONTS = {
   salonBody: FONTS.hankenGrotesk,
   folio: FONTS.geist,
   folioMono: FONTS.geistMono,
+  tempo: FONTS.archivo,
+  tempoMono: FONTS.martianMono,
 };
 
 const shownTitle = (view: ShareView) => view.title.trim() || view.autoTitle;

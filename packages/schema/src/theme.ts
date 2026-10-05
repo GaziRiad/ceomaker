@@ -116,6 +116,15 @@ export const TEMPLATE_PALETTES: {
       palette("Midnight", "#0f1626", "#e9edf4", "#8fb0ff"),
     ],
   },
+  tempo: {
+    1: [
+      palette("White", "#ffffff", "#0c0c0d", "#5b2eff"),
+      palette("Mist", "#eef1f5", "#0f1720", "#0a5cff"),
+      palette("Lilac", "#efebfd", "#1a1238", "#6a3cf0"),
+      palette("Ink", "#0b0b0c", "#f4f3ef", "#b6a3ff"),
+      palette("Moss", "#0f1a15", "#e8efe9", "#c4f06a"),
+    ],
+  },
 };
 
 /** The presets of one design of a template. */

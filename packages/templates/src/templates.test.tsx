@@ -120,8 +120,10 @@ describe.each(DESIGNS)("%s v%i template", (key, version) => {
     expect(html).toContain('id="contact"');
     expect(html).toContain('<nav aria-label="Sections"');
     expect(html).toContain('href="#main"');
-    // Salon's and Folio's footers carry the name without a copyright line.
-    if (key !== "salon" && key !== "folio") expect(html).toContain("© 2026 Amelia Hart");
+    // Salon's, Folio's and Tempo's footers carry the name without a copyright line.
+    if (!["salon", "folio", "tempo"].includes(key)) {
+      expect(html).toContain("© 2026 Amelia Hart");
+    }
   });
 
   it("opens contact links in a new tab with rel=me and no opener", () => {

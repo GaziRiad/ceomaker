@@ -24,4 +24,5 @@ export {
   SHARE_CARD_WIDTH,
   ShareCard,
   type ShareCardProps,
+  tempoNameSize,
 } from "./share-card";

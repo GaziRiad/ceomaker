@@ -11,6 +11,7 @@ import { MeridianTemplate as MeridianV1 } from "./meridian/v1";
 import { MonumentTemplate as MonumentV1 } from "./monument/v1";
 import { FolioTemplate as FolioV1 } from "./folio/v1";
 import { SalonTemplate as SalonV1 } from "./salon/v1";
+import { TempoTemplate as TempoV1 } from "./tempo/v1";
 import type { TemplateDefinition } from "./types";
 
 type Design = Omit<TemplateDefinition, "key" | "version">;
@@ -94,6 +95,26 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
         focusSection: true,
       },
       Component: FolioV1,
+    },
+  },
+  tempo: {
+    1: {
+      name: "Tempo",
+      description:
+        "Big moving type on clean white. Your name parts around your portrait and every section arrives in time with the scroll.",
+      tagline: "Big moving type on clean white. Your name parts around your portrait.",
+      contactForm: true,
+      shows: {
+        gallery: true,
+        quotePhotos: true,
+        photoGrade: true,
+        cta: true,
+        focal: true,
+        aboutImage: true,
+        workImages: true,
+        focusSection: true,
+      },
+      Component: TempoV1,
     },
   },
 };

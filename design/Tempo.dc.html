@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Martian+Mono:wght@400;500&display=swap">
+<script src="./image-slot.js"></script>
+<style>body{margin:0}
+[data-tempo]{--ease:cubic-bezier(.16,1,.3,1)}
+[data-tempo] a{color:inherit}
+[data-tempo] a:hover{color:inherit}
+[data-tempo] :is(h1,h2,h3,h4){font-family:inherit;text-transform:none;color:inherit;margin:0}
+[data-tempo] :is(p,a,button,input,textarea,label,legend,blockquote,li,figcaption){font-family:inherit}
+[data-tempo] :focus-visible{outline:2px solid var(--acg);outline-offset:3px}
+[data-tempo] [data-inv] :focus-visible{outline-color:var(--iacg)}
+[data-tempo] ::selection{background:var(--ink);color:var(--bg)}
+[data-tempo] image-slot::part(frame){background:var(--sf2);border:0;border-radius:0;box-shadow:none}
+[data-tempo] details>summary{list-style:none}
+[data-tempo] details>summary::-webkit-details-marker{display:none}
+[data-tempo] details[open]>summary{display:none}
+[data-tempo] input::placeholder,[data-tempo] textarea::placeholder{color:var(--iink2);opacity:1}
+[data-tempo] [data-head]{transition:transform .6s var(--ease),box-shadow .4s var(--ease)}
+[data-tempo] [data-head][data-sc]{box-shadow:0 1px 0 var(--rule)}
+[data-tempo] [data-head][data-up]:not(:focus-within){transform:translateY(-100%)}
+[data-tempo] [data-roll]{display:inline-block;height:1.3em;line-height:1.3;overflow:hidden;vertical-align:top}
+[data-tempo] [data-rl]{display:flex;flex-direction:column;transition:transform .55s var(--ease)}
+[data-tempo] [data-rh]:hover [data-rl],[data-tempo] [data-rh]:focus-visible [data-rl]{transform:translateY(-50%)}
+[data-tempo] [data-rv]{transition:opacity 1s var(--ease),transform 1.1s var(--ease);transition-delay:var(--rd,0s)}
+[data-tempo] [data-rv][data-wait]{opacity:0;transform:translateY(36px)}
+[data-tempo] [data-rw]{display:inline-block;overflow:hidden;vertical-align:top;padding:0 0.05em 0.12em;margin:0 0.2em -0.12em -0.05em}
+[data-tempo] [data-rw]>span{display:inline-block;transition:transform 1.2s var(--ease);transition-delay:calc(var(--i,0) * 70ms)}
+[data-tempo] [data-sp][data-wait] [data-rw]>span{transform:translateY(112%)}
+[data-tempo] [data-row]{position:relative;isolation:isolate;transition:color .45s var(--ease)}
+[data-tempo] [data-row]::before{content:"";position:absolute;inset:0 calc(var(--bleed,0px) * -1);z-index:-1;background:var(--ink);transform:scaleY(0);transform-origin:50% 100%;transition:transform .6s var(--ease)}
+[data-tempo] [data-pv]{opacity:0;transform:translateY(-50%) scale(.8) rotate(2deg);transition:opacity .35s var(--ease),transform .8s var(--ease)}
+[data-tempo] [data-arw]{transition:transform .5s var(--ease)}
+@media (hover:hover){[data-tempo] [data-row]:hover{color:var(--bg);--rk2:var(--iink2);--rka:var(--iacg);--rkr:var(--irule)}[data-tempo] [data-row]:hover::before{transform:none}[data-tempo] [data-row]:hover [data-pv]{opacity:1;transform:translateY(-50%) scale(1) rotate(-3deg)}[data-tempo] [data-row]:hover [data-arw]{transform:rotate(-45deg)}}
+[data-tempo] [data-row]:focus-visible{outline-offset:-2px}
+[data-tempo] [data-bdot]{transition:transform .7s var(--ease)}
+[data-tempo] [data-badge]:hover [data-bdot],[data-tempo] [data-badge]:focus-visible [data-bdot]{transform:scale(2.15)}
+[data-tempo] [data-badge]:hover [data-arw]{transform:rotate(-45deg)}
+[data-tempo] [data-ul]{background:linear-gradient(currentColor,currentColor) no-repeat 0 100% / 0% 2px;transition:background-size .7s var(--ease)}
+[data-tempo] [data-ul]:hover,[data-tempo] [data-ul]:focus-visible{background-size:100% 2px}
+[data-tempo] [data-mag]{transition:transform .7s var(--ease),background-color .4s var(--ease)}
+@keyframes tp-wide{from{font-stretch:96%}to{font-stretch:125%}}
+@keyframes tp-clip{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes tp-zin{from{transform:scale(1.22)}to{transform:none}}
+@keyframes tp-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes tp-dl{to{transform:translateX(-14%)}}
+@keyframes tp-dr{to{transform:translateX(14%)}}
+@keyframes tp-zoom{to{transform:scale(1.16)}}
+@keyframes tp-lit{from{opacity:.16}to{opacity:1}}
+@keyframes tp-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes tp-scale{from{transform:scale(.82)}to{transform:none}}
+@keyframes tp-gal{from{transform:translateX(0)}to{transform:translateX(var(--gx,0px))}}
+@keyframes tp-marq{to{transform:translateX(-50%)}}
+@keyframes tp-spin{to{transform:rotate(360deg)}}
+@keyframes tp-drop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes tp-pop{0%{transform:scale(.3)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+[data-tempo] [data-wide]{animation:tp-wide 1.7s var(--ease) both}
+[data-tempo] [data-wide="2"]{animation-delay:.12s}
+[data-tempo] [data-pclip]{animation:tp-clip 1.3s var(--ease) .2s both}
+[data-tempo] [data-zin]{animation:tp-zin 1.9s var(--ease) .2s both}
+[data-tempo] [data-in]{animation:tp-up 1s var(--ease) var(--rd,.3s) both}
+[data-tempo] [data-marq]{animation:tp-marq var(--md,40s) linear infinite}
+[data-tempo] [data-mqw]:hover [data-marq]{animation-play-state:paused}
+[data-tempo] [data-spin]{animation:tp-spin 22s linear infinite}
+@supports (animation-timeline:scroll()){
+[data-tempo]:not([data-still="1"]) [data-dl]{animation:tp-dl linear both;animation-timeline:scroll(root);animation-range:0px 110vh}
+[data-tempo]:not([data-still="1"]) [data-dr]{animation:tp-dr linear both;animation-timeline:scroll(root);animation-range:0px 110vh}
+[data-tempo]:not([data-still="1"]) [data-zoom]{animation:tp-zoom linear both;animation-timeline:scroll(root);animation-range:0px 110vh}
+[data-tempo]:not([data-still="1"]) [data-lit]{view-timeline-name:--lit}
+[data-tempo]:not([data-still="1"]) [data-lit] [data-w]{animation:tp-lit linear both;animation-timeline:--lit;animation-range:cover calc(12% + var(--i) / var(--n) * 34%) cover calc(20% + var(--i) / var(--n) * 34%)}
+[data-tempo]:not([data-still="1"]) [data-line]{animation:tp-grow linear both;animation-timeline:view();animation-range:cover 10% cover 75%}
+[data-tempo]:not([data-still="1"]) [data-ctas]{animation:tp-scale linear both;animation-timeline:view();animation-range:entry 0% cover 42%}
+[data-tempo]:not([data-still="1"]) [data-gtrack]{animation:tp-gal linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+[data-tempo]:not([data-still="1"]) [data-gwrap]{overflow:hidden !important}
+}
+[data-tempo][data-still="1"] *{animation:none !important;transition:none !important}
+[data-tempo][data-still="1"] [data-dup]{display:none !important}
+[data-tempo][data-still="1"] [data-marq]{width:auto !important}
+[data-tempo][data-still="1"] [data-mqg]{flex-wrap:wrap;justify-content:center;white-space:normal !important;row-gap:10px}
+@media (prefers-reduced-motion:reduce){[data-tempo] *{animation:none !important;transition:none !important}[data-tempo] [data-dup]{display:none !important}[data-tempo] [data-marq]{width:auto !important}[data-tempo] [data-mqg]{flex-wrap:wrap;justify-content:center;white-space:normal !important;row-gap:10px}}</style>
+</helmet>
+
+<sc-if value="{{ show.swatch }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;height:100%;box-sizing:border-box;padding:24px;display:flex;flex-direction:column;gap:16px;background:{{ sw.bg }};color:{{ sw.ink }};font-family:'Archivo',sans-serif;box-shadow:inset 0 0 0 1px {{ sw.rule }}">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:30px;font-weight:440;font-stretch:125%;letter-spacing:-0.04em;line-height:1">{{ sw.name }}</span><span style="font-family:'Martian Mono',monospace;font-size:10px;letter-spacing:0.04em;text-transform:uppercase;color:{{ sw.ink2 }}">{{ sw.kind }}</span></div>
+  <div style="display:flex;flex-direction:column;gap:2px;font-size:44px;font-weight:440;font-stretch:125%;letter-spacing:-0.045em;line-height:0.86"><span>Nadia</span><span style="text-align:right">Ferreira</span></div>
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:{{ sw.ink }};color:{{ sw.bg }};font-size:15px;font-stretch:125%;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden"><span>Storage</span><span style="color:{{ sw.iacg }};font-size:9px">✦</span><span>Grid policy</span><span style="color:{{ sw.iacg }};font-size:9px">✦</span><span style="color:{{ sw.iink2 }}">Founders</span></div>
+  <div style="display:flex;gap:6px"><span style="width:28px;height:28px;background:{{ sw.bg }};box-shadow:inset 0 0 0 1px {{ sw.br }}"></span><span style="width:28px;height:28px;background:{{ sw.ink }}"></span><span style="width:28px;height:28px;background:{{ sw.ac }}"></span><span style="width:28px;height:28px;background:{{ sw.ink2 }}"></span><span style="width:28px;height:28px;background:{{ sw.sf2 }}"></span></div>
+  <div style="font-family:'Martian Mono',monospace;font-size:10.5px;line-height:1.75;border-top:1px solid {{ sw.rule }};padding-top:10px">bg {{ sw.bg }} · text {{ sw.ink }} · accent {{ sw.ac }}<br>Body {{ sw.r1 }} · <span style="color:{{ sw.ink2 }}">Secondary {{ sw.r2 }}</span><br><span style="color:{{ sw.act }}">Accent text {{ sw.ra }}</span> · Accent mark {{ sw.rg }}<br>Inverse panel {{ sw.ri }} · secondary {{ sw.ri2 }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.page }}" hint-placeholder-val="{{ true }}">
+<div data-tempo="" data-still="{{ still }}" ref="{{ rootRef }}" lang="{{ lang }}" style="position:relative;container-type:inline-size;width:{{ L.rootW }};--bg:{{ th.bg }};--ink:{{ th.ink }};--ac:{{ th.ac }};--ink2:{{ th.ink2 }};--br:{{ th.br }};--rule:{{ th.rule }};--sf:{{ th.sf }};--sf2:{{ th.sf2 }};--acg:{{ th.acg }};--act:{{ th.act }};--iink2:{{ th.iink2 }};--iacg:{{ th.iacg }};--irule:{{ th.irule }};--ibr:{{ th.ibr }};--gf:{{ G.f }};--go:{{ G.o }};background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,sans-serif;font-stretch:100%;font-size:{{ L.bodyFs }};line-height:1.6;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;min-height:{{ L.minH }};overflow-x:clip">
+
+<sc-if value="{{ show.header }}" hint-placeholder-val="{{ true }}">
+<header data-head="" ref="{{ headRef }}" style="order:0;position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+  <div style="max-width:{{ L.maxW }};margin:0 auto;padding:0 {{ L.pad }};height:{{ L.headH }};display:flex;align-items:center;justify-content:space-between;gap:24px">
+    <a href="#tp-top" style="min-width:0;padding:10px 0;font-size:15px;font-weight:500;font-stretch:115%;letter-spacing:-0.015em;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</a>
+    <sc-if value="{{ L.full }}" hint-placeholder-val="{{ true }}"><nav aria-label="Sections" style="display:flex;gap:2px;min-width:0"><sc-for list="{{ nav }}" as="n" hint-placeholder-count="5"><a href="{{ n.href }}" data-rh="" style="display:inline-flex;align-items:flex-start;gap:5px;padding:10px 12px;font-size:14px;text-decoration:none;white-space:nowrap"><span data-roll=""><span data-rl=""><span>{{ n.label }}</span><span aria-hidden="true">{{ n.label }}</span></span></span><span aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:9px;line-height:1.4;color:var(--ink2)">{{ n.num }}</span></a></sc-for></nav></sc-if>
+    <sc-if value="{{ L.icons }}" hint-placeholder-val="{{ true }}"><div style="flex:none;display:flex;gap:6px"><sc-for list="{{ L.headLinks }}" as="l" hint-placeholder-count="3"><a href="{{ l.href }}" target="_blank" rel="noopener me" aria-label="{{ l.label }}" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;box-shadow:inset 0 0 0 1px var(--rule);transition:background-color .35s var(--ease),color .35s var(--ease)" style-hover="background-color:var(--ink);color:var(--bg)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ l.d }}"></path></svg></a></sc-for></div></sc-if>
+    <sc-if value="{{ L.compact }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ menuToggle }}" aria-expanded="{{ menuOpen }}" style="flex:none;min-height:44px;padding:0 18px;border:0;background:var(--ink);color:var(--bg);font:inherit;font-size:14px;font-weight:500;cursor:pointer">{{ words.menu }}</button></sc-if>
+  </div>
+</header>
+</sc-if>
+
+<sc-if value="{{ show.menu }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-label="{{ words.menu }}" style="position:{{ L.menuPos }};inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;overflow:auto">
+  <div style="padding:0 {{ L.pad }};height:{{ L.headH }};display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 1px 0 var(--rule)"><span style="min-width:0;font-size:15px;font-weight:500;font-stretch:115%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span><button type="button" onClick="{{ menuToggle }}" style="flex:none;min-height:44px;padding:0 18px;border:0;background:var(--sf2);color:var(--ink);font:inherit;font-size:14px;font-weight:500;cursor:pointer">{{ words.close }}</button></div>
+  <nav aria-label="Sections" style="padding:16px {{ L.pad }} 0;display:flex;flex-direction:column">
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="5"><a href="{{ n.href }}" onClick="{{ menuToggle }}" style="min-height:64px;padding:12px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--rule);font-size:{{ L.menuFs }};font-weight:440;font-stretch:125%;line-height:1;letter-spacing:-0.04em;text-decoration:none;animation:tp-drop .6s var(--ease) {{ n.d }} both"><span style="min-width:0;overflow-wrap:break-word">{{ n.label }}</span><span aria-hidden="true" style="flex:none;font-family:'Martian Mono',monospace;font-size:11px;letter-spacing:0;color:var(--ink2)">{{ n.num }}</span></a></sc-for>
+  </nav>
+  <sc-if value="{{ has.links }}" hint-placeholder-val="{{ true }}"><div style="margin-top:auto;padding:28px {{ L.pad }} 32px;display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ links }}" as="l" hint-placeholder-count="3"><a href="{{ l.href }}" target="_blank" rel="noopener me" style="min-height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;box-shadow:inset 0 0 0 1px var(--br);font-size:14px;text-decoration:none"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ l.d }}"></path></svg>{{ l.label }}</a></sc-for></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ show.hero }}" hint-placeholder-val="{{ true }}">
+<section id="tp-top" aria-label="{{ c.name }}" style="order:1;padding:{{ H.pad }}">
+  <div style="max-width:1200px;margin:0 auto">
+    <sc-if value="{{ has.eyebrow }}" hint-placeholder-val="{{ true }}"><p data-in="" style="--rd:.05s;margin:0 0 {{ H.ebM }};max-width:40em;font-family:'Martian Mono',ui-monospace,monospace;font-size:11px;line-height:1.6;letter-spacing:0.04em;text-transform:uppercase;color:var(--act);text-wrap:balance">{{ c.eyebrow }}</p></sc-if>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto">
+      <h1 style="grid-row:1 / 4;grid-column:1;display:grid;grid-template-rows:subgrid;grid-template-columns:minmax(0,1fr);font-size:{{ H.fs }};font-weight:440;font-stretch:125%;line-height:0.86;letter-spacing:-0.045em;overflow-wrap:normal;word-break:normal;hyphens:manual">
+        <span data-dl="" style="grid-row:1;display:block;text-wrap:balance"><span data-wide="1">{{ H.l1 }}</span></span>
+        <sc-if value="{{ H.two }}" hint-placeholder-val="{{ true }}"><span data-dr="" style="grid-row:3;display:block;text-align:right;text-wrap:balance"><span data-wide="2">{{ H.l2 }}</span></span></sc-if>
+      </h1>
+      <div style="grid-row:2;grid-column:1;position:relative;z-index:1;padding:{{ H.bandPad }};display:grid;grid-template-columns:{{ H.bandCols }};gap:{{ H.bandGap }};align-items:end">
+        <sc-if value="{{ H.hasPor }}" hint-placeholder-val="{{ true }}">
+          <div data-pclip="" style="position:relative;width:100%;aspect-ratio:4 / 5;overflow:hidden;isolation:isolate;background:var(--sf2)">
+            <span data-zoom="" style="position:absolute;inset:0;display:block;transform-origin:50% 40%"><span data-zin="" role="img" aria-label="{{ H.por.alt }}" style="position:absolute;inset:0;display:block"><image-slot id="{{ H.por.slot }}" src="{{ H.por.src }}" placeholder="{{ H.por.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ H.bandText }}" hint-placeholder-val="{{ true }}">
+          <div style="min-width:0;display:grid;grid-template-columns:{{ H.tCols }};gap:{{ H.tGap }};align-items:end">
+            <sc-if value="{{ has.headline }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:{{ H.hlMax }};font-size:{{ H.hlFs }};font-weight:450;font-stretch:110%;line-height:1.12;letter-spacing:-0.025em;text-wrap:balance">{{ c.headline }}</p></sc-if>
+            <div data-in="" style="--rd:.45s;min-width:0;display:flex;flex-direction:{{ H.restDir }};align-items:{{ H.restAlign }};justify-content:space-between;gap:28px 40px">
+              <sc-if value="{{ has.sub }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:27em;font-size:{{ H.subFs }};line-height:1.55;color:var(--ink2);text-wrap:pretty">{{ c.sub }}</p></sc-if>
+              <sc-if value="{{ H.badge }}" hint-placeholder-val="{{ true }}"><a href="{{ c.btnHref }}" data-badge="" aria-label="{{ c.btn }}" style="flex:none;position:relative;width:148px;height:148px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none">{{ H.ring }}<span data-bdot="" aria-hidden="true" style="width:46px;height:46px;border-radius:50%;background:var(--ink)"></span><span data-arw="" aria-hidden="true" style="position:absolute;color:var(--bg);font-size:19px;line-height:1">→</span></a></sc-if>
+              <sc-if value="{{ H.rectBtn }}" hint-placeholder-val="{{ false }}"><a href="{{ c.btnHref }}" data-rh="" style="flex:none;min-height:56px;padding:0 26px;display:inline-flex;align-items:center;gap:14px;background:var(--ink);color:var(--bg);font-size:15px;font-weight:500;text-decoration:none" style-hover="color:var(--bg)"><span data-roll=""><span data-rl=""><span>{{ c.btn }}</span><span aria-hidden="true">{{ c.btn }}</span></span></span><span aria-hidden="true">→</span></a></sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <sc-if value="{{ H.after }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:28px;display:flex;flex-direction:column;gap:20px">
+        <sc-if value="{{ has.headline }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:{{ H.hlFs }};font-weight:450;font-stretch:110%;line-height:1.14;letter-spacing:-0.02em;text-wrap:balance">{{ c.headline }}</p></sc-if>
+        <sc-if value="{{ has.sub }}" hint-placeholder-val="{{ true }}"><p data-in="" style="margin:0;font-size:16px;line-height:1.55;color:var(--ink2);text-wrap:pretty">{{ c.sub }}</p></sc-if>
+        <sc-if value="{{ has.btn }}" hint-placeholder-val="{{ true }}"><a href="{{ c.btnHref }}" data-in="" style="--rd:.4s;margin-top:4px;min-height:56px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--ink);color:var(--bg);font-size:15px;font-weight:500;text-decoration:none" style-hover="color:var(--bg)"><span style="min-width:0">{{ c.btn }}</span><span aria-hidden="true">→</span></a></sc-if>
+      </div>
+    </sc-if>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ GA.show }}" hint-placeholder-val="{{ false }}">
+<section aria-label="{{ words.gallery }}" style="order:2;padding:0 {{ L.pad }} {{ GA.pb }}">
+  <sc-if value="{{ GA.grid }}" hint-placeholder-val="{{ true }}">
+    <ul style="list-style:none;max-width:1200px;margin:0 auto;padding:0;display:grid;grid-template-columns:{{ GA.cols }};gap:{{ GA.gap }};align-items:end">
+      <sc-for list="{{ GA.items }}" as="g" hint-placeholder-count="2"><li data-rv="" style="--rd:{{ g.d }};min-width:0;display:flex;flex-direction:column;gap:10px"><span role="img" aria-label="{{ g.alt }}" style="position:relative;display:block;aspect-ratio:{{ g.ar }};overflow:hidden;isolation:isolate;background:var(--sf2)"><image-slot id="{{ g.slot }}" src="{{ g.src }}" placeholder="{{ g.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span><sc-if value="{{ g.hasCap }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;line-height:1.6;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink2)">{{ g.cap }}</span></sc-if></li></sc-for>
+    </ul>
+  </sc-if>
+  <sc-if value="{{ GA.strip }}" hint-placeholder-val="{{ false }}">
+    <div data-gwrap="" role="region" aria-label="{{ words.gallery }}" tabIndex="0" style="max-width:1200px;margin:0 auto;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none">
+      <ul data-gtrack="" style="--gx:{{ GA.gx }};list-style:none;margin:0;padding:0;display:flex;gap:{{ GA.gap }};width:max-content;align-items:flex-end">
+        <sc-for list="{{ GA.items }}" as="g" hint-placeholder-count="5"><li style="flex:none;width:{{ g.w }};scroll-snap-align:start;display:flex;flex-direction:column;gap:10px"><span role="img" aria-label="{{ g.alt }}" style="position:relative;display:block;height:{{ GA.h }};overflow:hidden;isolation:isolate;background:var(--sf2)"><image-slot id="{{ g.slot }}" src="{{ g.src }}" placeholder="{{ g.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span><sc-if value="{{ g.hasCap }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;line-height:1.6;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ g.cap }}</span></sc-if></li></sc-for>
+      </ul>
+    </div>
+  </sc-if>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.about.show }}" hint-placeholder-val="{{ true }}">
+<section id="tp-about" aria-label="{{ sec.about.aria }}" style="order:{{ sec.about.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="padding-top:18px;border-top:1px solid var(--ink);margin-bottom:{{ L.tGap }}"><sc-if value="{{ sec.about.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-sp="" style="font-size:{{ sec.about.tfs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.04em"><sc-for list="{{ sec.about.words }}" as="w" hint-placeholder-count="1"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for><sup aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:12px;font-weight:400;letter-spacing:0;vertical-align:top;line-height:1;color:var(--ink2)">{{ sec.about.num }}</sup></h2></sc-if></div>
+    <div style="display:grid;grid-template-columns:{{ A.cols }};gap:{{ A.gap }};align-items:start">
+      <sc-if value="{{ A.hasImg }}" hint-placeholder-val="{{ false }}"><div data-rv="" style="position:{{ A.imgPos }};top:96px;aspect-ratio:4 / 5;overflow:hidden;isolation:isolate;background:var(--sf2)"><span role="img" aria-label="{{ A.img.alt }}" style="position:absolute;inset:0"><image-slot id="{{ A.img.slot }}" src="{{ A.img.src }}" placeholder="{{ A.img.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></div></sc-if>
+      <div style="min-width:0;grid-column:{{ A.textCol }};display:flex;flex-direction:column;gap:{{ A.innerGap }}">
+        <p data-lit="" style="--n:{{ A.n }};margin:0;font-size:{{ A.fs }};font-weight:400;font-stretch:104%;line-height:1.16;letter-spacing:-0.022em;text-wrap:pretty"><sc-for list="{{ A.lead }}" as="g" hint-placeholder-count="12"><sc-if value="{{ g.b }}" hint-placeholder-val="{{ false }}"><strong data-w="" style="--i:{{ g.i }};font-weight:600">{{ g.t }}</strong></sc-if><sc-if value="{{ g.it }}" hint-placeholder-val="{{ false }}"><em data-w="" style="--i:{{ g.i }}">{{ g.t }}</em></sc-if><sc-if value="{{ g.a }}" hint-placeholder-val="{{ false }}"><a data-w="" href="{{ g.href }}" style="--i:{{ g.i }};text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:var(--acg);text-underline-offset:0.14em">{{ g.t }}</a></sc-if><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}"><span data-w="" style="--i:{{ g.i }}">{{ g.t }}</span></sc-if></sc-for></p>
+        <sc-if value="{{ A.hasRest }}" hint-placeholder-val="{{ true }}">
+          <div data-rv="" style="margin-left:{{ A.restML }};max-width:{{ A.restMax }};display:grid;grid-template-columns:{{ A.restCols }};gap:20px 40px">
+            <sc-for list="{{ A.rest }}" as="r" hint-placeholder-count="2"><p style="margin:0;color:var(--ink2);text-wrap:pretty"><sc-for list="{{ r.segs }}" as="g" hint-placeholder-count="1"><sc-if value="{{ g.b }}" hint-placeholder-val="{{ false }}"><strong style="font-weight:600;color:var(--ink)">{{ g.t }}</strong></sc-if><sc-if value="{{ g.i }}" hint-placeholder-val="{{ false }}"><em>{{ g.t }}</em></sc-if><sc-if value="{{ g.a }}" hint-placeholder-val="{{ false }}"><a href="{{ g.href }}" style="color:var(--ink);text-decoration:underline;text-decoration-color:var(--acg);text-underline-offset:0.2em">{{ g.t }}</a></sc-if><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if></sc-for></p></sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.experience.show }}" hint-placeholder-val="{{ true }}">
+<section id="tp-experience" aria-label="{{ sec.experience.aria }}" style="order:{{ sec.experience.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="padding-top:18px;border-top:1px solid var(--ink);margin-bottom:{{ L.tGap }}"><sc-if value="{{ sec.experience.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-sp="" style="font-size:{{ sec.experience.tfs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.04em"><sc-for list="{{ sec.experience.words }}" as="w" hint-placeholder-count="1"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for><sup aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:12px;font-weight:400;letter-spacing:0;vertical-align:top;line-height:1;color:var(--ink2)">{{ sec.experience.num }}</sup></h2></sc-if></div>
+    <div style="position:relative;padding-left:{{ EX.gut }}">
+      <span aria-hidden="true" style="position:absolute;left:3px;top:0;bottom:0;width:1px;background:var(--rule)"></span>
+      <span data-line="" aria-hidden="true" style="position:absolute;left:2px;top:0;bottom:0;width:3px;background:var(--acg);transform-origin:50% 0"></span>
+      <ol style="list-style:none;margin:0;padding:0">
+        <sc-for list="{{ EX.head }}" as="e" hint-placeholder-count="4"><li data-rv="" style="position:relative;padding:{{ EX.padR }};border-bottom:1px solid var(--rule);display:grid;grid-template-columns:{{ EX.cols }};gap:10px 40px;align-items:baseline"><span aria-hidden="true" style="position:absolute;left:calc({{ EX.gut }} * -1);top:{{ EX.dotTop }};width:7px;height:7px;border-radius:50%;background:var(--ink)"></span><span style="font-family:'Martian Mono',monospace;font-size:11px;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink2);font-variant-numeric:tabular-nums">{{ e.dates }}</span><div style="min-width:0;display:flex;flex-direction:column;gap:6px"><h3 style="font-size:{{ EX.roleFs }};font-weight:450;font-stretch:112%;line-height:1.15;letter-spacing:-0.02em;overflow-wrap:break-word">{{ e.role }}</h3><sc-if value="{{ e.hasOrg }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px;line-height:1.45;color:var(--ink2)">{{ e.org }}</span></sc-if></div><sc-if value="{{ e.hasSum }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:34em;font-size:15.5px;line-height:1.6;color:var(--ink2);text-wrap:pretty">{{ e.summary }}</p></sc-if></li></sc-for>
+      </ol>
+      <sc-if value="{{ EX.hasTail }}" hint-placeholder-val="{{ false }}">
+        <details>
+          <summary style="margin-top:28px;min-height:52px;padding:0 22px;display:inline-flex;align-items:center;gap:12px;box-shadow:inset 0 0 0 1px var(--br);font-size:15px;font-weight:500;cursor:pointer">{{ EX.more }} <span aria-hidden="true">↓</span></summary>
+          <ol start="{{ EX.tailStart }}" style="list-style:none;margin:0;padding:0">
+            <sc-for list="{{ EX.tail }}" as="e" hint-placeholder-count="2"><li style="position:relative;padding:{{ EX.padR }};border-bottom:1px solid var(--rule);display:grid;grid-template-columns:{{ EX.cols }};gap:10px 40px;align-items:baseline"><span aria-hidden="true" style="position:absolute;left:calc({{ EX.gut }} * -1);top:{{ EX.dotTop }};width:7px;height:7px;border-radius:50%;background:var(--ink)"></span><span style="font-family:'Martian Mono',monospace;font-size:11px;letter-spacing:0.03em;text-transform:uppercase;color:var(--ink2)">{{ e.dates }}</span><div style="min-width:0;display:flex;flex-direction:column;gap:6px"><h3 style="font-size:{{ EX.roleFs }};font-weight:450;font-stretch:112%;line-height:1.15;letter-spacing:-0.02em;overflow-wrap:break-word">{{ e.role }}</h3><sc-if value="{{ e.hasOrg }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px;line-height:1.45;color:var(--ink2)">{{ e.org }}</span></sc-if></div><sc-if value="{{ e.hasSum }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:34em;font-size:15.5px;line-height:1.6;color:var(--ink2)">{{ e.summary }}</p></sc-if></li></sc-for>
+          </ol>
+        </details>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.achievements.show }}" hint-placeholder-val="{{ true }}">
+<section id="tp-achievements" aria-label="{{ sec.achievements.aria }}" style="order:{{ sec.achievements.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="padding-top:18px;border-top:1px solid var(--ink);margin-bottom:{{ L.tGap }}"><sc-if value="{{ sec.achievements.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-sp="" style="font-size:{{ sec.achievements.tfs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.04em"><sc-for list="{{ sec.achievements.words }}" as="w" hint-placeholder-count="2"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for><sup aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:12px;font-weight:400;letter-spacing:0;vertical-align:top;line-height:1;color:var(--ink2)">{{ sec.achievements.num }}</sup></h2></sc-if></div>
+    <ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:{{ AC.cols }};row-gap:{{ AC.rowGap }}">
+      <sc-for list="{{ AC.items }}" as="a" hint-placeholder-count="4"><li data-rv="" style="--rd:{{ a.d }};min-width:0;padding:{{ a.pad }};border-left:{{ a.bl }};display:flex;flex-direction:column;gap:18px"><span data-count="" data-v="{{ a.v }}" style="font-size:{{ AC.fs }};font-weight:420;font-stretch:125%;line-height:0.9;letter-spacing:-0.05em;font-variant-numeric:tabular-nums;white-space:nowrap">{{ a.v }}</span><sc-if value="{{ a.hasL }}" hint-placeholder-val="{{ true }}"><span style="max-width:17em;font-size:15px;line-height:1.45;color:var(--ink2);text-wrap:pretty">{{ a.l }}</span></sc-if></li></sc-for>
+    </ul>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.portfolio.show }}" hint-placeholder-val="{{ true }}">
+<section id="tp-portfolio" aria-label="{{ sec.portfolio.aria }}" style="order:{{ sec.portfolio.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="padding-top:18px;border-top:1px solid var(--ink);margin-bottom:{{ PF.tGap }}"><sc-if value="{{ sec.portfolio.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-sp="" style="font-size:{{ sec.portfolio.tfs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.04em"><sc-for list="{{ sec.portfolio.words }}" as="w" hint-placeholder-count="2"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for><sup aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:12px;font-weight:400;letter-spacing:0;vertical-align:top;line-height:1;color:var(--ink2)">{{ sec.portfolio.num }}</sup></h2></sc-if></div>
+    <ul style="list-style:none;margin:0;padding:0">
+      <sc-for list="{{ PF.items }}" as="r" hint-placeholder-count="4"><li data-rv="" style="--rd:{{ r.d }};border-bottom:1px solid var(--rule)">
+        <a href="{{ r.href }}" data-row="{{ r.rowAttr }}" style="--bleed:{{ PF.bleed }};display:grid;grid-template-columns:{{ PF.cols }};gap:{{ PF.gap }};align-items:{{ PF.align }};padding:{{ PF.padR }};text-decoration:none;color:inherit">
+          <sc-if value="{{ r.mobImg }}" hint-placeholder-val="{{ false }}"><span role="img" aria-label="{{ r.img.alt }}" style="grid-column:1 / -1;position:relative;display:block;aspect-ratio:3 / 2;overflow:hidden;isolation:isolate;background:var(--sf2)"><image-slot id="{{ r.img.slot }}" src="{{ r.img.src }}" placeholder="{{ r.img.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot><span aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></sc-if>
+          <span aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:11px;line-height:2.4;color:var(--rk2,var(--ink2))">{{ r.num }}</span>
+          <div style="min-width:0;display:flex;flex-direction:column;gap:10px">
+            <sc-if value="{{ r.kyTop }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;line-height:2.2;letter-spacing:0.03em;text-transform:uppercase;color:var(--rka,var(--act))">{{ r.ky }}</span></sc-if>
+            <h3 style="font-size:{{ r.tfs }};font-weight:440;font-stretch:118%;line-height:1.06;letter-spacing:-0.03em;overflow-wrap:break-word;text-wrap:balance">{{ r.title }}</h3>
+            <sc-if value="{{ r.hasMeta }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px;line-height:1.45;color:var(--rk2,var(--ink2))">{{ r.meta }}</span></sc-if>
+          </div>
+          <sc-if value="{{ r.hasDesc }}" hint-placeholder-val="{{ true }}"><p style="margin:0;grid-column:{{ PF.descCol }};max-width:30em;font-size:15.5px;line-height:1.55;color:var(--rk2,var(--ink2));text-wrap:pretty">{{ r.desc }}</p></sc-if>
+          <div style="grid-column:{{ PF.endCol }};grid-row:{{ PF.endRow }};justify-self:end;display:flex;align-items:center;gap:16px;white-space:nowrap">
+            <sc-if value="{{ r.kyEnd }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;letter-spacing:0.03em;text-transform:uppercase;color:var(--rka,var(--act))">{{ r.ky }}</span></sc-if>
+            <sc-if value="{{ r.hasHref }}" hint-placeholder-val="{{ true }}"><span data-arw="" aria-hidden="true" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;box-shadow:inset 0 0 0 1px var(--rkr,var(--rule));font-size:17px">→</span></sc-if>
+          </div>
+          <sc-if value="{{ r.pv }}" hint-placeholder-val="{{ false }}"><span data-pv="" aria-hidden="true" style="position:absolute;right:{{ PF.pvR }};top:50%;width:250px;aspect-ratio:4 / 3;overflow:hidden;pointer-events:none;z-index:2;box-shadow:0 18px 40px rgba(0,0,0,.18)"><image-slot id="{{ r.img.slot }}" src="{{ r.img.src }}" placeholder="{{ r.img.ph }}" shape="rect" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot><span style="position:absolute;inset:0;background:var(--ac);mix-blend-mode:color;opacity:var(--go)"></span></span></sc-if>
+        </a>
+      </li></sc-for>
+    </ul>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.focus.show }}" hint-placeholder-val="{{ true }}">
+<section id="tp-focus" aria-label="{{ sec.focus.aria }}" style="order:{{ sec.focus.order }};padding:{{ FO.pad }}">
+  <div data-mqw="" aria-hidden="true" style="background:var(--ink);color:var(--bg);overflow:hidden;padding:{{ FO.mqPad }}">
+    <div data-marq="" style="--md:{{ FO.md }};display:flex;width:max-content">
+      <div data-mqg="" style="display:flex;align-items:center;gap:{{ FO.mqGap }};padding:0 {{ FO.mqGapHalf }};font-size:{{ FO.mfs }};font-weight:420;font-stretch:125%;line-height:1.05;letter-spacing:-0.045em;white-space:nowrap"><sc-for list="{{ FO.items }}" as="f" hint-placeholder-count="4"><span style="display:inline-flex;align-items:center;gap:{{ FO.mqGap }}"><span>{{ f.t }}</span><span style="color:var(--iacg);font-size:0.42em">✦</span></span></sc-for></div>
+      <div data-dup="" data-mqg="" style="display:flex;align-items:center;gap:{{ FO.mqGap }};padding:0 {{ FO.mqGapHalf }};font-size:{{ FO.mfs }};font-weight:420;font-stretch:125%;line-height:1.05;letter-spacing:-0.045em;white-space:nowrap"><sc-for list="{{ FO.items }}" as="f" hint-placeholder-count="4"><span style="display:inline-flex;align-items:center;gap:{{ FO.mqGap }}"><span>{{ f.t }}</span><span style="color:var(--iacg);font-size:0.42em">✦</span></span></sc-for></div>
+    </div>
+  </div>
+  <div style="max-width:{{ L.maxW }};margin:0 auto;padding:{{ FO.innerPad }}">
+    <div style="padding-top:18px;border-top:1px solid var(--ink);margin-bottom:{{ L.tGap }}"><sc-if value="{{ sec.focus.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-sp="" style="font-size:{{ sec.focus.tfs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.04em"><sc-for list="{{ sec.focus.words }}" as="w" hint-placeholder-count="1"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for><sup aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:12px;font-weight:400;letter-spacing:0;vertical-align:top;line-height:1;color:var(--ink2)">{{ sec.focus.num }}</sup></h2></sc-if></div>
+    <ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:{{ FO.cols }};gap:{{ FO.gap }}">
+      <sc-for list="{{ FO.items }}" as="f" hint-placeholder-count="4"><li data-rv="" style="--rd:{{ f.d }};min-width:0;padding-top:20px;border-top:1px solid var(--rule);display:grid;grid-template-columns:{{ FO.icols }};gap:14px 24px;align-content:start"><span aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:11px;line-height:2.2;color:var(--act)">{{ f.num }}</span><div style="min-width:0;display:flex;flex-direction:column;gap:12px"><h3 style="font-size:{{ FO.tFs }};font-weight:450;font-stretch:115%;line-height:1.12;letter-spacing:-0.025em;overflow-wrap:break-word;text-wrap:balance">{{ f.t }}</h3><sc-if value="{{ f.hasD }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:30em;font-size:15.5px;line-height:1.6;color:var(--ink2);text-wrap:pretty">{{ f.d2 }}</p></sc-if></div></li></sc-for>
+    </ul>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.testimonials.show }}" hint-placeholder-val="{{ true }}">
+<section id="tp-testimonials" aria-label="{{ sec.testimonials.aria }}" style="order:{{ sec.testimonials.order }};padding:{{ L.secPad }}">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="padding-top:18px;border-top:1px solid var(--ink);margin-bottom:{{ L.tGap }}"><sc-if value="{{ sec.testimonials.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 data-sp="" style="font-size:{{ sec.testimonials.tfs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.04em"><sc-for list="{{ sec.testimonials.words }}" as="w" hint-placeholder-count="2"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for><sup aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:12px;font-weight:400;letter-spacing:0;vertical-align:top;line-height:1;color:var(--ink2)">{{ sec.testimonials.num }}</sup></h2></sc-if></div>
+    <div style="display:flex;flex-direction:column;gap:{{ TS.gap }}">
+      <sc-for list="{{ TS.items }}" as="q" hint-placeholder-count="3"><figure style="position:sticky;top:{{ q.top }};margin:0;padding:{{ TS.pad }};background:var(--sf);box-shadow:inset 0 0 0 1px var(--rule);display:grid;grid-template-columns:{{ TS.cols }};gap:20px 40px;min-height:{{ TS.minH }};box-sizing:border-box">
+        <span aria-hidden="true" style="font-size:{{ TS.qmFs }};font-weight:440;font-stretch:125%;line-height:0.8;color:var(--acg)">“</span>
+        <div style="min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:32px">
+          <blockquote style="margin:0;font-size:{{ q.fs }};font-weight:400;font-stretch:104%;line-height:1.24;letter-spacing:-0.02em;text-wrap:pretty">{{ q.quote }}</blockquote>
+          <figcaption style="display:flex;align-items:center;gap:14px;min-width:0">
+            <sc-if value="{{ q.hasPh }}" hint-placeholder-val="{{ false }}"><span role="img" aria-label="{{ q.author }}" style="flex:none;position:relative;width:52px;height:52px;border-radius:50%;overflow:hidden;isolation:isolate;background:var(--sf2)"><image-slot id="{{ q.ph.slot }}" src="{{ q.ph.src }}" placeholder="{{ q.ph.ph }}" shape="circle" style="position:absolute;inset:0;width:100%;height:100%;filter:var(--gf)"></image-slot></span></sc-if>
+            <span style="min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:600;line-height:1.3">{{ q.author }}</span><sc-if value="{{ q.hasRole }}" hint-placeholder-val="{{ true }}"><span style="font-size:14.5px;line-height:1.4;color:var(--ink2)">{{ q.role }}</span></sc-if></span>
+            <span aria-hidden="true" style="margin-left:auto;flex:none;font-family:'Martian Mono',monospace;font-size:11px;color:var(--ink2)">{{ q.num }}</span>
+          </figcaption>
+        </div>
+      </figure></sc-for>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ sec.cta.show }}" hint-placeholder-val="{{ true }}">
+<section id="tp-cta" aria-label="{{ CT.headline }}" onPointerMove="{{ CT.move }}" onPointerLeave="{{ CT.leave }}" style="order:{{ sec.cta.order }};padding:{{ CT.pad }};text-align:center">
+  <div data-ctas="" style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:{{ CT.gap }}">
+    <h2 data-sp="" style="max-width:100%;font-size:{{ CT.fs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.045em;text-wrap:balance"><sc-for list="{{ CT.words }}" as="w" hint-placeholder-count="4"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for></h2>
+    <sc-if value="{{ CT.hasBody }}" hint-placeholder-val="{{ true }}"><p data-rv="" style="margin:0;max-width:30em;font-size:{{ CT.bodyFs }};line-height:1.5;color:var(--ink2);text-wrap:balance">{{ CT.body }}</p></sc-if>
+    <sc-if value="{{ CT.circle }}" hint-placeholder-val="{{ true }}"><a ref="{{ magRef }}" data-mag="" href="{{ CT.href }}" style="margin-top:12px;width:188px;height:188px;padding:24px;box-sizing:border-box;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--ink);color:var(--bg);font-size:16px;font-weight:500;font-stretch:110%;line-height:1.2;text-decoration:none;text-align:center" style-hover="background-color:var(--act);color:var(--bg)"><span style="overflow-wrap:break-word;max-width:100%">{{ CT.btn }}</span><span aria-hidden="true" style="font-size:20px">→</span></a></sc-if>
+    <sc-if value="{{ CT.rect }}" hint-placeholder-val="{{ false }}"><a href="{{ CT.href }}" style="margin-top:4px;width:100%;min-height:56px;padding:0 22px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--ink);color:var(--bg);font-size:15px;font-weight:500;text-decoration:none;text-align:left" style-hover="color:var(--bg)"><span style="min-width:0">{{ CT.btn }}</span><span aria-hidden="true">→</span></a></sc-if>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{ show.contact }}" hint-placeholder-val="{{ true }}">
+<section id="tp-contact" data-inv="" aria-label="{{ CO.title }}" style="order:90;background:var(--ink);color:var(--bg);padding:{{ CO.pad }}">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="padding-top:18px;border-top:1px solid var(--bg);margin-bottom:{{ L.tGap }}"><h2 data-sp="" style="font-size:{{ CO.tfs }};font-weight:440;font-stretch:125%;line-height:0.95;letter-spacing:-0.04em"><sc-for list="{{ CO.words }}" as="w" hint-placeholder-count="1"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for><sup aria-hidden="true" style="font-family:'Martian Mono',monospace;font-size:12px;font-weight:400;letter-spacing:0;vertical-align:top;line-height:1;color:var(--iink2)">{{ CO.num }}</sup></h2></div>
+    <div style="display:grid;grid-template-columns:{{ CO.cols }};gap:{{ CO.gap }};align-items:start">
+      <sc-if value="{{ CO.direct }}" hint-placeholder-val="{{ true }}">
+        <div style="min-width:0;display:flex;flex-direction:column;align-items:{{ CO.align }};text-align:{{ CO.ta }};gap:32px">
+          <sc-if value="{{ CO.hasBlurb }}" hint-placeholder-val="{{ true }}"><p style="margin:0;max-width:24em;font-size:{{ CO.blurbFs }};font-weight:400;font-stretch:104%;line-height:1.3;letter-spacing:-0.015em;text-wrap:pretty">{{ CO.blurb }}</p></sc-if>
+          <sc-if value="{{ CO.hasEmail }}" hint-placeholder-val="{{ true }}"><a href="{{ CO.mailto }}" data-ul="" style="max-width:100%;padding-bottom:6px;font-size:{{ CO.emailFs }};font-weight:440;font-stretch:112%;line-height:1.15;letter-spacing:-0.03em;text-decoration:none;overflow-wrap:anywhere">{{ CO.email }}</a></sc-if>
+          <sc-if value="{{ CO.hasLinks }}" hint-placeholder-val="{{ true }}">
+            <ul style="list-style:none;margin:0;padding:0;width:100%;max-width:{{ CO.linksMax }};border-top:1px solid var(--irule)">
+              <sc-for list="{{ links }}" as="l" hint-placeholder-count="3"><li style="border-bottom:1px solid var(--irule)"><a href="{{ l.href }}" target="_blank" rel="noopener me" data-rh="" style="min-height:56px;display:flex;align-items:center;gap:14px;font-size:16px;text-decoration:none;text-align:left"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="{{ l.d }}"></path></svg><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span data-roll=""><span data-rl=""><span>{{ l.label }}</span><span aria-hidden="true">{{ l.label }}</span></span></span></span><span aria-hidden="true" style="color:var(--iink2)">↗</span></a></li></sc-for>
+            </ul>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ fm.on }}" hint-placeholder-val="{{ true }}">
+        <div style="min-width:0;max-width:{{ CO.formMax }}">
+          <sc-if value="{{ fm.form }}" hint-placeholder-val="{{ true }}">
+            <form onSubmit="{{ fm.submit }}" noValidate="{{ true }}" style="display:flex;flex-direction:column;gap:26px;opacity:{{ fm.op }}">
+              <div style="display:grid;grid-template-columns:{{ CO.fCols }};gap:26px 28px">
+                <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--iink2)">Name</span><input value="{{ f.name }}" onChange="{{ on.name }}" autoComplete="name" aria-invalid="{{ fe.name.inv }}" style="min-height:48px;padding:8px 0;border:0;border-bottom:{{ fe.name.bw }} solid {{ fe.name.bc }};background:transparent;color:var(--bg);font:inherit;font-size:18px;outline:none;border-radius:0" style-focus="border-bottom-color:var(--iacg)"><sc-if value="{{ fe.name.show }}" hint-placeholder-val="{{ false }}"><span role="alert" style="font-size:14px;color:var(--bg)">↳ {{ fe.name.msg }}</span></sc-if></label>
+                <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--iink2)">Email</span><input type="email" value="{{ f.email }}" onChange="{{ on.email }}" autoComplete="email" aria-invalid="{{ fe.email.inv }}" style="min-height:48px;padding:8px 0;border:0;border-bottom:{{ fe.email.bw }} solid {{ fe.email.bc }};background:transparent;color:var(--bg);font:inherit;font-size:18px;outline:none;border-radius:0" style-focus="border-bottom-color:var(--iacg)"><sc-if value="{{ fe.email.show }}" hint-placeholder-val="{{ false }}"><span role="alert" style="font-size:14px;color:var(--bg)">↳ {{ fe.email.msg }}</span></sc-if></label>
+              </div>
+              <label style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--iink2)">Organisation (optional)</span><input value="{{ f.org }}" onChange="{{ on.org }}" autoComplete="organization" style="min-height:48px;padding:8px 0;border:0;border-bottom:1px solid var(--ibr);background:transparent;color:var(--bg);font:inherit;font-size:18px;outline:none;border-radius:0" style-focus="border-bottom-color:var(--iacg)"></label>
+              <sc-if value="{{ fm.hasTopics }}" hint-placeholder-val="{{ true }}"><fieldset style="margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:12px"><legend style="padding:0;margin-bottom:12px;font-family:'Martian Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--iink2)">Topic</legend><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ fm.topics }}" as="t" hint-placeholder-count="4"><button type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.on }}" style="min-height:44px;padding:0 16px;border:0;box-shadow:inset 0 0 0 1px {{ t.bc }};background:{{ t.bg }};color:{{ t.fg }};font:inherit;font-size:14px;cursor:pointer">{{ t.label }}</button></sc-for></div></fieldset></sc-if>
+              <label style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Martian Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--iink2)">Message</span><textarea value="{{ f.msg }}" onChange="{{ on.msg }}" rows="4" aria-invalid="{{ fe.msg.inv }}" style="min-height:120px;padding:10px 0;border:0;border-bottom:{{ fe.msg.bw }} solid {{ fe.msg.bc }};background:transparent;color:var(--bg);font:inherit;font-size:18px;line-height:1.5;resize:vertical;outline:none;border-radius:0" style-focus="border-bottom-color:var(--iacg)"></textarea><sc-if value="{{ fe.msg.show }}" hint-placeholder-val="{{ false }}"><span role="alert" style="font-size:14px;color:var(--bg)">↳ {{ fe.msg.msg }}</span></sc-if></label>
+              <div style="display:flex;flex-direction:{{ CO.sendDir }};align-items:{{ CO.sendAlign }};gap:16px 24px">
+                <button type="submit" disabled="{{ fm.busy }}" data-rh="" style="min-height:58px;padding:0 28px;border:0;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;font-weight:500;display:inline-flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;width:{{ CO.sendW }}"><span data-roll=""><span data-rl=""><span>{{ fm.btnLabel }}</span><span aria-hidden="true">{{ fm.btnLabel }}</span></span></span>{{ fm.btnIcon }}</button>
+                <span style="font-size:13.5px;line-height:1.5;color:var(--iink2)">{{ fm.note }}</span>
+              </div>
+            </form>
+          </sc-if>
+          <sc-if value="{{ fm.sent }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="min-height:{{ CO.sentMin }};display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:16px">
+              <span aria-hidden="true" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg);color:var(--ink);animation:tp-pop .6s var(--ease) both"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+              <span style="font-size:{{ CO.sentFs }};font-weight:440;font-stretch:125%;line-height:1;letter-spacing:-0.04em">Message sent</span>
+              <span style="max-width:28em;line-height:1.55;color:var(--iink2)">{{ fm.sentLine }}</span>
+              <button type="button" onClick="{{ fm.reset }}" style="margin-top:6px;min-height:44px;padding:0;border:0;background:none;color:var(--bg);font:inherit;font-size:15px;text-decoration:underline;text-underline-offset:0.25em;cursor:pointer">Send another</button>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+    <div aria-hidden="true" data-sp="" style="margin-top:{{ CO.bigM }};font-size:{{ CO.bigFs }};font-weight:440;font-stretch:125%;line-height:0.9;letter-spacing:-0.05em;white-space:nowrap;text-align:center"><sc-for list="{{ CO.nameWords }}" as="w" hint-placeholder-count="2"><span data-rw="" style="--i:{{ w.i }}"><span>{{ w.t }}</span></span></sc-for></div>
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--irule);display:flex;flex-direction:{{ CO.footDir }};align-items:{{ CO.footAlign }};justify-content:space-between;gap:12px 24px;font-size:14px;color:var(--iink2)">
+      <span>{{ c.name }}</span>
+      <a href="#tp-top" data-rh="" style="min-height:44px;display:inline-flex;align-items:center;gap:8px;color:var(--bg);text-decoration:none"><span data-roll=""><span data-rl=""><span>{{ words.top }}</span><span aria-hidden="true">{{ words.top }}</span></span></span><span aria-hidden="true">↑</span></a>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;white&quot;,&quot;mist&quot;,&quot;lilac&quot;,&quot;ink&quot;,&quot;moss&quot;],&quot;default&quot;:&quot;white&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;grade&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;original&quot;,&quot;tinted&quot;,&quot;mono&quot;],&quot;default&quot;:&quot;original&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;sample&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;typical&quot;,&quot;full&quot;,&quot;max&quot;,&quot;long&quot;],&quot;default&quot;:&quot;typical&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;photos&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;on&quot;,&quot;0&quot;],&quot;default&quot;:&quot;on&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+const DEV = { desktop: 1280, tablet: 820, phone: 390 };
+const MID = ["about", "experience", "achievements", "portfolio", "focus", "testimonials", "cta"];
+const T_DEF = { about: "About", experience: "Experience", achievements: "Achievements", portfolio: "Work", focus: "Focus", testimonials: "Testimonials", cta: "Get in touch", contact: "Contact" };
+const W_DEF = { menu: "Menu", close: "Close", top: "Back to top", send: "Send message", more: "Show {n} more", gallery: "Gallery" };
+const ICON = {
+  linkedin: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
+  x: "M4 4l16 16M20 4l-6.5 6.5M10.5 13.5L4 20",
+  github: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4M9 18c-4.51 2-5-2-7-2",
+  instagram: "M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zM16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37zM17.5 6.5h.01",
+  youtube: "M2.5 17a24 24 0 0 1 0-10a2 2 0 0 1 1.4-1.4a49.6 49.6 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24 24 0 0 1 0 10a2 2 0 0 1-1.4 1.4a49.6 49.6 0 0 1-16.2 0A2 2 0 0 1 2.5 17M10 15l5-3l-5-3z",
+  website: "M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10a15.3 15.3 0 0 1-4 10a15.3 15.3 0 0 1-4-10a15.3 15.3 0 0 1 4-10z",
+  other: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+};
+const im = (slot, caption, ph) => ({ slot, caption, ph });
+const X = (role, org, loc, start, end, summary) => ({ role, org, loc, start, end, summary });
+const TYPICAL = {
+  name: "Nadia Ferreira",
+  hero: { eyebrow: "Founder and CEO, Halden Grid · Lisbon", headline: "I build companies that keep the grid steady when the wind drops.", sub: "Fifteen years in energy, from a London trading desk to wind farms in the Alentejo. Today I run Halden Grid, which stores renewable power for 2.3 million homes, and I sit on two boards.", button: { label: "Start a conversation", href: "#tp-contact" }, image: im("tp-portrait", "Nadia Ferreira", "Drop a portrait") },
+  gallery: [],
+  about: { heading: "About", image: null, body: [
+    [["I started on a gas trading desk in London and left when it became clear that the hard part of clean energy was never making power. "], ["It was keeping it.", "b"]],
+    "In 2017 I co-founded Halden Grid with two battery engineers I met in Porto. We now run storage sites in nine countries and sell flexibility back to the grid operators who once told us it could not be done.",
+    [["Outside Halden I chair the storage working group at "], ["Energia Sul", "i"], [", mentor first-time founders in hard tech, and write about grid policy for anyone who will read it."]]
+  ] },
+  experience: { heading: "Experience", items: [
+    X("Chief Executive and Co-founder", "Halden Grid", "Lisbon", "2017", "Present", "Grew a three-person battery start-up into a storage operator with 2.4 GW under management across nine countries."),
+    X("Vice President, Storage", "Solvane Energy", "Madrid", "2012", "2017", "Built the storage division from a single pilot into a €300M business line and led the first grid-scale battery tender in Spain."),
+    X("Non-executive Director", "Corvo Water", "Porto", "2021", "Present", ""),
+    X("Analyst, Gas and Power", "Ashby Rowe", "London", "2008", "2012", "Traded short-term gas and power across northwest Europe.")
+  ] },
+  achievements: { heading: "In numbers", items: [
+    { value: "2.3M", label: "Homes powered from stored energy each evening" }, { value: "€410M", label: "Raised across three funding rounds" },
+    { value: "9", label: "Countries with Halden storage sites" }, { value: "15", label: "Years working in European energy" }
+  ] },
+  portfolio: { heading: "Selected work", items: [
+    { title: "Halden Grid", kind: "Company", year: "2017", meta: "Co-founder and Chief Executive", desc: "Long-duration battery storage that turns surplus wind and solar into evening power.", href: "#" },
+    { title: "The Flexible Grid", kind: "Book", year: "2023", meta: "Northfield Press", desc: "A plain-language guide to why storage, not generation, decides how fast Europe can decarbonise.", href: "#" },
+    { title: "Storage at scale: lessons from Iberia", kind: "Keynote", year: "2024", meta: "Energy Futures Summit, Rotterdam", desc: "", href: "#" },
+    { title: "Corvo Water", kind: "Board seat", year: "2021", meta: "Non-executive Director", desc: "", href: "" }
+  ] },
+  focus: { heading: "Focus", items: [
+    { title: "Long-duration storage", desc: "Taking batteries from four hours to twelve, so solar power lasts through the night." },
+    { title: "Grid policy in Southern Europe", desc: "Working with regulators in Spain and Portugal on markets that pay for flexibility." },
+    { title: "Founders in hard tech", desc: "Two hours a month with first-time founders building physical infrastructure." },
+    { title: "Women in energy leadership", desc: "Sponsoring the next generation of operators onto boards across the sector." }
+  ] },
+  testimonials: { heading: "Kind words", items: [
+    { quote: "Nadia sees the whole system at once: the physics, the market and the politics. She is the first person I call before any decision on storage.", author: "Henrik Aalto", role: "Chair, Nordvolt Capital" },
+    { quote: "She built Halden the way you build infrastructure, patiently and to last. Our board has never had a clearer operator in the room.", author: "Inês Carvalho", role: "Non-executive Director, Corvo Water" },
+    { quote: "The rare founder who can explain a capacity market to a minister in ten minutes and leave them wanting to help.", author: "Tomás Reyes", role: "Former Secretary of State for Energy" }
+  ] },
+  cta: { headline: "Working on something the grid needs?", body: "I make time each month for founders, boards and policymakers working on storage and flexibility.", button: { label: "Write to me", href: "#tp-contact" } },
+  contact: { heading: "Contact", blurb: "For board roles, speaking and press, write here or by email. I read everything and reply within a week.", email: "nadia@haldengrid.example", links: [{ type: "linkedin", label: "LinkedIn", href: "#" }, { type: "x", label: "X", href: "#" }, { type: "website", label: "haldengrid.example", href: "#" }], form: { enabled: true, topics: ["Board roles", "Speaking", "Investment", "Press"] } }
+};
+const MAXH = { ...TYPICAL, hero: { eyebrow: "Founder and Chief Executive, Halden Grid · Non-executive Director, Corvo Water", headline: "I build and run the companies that keep Europe's electricity grid steady on still, dark evenings when the wind drops.", sub: "Fifteen years in energy, from a London trading desk to wind farms in the Alentejo. Today I run Halden Grid, which stores renewable power for 2.3 million homes across nine countries, chair a storage working group, and sit on two boards in water and infrastructure.", button: { label: "Download the board biography", href: "#" }, image: im("tp-portrait", "Nadia Ferreira", "Drop a portrait") } };
+const LONG = { ...TYPICAL, name: "Alexandra Montgomery-Fitzgerald", hero: { ...TYPICAL.hero, eyebrow: "Founder and CEO, Halden Grid · Lisbon" } };
+const GAL = ["Opening the Évora storage site", "Keynote at Energy Futures, Rotterdam", "With the Halden operations team", "Signing the Iberian grid accord", "Board offsite in Porto", "Our first container battery"].map((c, i) => im("tp-g" + (i + 1), c, "Drop a gallery photo"));
+const FULL = { ...TYPICAL, gallery: GAL, about: { ...TYPICAL.about, image: im("tp-about", "", "Drop a photo") }, portfolio: { ...TYPICAL.portfolio, items: TYPICAL.portfolio.items.map((x, i) => ({ ...x, img: im("tp-w" + (i + 1), "", "Drop a project image") })) }, testimonials: { ...TYPICAL.testimonials, items: TYPICAL.testimonials.items.map((x, i) => ({ ...x, photo: im("tp-q" + (i + 1), "", "Photo") })) } };
+const SAMPLES = { typical: TYPICAL, max: MAXH, long: LONG, full: FULL };
+const PRESETS = {
+  white: { name: "White", kind: "Light · default", bg: "#ffffff", ink: "#0c0c0d", accent: "#5b2eff" },
+  mist: { name: "Mist", kind: "Cool off-white", bg: "#eef1f5", ink: "#0f1720", accent: "#0a5cff" },
+  lilac: { name: "Lilac", kind: "Tinted", bg: "#efebfd", ink: "#1a1238", accent: "#6a3cf0" },
+  ink: { name: "Ink", kind: "Dark", bg: "#0b0b0c", ink: "#f4f3ef", accent: "#b6a3ff" },
+  moss: { name: "Moss", kind: "Dark green", bg: "#0f1a15", ink: "#e8efe9", accent: "#c4f06a" }
+};
+const GRADES = { original: { f: "none", o: "0" }, tinted: { f: "grayscale(1) contrast(1.05)", o: "0.4" }, mono: { f: "grayscale(1) contrast(1.1)", o: "0" } };
+const EMPTY_F = { name: "", email: "", org: "", msg: "", topic: null };
+const rgb = h => { const n = parseInt(String(h).replace("#", ""), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = Array.isArray(a) ? a : rgb(a), B = Array.isArray(b) ? b : rgb(b); return A.map((v, i) => Math.round(v * p + B[i] * (1 - p))); };
+const hex = c => "#" + c.map(v => v.toString(16).padStart(2, "0")).join("");
+const cm = (a, p, b) => "color-mix(in srgb,var(" + a + ") " + p + "%,var(" + b + "))";
+function derive({ bg, ink, accent }) {
+  const worst = (c, gs) => Math.min(...gs.map(g => ratio(c, g)));
+  const toward = (a, b, gs, min, from) => { let q = from; while (q < 100 && worst(mix(a, b, q / 100), gs) < min) q += 2; return Math.min(q, 100); };
+  const keep = (a, b, gs, min) => { let q = 100; while (q > 0 && worst(mix(a, b, q / 100), gs) < min) q -= 2; return q; };
+  const sf = mix(ink, bg, 0.045), sf2 = mix(ink, bg, 0.09);
+  const p2 = toward(ink, bg, [bg, sf, sf2], 4.6, 50), pb = toward(ink, bg, [bg, sf], 3.1, 24);
+  const pg = keep(accent, ink, [bg, sf], 3.05), pa = keep(accent, ink, [bg, sf], 4.6);
+  const pi2 = toward(bg, ink, [ink], 4.6, 50), pib = toward(bg, ink, [ink], 3.1, 24), pig = keep(accent, bg, [ink], 3.05);
+  const v = { ink2: mix(ink, bg, p2 / 100), act: mix(accent, ink, pa / 100), acg: mix(accent, ink, pg / 100), iink2: mix(bg, ink, pi2 / 100), iacg: mix(accent, bg, pig / 100) };
+  const r = x => x.toFixed(1) + ":1";
+  return { bg, ink, ac: accent, ink2: cm("--ink", p2, "--bg"), br: cm("--ink", pb, "--bg"), rule: cm("--ink", 14, "--bg"), sf: cm("--ink", 4.5, "--bg"), sf2: cm("--ink", 9, "--bg"),
+    acg: pg >= 100 ? "var(--ac)" : cm("--ac", pg, "--ink"), act: pa >= 100 ? "var(--ac)" : cm("--ac", pa, "--ink"),
+    iink2: cm("--bg", pi2, "--ink"), iacg: pig >= 100 ? "var(--ac)" : cm("--ac", pig, "--bg"), irule: cm("--bg", 18, "--ink"), ibr: cm("--bg", pib, "--ink"),
+    hex: { ink2: hex(v.ink2), act: hex(v.act), acg: hex(v.acg), iink2: hex(v.iink2), iacg: hex(v.iacg), sf2: hex(sf2), br: hex(mix(ink, bg, pb / 100)), rule: hex(mix(ink, bg, 0.14)) },
+    ratios: { r1: r(ratio(ink, bg)), r2: r(worst(v.ink2, [bg, sf2])), ra: r(worst(v.act, [bg, sf])), rg: r(worst(v.acg, [bg, sf])), ri: r(ratio(bg, ink)), ri2: r(ratio(v.iink2, ink)) } };
+}
+const plain = para => Array.isArray(para) ? para.map(s => s[0]).join("") : String(para || "");
+const segs = para => (Array.isArray(para) ? para : [[String(para)]]).map(s => { const mk = s[1] || "", href = /^(https?:|mailto:|#)/.test(mk) ? mk : ""; return { t: s[0], b: mk === "b", i: mk === "i", a: !!href, href: href || undefined, plain: !mk }; });
+const litWords = para => { const out = []; segs(para).forEach(g => { g.t.split(/(?<=\s)/).filter(w => w.length).forEach(w => out.push({ t: w, b: g.b, it: g.i, a: g.a, href: g.href, plain: g.plain, i: out.length })); }); return out; };
+const wordsOf = t => String(t || "").trim().split(/\s+/).filter(Boolean).map((w, i) => ({ t: w, i }));
+const units = t => String(t || "").trim().split(/\s+/).filter(Boolean).flatMap(w => [w, ...w.split(/(?<=-)/)]);
+const IM = (o, ph) => o && (o.slot || o.src) ? { slot: o.slot || undefined, src: o.src || undefined, alt: o.caption || o.alt || "", ph: o.ph || ph || "Drop a photo", cap: o.caption || "", hasCap: !!o.caption } : null;
+const expo = t => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+
+class Component extends DCLogic {
+  state = { w: 0, m: null, f: { ...EMPTY_F }, err: {}, status: "idle", menu: false };
+  rid = "tp-ring-" + Math.random().toString(36).slice(2, 8);
+  rootRef = el => {
+    this.root = el;
+    if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    if (!el || DEV[this.props.device]) return;
+    this._ro = new ResizeObserver(() => { const w = el.offsetWidth; if (w && Math.abs(w - (this.state.w || 0)) > 4) this.setState({ w }); });
+    this._ro.observe(el);
+  };
+  headRef = el => { this.head = el; };
+  magRef = el => { this.mag = el; };
+  live() { return !DEV[this.props.device] && this.props.motion !== false && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  src() {
+    const p = this.props; let s = { ...(p.content || SAMPLES[p.sample] || TYPICAL), ...(p.patch || {}) };
+    if (p.photos === 0 || p.photos === "0") s = { ...s, hero: { ...s.hero, image: null }, about: { ...s.about, image: null }, gallery: [], portfolio: s.portfolio && { ...s.portfolio, items: (s.portfolio.items || []).map(x => ({ ...x, img: null })) } };
+    return s;
+  }
+  measure() {
+    const s = this.src(), strs = [s.name, (s.cta || {}).headline, (s.contact || {}).heading, ...MID.map(k => (s[k] || {}).heading), ...((s.achievements || {}).items || []).map(x => x.value)].filter(Boolean);
+    const all = [...new Set([...strs.flatMap(units), ...strs])];
+    const run = () => {
+      const cx = document.createElement("canvas").getContext("2d"); cx.font = '440 100px "Archivo"'; try { cx.fontStretch = "expanded"; } catch (e) {} try { cx.letterSpacing = "-4.5px"; } catch (e) {}
+      const m = { __sp: cx.measureText(" ").width / 100 }; all.forEach(u => { m[u] = cx.measureText(u).width / 100; }); this.setState({ m });
+    };
+    const f = document.fonts; if (f && f.load) f.load('440 100px "Archivo"', "Aa").then(run, run); else run();
+  }
+  arm() {
+    if (this._armed || !this.root || !this.live()) return; this._armed = true;
+    const vh = innerHeight, els = [...this.root.querySelectorAll("[data-rv],[data-sp],[data-count]")].filter(el => el.getBoundingClientRect().top > vh * 0.92);
+    const go = el => {
+      delete el.dataset.wait; if (el.dataset.count == null) return;
+      const n = el.firstChild, mm = String(el.dataset.v || "").match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (!n || n.nodeType !== 3 || !mm) return;
+      const tgt = parseFloat(mm[2].replace(/,/g, "")), dec = (mm[2].split(".")[1] || "").length, cma = mm[2].includes(","), t0 = performance.now(), d = 1600;
+      const fmt = v => { let t = v.toFixed(dec); if (cma) t = t.replace(/\B(?=(\d{3})+(?!\d))/g, ","); return mm[1] + t + mm[3]; };
+      const step = now => { const t = Math.min(1, (now - t0) / d); n.nodeValue = fmt(tgt * expo(t)); if (t < 1) requestAnimationFrame(step); else n.nodeValue = el.dataset.v; };
+      requestAnimationFrame(step);
+    };
+    this._io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { this._io.unobserve(e.target); go(e.target); } }), { rootMargin: "0px 0px -12% 0px" });
+    els.forEach(el => { el.dataset.wait = "1"; if (el.dataset.count != null && el.firstChild && el.firstChild.nodeType === 3) { const mm = String(el.dataset.v || "").match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (mm) el.firstChild.nodeValue = mm[1] + (0).toFixed((mm[2].split(".")[1] || "").length) + mm[3]; } this._io.observe(el); });
+  }
+  initHead() {
+    if (DEV[this.props.device]) return; let last = scrollY;
+    const on = () => { const h = this.head; if (!h) return; const y = scrollY; if (y > 8) h.dataset.sc = "1"; else delete h.dataset.sc; if (this.live() && y > last + 4 && y > 520 && !this.state.menu) h.dataset.up = "1"; else if (y < last - 4 || y < 520) delete h.dataset.up; last = y; };
+    addEventListener("scroll", on, { passive: true }); this._hs = () => removeEventListener("scroll", on);
+  }
+  initSmooth() {
+    if (this._sm || !this.live() || this.props.smooth === false) return;
+    const se = document.scrollingElement || document.documentElement, fine = matchMedia("(pointer: fine)").matches;
+    let target = se.scrollTop, cur = target, raf = 0, anim = null;
+    const max = () => se.scrollHeight - innerHeight;
+    const tick = now => {
+      if (anim) { const t = Math.min(1, (now - anim.t0) / anim.dur); cur = anim.from + (anim.to - anim.from) * expo(t); if (t >= 1) { anim = null; target = cur; } }
+      else { cur += (target - cur) * 0.1; if (Math.abs(target - cur) < 0.5) cur = target; }
+      se.scrollTop = cur; raf = anim || cur !== target ? requestAnimationFrame(tick) : 0;
+    };
+    const wheel = e => {
+      if (!fine || e.ctrlKey || e.defaultPrevented || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (e.target.closest && e.target.closest("textarea,[role=dialog],[data-gwrap]")) return;
+      e.preventDefault(); if (!raf) cur = target = se.scrollTop; anim = null;
+      const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * innerHeight : e.deltaY;
+      target = Math.max(0, Math.min(max(), target + dy)); if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const sync = () => { if (!raf) cur = target = se.scrollTop; };
+    const click = e => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a || !this.root || !this.root.contains(a)) return;
+      const id = a.getAttribute("href").slice(1), el = id && document.getElementById(id); if (!el) return; e.preventDefault();
+      const from = se.scrollTop, to = Math.max(0, Math.min(max(), el.getBoundingClientRect().top + from));
+      anim = { from, to, t0: performance.now(), dur: Math.min(1600, 700 + Math.abs(to - from) * 0.15) }; cur = from; if (!raf) raf = requestAnimationFrame(tick);
+    };
+    addEventListener("wheel", wheel, { passive: false }); addEventListener("scroll", sync, { passive: true }); document.addEventListener("click", click);
+    this._sm = () => { removeEventListener("wheel", wheel); removeEventListener("scroll", sync); document.removeEventListener("click", click); cancelAnimationFrame(raf); };
+  }
+  onCtaMove = e => { const b = this.mag; if (!b || e.pointerType !== "mouse" || !this.live()) return; const r = b.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), k = Math.hypot(dx, dy) < 300 ? 0.24 : 0; b.style.transform = "translate(" + (dx * k).toFixed(1) + "px," + (dy * k).toFixed(1) + "px)"; };
+  onCtaLeave = () => { if (this.mag) this.mag.style.transform = ""; };
+  mkey() { const p = this.props; try { return JSON.stringify([p.patch, p.sample, p.content]); } catch (e) { return "x"; } }
+  componentDidMount() {
+    this._pp = this.props; this._mk = this.mkey(); if (this.props.only === "swatch") return;
+    if (this.props.menu) this.setState({ menu: true });
+    this.measure(); this.initSmooth(); this.initHead(); this._at = setTimeout(() => this.arm(), 250);
+  }
+  componentDidUpdate() { const pp = this._pp || this.props, p = this.props; this._pp = p; if (pp.menu !== p.menu) this.setState({ menu: !!p.menu }); const mk = this.mkey(); if (mk !== this._mk) { this._mk = mk; this.measure(); } }
+  componentWillUnmount() { clearTimeout(this._at); clearTimeout(this._st); this._ro && this._ro.disconnect(); this._sm && this._sm(); this._hs && this._hs(); this._io && this._io.disconnect(); }
+
+  swatchVals() {
+    const pr = PRESETS[this.props.preset] || PRESETS.white, t = derive(pr), h = t.hex;
+    return { show: { swatch: true, page: false }, sw: { name: pr.name, kind: pr.kind, bg: pr.bg, ink: pr.ink, ac: pr.accent, ink2: h.ink2, act: h.act, iacg: h.iacg, iink2: h.iink2, sf2: h.sf2, br: h.br, rule: h.rule, ...t.ratios } };
+  }
+
+  renderVals() {
+    const p = this.props, s = this.state;
+    if (p.only === "swatch") return this.swatchVals();
+    const src = this.src();
+    const W = DEV[p.device] || s.w || 1280, P = W < 640, T = !P && W < 1000, D = !P && !T;
+    const pad = P ? 20 : T ? 32 : 40, inner = Math.min(W - 2 * pad, 1200), only = p.only || null;
+    const th = derive({ ...(PRESETS[p.preset] || PRESETS.white), ...(p.theme || {}) });
+    const G = GRADES[p.grade] || GRADES.original, words = { ...W_DEF, ...(src.words || {}) };
+    const hero = src.hero || {}, about = src.about || {}, ex = src.experience || {}, ac = src.achievements || {}, fo = src.focus || {}, pf = src.portfolio || {}, ts = src.testimonials || {}, co = src.contact || {}, ct = src.cta || {};
+    const m = s.m || {}, em = u => m[u] || [...u].length * 0.66, sp = m.__sp || 0.24;
+    const wEm = t => { const ws = String(t || "").trim().split(/\s+/).filter(Boolean); return ws.reduce((a, w) => a + em(w), 0) + Math.max(0, ws.length - 1) * sp; };
+    const maxWord = t => Math.max(0.5, ...String(t || "").trim().split(/\s+/).filter(Boolean).map(em));
+    const maxUnit = t => Math.max(0.5, ...String(t || "").trim().split(/\s+/).filter(Boolean).flatMap(w => w.split(/(?<=-)/)).map(em));
+    const fit = (t, cap, room, lines) => { let f = Math.min(cap, room * 0.97 / maxWord(t)); if (lines) f = Math.min(f, room * lines / (wEm(t) * 1.06)); return Math.max(16, Math.floor(f)); };
+    const tier = n => n <= 14 ? 1 : n <= 28 ? 0.8 : n <= 50 ? 0.62 : 0.48;
+    const tSize = t => fit(t, (D ? 112 : T ? 84 : 50) * tier(String(t).length), inner, 2) + "px";
+
+    const paras = (about.body || []).filter(x => plain(x).trim());
+    const exI = (ex.items || []).filter(e => e && (e.role || e.org)).slice(0, 20);
+    const acI = (ac.items || []).filter(x => x && x.value).slice(0, 8);
+    const foI = (fo.items || []).filter(x => x && x.title).slice(0, 6);
+    const pfI = (pf.items || []).filter(x => x && x.title).slice(0, 12);
+    const tsI = (ts.items || []).filter(x => x && x.quote).slice(0, 10);
+    const links = (co.links || []).filter(l => l && l.href).slice(0, 10).map(l => ({ href: l.href, label: l.label || l.type, d: ICON[l.type] || ICON.other, type: l.type }));
+    const present = { about: paras.length > 0, experience: exI.length > 0, achievements: acI.length > 0, portfolio: pfI.length > 0, focus: foI.length > 0, testimonials: tsI.length > 0, cta: !!ct.headline };
+    const hide = { ...(src.hide || {}), ...(p.hide || {}) };
+    const order = (p.order || src.order || MID).filter(k => MID.includes(k)); MID.forEach(k => { if (!order.includes(k)) order.push(k); });
+    const vis = order.filter(k => present[k] && !hide[k] && (!only || only === k));
+    const heading = k => (src[k] || {}).heading || "";
+    const numbered = vis.filter(k => k !== "cta");
+    const sec = {}; MID.forEach(k => { const i = vis.indexOf(k), t = heading(k); sec[k] = { show: i >= 0, order: 10 + Math.max(i, 0), words: wordsOf(t), hasTitle: !!t, tfs: t ? tSize(t) : "0", aria: t || T_DEF[k], num: String(numbered.indexOf(k) + 1).padStart(2, "0") }; });
+    const contactT = co.heading || T_DEF.contact;
+    const nav = [...numbered.map(k => ({ href: "#tp-" + k, label: heading(k) || T_DEF[k] })), { href: "#tp-contact", label: contactT }].map((n, i) => ({ ...n, num: String(i + 1).padStart(2, "0"), d: (0.05 + i * 0.05).toFixed(2) + "s" }));
+
+    const name = String(src.name || "").trim(), headline = String(hero.headline || "").trim();
+    const ws = name.split(/\s+/).filter(Boolean); let l1 = name, l2 = "";
+    if (ws.length > 1) { let bd = 1e9; for (let i = 1; i < ws.length; i++) { const a = ws.slice(0, i).join(" "), b = ws.slice(i).join(" "), d = Math.max(wEm(a), wEm(b)); if (d < bd - 0.01) { bd = d; l1 = a; l2 = b; } } }
+    const capN = P ? 92 : T ? 150 : 212, floorN = P ? 52 : T ? 88 : 116;
+    let nfs = Math.min(capN, inner * 0.97 / Math.max(wEm(l1), l2 ? wEm(l2) : 0.1));
+    if (nfs < floorN) nfs = Math.min(capN, inner * 0.97 / maxUnit(name));
+    const por = IM(hero.image, "Drop a portrait"), hasPor = !!por;
+    const btn = hero.button && hero.button.label ? hero.button : null, bl = btn ? btn.label : "";
+    const badge = !P && !!btn && bl.length <= 34;
+    const ringTxt = (bl.toUpperCase() + "  ·  "), circ = 2 * Math.PI * 56, reps = Math.max(1, Math.round(circ / (ringTxt.length * 7))), rid = this.rid;
+    const ring = badge ? React.createElement("svg", { viewBox: "0 0 140 140", "aria-hidden": true, "data-spin": "", style: { position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" } },
+      React.createElement("defs", null, React.createElement("path", { id: rid, d: "M70,70 m-56,0 a56,56 0 1,1 112,0 a56,56 0 1,1 -112,0" })),
+      React.createElement("text", { fill: "currentColor", style: { fontFamily: "'Martian Mono',monospace", fontSize: "9.4px", letterSpacing: "0.04em" } }, React.createElement("textPath", { href: "#" + rid, textLength: (circ - 1).toFixed(1), lengthAdjust: "spacing" }, ringTxt.repeat(reps)))) : null;
+    const hl = headline.length;
+    const H = {
+      pad: (P ? "20px " : "36px ") + pad + "px " + (P ? "64px" : "104px"), ebM: P ? "16px" : "22px",
+      fs: Math.floor(nfs) + "px", l1: l2 ? l1 + " " : l1, l2, two: !!l2, por: por || {}, hasPor,
+      bandPad: P ? (hasPor ? "18px 0 20px" : "0") : hasPor ? "36px 0 40px" : "44px 0 48px",
+      bandCols: P ? "minmax(0,1fr)" : hasPor ? (D ? "minmax(0,3fr) minmax(0,7fr)" : "minmax(0,4fr) minmax(0,6fr)") : "minmax(0,1fr)", bandGap: D ? "48px" : "32px",
+      bandText: !P, after: P, tCols: hasPor || T ? "minmax(0,1fr)" : "minmax(0,7fr) minmax(0,5fr)", tGap: hasPor ? "32px" : "40px",
+      hlFs: (P ? (hl <= 80 ? 25 : 22) : D ? (hl <= 80 ? 38 : 31) : (hl <= 80 ? 30 : 26)) + "px", hlMax: hasPor ? "18em" : "15em", subFs: D ? "17px" : "16px",
+      restDir: hasPor || T ? "row" : "column", restAlign: hasPor || T ? "flex-end" : "flex-start", badge, rectBtn: !P && !!btn && !badge, ring
+    };
+
+    const gal = (src.gallery || []).slice(0, 12).map(g => IM(g, "Drop a gallery photo")).filter(Boolean), nG = gal.length;
+    const gh = D ? 380 : T ? 300 : 230, ars = [4 / 5, 3 / 2, 1, 3 / 2], gg = P ? 12 : 20;
+    const gItems = gal.map((g, i) => ({ ...g, ar: nG === 1 ? "16 / 9" : i % 2 ? "3 / 2" : "4 / 5", w: Math.round(gh * ars[i % 4]) + "px", d: (i * 0.08).toFixed(2) + "s" }));
+    const trackW = gItems.reduce((a, g) => a + parseInt(g.w), 0) + gg * Math.max(0, nG - 1);
+    const GA = { show: (!only || only === "hero") && nG > 0, grid: nG > 0 && (nG <= 3 && !(P && nG > 1)), strip: nG > 3 || (P && nG > 1), items: gItems, cols: "repeat(" + Math.max(1, nG) + ",minmax(0,1fr))", gap: gg + "px", h: gh + "px", gx: -Math.max(0, trackW - inner) + "px", pb: P ? "64px" : "112px" };
+
+    const lead = paras[0] || "", lw = litWords(lead), leadLen = plain(lead).length, rest = paras.slice(1), aImg = IM(about.image, "Drop a photo"), aIm = !!aImg;
+    const A = {
+      img: aImg || {}, hasImg: aIm, imgPos: D ? "sticky" : "relative", cols: aIm && !P ? "minmax(0,4fr) minmax(0,8fr)" : D ? "minmax(0,2fr) minmax(0,10fr)" : "minmax(0,1fr)", textCol: aIm || !D ? "auto" : "2", gap: P ? "28px" : D ? "48px" : "32px", innerGap: P ? "28px" : "48px",
+      lead: lw, n: Math.max(1, lw.length), fs: (aIm ? (P ? 24 : D ? 36 : 28) : (P ? (leadLen < 160 ? 27 : 24) : D ? (leadLen < 160 ? 52 : leadLen < 300 ? 44 : 36) : (leadLen < 160 ? 38 : 32))) + "px",
+      rest: rest.map(x => ({ segs: segs(x) })), hasRest: rest.length > 0, restCols: !P && rest.length >= 2 ? "repeat(2,minmax(0,1fr))" : "minmax(0,1fr)", restML: D && !aIm ? "0" : "0", restMax: D ? "820px" : "100%"
+    };
+
+    const nA = acI.length, aCols = P ? Math.min(2, nA) : T ? Math.min(nA, nA === 4 ? 2 : 3) : Math.min(nA, 4), cw = inner / aCols - (P ? 20 : 48);
+    const aCap = nA === 1 ? (D ? 220 : 120) : (D ? 132 : T ? 104 : 54);
+    const AC = { cols: "repeat(" + aCols + ",minmax(0,1fr))", rowGap: P ? "40px" : "64px", fs: Math.max(28, Math.floor(Math.min(aCap, ...acI.map(x => cw * 0.95 / Math.max(0.6, wEm(x.value)))))) + "px",
+      items: acI.map((x, i) => { const first = i % aCols === 0; return { v: x.value, l: x.label || "", hasL: !!x.label, d: ((i % aCols) * 0.08).toFixed(2) + "s", bl: first ? "0" : "1px solid var(--rule)", pad: first ? (P ? "0 10px 0 0" : "0 24px 0 0") : (P ? "0 0 0 16px" : "0 24px 0 28px") }; }) };
+
+    const PF = {
+      tGap: P ? "24px" : "40px", bleed: P ? "12px" : "24px", cols: P ? "28px minmax(0,1fr) auto" : D ? "64px minmax(0,6fr) minmax(0,4fr) 168px" : "48px minmax(0,1fr) auto", gap: P ? "6px 12px" : "12px 32px", align: "start",
+      padR: P ? "24px 0" : D ? "36px 0" : "30px 0", descCol: P || T ? "2 / -1" : "3", endCol: P || T ? "3" : "4", endRow: "1", pvR: "200px",
+      items: pfI.map((x, i) => { const img = IM(x.img, "Drop a project image"), ky = [x.kind, x.year].filter(Boolean).join(" · "), tl = x.title.length; return { title: x.title, num: String(i + 1).padStart(2, "0"), ky, hasKY: !!ky, kyEnd: D && !!ky, kyTop: !D && !!ky, meta: x.meta || "", hasMeta: !!x.meta, desc: x.desc || "", hasDesc: !!x.desc, href: x.href || undefined, hasHref: !!x.href, rowAttr: x.href ? "" : undefined, img: img || {}, pv: D && !!img, mobImg: !D && !!img, d: "0s", tfs: (P ? (tl <= 40 ? 25 : 21) : D ? (tl <= 30 ? 40 : tl <= 70 ? 32 : 26) : (tl <= 40 ? 30 : 24)) + "px" }; })
+    };
+    if (!D) PF.items.forEach(r => { if (r.mobImg) r.mobImg = true; });
+
+    const exRow = e => ({ role: e.role || e.org, org: e.role ? [e.org, e.loc].filter(Boolean).join(" · ") : e.loc || "", hasOrg: !!(e.role && (e.org || e.loc)), dates: [e.start, e.end].filter(Boolean).join(" – "), summary: e.summary || "", hasSum: !!e.summary });
+    const cut = exI.length > 10 ? 8 : exI.length;
+    const EX = { gut: P ? "24px" : "40px", cols: P ? "minmax(0,1fr)" : D ? "150px minmax(0,1fr) minmax(0,1fr)" : "120px minmax(0,1fr)", padR: P ? "22px 0" : "30px 0", dotTop: P ? "30px" : "40px", roleFs: P ? "20px" : D ? "25px" : "22px",
+      head: exI.slice(0, cut).map(exRow), tail: exI.slice(cut).map(exRow), hasTail: exI.length > cut, tailStart: String(cut + 1), more: words.more.replace("{n}", String(exI.length - cut)) };
+    if (T) EX.cols = "120px minmax(0,1fr)";
+
+    const nF = foI.length, fCols = P || nF === 1 ? 1 : nF === 2 || nF === 4 ? 2 : 3;
+    const FO = { pad: (P ? "0 0 88px" : "0 0 140px"), innerPad: (P ? "64px " : "112px ") + pad + "px 0", mqPad: P ? "18px 0" : "30px 0", mfs: (P ? 40 : D ? 84 : 64) + "px", mqGap: P ? "22px" : "40px", mqGapHalf: P ? "11px" : "20px", md: Math.max(24, foI.reduce((a, x) => a + x.title.length, 0) * 0.55).toFixed(0) + "s",
+      cols: "repeat(" + (T && fCols === 3 ? 2 : fCols) + ",minmax(0,1fr))", gap: P ? "28px" : "48px 40px", icols: "28px minmax(0,1fr)", tFs: P ? "22px" : D ? "28px" : "25px",
+      items: foI.map((x, i) => ({ t: x.title, num: String(i + 1).padStart(2, "0"), d2: x.desc || "", hasD: !!x.desc, d: ((i % fCols) * 0.08).toFixed(2) + "s" })) };
+
+    const headPx = P ? 60 : 76;
+    const TS = { gap: P ? "16px" : "24px", pad: P ? "26px 22px" : D ? "48px 56px" : "36px", cols: P ? "minmax(0,1fr)" : "72px minmax(0,1fr)", qmFs: P ? "64px" : "112px", minH: P ? "0px" : "340px",
+      items: tsI.map((q, i) => { const ph = IM(q.photo && { ...q.photo, ph: "Photo" }, "Photo"), ql = q.quote.length; return { quote: q.quote, author: q.author || "", role: q.role || "", hasRole: !!q.role, ph: ph || {}, hasPh: !!ph, num: String(i + 1).padStart(2, "0") + " / " + String(tsI.length).padStart(2, "0"), top: (headPx + 24 + i * (P ? 10 : 18)) + "px", fs: (P ? (ql <= 140 ? 21 : 18) : D ? (ql <= 140 ? 34 : ql <= 300 ? 27 : 22) : (ql <= 140 ? 28 : 22)) + "px" }; }) };
+
+    const chl = String(ct.headline || "").length;
+    const CT = { headline: ct.headline || "", words: wordsOf(ct.headline), body: ct.body || "", hasBody: !!ct.body, btn: (ct.button && ct.button.label) || "", href: (ct.button && ct.button.href) || "#tp-contact",
+      circle: !P && !!(ct.button && ct.button.label) && String(ct.button.label).length <= 32, rect: !!(ct.button && ct.button.label) && (P || String(ct.button.label).length > 32),
+      fs: fit(ct.headline || " ", (chl <= 40 ? (D ? 120 : T ? 88 : 48) : chl <= 80 ? (D ? 88 : T ? 68 : 40) : (D ? 68 : T ? 54 : 34)), inner, 3) + "px", bodyFs: P ? "17px" : "20px", gap: P ? "24px" : "32px",
+      pad: (P ? "40px " : "120px ") + pad + "px " + (P ? "88px" : "160px"), move: this.onCtaMove, leave: this.onCtaLeave };
+
+    const fc = co.form || {}, formOn = fc.enabled !== false, topics = (fc.topics || []).filter(Boolean).slice(0, 8);
+    const hasEmail = !!co.email, hasDirect = hasEmail || links.length > 0 || !!co.blurb, two = D && formOn && hasDirect;
+    const CO = { title: contactT, words: wordsOf(contactT), num: String(numbered.length + 1).padStart(2, "0"), tfs: tSize(contactT), pad: (P ? "72px " : "120px ") + pad + "px " + (P ? "28px" : "36px"),
+      blurb: co.blurb || "", hasBlurb: !!co.blurb, email: co.email || "", hasEmail, mailto: "mailto:" + (co.email || ""), direct: hasDirect, hasLinks: links.length > 0, linksMax: formOn ? "none" : "520px",
+      cols: two ? "minmax(0,5fr) minmax(0,7fr)" : "minmax(0,1fr)", gap: P ? "48px" : "72px", align: formOn ? "flex-start" : "center", ta: formOn ? "left" : "center",
+      blurbFs: formOn ? (P ? "21px" : "25px") : (P ? "24px" : "34px"), emailFs: Math.max(17, Math.floor(Math.min(formOn ? (P ? 22 : 30) : (D ? 64 : T ? 44 : 26), (two ? inner * 5 / 12 : inner) * 0.94 / (String(co.email || "").length * 0.6)))) + "px",
+      formMax: formOn && !hasDirect ? "760px" : "none", fCols: P ? "minmax(0,1fr)" : "minmax(0,1fr) minmax(0,1fr)", sendDir: P ? "column" : "row", sendAlign: P ? "stretch" : "center", sendW: P ? "100%" : "auto", sentMin: P ? "auto" : "420px", sentFs: P ? "36px" : "52px",
+      nameWords: wordsOf(name), bigFs: Math.floor(Math.min(D ? 260 : T ? 170 : 96, inner * 0.96 / Math.max(0.5, wEm(name)))) + "px", bigM: P ? "72px" : "120px", footDir: P ? "column" : "row", footAlign: P ? "flex-start" : "center" };
+
+    const headLinks = links.filter(l => ICON[l.type] && l.type !== "other").slice(0, 3);
+    const navW = nav.reduce((t, x) => t + x.label.length * 7.4 + 38, 0), nameW = Math.min(240, name.length * 9) + 32, full = D && navW + nameW + headLinks.length * 46 + 40 <= inner;
+    const L = { maxW: (1200 + 2 * pad) + "px", full, compact: !full, icons: full && headLinks.length > 0, headLinks, pad: pad + "px", headH: headPx + "px", rootW: DEV[p.device] ? DEV[p.device] + "px" : "100%", menuPos: DEV[p.device] ? "absolute" : "fixed", menuFs: P ? "34px" : "48px", bodyFs: P ? "16px" : "17px",
+      secPad: (P ? 88 : T ? 112 : 140) + "px " + pad + "px", tGap: P ? "36px" : D ? "64px" : "48px", minH: s.menu && !full ? "780px" : "0px" };
+
+    const f = s.f, busy = s.status === "sending", firstName = ws[0] || "";
+    const setF = (k, v) => this.setState(st => ({ f: { ...st.f, [k]: v }, err: st.err[k] ? { ...st.err, [k]: undefined } : st.err }));
+    const fe = {}; ["name", "email", "msg"].forEach(k => { const mm = s.err[k]; fe[k] = { show: !!mm, msg: mm || "", inv: mm ? "true" : "false", bc: mm ? "var(--iacg)" : "var(--ibr)", bw: mm ? "2px" : "1px" }; });
+    const submit = e => {
+      e.preventDefault(); if (this.state.status !== "idle") return;
+      const v = this.state.f, er = {};
+      if (!v.name.trim()) er.name = "Add your name.";
+      if (!v.email.trim()) er.email = firstName ? "Add your email so " + firstName + " can reply." : "Add your email so we can reply.";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email.trim())) er.email = "Check the email address.";
+      if (!v.msg.trim()) er.msg = "Add a short message.";
+      if (Object.keys(er).length) return this.setState({ err: er });
+      this.setState({ status: "sending", err: {} }); clearTimeout(this._st); this._st = setTimeout(() => this.setState({ status: "sent" }), 1300);
+    };
+    const spinner = React.createElement("span", { "aria-hidden": true, style: { width: 15, height: 15, boxSizing: "border-box", borderRadius: "50%", border: "1.5px solid currentColor", borderTopColor: "transparent", animation: "tp-spin .8s linear infinite" } });
+    const sender = f.name.split(/\s+/)[0] || "";
+    const fm = {
+      on: formOn, form: s.status !== "sent", sent: s.status === "sent", busy, op: busy ? 0.6 : 1, hasTopics: topics.length > 0,
+      topics: topics.map(t => { const on = f.topic === t; return { label: t, on, pick: () => setF("topic", on ? null : t), bg: on ? "var(--bg)" : "transparent", fg: on ? "var(--ink)" : "var(--bg)", bc: on ? "var(--bg)" : "var(--ibr)" }; }),
+      submit, btnLabel: busy ? "Sending…" : words.send, btnIcon: busy ? spinner : React.createElement("span", { "aria-hidden": true }, "→"),
+      note: firstName ? "Goes straight to " + firstName + ". Your details are not shared." : "Your details are not shared.",
+      sentLine: (sender ? "Thanks, " + sender + ". " : "Thanks. ") + (firstName ? firstName + " will reply to " : "You will get a reply at ") + (f.email.trim() || "your email") + ".",
+      reset: () => this.setState({ status: "idle", f: { ...EMPTY_F }, err: {} })
+    };
+    return {
+      show: { swatch: false, page: true, header: !only || only === "hero", hero: !only || only === "hero", menu: s.menu && !full && (!only || only === "hero"), contact: !only || only === "contact" },
+      sw: {}, th, G, L, H, GA, A, AC, PF, EX, FO, TS, CT, CO, sec, words, links, nav, magRef: this.magRef, headRef: this.headRef,
+      still: DEV[p.device] || p.motion === false ? "1" : undefined, lang: src.lang || "en", rootRef: this.rootRef,
+      menuToggle: () => this.setState(st => ({ menu: !st.menu })), menuOpen: s.menu ? "true" : "false",
+      has: { eyebrow: !!hero.eyebrow, headline: !!headline, sub: !!hero.sub, btn: !!btn, links: links.length > 0 },
+      c: { name, eyebrow: hero.eyebrow || "", headline, sub: hero.sub || "", btn: bl, btnHref: btn ? btn.href || "#tp-contact" : "#tp-contact" },
+      fm, f, fe, on: { name: e => setF("name", e.target.value), email: e => setF("email", e.target.value), org: e => setF("org", e.target.value), msg: e => setF("msg", e.target.value) }
+    };
+  }
+}
+</script>
+</body>
+</html>
