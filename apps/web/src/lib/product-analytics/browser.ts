@@ -47,7 +47,8 @@ export function startProductAnalytics(): void {
     disable_surveys: true,
     disable_product_tours: true,
     disable_conversations: true,
-    capture_performance: false,
+    // Page speed (LCP, CLS, FCP, INP) from Google's web-vitals library; nothing is stored.
+    capture_performance: { web_vitals: true, network_timing: false },
     // Settings come from this code, not from PostHog's dashboard.
     advanced_disable_flags: true,
     mask_personal_data_properties: true,

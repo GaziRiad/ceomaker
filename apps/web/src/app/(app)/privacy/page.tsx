@@ -66,11 +66,12 @@ const sections: LegalSection[] = [
         <li>
           <strong>How ceomaker.app is used:</strong> the pages you open and the steps you take (for
           example finishing the questions, publishing, or opening Billing), where the visit that led
-          to your sign-up came from (such as LinkedIn, Google or a campaign link), errors you run
-          into, your browser and device type, and the country you are in. Once you have an account
-          this is linked to its id, never to your email, and it never includes your site&apos;s
-          text, your answers or your photos. Nothing is stored in your browser for this: before you
-          sign in, each page you open counts as a new, anonymous visitor.
+          to your sign-up came from (such as LinkedIn, Google or a campaign link), how fast pages
+          load for you, errors you run into, your browser and device type, and the country you are
+          in. Once you have an account this is linked to its id, never to your email, and it never
+          includes your site&apos;s text, your answers or your photos. Nothing is stored in your
+          browser for this: before you sign in, each page you open counts as a new, anonymous
+          visitor.
         </li>
       </ul>
     ),

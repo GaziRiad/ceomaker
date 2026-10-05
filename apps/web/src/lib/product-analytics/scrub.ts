@@ -39,9 +39,15 @@ export function scrubUrl(value: string, ownHost: string): string {
 
 type Properties = Record<string, unknown>;
 
-function scrubProperties(properties: Properties | undefined, ownHost: string) {
+function isPlainObject(value: unknown): value is Properties {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function scrubProperties(properties: Properties | undefined, ownHost: string, depth = 0) {
   if (!properties) return;
   for (const [key, value] of Object.entries(properties)) {
+    // Web vitals nest each measurement, with its own page URL, inside the event.
+    if (isPlainObject(value) && depth < 2) scrubProperties(value, ownHost, depth + 1);
     if (typeof value !== "string") continue;
     if (key.endsWith("_url") || key.endsWith("referrer")) {
       properties[key] = scrubUrl(value, ownHost);

@@ -56,6 +56,26 @@ describe("scrubbing", () => {
     });
     expect(scrubEvent(null, OWN)).toBeNull();
   });
+
+  it("cleans URLs nested in web vitals measurements", () => {
+    const event = scrubEvent(
+      {
+        properties: {
+          $web_vitals_LCP_event: {
+            name: "LCP",
+            value: 1200,
+            $current_url: "https://www.ceomaker.app/start/finish?a=eyJuYW1lIjoiUGF0In0",
+          },
+        },
+      },
+      OWN,
+    );
+    expect(event?.properties.$web_vitals_LCP_event).toEqual({
+      name: "LCP",
+      value: 1200,
+      $current_url: "https://www.ceomaker.app/start/finish",
+    });
+  });
 });
 
 describe("visit source", () => {
