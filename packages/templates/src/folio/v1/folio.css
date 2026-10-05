@@ -965,8 +965,8 @@
   color: var(--fo-act);
 }
 
+/* The title sits right under its number in every card, whatever the cards beside it hold. */
 .fo .fo-focus-name {
-  margin-top: auto;
   font-size: 20px;
   line-height: 1.15;
   letter-spacing: -0.025em;
