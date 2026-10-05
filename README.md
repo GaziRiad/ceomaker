@@ -146,6 +146,7 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    | `VERCEL_TEAM_ID`               | see Custom domains  | (leave unset)            |
    | `CRON_SECRET`                  | new random value    | (leave unset)            |
    | `FREEMIUS_*` (4 variables)     | see Payments        | same (sandbox)           |
+   | `R2_*` (4 variables)           | see Image storage   | same                     |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
    - Set `ROOT_DOMAIN` and `APP_URL` as described in "Domain setup" below. Without a domain, customer sites can't be reached on a `*.vercel.app` address.
 
@@ -204,6 +205,16 @@ Owners connect a domain they bought elsewhere in Settings › Site: they get the
 5. **Optional, before many customers:** set `CUSTOM_DOMAIN_CNAME` to a hostname of yours (e.g. `sites.ceomaker.app`, itself a CNAME to `cname.vercel-dns.com`). Customers then point `www` at your hostname, so a future move of hosting needs one record changed by you instead of one per customer. Test it with one domain first: Vercel must still recognise the domain as pointed at it.
 
 Unconnected domains are released after 7 days, so nobody can hold a domain they never point here. When the domain goes live, the owner gets an email (once Resend is set up).
+
+### Image storage (Cloudflare R2)
+
+Uploaded images live in a Cloudflare R2 bucket; Postgres keeps only a row per image (owner, type, size). Sites still link to `/media/<id>`, which reads the file from R2 and is cached for a year by browsers and Vercel's CDN.
+
+1. In Cloudflare, open R2, enable it (it asks for a payment method; the free tier covers 10 GB and a few million requests a month) and create a bucket, for example `ceomaker-media`, location hint Western Europe. Leave public access off.
+2. R2 › Manage API tokens › Create API token: permission **Object Read & Write**, applied to that bucket only. Copy the Access Key ID and Secret Access Key (shown once).
+3. In Vercel, set `R2_ACCOUNT_ID` (on the R2 overview page), `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` and `R2_BUCKET` for Production and Preview. Sharing the bucket is safe: every file is named by a random id, and the cleanup below only deletes files its own database recorded.
+
+Without these, production says uploads aren't available, and local development keeps files in `.media/` at the repository root. Every day at 03:43 UTC, `/api/cron/media` (with `CRON_SECRET`) deletes images over a day old that no version of any site uses; images in older published versions are kept. Deleting a site or an account deletes its images at once.
 
 ### Analytics
 

@@ -1,4 +1,4 @@
-import { getDb, getMedia, type PublishedSite } from "@ceomaker/db";
+import type { PublishedSite } from "@ceomaker/db";
 import {
   MEDIA_PATH,
   parseSiteContentForRender,
@@ -12,6 +12,7 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
+import { mediaStore } from "@/lib/media-store";
 import { routingConfigFromEnv } from "@/lib/routing";
 
 // The generated share image of a live site (see ShareCard), and its address.
@@ -94,7 +95,9 @@ export function shareCardVersion(site: PublishedSite): string {
 /** An uploaded portrait as a data URI the renderer can draw; outside images aren't fetched. */
 async function portrait(src: string | undefined): Promise<string | undefined> {
   if (!src || !MEDIA_PATH.test(src)) return undefined;
-  const media = await getMedia(getDb(), src.slice("/media/".length));
+  const media = await mediaStore()
+    ?.get(src.slice("/media/".length))
+    .catch(() => null);
   if (!media) return undefined;
   return `data:${media.contentType};base64,${Buffer.from(media.data).toString("base64")}`;
 }

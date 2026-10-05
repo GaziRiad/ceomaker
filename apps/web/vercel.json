@@ -6,6 +6,10 @@
     {
       "path": "/api/cron/domains",
       "schedule": "17 6 * * *"
+    },
+    {
+      "path": "/api/cron/media",
+      "schedule": "43 3 * * *"
     }
   ]
 }
