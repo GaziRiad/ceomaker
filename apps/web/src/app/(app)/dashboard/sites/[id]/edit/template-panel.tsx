@@ -17,11 +17,13 @@ import {
   TemplateView,
 } from "@ceomaker/templates";
 import { ScaledFrame } from "@/components/scaled-frame";
+import { ExternalLink } from "@/components/icons";
 import { ProTag, UpgradePrompt } from "@/components/pro";
 
 const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
 export function TemplatePanel({
+  siteId,
   current,
   live,
   theme,
@@ -30,6 +32,7 @@ export function TemplatePanel({
   onChoose,
   onDesign,
 }: {
+  siteId: string;
   /** The draft's template and design. */
   current: TemplateRef;
   /** The live site's, or null before the first publish. */
@@ -93,6 +96,10 @@ export function TemplatePanel({
           is included in the free plan.
         </UpgradePrompt>
       ) : null}
+      <p className="m-0 text-[13px] text-neutral-700">
+        Preview opens your draft in a template, full size, in a new tab. It doesn&apos;t change your
+        choice.
+      </p>
       <div role="radiogroup" aria-label="Template" className="flex flex-col gap-3">
         {choices.map((template) => {
           const selected = template.key === current.key;
@@ -121,28 +128,38 @@ export function TemplatePanel({
                   still
                 />
               </ScaledFrame>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => onChoose(template.key)}
-                className="flex cursor-pointer items-center justify-between px-3 py-2.5 text-left outline-none after:absolute after:inset-0 after:content-['']"
-              >
-                <span className="flex items-center gap-2">
+              <div className="flex items-center gap-3 px-3 py-2.5">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => onChoose(template.key)}
+                  className="flex flex-1 cursor-pointer items-center gap-2 text-left outline-none after:absolute after:inset-0 after:content-['']"
+                >
                   <span className="font-heading text-lg font-semibold uppercase">
                     {template.name}
                   </span>
                   {isPremiumTemplate(template.key) ? <ProTag /> : null}
-                </span>
+                </button>
+                {/* Above the radio's overlay, so it opens the preview instead of choosing. */}
+                <a
+                  href={`/preview/${siteId}/${template.key}`}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`Preview ${template.name} in a new tab`}
+                  className="relative z-[1] flex items-center gap-1 text-[13px]"
+                >
+                  Preview <ExternalLink size={13} />
+                </a>
                 <span
                   aria-hidden
-                  className="size-4 rounded-full border"
+                  className="size-4 flex-none rounded-full border"
                   style={{
                     borderColor: selected ? "var(--color-accent)" : "var(--color-divider)",
                     background: selected ? "var(--color-accent)" : "transparent",
                   }}
                 />
-              </button>
+              </div>
             </div>
           );
         })}

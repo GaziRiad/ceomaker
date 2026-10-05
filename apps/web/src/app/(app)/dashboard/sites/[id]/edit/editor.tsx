@@ -544,6 +544,7 @@ export function Editor({
             <SharingPanel view={shareView} onMeta={updateMeta} />
           ) : (
             <TemplatePanel
+              siteId={siteId}
               current={{ key: draft.templateKey, version: draft.templateVersion }}
               live={live}
               theme={draft.theme}
