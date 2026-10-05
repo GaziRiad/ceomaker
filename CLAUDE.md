@@ -15,9 +15,12 @@ decisions, and "Current state" at the end: what's done, parked and next).
 - **A question is not a request to code.** When asked to explain, discuss or "tell me your
   thoughts", answer only. Write code only when asked to build or change something.
 - **Don't add features that weren't discussed.** Propose first, build after agreement.
-- **Git:** work on the branch the session names (so far `claude/ai-website-builder-plan-ytr7tb`).
-  Merge to `main` only when explicitly told: every merge deploys production and runs migrations on
-  the production Neon database. Never force-push `main`. Never commit `.env`. No PRs unless asked.
+- **Git:** only two branches. `main` is production; all work goes on
+  `claude/ai-website-builder-plan-ytr7tb` (it also feeds `preview.ceomaker.app`). This holds even
+  when a session names another branch: don't create new ones. Start from the latest `main`
+  (fast-forward or merge it into the work branch). Merge to `main` only when explicitly told: every
+  merge deploys production and runs migrations on the production Neon database. Never force-push
+  `main`. Never commit `.env`. No PRs unless asked.
 - **Answers:** brief and direct, conclusion first, plain English. No em dashes. Avoid filler words
   (actually, certainly, leverage, seamless, robust, comprehensive). Long explanations get skimmed.
 - **Claude Design prompts:** always one single prompt per template, which the owner runs at max
