@@ -1,27 +1,19 @@
 "use client";
 
 import {
-  resolvePhotoGrade,
-  resolveSiteColors,
   type RenderableSiteContent,
   type TemplateKey,
   type TemplateRef,
   type ThemeSettings,
   isPremiumTemplate,
 } from "@ceomaker/schema";
-import {
-  designOnChoosing,
-  getTemplate,
-  newerDesign,
-  templateList,
-  TemplateView,
-} from "@ceomaker/templates";
-import { ScaledFrame } from "@/components/scaled-frame";
+import { designOnChoosing, getTemplate, newerDesign, templateList } from "@ceomaker/templates";
+import { TemplateThumbnail } from "@/components/template-thumbnail";
+import { ExternalLink } from "@/components/icons";
 import { ProTag, UpgradePrompt } from "@/components/pro";
 
-const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
-
 export function TemplatePanel({
+  siteId,
   current,
   live,
   theme,
@@ -30,6 +22,7 @@ export function TemplatePanel({
   onChoose,
   onDesign,
 }: {
+  siteId: string;
   /** The draft's template and design. */
   current: TemplateRef;
   /** The live site's, or null before the first publish. */
@@ -89,12 +82,16 @@ export function TemplatePanel({
       ) : null}
       {!pro && isPremiumTemplate(current.key) ? (
         <UpgradePrompt title={`${name} is a Pro template`}>
-          Try it here as much as you like. Upgrade to publish it, or switch back to Meridian, which
-          is included in the free plan.
+          Try it here as much as you like. Upgrade to publish it, or switch to Meridian or Harbour,
+          which are included in the free plan.
         </UpgradePrompt>
       ) : null}
+      <p className="m-0 text-[13px] text-neutral-700">
+        Preview opens your draft in a template, full size, in a new tab. It doesn&apos;t change your
+        choice.
+      </p>
       <div role="radiogroup" aria-label="Template" className="flex flex-col gap-3">
-        {choices.map((template) => {
+        {choices.map((template, index) => {
           const selected = template.key === current.key;
           return (
             // Preview beside the radio, not inside it (templates contain buttons and forms).
@@ -105,44 +102,47 @@ export function TemplatePanel({
                 border: `1px solid ${selected ? "var(--color-accent)" : "var(--color-divider)"}`,
               }}
             >
-              <ScaledFrame
+              <TemplateThumbnail
+                templateKey={template.key}
+                templateVersion={template.version}
+                theme={theme}
+                content={content}
+                height={120}
                 initialZoom={0.255}
-                className="w-full border-b border-divider"
-                style={{ height: 120 }}
-              >
-                <TemplateView
-                  templateKey={template.key}
-                  templateVersion={template.version}
-                  colors={resolveSiteColors(theme, template.key, template.version)}
-                  photoGrade={resolvePhotoGrade(theme)}
-                  content={content}
-                  publishedAt={PREVIEW_DATE}
-                  preview
-                  still
-                />
-              </ScaledFrame>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => onChoose(template.key)}
-                className="flex cursor-pointer items-center justify-between px-3 py-2.5 text-left outline-none after:absolute after:inset-0 after:content-['']"
-              >
-                <span className="flex items-center gap-2">
+                eager={index < 3}
+              />
+              <div className="flex items-center gap-3 px-3 py-2.5">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => onChoose(template.key)}
+                  className="flex flex-1 cursor-pointer items-center gap-2 text-left outline-none after:absolute after:inset-0 after:content-['']"
+                >
                   <span className="font-heading text-lg font-semibold uppercase">
                     {template.name}
                   </span>
                   {isPremiumTemplate(template.key) ? <ProTag /> : null}
-                </span>
+                </button>
+                {/* Above the radio's overlay, so it opens the preview instead of choosing. */}
+                <a
+                  href={`/preview/${siteId}/${template.key}`}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`Preview ${template.name} in a new tab`}
+                  className="relative z-[1] flex items-center gap-1 text-[13px]"
+                >
+                  Preview <ExternalLink size={13} />
+                </a>
                 <span
                   aria-hidden
-                  className="size-4 rounded-full border"
+                  className="size-4 flex-none rounded-full border"
                   style={{
                     borderColor: selected ? "var(--color-accent)" : "var(--color-divider)",
                     background: selected ? "var(--color-accent)" : "transparent",
                   }}
                 />
-              </button>
+              </div>
             </div>
           );
         })}

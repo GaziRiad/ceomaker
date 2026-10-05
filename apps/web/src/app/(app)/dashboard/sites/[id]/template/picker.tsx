@@ -2,23 +2,19 @@
 
 import {
   isPremiumTemplate,
-  resolvePhotoGrade,
-  resolveSiteColors,
   type RenderableSiteContent,
   type TemplateKey,
   type TemplateRef,
   type ThemeSettings,
 } from "@ceomaker/schema";
-import { designOnChoosing, getTemplate, templateList, TemplateView } from "@ceomaker/templates";
+import { designOnChoosing, getTemplate, templateList } from "@ceomaker/templates";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { ScaledFrame } from "@/components/scaled-frame";
+import { TemplateThumbnail } from "@/components/template-thumbnail";
 import { ArrowRight } from "@/components/ui";
 import { DOCUMENT_ACCEPT, DOCUMENT_MAX_BYTES, setPendingDocument } from "@/lib/pending-document";
 import { chooseTemplateAction } from "../../../site-actions";
 import { ProTag } from "@/components/pro";
-
-const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
 export function TemplatePicker({
   siteId,
@@ -94,7 +90,7 @@ export function TemplatePicker({
           aria-label="Template"
           className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,380px),1fr))] gap-6"
         >
-          {choices.map((template) => {
+          {choices.map((template, index) => {
             const isSelected = template.key === selected;
             return (
               // The preview sits beside the radio, not inside it: templates contain their own
@@ -109,22 +105,15 @@ export function TemplatePicker({
                 <i aria-hidden className="corner tr" />
                 <i aria-hidden className="corner bl" />
                 <i aria-hidden className="corner br" />
-                <ScaledFrame
+                <TemplateThumbnail
+                  templateKey={template.key}
+                  templateVersion={template.version}
+                  theme={theme}
+                  content={content}
+                  height={260}
                   initialZoom={0.3}
-                  className="w-full border-b border-divider"
-                  style={{ height: 260 }}
-                >
-                  <TemplateView
-                    templateKey={template.key}
-                    templateVersion={template.version}
-                    colors={resolveSiteColors(theme, template.key, template.version)}
-                    photoGrade={resolvePhotoGrade(theme)}
-                    content={content}
-                    publishedAt={PREVIEW_DATE}
-                    preview
-                    still
-                  />
-                </ScaledFrame>
+                  eager={index < 3}
+                />
                 <button
                   type="button"
                   role="radio"

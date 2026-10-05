@@ -57,6 +57,7 @@ const BROWSER_FONTS = {
   folioMono: FONTS.geistMono,
   tempo: FONTS.archivo,
   tempoMono: FONTS.martianMono,
+  harbour: FONTS.figtree,
 };
 
 const shownTitle = (view: ShareView) => view.title.trim() || view.autoTitle;

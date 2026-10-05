@@ -3,6 +3,7 @@ import {
   Barlow,
   Barlow_Condensed,
   Big_Shoulders,
+  Figtree,
   Geist,
   Geist_Mono,
   Hanken_Grotesk,
@@ -106,6 +107,15 @@ export const martianMono = Martian_Mono({
   preload: false,
 });
 
+// Harbour sets everything in Figtree, from Light (300) for the name to Semibold.
+export const figtree = Figtree({
+  subsets: ["latin", "latin-ext"],
+  style: ["normal", "italic"],
+  variable: "--font-figtree",
+  display: "swap",
+  preload: false,
+});
+
 // The same families for the "not live" and "paused" cards on customer addresses, without
 // preloading: published sites never use them.
 export const barlowLazy = Barlow({
@@ -134,6 +144,7 @@ const siteFonts = [
   geistMono,
   archivo,
   martianMono,
+  figtree,
 ];
 
 export const siteFontVariables = [...siteFonts, barlowLazy, barlowCondensedLazy]

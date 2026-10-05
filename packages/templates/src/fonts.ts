@@ -13,6 +13,7 @@ export const FONT_VARIABLES = {
   geistMono: "--font-geist-mono",
   archivo: "--font-archivo",
   martianMono: "--font-martian-mono",
+  figtree: "--font-figtree",
 } as const;
 
 /** Each template hard-codes its pairing; users pick colours, not fonts. */
@@ -27,6 +28,7 @@ export const FONTS = {
   geistMono: `var(${FONT_VARIABLES.geistMono}), "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace`,
   archivo: `var(${FONT_VARIABLES.archivo}), Archivo, "Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans Arabic", system-ui, sans-serif`,
   martianMono: `var(${FONT_VARIABLES.martianMono}), "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, monospace`,
+  figtree: `var(${FONT_VARIABLES.figtree}), Figtree, "Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans Arabic", system-ui, sans-serif`,
 } as const;
 
 /** Design width every template is drawn at; previews render at this width and scale down. */

@@ -3,8 +3,8 @@
 # CEOMaker
 
 A website builder for busy, non-technical executives (CEOs, founders, chairs). They answer a few
-questions, AI drafts a personal site in their voice from one of five templates (Meridian, Monument, Salon,
-Folio, Tempo), they edit it in place and publish. Live at `www.ceomaker.app` (the apex forwards there), customer sites at
+questions, AI drafts a personal site in their voice from one of six templates (Meridian, Harbour, Monument,
+Salon, Folio, Tempo), they edit it in place and publish. Live at `www.ceomaker.app` (the apex forwards there), customer sites at
 `<name>.ceomaker.app`; previews at `preview.ceomaker.app` and `<name>.preview.ceomaker.app`.
 
 Read before working: `README.md` (setup, deployment, env vars) and `docs/PLAN.md` (architecture,
@@ -38,6 +38,8 @@ decisions, and "Current state" at the end: what's done, parked and next).
   and frozen (`packages/templates/src/<key>/v<N>/`); only bug, accessibility and security fixes
   go into a shipped design. The design snapshots in `packages/templates/src/__snapshots__/` must
   stay identical for untouched content; a redesign is a new version.
+  Until real users publish, the current templates can still change in place at version 1
+  (owner, October 2026); update the snapshots and say why in the commit.
 - New content fields are optional and additive, so older published versions keep rendering.
 - Truthful drafts: AI never invents numbers, roles, work or quotes.
 
@@ -49,8 +51,9 @@ Vercel (Hobby, `fra1`).
 
 - `packages/schema`: zod content contract (sites, sections, theme, templates, domains, analytics).
 - `packages/db`: Drizzle schema, migrations, queries, integration tests (need local Postgres).
-- `packages/templates`: `buildSiteModel` (one view model for all templates) and the five
-  templates: Meridian (`meridian/v1`, the quiet one), Monument (`monument/v1`, the loud one),
+- `packages/templates`: `buildSiteModel` (one view model for all templates) and the six
+  templates: Meridian (`meridian/v1`, the quiet one), Harbour (`harbour/v1`, the warm one: a
+  greeting and an arched portrait; free like Meridian), Monument (`monument/v1`, the loud one),
   Salon (`salon/v1`, the name among the owner's photographs), Folio (`folio/v1`, work as a
   carousel of projects) and Tempo (`tempo/v1`, the name parted around the portrait, moving with
   the scroll). All support in-place editing of every visible text and the contact form.

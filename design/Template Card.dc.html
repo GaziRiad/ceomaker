@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/styles.css">
+<script src="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/_ds_bundle.js"></script>
+</helmet>
+<article class="blueprint" onMouseEnter="{{ enter }}" onMouseLeave="{{ leave }}" onFocus="{{ onFocus }}" onBlur="{{ onBlur }}" style="position:relative; height:100%; box-sizing:border-box; display:flex; flex-direction:column; background:var(--color-neutral-100); cursor:pointer; transform:{{ ty }}; box-shadow:{{ shadow }}; outline:{{ outline }}; outline-offset:2px; transition:transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s">
+  <i aria-hidden="true" class="corner tl"></i><i aria-hidden="true" class="corner tr"></i><i aria-hidden="true" class="corner bl"></i><i aria-hidden="true" class="corner br"></i>
+  <sc-if value="{{ isReal }}" hint-placeholder-val="{{ true }}">
+    <div style="position:relative; aspect-ratio:16/10; background:var(--color-neutral-200); border-bottom:1px solid var(--color-divider); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; overflow:hidden">
+      <span style="font-family:var(--font-heading); font-weight:600; font-size:26px; line-height:1; letter-spacing:.04em; text-transform:uppercase; color:var(--color-neutral-600)">{{ name }}</span>
+      <span style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-700)">Screenshot · 1280 × 800</span>
+    </div>
+  </sc-if>
+  <sc-if value="{{ isPh }}" hint-placeholder-val="{{ false }}">
+    <div style="position:relative; aspect-ratio:16/10; background:repeating-linear-gradient(135deg, var(--color-neutral-100) 0 10px, var(--color-neutral-200) 10px 11px); border-bottom:1px solid var(--color-divider); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; overflow:hidden">
+      <span style="font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-700); background:var(--color-neutral-100); padding:2px 8px">Placeholder</span>
+      <span style="font-family:var(--font-heading); font-weight:600; font-size:22px; line-height:1; letter-spacing:.04em; text-transform:uppercase; color:var(--color-neutral-600); background:var(--color-neutral-100); padding:2px 8px">{{ name }}</span>
+    </div>
+  </sc-if>
+  <div style="flex:1; display:flex; flex-direction:column; gap:8px; padding:18px 20px 6px">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px">
+      <h3 style="margin:0; min-width:0; font-family:var(--font-heading); font-size:24px; line-height:1; font-weight:600; letter-spacing:0; text-transform:uppercase; overflow-wrap:anywhere">{{ name }}</h3>
+      <sc-if value="{{ isPro }}" hint-placeholder-val="{{ false }}">
+        <span class="tag" style="gap:4px; background:var(--color-accent-800); color:var(--color-bg); font-weight:600; letter-spacing:.08em; text-transform:uppercase; padding:3px 8px"><x-import component-from-global-scope="CEOMakerDesignSystem_fac0e4.Icon" name="Sparkles" size="{{ 11 }}" stroke-width="{{ 2 }}" hint-size="11px,11px"></x-import>Pro</span>
+      </sc-if>
+      <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}">
+        <span class="tag" style="background:var(--color-accent-200); color:var(--color-accent-800); font-weight:600; letter-spacing:.08em; text-transform:uppercase; padding:3px 8px">Free</span>
+      </sc-if>
+    </div>
+    <p style="margin:0; font-size:15px; line-height:1.45; color:var(--color-neutral-800); text-wrap:pretty; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden">{{ description }}</p>
+    <a href="{{ href }}" target="_blank" rel="noopener" onClick="{{ stop }}" style="margin-top:auto; align-self:flex-start; display:inline-flex; align-items:center; gap:6px; min-height:44px; font-family:var(--font-heading); font-weight:600; font-size:15px; letter-spacing:.01em; color:{{ linkColor }}; text-decoration:{{ deco }}; text-underline-offset:3px; outline:none" style-after="content:''; position:absolute; inset:0">View sample site<span style="position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0"> · {{ name }}, opens in a new tab</span><x-import component-from-global-scope="CEOMakerDesignSystem_fac0e4.Icon" name="ExternalLink" size="{{ 16 }}" hint-size="16px,16px"></x-import></a>
+  </div>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:380,&quot;height&quot;:420},&quot;cardName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Meridian&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tier&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;},&quot;description&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A serif masthead on white with a monogram seal. For chief executives and chairs.&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;href&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;#&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;placeholder&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;hover&quot;,&quot;focus&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;'none' | 'hover' | 'focus'&quot;}}">
+class Component extends DCLogic {
+  state = { hover: false, focus: false };
+  renderVals() {
+    const p = this.props;
+    const tier = p.tier ?? "free";
+    const hover = this.state.hover || p.state === "hover";
+    const focus = this.state.focus || p.state === "focus";
+    return {
+      name: p.cardName ?? "Meridian",
+      description: p.description ?? "A serif masthead on white with a monogram seal. For chief executives and chairs.",
+      href: p.href ?? "#",
+      isPro: tier === "pro",
+      isFree: tier !== "pro",
+      isPh: !!p.placeholder,
+      isReal: !p.placeholder,
+      ty: hover ? "translateY(-3px)" : "translateY(0)",
+      shadow: hover ? "var(--shadow-md)" : "0 0 0 transparent",
+      outline: focus ? "2px solid var(--color-accent)" : "2px solid transparent",
+      linkColor: hover ? "var(--color-accent-600)" : "var(--color-accent-700)",
+      deco: hover ? "underline" : "none",
+      enter: () => this.setState({ hover: true }),
+      leave: () => this.setState({ hover: false }),
+      onFocus: (e) => { if (e.target.matches && e.target.matches(":focus-visible")) this.setState({ focus: true }); },
+      onBlur: () => this.setState({ focus: false }),
+      stop: (e) => e.preventDefault(),
+    };
+  }
+}
+</script>
+</body>
+</html>

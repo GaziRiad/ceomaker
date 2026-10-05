@@ -36,9 +36,12 @@ const FONT_FILES = [
   ["Geist Mono", "GeistMono-400.ttf", 400],
   ["Archivo Expanded", "ArchivoExpanded-440.ttf", 400],
   ["Martian Mono", "MartianMono-400.ttf", 400],
+  ["Figtree", "Figtree-300.ttf", 300],
+  ["Figtree", "Figtree-500.ttf", 500],
 ] as const;
 
-let fonts: Promise<{ name: string; data: Buffer; weight: 400 | 500 | 600 | 900 }[]> | null = null;
+let fonts: Promise<{ name: string; data: Buffer; weight: 300 | 400 | 500 | 600 | 900 }[]> | null =
+  null;
 
 function loadFonts() {
   fonts ??= Promise.all(
@@ -62,6 +65,7 @@ const IMAGE_FONTS = {
   folioMono: "Geist Mono",
   tempo: "Archivo Expanded",
   tempoMono: "Martian Mono",
+  harbour: "Figtree",
 };
 
 /** What the card shows for a live site (already entitled), without the portrait's bytes. */

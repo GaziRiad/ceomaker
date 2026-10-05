@@ -1,9 +1,9 @@
 import type { TemplateKey } from "./templates";
 
 /**
- * Plans. Everyone starts free: a published site on Meridian at <name>.ceomaker.app, with email
- * and links to get in touch, a first AI draft and a few rewrites, and a "Made with CEOMaker"
- * badge. Pro adds the premium templates, a custom domain, the contact form and its inbox,
+ * Plans. Everyone starts free: a published site on Meridian or Harbour at <name>.ceomaker.app,
+ * with email and links to get in touch, a first AI draft and a few rewrites, and a "Made with
+ * CEOMaker" badge. Pro adds the premium templates, a custom domain, the contact form and its inbox,
  * analytics, unlimited AI rewrites and CV import, and removes the badge.
  */
 export const PLANS = ["free", "pro"] as const;
@@ -18,7 +18,10 @@ export function isPro(plan: Plan): boolean {
   return plan === "pro";
 }
 
-/** Templates only Pro sites can publish. Free sites may try them in the draft. */
+/**
+ * Templates only Pro sites can publish. Free sites may try them in the draft. Meridian and
+ * Harbour are free.
+ */
 export const PREMIUM_TEMPLATES: ReadonlySet<TemplateKey> = new Set<TemplateKey>([
   "monument",
   "salon",

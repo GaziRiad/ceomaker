@@ -757,43 +757,47 @@ export function MonumentTemplate({ model, publishedAt, colors, sendMessage }: Te
       <main id="main">
         <Hero model={model} />
         {affiliations ? <Affiliations model={model} /> : null}
-        {model.order.map((kind, index) => (
-          <Fragment key={kind}>
-            {renderers[kind]({
-              // Grounds alternate down the page; the affiliations band counts as an inverse one.
-              ground: (index + (affiliations ? 1 : 0)) % 2 === 0 ? "inverse" : "paper",
-              number: String(index + 1).padStart(2, "0"),
-              total,
-            })}
-          </Fragment>
-        ))}
-        <Contact model={model} sendMessage={sendMessage} />
+        {model.top
+          ? null
+          : model.order.map((kind, index) => (
+              <Fragment key={kind}>
+                {renderers[kind]({
+                  // Grounds alternate down the page; the affiliations band counts as an inverse one.
+                  ground: (index + (affiliations ? 1 : 0)) % 2 === 0 ? "inverse" : "paper",
+                  number: String(index + 1).padStart(2, "0"),
+                  total,
+                })}
+              </Fragment>
+            ))}
+        {model.top ? null : <Contact model={model} sendMessage={sendMessage} />}
       </main>
-      <footer className="mon-footer">
-        <div className="mon-footer-in">
-          <span>
-            © {publishedAt.getUTCFullYear()}{" "}
-            <Words model={model} text={{ text: model.name, field: model.fields.name }} />
-          </span>
-          <span className="mon-footer-location">
-            {model.location ? (
-              <span {...editable(model, model.fields.location)}>{model.location}</span>
-            ) : null}
-          </span>
-          <a href={`#${ANCHORS.top}`} className="mon-top">
-            {model.editable ? (
-              <>
-                <Words model={model} text={label(model, "back-to-top", "Back to top")} />
-                <span aria-hidden="true"> ↑</span>
-              </>
-            ) : (
-              `${label(model, "back-to-top", "Back to top").text} ↑`
-            )}
-          </a>
-        </div>
-      </footer>
+      {model.top ? null : (
+        <footer className="mon-footer">
+          <div className="mon-footer-in">
+            <span>
+              © {publishedAt.getUTCFullYear()}{" "}
+              <Words model={model} text={{ text: model.name, field: model.fields.name }} />
+            </span>
+            <span className="mon-footer-location">
+              {model.location ? (
+                <span {...editable(model, model.fields.location)}>{model.location}</span>
+              ) : null}
+            </span>
+            <a href={`#${ANCHORS.top}`} className="mon-top">
+              {model.editable ? (
+                <>
+                  <Words model={model} text={label(model, "back-to-top", "Back to top")} />
+                  <span aria-hidden="true"> ↑</span>
+                </>
+              ) : (
+                `${label(model, "back-to-top", "Back to top").text} ↑`
+              )}
+            </a>
+          </div>
+        </footer>
+      )}
       {/* In the editor the owner needs the whole page at once, so sections don't wipe in. */}
-      {model.editable ? null : <MonumentMotion />}
+      {model.editable || model.top ? null : <MonumentMotion />}
     </div>
   );
 }

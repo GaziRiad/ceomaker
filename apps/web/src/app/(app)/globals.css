@@ -241,6 +241,15 @@
     text-transform: uppercase;
     padding: 3px 8px;
   }
+  /* The free plan's counterpart of tag-pro (Templates Page handoff). */
+  .tag-free {
+    background: var(--color-accent-200);
+    color: var(--color-accent-800);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+  }
   .tag-neutral {
     background: var(--color-neutral-200);
     color: var(--color-neutral-800);

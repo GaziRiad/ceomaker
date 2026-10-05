@@ -2,6 +2,7 @@ import { contrastRatio, type SiteColors } from "@ceomaker/schema";
 import type { CSSProperties } from "react";
 import { mixHex } from "./meridian/v1/measure";
 import { folioRoles, textWidth as folioWidth } from "./folio/v1/measure";
+import { harbourGrounds, harbourRoles, longestPiece } from "./harbour/v1/measure";
 import { initialsOf } from "./monogram";
 import { salonRoles, textWidth } from "./salon/v1/measure";
 import { splitName, tempoRoles, textWidth as tempoWidth } from "./tempo/v1/measure";
@@ -16,7 +17,7 @@ export const SHARE_CARD_WIDTH = 1200;
 export const SHARE_CARD_HEIGHT = 630;
 
 export interface ShareCardProps {
-  /** "meridian", "monument", "salon", "folio" or "tempo"; anything else is drawn as Meridian. */
+  /** A template key: "harbour", "monument", "salon", "folio" or "tempo"; others are Meridian. */
   template: string;
   colors: SiteColors;
   name: string;
@@ -41,6 +42,8 @@ export interface ShareCardProps {
     /** Tempo's expanded grotesk (Archivo at width 125) and its mono (Martian Mono). */
     tempo: string;
     tempoMono: string;
+    /** Harbour's one family (Figtree). */
+    harbour: string;
   };
 }
 
@@ -132,7 +135,18 @@ export function tempoNameSize(name: string, withPhoto: boolean): number {
   return Math.max(48, Math.round(Math.min(largest, (1072 * 0.97) / widest)));
 }
 
+/**
+ * Name size on Harbour, in Figtree Light: the hero's sizes, and never wider than its column for
+ * its longest piece (0.56em a character, as the template measures it).
+ */
+export function harbourNameSize(name: string, withPhoto: boolean): number {
+  const column = withPhoto ? 600 : 1040;
+  const largest = withPhoto ? 92 : 120;
+  return Math.max(40, Math.round(Math.min(largest, column / (longestPiece(name) * 0.56))));
+}
+
 export function ShareCard(props: ShareCardProps) {
+  if (props.template === "harbour") return <HarbourCard {...props} />;
   if (props.template === "monument") return <MonumentCard {...props} />;
   if (props.template === "salon") return <SalonCard {...props} />;
   if (props.template === "folio") return <FolioCard {...props} />;
@@ -761,6 +775,120 @@ function TempoCard({ colors, name, role, organization, domain, photo, fonts }: S
         </div>
       </div>
       {rest ? line(rest, true) : null}
+    </div>
+  );
+}
+
+function HarbourCard({ colors, name, role, organization, domain, photo, fonts }: ShareCardProps) {
+  const harbour = harbourRoles(colors);
+  const { surface2 } = harbourGrounds(colors);
+  const ink2 = mixHex(colors.ink, colors.bg, harbour.secondary / 100);
+  const act = mixHex(colors.accent, colors.ink, harbour.accentText / 100);
+  const mark = mixHex(colors.accent, colors.ink, harbour.mark / 100);
+  const kicker = [role, organization].filter(Boolean).join(" · ");
+  const size = harbourNameSize(name, Boolean(photo));
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        width: SHARE_CARD_WIDTH,
+        height: SHARE_CARD_HEIGHT,
+        overflow: "hidden",
+        background: colors.bg,
+        color: colors.ink,
+        fontFamily: fonts.harbour,
+      }}
+    >
+      {photo ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 200,
+            display: "flex",
+            background: surface2,
+          }}
+        />
+      ) : null}
+      <div
+        style={{
+          position: "absolute",
+          left: 80,
+          right: photo ? 520 : 80,
+          top: 76,
+          bottom: 64,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            fontWeight: 500,
+            fontSize: 24,
+            lineHeight: 1.35,
+            color: act,
+            ...clamp2,
+          }}
+        >
+          {kicker || " "}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontWeight: 300,
+            fontSize: size,
+            lineHeight: 1.02,
+            letterSpacing: "-0.025em",
+          }}
+        >
+          {name || " "}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            fontSize: 22,
+            fontWeight: 500,
+            color: ink2,
+          }}
+        >
+          <div
+            style={{ display: "flex", width: 12, height: 12, borderRadius: 6, background: mark }}
+          />
+          <div style={{ display: "flex" }}>{domain}</div>
+        </div>
+      </div>
+      {photo ? (
+        <div
+          style={{
+            position: "absolute",
+            right: 100,
+            bottom: 0,
+            width: 376,
+            height: 470,
+            display: "flex",
+            overflow: "hidden",
+            borderTopLeftRadius: 188,
+            borderTopRightRadius: 188,
+            background: surface2,
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- also drawn by the image renderer */}
+          <img
+            src={photo}
+            alt=""
+            width={376}
+            height={470}
+            style={{ width: 376, height: 470, objectFit: "cover" }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
 } from "./lib/routing";
 
 /** Paths that need a signed-in user. */
-const PROTECTED_PREFIXES = ["/dashboard"];
+const PROTECTED_PREFIXES = ["/dashboard", "/preview"];
 
 /** Uploaded images are served by the app on every host, including customer sites. */
 const MEDIA_PREFIX = "/media/";

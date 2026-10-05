@@ -640,36 +640,40 @@ export function MeridianTemplate({ model, publishedAt, colors, sendMessage }: Te
       <main id="main">
         <Hero model={model} />
         {model.affiliations.length ? <Affiliations model={model} /> : null}
-        {order.map((kind) => (
-          <div key={kind} style={{ display: "contents" }}>
-            {renderers[kind]()}
-          </div>
-        ))}
-        <Contact model={model} sendMessage={sendMessage} />
+        {model.top
+          ? null
+          : order.map((kind) => (
+              <div key={kind} style={{ display: "contents" }}>
+                {renderers[kind]()}
+              </div>
+            ))}
+        {model.top ? null : <Contact model={model} sendMessage={sendMessage} />}
       </main>
-      <footer className="mer-wrap mer-footer">
-        <div className="mer-footer-in">
-          <span>
-            © {publishedAt.getUTCFullYear()}{" "}
-            <Words model={model} text={{ text: model.name, field: model.fields.name }} />
-          </span>
-          <span className="mer-footer-location">
-            {model.location ? (
-              <span {...editable(model, model.fields.location)}>{model.location}</span>
-            ) : null}
-          </span>
-          <a href={`#${ANCHORS.top}`} className="mer-top">
-            {model.editable ? (
-              <>
-                <Words model={model} text={label(model, "back-to-top", "Back to top")} />
-                <span aria-hidden="true"> ↑</span>
-              </>
-            ) : (
-              `${label(model, "back-to-top", "Back to top").text} ↑`
-            )}
-          </a>
-        </div>
-      </footer>
+      {model.top ? null : (
+        <footer className="mer-wrap mer-footer">
+          <div className="mer-footer-in">
+            <span>
+              © {publishedAt.getUTCFullYear()}{" "}
+              <Words model={model} text={{ text: model.name, field: model.fields.name }} />
+            </span>
+            <span className="mer-footer-location">
+              {model.location ? (
+                <span {...editable(model, model.fields.location)}>{model.location}</span>
+              ) : null}
+            </span>
+            <a href={`#${ANCHORS.top}`} className="mer-top">
+              {model.editable ? (
+                <>
+                  <Words model={model} text={label(model, "back-to-top", "Back to top")} />
+                  <span aria-hidden="true"> ↑</span>
+                </>
+              ) : (
+                `${label(model, "back-to-top", "Back to top").text} ↑`
+              )}
+            </a>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

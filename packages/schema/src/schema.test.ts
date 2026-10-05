@@ -203,7 +203,7 @@ describe("theme", () => {
         }
       }
     }
-    expect(resolveSiteColors({ palettes: {} }, "monument", 1).bg).toBe("#f3f0e8");
+    expect(resolveSiteColors({ palettes: {} }, "monument", 1).bg).toBe("#0f100d");
   });
 
   it("writes out a design's colours so a later default can't change them", () => {
@@ -565,6 +565,7 @@ describe("plans", () => {
     expect(isPremiumTemplate("monument")).toBe(true);
     expect(isPremiumTemplate("salon")).toBe(true);
     expect(isPremiumTemplate("folio")).toBe(true);
+    expect(isPremiumTemplate("harbour")).toBe(false);
     expect(isPremiumTemplate("tempo")).toBe(true);
     expect(isPremiumTemplate("meridian")).toBe(false);
   });

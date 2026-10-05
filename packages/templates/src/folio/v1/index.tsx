@@ -896,31 +896,33 @@ export function FolioTemplate({ model, colors, photoGrade, sendMessage }: Templa
       }
     >
       <SkipLink />
-      <FolioSmooth />
+      {model.top ? null : <FolioSmooth />}
       <Header model={model} />
       <main id="main">
         <Hero model={model} />
-        {model.sequence.map((kind) => (
-          <Fragment key={kind}>{renderers[kind]()}</Fragment>
-        ))}
-        <Contact model={model} sendMessage={sendMessage} />
+        {model.top
+          ? null
+          : model.sequence.map((kind) => <Fragment key={kind}>{renderers[kind]()}</Fragment>)}
+        {model.top ? null : <Contact model={model} sendMessage={sendMessage} />}
       </main>
-      <footer className="fo-footer">
-        <div className="fo-footer-in">
-          <Brand model={model} />
-          <nav aria-label="Footer" className="fo-footer-nav">
-            {navOf(model).map((item) => (
-              <a key={item.href} href={item.href} className="fo-footer-link">
-                <Words model={model} text={item.text} />
-              </a>
-            ))}
-          </nav>
-          <a href={`#${ANCHORS.top}`} className="fo-top">
-            <Words model={model} text={top} />
-            <span aria-hidden="true"> ↑</span>
-          </a>
-        </div>
-      </footer>
+      {model.top ? null : (
+        <footer className="fo-footer">
+          <div className="fo-footer-in">
+            <Brand model={model} />
+            <nav aria-label="Footer" className="fo-footer-nav">
+              {navOf(model).map((item) => (
+                <a key={item.href} href={item.href} className="fo-footer-link">
+                  <Words model={model} text={item.text} />
+                </a>
+              ))}
+            </nav>
+            <a href={`#${ANCHORS.top}`} className="fo-top">
+              <Words model={model} text={top} />
+              <span aria-hidden="true"> ↑</span>
+            </a>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

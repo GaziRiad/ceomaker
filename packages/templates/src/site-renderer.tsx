@@ -28,6 +28,8 @@ export interface TemplateViewProps {
   preview?: boolean;
   /** Pause animations (thumbnails). */
   still?: boolean;
+  /** Only the header and the hero: all a thumbnail shows. */
+  top?: boolean;
   /** Mark text for in-place editing (the editor's preview). */
   editable?: boolean;
   /** Only the person's own answers, with placeholders for the rest (the questions screen). */
@@ -46,6 +48,7 @@ export function TemplateView({
   publishedAt,
   preview = false,
   still = false,
+  top = false,
   editable = false,
   draft = false,
   sendMessage,
@@ -58,7 +61,7 @@ export function TemplateView({
       style={{ ...themeToStyle(colors), minHeight: preview ? undefined : "100dvh" }}
     >
       <Template
-        model={buildSiteModel(content, { editable, draft })}
+        model={buildSiteModel(content, { editable, draft, top })}
         publishedAt={publishedAt}
         colors={colors}
         photoGrade={photoGrade}

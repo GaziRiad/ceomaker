@@ -208,7 +208,7 @@ export function PublishDialog({
               <span className="text-xs text-neutral-700">
                 {pro
                   ? "Every template, your own domain, the contact form and analytics."
-                  : "Free sites use Meridian, are reached by email and links, and carry a small “Made with CEOMaker” badge."}
+                  : "Free sites use Meridian or Harbour, are reached by email and links, and carry a small “Made with CEOMaker” badge."}
               </span>
             </div>
             {error ? (
