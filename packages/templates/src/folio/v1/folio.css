@@ -79,9 +79,11 @@
   margin: 0;
 }
 
+/* Headings keep Folio's face inside the dashboard too, whose own headings are condensed. */
 .fo h1,
 .fo h2,
 .fo h3 {
+  font-family: inherit;
   font-weight: 600;
 }
 

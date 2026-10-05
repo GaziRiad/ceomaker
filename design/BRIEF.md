@@ -11,7 +11,7 @@ step with the content model (`packages/schema`) whenever it grows.
 ## Standing brief
 
 ```
-You are designing a website template for CEOMaker, a website builder for busy, non-technical executives (CEOs, founders, chairs, investors, senior leaders). An executive answers a few questions, AI drafts their personal site in their voice, they pick a template, edit every visible text in place, and publish to name.ceomaker.app or their own domain. A template is a design, not a site: every customer's content renders through it, and owners switch templates without losing anything. Existing templates: Meridian (quiet serif on light, free), Monument (bold condensed type on a full colour field, Pro) and Salon (dark gallery, large serif, photo collage around the name, Pro). New templates are Pro: they must feel clearly premium and look unlike these three.
+You are designing a website template for CEOMaker, a website builder for busy, non-technical executives (CEOs, founders, chairs, investors, senior leaders). An executive answers a few questions, AI drafts their personal site in their voice, they pick a template, edit every visible text in place, and publish to name.ceomaker.app or their own domain. A template is a design, not a site: every customer's content renders through it, and owners switch templates without losing anything. Existing templates: Meridian (quiet serif on light, free), Monument (bold condensed type on a full colour field, Pro), Salon (dark gallery, large serif, photo collage around the name, Pro) and Folio (warm paper, large grotesk, a full-bleed carousel of projects, Pro). New templates are Pro: they must feel clearly premium and look unlike these four.
 
 Your job: design ONE template at high fidelity as an HTML design file, ready for an engineer to rebuild in React. Finish everything in this one run. Don't stop to ask questions: make reasonable choices and list them in the handoff notes.
 
@@ -23,6 +23,7 @@ A site is an ordered list of sections. Owners reorder, hide and edit them; optio
 - About: heading (optional, 80), body (rich text: paragraphs with bold, italic and links), one image (optional).
 - Experience: heading, up to 20 items: role (100), organisation (100), location (optional), start and end (free text such as "2019" or "Present"), summary (optional, 500).
 - Achievements: heading, up to 8 items: value (up to 20 chars, such as "$2.1B", "40+") and label (80).
+- Focus (what the owner works on now): heading, up to 6 items: title (60) and description (optional, 200).
 - Portfolio (ventures, projects, books, talks, board seats, press): heading, up to 12 items: title (120), kind (30), meta (120), year, description (300), link and image, all optional except the title.
 - Testimonials: heading, up to 10 items: quote (500), author (80), role (100), photo (optional).
 - Call to action: headline (120), body (optional, 280), button (optional).
@@ -31,7 +32,7 @@ A site is an ordered list of sections. Owners reorder, hide and edit them; optio
 - Owners can rename section titles and the template's own wording ("Menu", "Send message").
 
 ## 2. Proposing new content
-If the design needs something we don't have (a logo strip, press mentions, areas of focus), propose it as a NEW optional field or section with its limits: how many items, which fields, text lengths, image ratios. The template must look finished without it.
+If the design needs something we don't have (a logo strip, press mentions, speaking topics), propose it as a NEW optional field or section with its limits: how many items, which fields, text lengths, image ratios. The template must look finished without it.
 
 ## 3. Hard rules
 1. Design for real executives: one professional headshot, maybe a few event photos, often no project images. The page must look finished with no images at all.

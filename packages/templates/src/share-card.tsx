@@ -93,11 +93,23 @@ export function salonNameSize(name: string, withPhoto: boolean): number {
  * Name size on Folio, in Geist SemiBold with the accent square after it: as large as fits its
  * column in two lines (three beside a photo), never breaking a word.
  */
-export function folioNameSize(name: string, withPhoto: boolean): number {
+/** A name's words, split after each hyphen: the places a line may break. */
+function nameUnits(name: string) {
   const words = name.trim().split(/\s+/).filter(Boolean);
+  return words.flatMap((word, at) =>
+    word.split(/(?<=-)/).map((text, index, parts) => ({
+      text,
+      /** Ends a word, so a space follows unless it's the last. */
+      end: index === parts.length - 1,
+      last: at === words.length - 1 && index === parts.length - 1,
+    })),
+  );
+}
+
+export function folioNameSize(name: string, withPhoto: boolean): number {
   // The square after the last word takes about a fifth of an em.
-  const square = 0.22;
-  const longest = Math.max(2, ...words.map((word) => folioWidth(word))) + square;
+  const square = 0.2;
+  const longest = Math.max(2, ...nameUnits(name).map((unit) => folioWidth(unit.text))) + square;
   const total = Math.max(2, folioWidth(name) + square);
   const room = withPhoto ? 600 : 1040;
   const lines = withPhoto ? 3 : 2;
@@ -512,7 +524,7 @@ function FolioCard({ colors, name, role, organization, domain, photo, fonts }: S
   const rule = mixHex(colors.ink, colors.bg, 0.13);
   const kicker = [role, organization].filter(Boolean).join(" · ");
   const size = folioNameSize(name, Boolean(photo));
-  const words = name.trim().split(/\s+/).filter(Boolean);
+  const units = nameUnits(name);
   return (
     <div
       style={{
@@ -557,26 +569,32 @@ function FolioCard({ colors, name, role, organization, domain, photo, fonts }: S
             display: "flex",
             flexWrap: "wrap",
             alignItems: "flex-end",
-            columnGap: Math.round(size * 0.19),
             fontWeight: 600,
             fontSize: size,
             lineHeight: 0.94,
             letterSpacing: "-0.045em",
           }}
         >
-          {(words.length ? words : [" "]).map((word, index) => (
+          {(units.length ? units : [{ text: " ", end: true, last: true }]).map((unit, index) => (
             <div
               key={index}
-              style={{ display: "flex", alignItems: "flex-end", whiteSpace: "nowrap" }}
+              style={{
+                display: "flex",
+                alignItems: "flex-end",
+                whiteSpace: "nowrap",
+                // A space between words; hyphenated parts join up unless the line breaks there.
+                marginRight: unit.end && !unit.last ? Math.round(size * 0.19) : 0,
+              }}
             >
-              {word}
-              {index === words.length - 1 ? (
+              {unit.text}
+              {unit.last ? (
                 <div
                   style={{
                     display: "flex",
                     width: Math.round(size * 0.17),
                     height: Math.round(size * 0.17),
-                    marginLeft: Math.round(size * 0.05),
+                    // Pulls back the last letter's tracking, which the image renderer keeps.
+                    marginLeft: Math.round(size * -0.01),
                     // Sits on the baseline: Geist's descent less half the negative leading.
                     marginBottom: Math.round(size * 0.115),
                     borderRadius: Math.max(2, Math.round(size * 0.03)),
@@ -623,9 +641,9 @@ function FolioCard({ colors, name, role, organization, domain, photo, fonts }: S
           <img
             src={photo}
             alt=""
-            width={344}
-            height={478}
-            style={{ width: 344, height: 478, objectFit: "cover" }}
+            width={360}
+            height={450}
+            style={{ width: 360, height: 450, objectFit: "cover" }}
           />
         </div>
       ) : null}
