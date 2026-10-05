@@ -73,6 +73,12 @@ const sections: LegalSection[] = [
           browser for this: before you sign in, each page you open counts as a new, anonymous
           visitor.
         </li>
+        <li>
+          <strong>Session recordings:</strong> some visits to ceomaker.app are recorded so we can
+          see where the product is hard to use: the layout of the page, clicks, scrolling and
+          timing. Everything you type and every text, image and link on the page is hidden before it
+          leaves your browser, so a recording shows grey shapes, not your content.
+        </li>
       </ul>
     ),
   },
@@ -164,9 +170,9 @@ const sections: LegalSection[] = [
             record.
           </li>
           <li>
-            <strong>PostHog</strong> records how ceomaker.app is used and reports errors (servers in
-            Frankfurt, Germany). It works out your country and doesn&apos;t keep your network
-            address.
+            <strong>PostHog</strong> records how ceomaker.app is used, keeps the hidden session
+            recordings and reports errors (servers in Frankfurt, Germany). It works out your country
+            and doesn&apos;t keep your network address.
           </li>
         </ul>
         <p>

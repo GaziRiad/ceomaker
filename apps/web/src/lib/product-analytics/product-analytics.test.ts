@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isRelayPath, relayTarget } from "./config";
+import { maskAttribute } from "./recording";
 import { scrubEvent, scrubPath, scrubUrl } from "./scrub";
 import { decodeVisitSource, encodeVisitSource, readVisitSource } from "./visit-source";
 
@@ -139,5 +140,16 @@ describe("relay", () => {
       "https://eu-assets.i.posthog.com/static/array.js?v=1",
     );
     expect(relayTarget("/relay/i/v0/e/", "?ip=0")).toBe("https://eu.i.posthog.com/i/v0/e/?ip=0");
+  });
+});
+
+describe("recordings", () => {
+  it("masks attributes that can carry someone's content, and keeps the rest", () => {
+    expect(maskAttribute("alt", "Amelia at the Lisbon summit")).toBe("************");
+    expect(maskAttribute("href", "mailto:amelia@example.com")).toBe("************");
+    expect(maskAttribute("aria-label", "Pat")).toBe("***");
+    expect(maskAttribute("class", "mer-name")).toBe("mer-name");
+    expect(maskAttribute("style", "width: 40px")).toBe("width: 40px");
+    expect(maskAttribute("title", "")).toBe("");
   });
 });
