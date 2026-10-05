@@ -1,5 +1,5 @@
-// Takes the template pictures on the landing and templates pages: the first screen of each sample
-// site (/templates/<key>) at 1280 × 800 and on a 390px phone (at 2x). Run once against a running
+// Takes the template cards' pictures on the landing and templates pages: the first screen of each
+// sample site (/templates/<key>) at 1280 × 800. Run once against a running
 // app; the output is committed. Needs Playwright, which isn't a dependency of the app:
 //
 //   PLAYWRIGHT=/path/to/node_modules/playwright/index.mjs \
@@ -9,10 +9,7 @@ const { chromium } = await import(process.env.PLAYWRIGHT ?? "playwright");
 const base = process.argv[2] ?? "http://localhost:3000";
 const out = new URL("../src/app/(app)/landing/shots/", import.meta.url);
 const KEYS = ["meridian", "monument", "salon", "folio", "tempo"];
-const SIZES = [
-  ["desktop", { width: 1280, height: 800 }, 1],
-  ["phone", { width: 390, height: 844 }, 2],
-];
+const SIZES = [["desktop", { width: 1280, height: 800 }, 1]];
 
 const browser = await chromium.launch();
 for (const key of KEYS) {

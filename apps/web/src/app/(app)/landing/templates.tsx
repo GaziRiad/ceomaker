@@ -6,135 +6,109 @@ import { ExternalLink } from "@/components/icons";
 import { ProTag } from "@/components/pro";
 import { ArrowRight, Blueprint } from "@/components/ui";
 import { sampleSitePath } from "@/lib/template-samples";
-import { delay, kicker, pad, sectionTitle } from "./chrome";
-import folioDesktop from "./shots/folio-desktop.png";
-import folioPhone from "./shots/folio-phone.png";
-import meridianDesktop from "./shots/meridian-desktop.png";
-import meridianPhone from "./shots/meridian-phone.png";
-import monumentDesktop from "./shots/monument-desktop.png";
-import monumentPhone from "./shots/monument-phone.png";
-import salonDesktop from "./shots/salon-desktop.png";
-import salonPhone from "./shots/salon-phone.png";
-import tempoDesktop from "./shots/tempo-desktop.png";
-import tempoPhone from "./shots/tempo-phone.png";
+import { kicker, pad, sectionTitle } from "./chrome";
+import { CARD_GRID, cardColumns, cardDelay } from "./columns";
+import folio from "./shots/folio-desktop.png";
+import meridian from "./shots/meridian-desktop.png";
+import monument from "./shots/monument-desktop.png";
+import salon from "./shots/salon-desktop.png";
+import tempo from "./shots/tempo-desktop.png";
+
+// The template cards of the landing page and /templates (design: "Template Card.dc.html" and
+// "Templates Page.dc.html").
 
 /**
- * The first screen of each sample site (/templates/<key>) at 1280 × 800 and on a 390px phone.
- * Made by scripts/template-shots.mjs; take them again when the sample content or a template's
- * newest design changes.
+ * The first screen of each sample site (/templates/<key>) at 1280 × 800. Made by
+ * scripts/template-shots.mjs; take them again when the sample content or a template's newest
+ * design changes.
  */
-export const TEMPLATE_SHOTS: Record<
-  TemplateKey,
-  { desktop: StaticImageData; phone: StaticImageData }
-> = {
-  meridian: { desktop: meridianDesktop, phone: meridianPhone },
-  monument: { desktop: monumentDesktop, phone: monumentPhone },
-  salon: { desktop: salonDesktop, phone: salonPhone },
-  folio: { desktop: folioDesktop, phone: folioPhone },
-  tempo: { desktop: tempoDesktop, phone: tempoPhone },
-};
+const SHOTS: Record<TemplateKey, StaticImageData> = { meridian, monument, salon, folio, tempo };
 
-export function PlanTag({ template }: { template: TemplateDefinition }) {
-  return isPremiumTemplate(template.key) ? (
-    <ProTag />
-  ) : (
-    <span className="tag tag-neutral">Free</span>
-  );
-}
-
-/** Opens the template's sample site in a new tab: a full site, nothing around it. */
-export function SampleSiteLink({
-  template,
-  className,
-}: {
-  template: TemplateDefinition;
-  className?: string;
-}) {
-  return (
-    <a
-      href={sampleSitePath(template.key)}
-      target="_blank"
-      rel="noopener"
-      aria-label={`View the ${template.name} sample site in a new tab`}
-      className={className}
-    >
-      View sample site <ExternalLink size={16} />
-    </a>
-  );
-}
-
-function TemplateCard({ template, index }: { template: TemplateDefinition; index: number }) {
+/** One template: its picture, plan and line, opening its sample site in a new tab. */
+export function TemplateCard({ template }: { template: TemplateDefinition }) {
   return (
     <Blueprint
-      data-reveal=""
-      className="lift relative flex flex-col bg-neutral-100"
-      style={delay(index * 90)}
+      as="article"
+      className="lift group flex h-full flex-col bg-neutral-100 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-accent"
     >
-      <div className="aspect-[16/10] overflow-hidden border-b border-divider bg-bg">
+      <div className="aspect-[16/10] overflow-hidden border-b border-divider bg-neutral-200">
         <Image
-          src={TEMPLATE_SHOTS[template.key].desktop}
+          src={SHOTS[template.key]}
           alt=""
-          sizes="(min-width: 1200px) 370px, (min-width: 700px) 50vw, 100vw"
+          sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
           placeholder="blur"
-          className="block h-auto w-full"
+          className="block size-full object-cover object-top"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-6">
-        <span className="flex items-center gap-2.5">
-          <span className="font-heading text-[28px] leading-none font-semibold uppercase">
+      <div className="flex flex-1 flex-col gap-2" style={{ padding: "18px 20px 6px" }}>
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <h3 className="m-0 min-w-0 font-heading text-2xl leading-none font-semibold uppercase [overflow-wrap:anywhere]">
             {template.name}
-          </span>
-          <PlanTag template={template} />
-        </span>
-        <span className="flex-1 text-[15px] text-neutral-700">{template.tagline}</span>
+          </h3>
+          {isPremiumTemplate(template.key) ? (
+            <ProTag />
+          ) : (
+            <span className="tag tag-free">Free</span>
+          )}
+        </div>
+        <p className="m-0 line-clamp-3 text-[15px] leading-[1.45] text-pretty text-neutral-800">
+          {template.tagline}
+        </p>
         {/* The link covers the card, so the whole card opens the sample site. */}
-        <SampleSiteLink
-          template={template}
-          className="mt-2 flex items-center gap-1.5 text-[15px] after:absolute after:inset-0 after:content-['']"
-        />
+        <a
+          href={sampleSitePath(template.key)}
+          target="_blank"
+          rel="noopener"
+          className="mt-auto inline-flex min-h-11 items-center gap-1.5 self-start font-heading text-[15px] font-semibold tracking-[0.01em] text-accent-700 no-underline underline-offset-3 outline-none group-hover:text-accent-600 group-hover:underline after:absolute after:inset-0 after:content-['']"
+        >
+          View sample site
+          <span className="sr-only"> · {template.name}, opens in a new tab</span>
+          <ExternalLink size={16} />
+        </a>
       </div>
     </Blueprint>
   );
 }
 
-/** The landing page's Templates section: every template, each opening its sample site. */
+const LANDING_CARDS = 6;
+const LANDING_CARDS_PHONE = 3;
+
+/** The landing page's Templates section: the first few templates and a way to all of them. */
 export function TemplatesSection() {
+  const shown = templateList.slice(0, LANDING_CARDS);
   return (
     <section
       id="templates"
-      className="mx-auto flex max-w-[1200px] flex-col gap-12"
-      style={{ padding: `112px ${pad}` }}
+      className="mx-auto flex max-w-[1200px] flex-col gap-9 sm:gap-12"
+      style={{ padding: `clamp(80px,9vw,112px) ${pad}` }}
     >
       <div data-reveal="" className="flex flex-col items-center gap-3.5 text-center">
         <span className={kicker}>Templates</span>
-        <h2 className={sectionTitle}>Your profile, in any design</h2>
-        <span className="max-w-[640px] text-neutral-800">
-          Every template shows the same content, so you can switch before you publish, and new
-          designs are added regularly. Meridian is free; the rest come with Pro. Each opens a sample
-          site for Amelia Hart, a fictional executive.
+        <h2 className={`${sectionTitle} text-balance`}>One draft. Every template.</h2>
+        <span className="max-w-[600px] text-[17px] text-pretty text-neutral-800">
+          Your answers fill whichever template you pick, and you can switch freely until you
+          publish.
         </span>
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-6">
-        {templateList.map((template, index) => (
-          <TemplateCard key={template.key} template={template} index={index} />
-        ))}
-        <Blueprint
-          data-reveal=""
-          className="lift relative flex flex-col justify-end gap-3 bg-accent-100 p-6"
-          style={delay(templateList.length * 90)}
-        >
-          <span className={kicker}>All templates</span>
-          <span className="font-heading text-[28px] leading-none font-semibold uppercase">
-            Side by side, on desktop and phone
-          </span>
-          <Link
-            href="/templates"
-            className="mt-2 flex items-center gap-1.5 text-[15px] after:absolute after:inset-0 after:content-['']"
+      <ul className={CARD_GRID}>
+        {shown.map((template, index) => (
+          <li
+            key={template.key}
+            data-reveal=""
+            className={`flex flex-col ${cardColumns(index, shown.length)} ${index >= LANDING_CARDS_PHONE ? "max-sm:hidden" : ""}`}
+            style={cardDelay(index)}
           >
-            See all templates <ArrowRight size={16} />
-          </Link>
-        </Blueprint>
-      </div>
+            <TemplateCard template={template} />
+          </li>
+        ))}
+      </ul>
+      <Link
+        href="/templates"
+        className="btn btn-secondary min-h-12 gap-2 self-stretch sm:min-w-[240px] sm:self-center"
+        style={{ padding: "12px 20px", fontSize: 16, justifyContent: "center" }}
+      >
+        See all templates <ArrowRight size={16} />
+      </Link>
     </section>
   );
 }
