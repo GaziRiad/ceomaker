@@ -220,6 +220,8 @@ Without these, production says uploads aren't available, and local development k
 
 Live sites send anonymous page views and clicks on email, phone, LinkedIn and website links to `/api/collect` (no cookies, no stored addresses; a visitor is a keyed hash that changes every day). Country and city come from Vercel's request headers, so they only appear on deployments: locally every visit shows as "Unknown location". Signed-in CEOMaker users and known bots aren't counted.
 
+The product's own pages (landing, sign-in, dashboard, editor) also load Vercel Web Analytics and Speed Insights (`@vercel/analytics`, `@vercel/speed-insights` in the `(app)` layout); enable both in the Vercel project. They only collect on Vercel deployments, and customer sites don't load them.
+
 ### Plans (Free and Pro)
 
 Every account starts on the free plan: a site on Meridian at `<name>.ceomaker.app`, reached by email and links, one AI draft and 5 AI rewrites a day, and a "Made with CEOMaker" badge. Pro adds Monument, Salon, Folio and Tempo (and future premium templates), a custom domain, the contact form and Messages inbox, analytics, more AI and drafting from a CV, and removes the badge. The rules live in `packages/schema/src/plans.ts`; the plan is `user.plan` (`free` or `pro`).
