@@ -99,11 +99,11 @@ export const TEMPLATE_PALETTES: {
   },
   monument: {
     1: [
+      palette("Acid night", "#0f100d", "#efeee6", "#c6f36b"),
       palette("Signal", "#f3f0e8", "#15130f", "#ff5a1f"),
       palette("Cobalt", "#f1f1ee", "#0e1015", "#1f3bff"),
       palette("Forest", "#f2f1ea", "#121512", "#1d5c3a"),
       palette("Oxblood", "#f4efe9", "#1a1414", "#7a1f2b"),
-      palette("Acid night", "#0f100d", "#efeee6", "#c6f36b"),
       palette("Ember night", "#14110f", "#f3ede4", "#ff6b2c"),
     ],
   },

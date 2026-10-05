@@ -203,7 +203,7 @@ describe("theme", () => {
         }
       }
     }
-    expect(resolveSiteColors({ palettes: {} }, "monument", 1).bg).toBe("#f3f0e8");
+    expect(resolveSiteColors({ palettes: {} }, "monument", 1).bg).toBe("#0f100d");
   });
 
   it("writes out a design's colours so a later default can't change them", () => {
