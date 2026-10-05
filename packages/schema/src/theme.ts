@@ -107,6 +107,15 @@ export const TEMPLATE_PALETTES: {
       palette("Linen", "#e8e6dd", "#1a1e19", "#56704d"),
     ],
   },
+  folio: {
+    1: [
+      palette("Paper", "#f6f1e9", "#1b1a17", "#d0501f"),
+      palette("Graphite", "#151515", "#eeebe5", "#ff6b3d"),
+      palette("Cobalt", "#eef0f3", "#121721", "#2d55d8"),
+      palette("Sage", "#e6e9de", "#1b2219", "#55782f"),
+      palette("Midnight", "#0f1626", "#e9edf4", "#8fb0ff"),
+    ],
+  },
 };
 
 /** The presets of one design of a template. */

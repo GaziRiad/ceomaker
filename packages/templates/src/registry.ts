@@ -9,6 +9,7 @@ import {
 } from "@ceomaker/schema";
 import { MeridianTemplate as MeridianV1 } from "./meridian/v1";
 import { MonumentTemplate as MonumentV1 } from "./monument/v1";
+import { FolioTemplate as FolioV1 } from "./folio/v1";
 import { SalonTemplate as SalonV1 } from "./salon/v1";
 import type { TemplateDefinition } from "./types";
 
@@ -22,6 +23,7 @@ const NONE: Design["shows"] = {
   focal: false,
   aboutImage: false,
   workImages: false,
+  focusSection: false,
 };
 
 /**
@@ -68,8 +70,30 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
         focal: true,
         aboutImage: true,
         workImages: true,
+        focusSection: false,
       },
       Component: SalonV1,
+    },
+  },
+  folio: {
+    1: {
+      name: "Folio",
+      description:
+        "Your work as large projects people can swipe through, with a clear story around them. For founders, investors and operators whose career is best told as projects.",
+      tagline:
+        "Your work as large projects people can swipe through. For founders, investors and operators whose career is best told as projects.",
+      contactForm: true,
+      shows: {
+        gallery: true,
+        quotePhotos: true,
+        photoGrade: true,
+        cta: true,
+        focal: true,
+        aboutImage: true,
+        workImages: true,
+        focusSection: true,
+      },
+      Component: FolioV1,
     },
   },
 };

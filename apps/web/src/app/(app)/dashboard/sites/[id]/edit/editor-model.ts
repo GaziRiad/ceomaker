@@ -3,6 +3,7 @@ import {
   EDITABLE_SECTION_TYPES,
   experienceItem,
   FIXED_SECTION_TYPES,
+  focusItem,
   LABEL_KEY,
   normalizeTemplateKey,
   parseSiteContent,
@@ -30,6 +31,7 @@ export const SECTION_LABELS: Record<EditableSectionType, string> = {
   hero: "Hero",
   achievements: "Impact",
   about: "About",
+  focus: "Focus",
   experience: "Experience",
   portfolio: "Selected work",
   testimonials: "What colleagues say",
@@ -41,6 +43,7 @@ const DEFAULT_IDS: Record<EditableSectionType, string> = {
   hero: "hero",
   achievements: "impact",
   about: "about",
+  focus: "focus",
   experience: "experience",
   portfolio: "work",
   testimonials: "testimonials",
@@ -66,6 +69,7 @@ function emptySection(type: EditableSectionType, meta: SiteMeta): Section {
     case "contact":
       return { id, type, visible: true, links: [] };
     case "achievements":
+    case "focus":
     case "experience":
     case "portfolio":
     case "testimonials":
@@ -80,8 +84,22 @@ function isEditable(section: Section): section is Extract<Section, { type: Edita
 }
 
 /**
+ * Whether the current template shows a kind of section. The editor offers only those; the
+ * others stay in the content, untouched, for templates that show them.
+ */
+export function offersSection(
+  shows: { cta: boolean; focusSection: boolean },
+  type: Section["type"],
+): boolean {
+  if (type === "cta") return shows.cta;
+  if (type === "focus") return shows.focusSection;
+  return true;
+}
+
+/**
  * The editor works on one section of each kind, hero first and contact last, with every kind
- * present (missing ones are added hidden and empty). Retired section types are dropped.
+ * present (missing ones are added hidden and empty, before the kind that follows them in a new
+ * site's order, or last). Retired section types are dropped.
  */
 export function normalizeForEditing(content: SiteContent): SiteContent {
   const seen = new Set<string>();
@@ -97,12 +115,15 @@ export function normalizeForEditing(content: SiteContent): SiteContent {
     else if (section.type === "contact") contact = section;
     else middle.push(section);
   }
-  for (const type of EDITABLE_SECTION_TYPES) {
-    if (seen.has(type) || FIXED_SECTION_TYPES.has(type)) continue;
+  EDITABLE_SECTION_TYPES.forEach((type, index) => {
+    if (seen.has(type) || FIXED_SECTION_TYPES.has(type)) return;
     let section = emptySection(type, content.meta);
     if (usedIds.has(section.id)) section = { ...section, id: `${section.id}-${type}` };
-    middle.push(section);
-  }
+    const later = EDITABLE_SECTION_TYPES.slice(index + 1);
+    const before = middle.findIndex((current) => later.includes(current.type as never));
+    if (before < 0) middle.push(section);
+    else middle.splice(before, 0, section);
+  });
   return {
     ...content,
     sections: [
@@ -116,12 +137,13 @@ export function normalizeForEditing(content: SiteContent): SiteContent {
 const blank = (value: string | undefined) => !value || !value.trim();
 const optional = (value: string | undefined) => (blank(value) ? undefined : value);
 
-type ListType = "achievements" | "experience" | "portfolio" | "testimonials";
+type ListType = "achievements" | "focus" | "experience" | "portfolio" | "testimonials";
 type ItemOf<T extends ListType> = SectionOf<T>["items"][number];
 
 /** Rows with anything typed in them; fully blank rows are dropped before saving and previewing. */
 const KEEP: { [T in ListType]: (item: ItemOf<T>) => boolean } = {
   achievements: (item) => !blank(item.value) || !blank(item.label),
+  focus: (item) => !blank(item.title) || !blank(item.description),
   experience: (item) =>
     [item.role, item.organization, item.start, item.end, item.summary].some(
       (value) => !blank(value),
@@ -144,6 +166,13 @@ function cleanSection(section: Section): Section {
     }
     case "achievements":
       return { ...section, items: section.items.filter(KEEP.achievements) };
+    case "focus":
+      return {
+        ...section,
+        items: section.items
+          .filter(KEEP.focus)
+          .map((item) => ({ ...item, description: optional(item.description) })),
+      };
     case "experience":
       return {
         ...section,
@@ -229,6 +258,7 @@ function cleanMeta(meta: SiteMeta): SiteMeta {
 
 const ITEM_SCHEMAS = {
   achievements: achievementItem,
+  focus: focusItem,
   experience: experienceItem,
   portfolio: portfolioItem,
   testimonials: testimonialItem,
@@ -243,6 +273,7 @@ function salvage(section: Section): Section | null {
   if (section.visible || sectionSchema.safeParse(section).success) return section;
   switch (section.type) {
     case "achievements":
+    case "focus":
     case "experience":
     case "portfolio":
     case "testimonials": {
@@ -400,6 +431,7 @@ export function sectionOf<T extends EditableSectionType>(content: SiteContent, t
 
 const ITEM_FIELDS: { [T in ListType]: readonly (keyof ItemOf<T> & string)[] } = {
   achievements: ["value", "label"],
+  focus: ["title", "description"],
   experience: ["role", "organization", "location", "summary", "start", "end"],
   portfolio: ["title", "kind", "meta", "year", "description"],
   testimonials: ["quote", "author", "role"],
@@ -580,6 +612,7 @@ function editSection(section: Section, rest: string[], before: string, after: st
       };
     }
     case "achievements":
+    case "focus":
     case "experience":
     case "portfolio":
     case "testimonials": {

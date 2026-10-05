@@ -14,6 +14,9 @@ import { initialsOf } from "./monogram";
 /** The middle sections a template lays out between the hero and the contact block. */
 export type MiddleKind = "impact" | "about" | "experience" | "work" | "testimonials";
 
+/** Everything between the hero and contact, with the sections only some templates show. */
+export type SequenceKind = MiddleKind | "focus" | "cta";
+
 /**
  * Where a piece of displayed text lives in the content, for editing it in place in the editor's
  * preview: "hero.headline", "work.items.2.title", "about.body.0", "meta.name". Item indexes count
@@ -112,6 +115,20 @@ export interface ModelCta {
   fields: { headline: FieldPath; body: FieldPath; button: FieldPath };
 }
 
+export interface ModelFocusItem {
+  title: string;
+  description: string;
+  fields: { title: FieldPath; description: FieldPath };
+}
+
+/** What the owner works on now, for templates that show it (Folio). */
+export interface ModelFocus {
+  /** The owner's title. Empty: the template's own label. */
+  heading: string;
+  headingField: FieldPath;
+  items: ModelFocusItem[];
+}
+
 export interface ModelStat {
   value: string;
   label: string;
@@ -174,6 +191,11 @@ export interface SiteModel {
   gallery: ModelImage[];
   /** Visible, non-empty middle sections in the order the user arranged them. */
   order: MiddleKind[];
+  /**
+   * The same, with the focus areas and the closing section where they sit, for templates that
+   * show those (Folio). Templates without them use `order`.
+   */
+  sequence: SequenceKind[];
   /** Section titles the owner wrote. Empty: the template's own label. */
   headings: Record<HeadingKind, string>;
   headingFields: Record<HeadingKind, FieldPath>;
@@ -188,6 +210,8 @@ export interface SiteModel {
   pullQuote: ModelQuote | null;
   /** Visible and filled in; null otherwise. Templates without a closing section ignore it. */
   cta: ModelCta | null;
+  /** Visible with at least one area; null otherwise. Templates without it ignore it. */
+  focus: ModelFocus | null;
   contact: {
     blurb: string;
     email: string;
@@ -327,6 +351,7 @@ export function buildSiteModel(
   const experience = firstVisible(sections, "experience");
   const work = firstVisible(sections, "portfolio");
   const testimonials = firstVisible(sections, "testimonials");
+  const focus = firstVisible(sections, "focus");
   const contact = firstOf(sections, "contact");
   const heroId = hero?.id ?? "hero";
 
@@ -397,6 +422,21 @@ export function buildSiteModel(
   const quotes =
     testimonials?.items.map((item, index) => quoteOf(item, `${testimonials.id}.items.${index}`)) ??
     [];
+  const focusModel: ModelFocus | null =
+    focus && focus.items.length
+      ? {
+          heading: focus.heading ?? "",
+          headingField: `${focus.id}.heading`,
+          items: focus.items.map((item, index) => ({
+            title: item.title,
+            description: item.description ?? "",
+            fields: {
+              title: `${focus.id}.items.${index}.title`,
+              description: `${focus.id}.items.${index}.description`,
+            },
+          })),
+        }
+      : null;
 
   // Hidden or empty sections drop out, so templates never render an empty block.
   const present: Record<MiddleKind, boolean> = {
@@ -421,12 +461,20 @@ export function buildSiteModel(
     headingFields[kind] = `${section?.id ?? kind}.heading`;
   }
   const order: MiddleKind[] = [];
+  const sequence: SequenceKind[] = [];
   const cta = firstVisible(sections, "cta");
   let ctaAfter = 0;
   for (const section of sections) {
-    if (section === cta) ctaAfter = order.length;
+    if (section === cta) {
+      ctaAfter = order.length;
+      sequence.push("cta");
+    }
+    if (section === focus && focusModel) sequence.push("focus");
     const kind = MIDDLE_KIND[section.type];
-    if (kind && section.visible && present[kind] && !order.includes(kind)) order.push(kind);
+    if (kind && section.visible && present[kind] && !order.includes(kind)) {
+      order.push(kind);
+      sequence.push(kind);
+    }
   }
 
   return {
@@ -469,6 +517,7 @@ export function buildSiteModel(
     },
     gallery: (hero?.gallery ?? []).map((photo) => imageOf(photo, "")!),
     order,
+    sequence,
     headings,
     headingFields,
     labels: meta?.labels ?? {},
@@ -491,6 +540,7 @@ export function buildSiteModel(
           },
         }
       : null,
+    focus: focusModel,
     contact: {
       blurb: contact?.blurb ?? "",
       email: contact?.email ?? "",

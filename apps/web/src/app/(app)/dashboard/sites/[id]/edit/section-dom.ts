@@ -4,6 +4,7 @@ import type { Section } from "@ceomaker/schema";
 const ANCHOR: Partial<Record<Section["type"], string>> = {
   about: "about",
   achievements: "impact",
+  focus: "focus",
   experience: "experience",
   portfolio: "work",
   testimonials: "testimonials",

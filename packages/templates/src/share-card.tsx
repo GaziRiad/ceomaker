@@ -1,6 +1,7 @@
 import { contrastRatio, type SiteColors } from "@ceomaker/schema";
 import type { CSSProperties } from "react";
 import { mixHex } from "./meridian/v1/measure";
+import { folioRoles, textWidth as folioWidth } from "./folio/v1/measure";
 import { initialsOf } from "./monogram";
 import { salonRoles, textWidth } from "./salon/v1/measure";
 
@@ -14,7 +15,7 @@ export const SHARE_CARD_WIDTH = 1200;
 export const SHARE_CARD_HEIGHT = 630;
 
 export interface ShareCardProps {
-  /** "meridian", "monument" or "salon"; anything else is drawn as Meridian. */
+  /** "meridian", "monument", "salon" or "folio"; anything else is drawn as Meridian. */
   template: string;
   colors: SiteColors;
   name: string;
@@ -33,6 +34,9 @@ export interface ShareCardProps {
     /** Salon's display serif (Italiana) and its reading face (Hanken Grotesk). */
     salonDisplay: string;
     salonBody: string;
+    /** Folio's grotesk (Geist) and its mono (Geist Mono). */
+    folio: string;
+    folioMono: string;
   };
 }
 
@@ -85,9 +89,26 @@ export function salonNameSize(name: string, withPhoto: boolean): number {
   return Math.round(Math.min(largest, size, room / longest));
 }
 
+/**
+ * Name size on Folio, in Geist SemiBold with the accent square after it: as large as fits its
+ * column in two lines (three beside a photo), never breaking a word.
+ */
+export function folioNameSize(name: string, withPhoto: boolean): number {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  // The square after the last word takes about a fifth of an em.
+  const square = 0.22;
+  const longest = Math.max(2, ...words.map((word) => folioWidth(word))) + square;
+  const total = Math.max(2, folioWidth(name) + square);
+  const room = withPhoto ? 600 : 1040;
+  const lines = withPhoto ? 3 : 2;
+  const largest = withPhoto ? 120 : 156;
+  return Math.round(Math.min(largest, (room * 0.97) / longest, (room * lines) / (total * 1.12)));
+}
+
 export function ShareCard(props: ShareCardProps) {
   if (props.template === "monument") return <MonumentCard {...props} />;
   if (props.template === "salon") return <SalonCard {...props} />;
+  if (props.template === "folio") return <FolioCard {...props} />;
   return <MeridianCard {...props} />;
 }
 
@@ -477,6 +498,135 @@ function SalonCard({ colors, name, role, organization, domain, photo, fonts }: S
               style={{ width: 324, height: 406, objectFit: "cover" }}
             />
           </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function FolioCard({ colors, name, role, organization, domain, photo, fonts }: ShareCardProps) {
+  const folio = folioRoles(colors);
+  const ink2 = mixHex(colors.ink, colors.bg, folio.secondary / 100);
+  const act = mixHex(colors.accent, colors.ink, folio.accentText / 100);
+  const mark = mixHex(colors.accent, colors.ink, folio.mark / 100);
+  const rule = mixHex(colors.ink, colors.bg, 0.13);
+  const kicker = [role, organization].filter(Boolean).join(" · ");
+  const size = folioNameSize(name, Boolean(photo));
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        width: SHARE_CARD_WIDTH,
+        height: SHARE_CARD_HEIGHT,
+        overflow: "hidden",
+        background: colors.bg,
+        color: colors.ink,
+        fontFamily: fonts.folio,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 80,
+          right: photo ? 500 : 80,
+          top: 76,
+          bottom: 72,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            fontFamily: fonts.folioMono,
+            fontWeight: 400,
+            fontSize: 19,
+            lineHeight: 1.5,
+            letterSpacing: "0.04em",
+            color: act,
+            maxWidth: photo ? 600 : 960,
+          }}
+        >
+          {kicker.toLocaleUpperCase() || " "}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "flex-end",
+            columnGap: Math.round(size * 0.19),
+            fontWeight: 600,
+            fontSize: size,
+            lineHeight: 0.94,
+            letterSpacing: "-0.045em",
+          }}
+        >
+          {(words.length ? words : [" "]).map((word, index) => (
+            <div
+              key={index}
+              style={{ display: "flex", alignItems: "flex-end", whiteSpace: "nowrap" }}
+            >
+              {word}
+              {index === words.length - 1 ? (
+                <div
+                  style={{
+                    display: "flex",
+                    width: Math.round(size * 0.17),
+                    height: Math.round(size * 0.17),
+                    marginLeft: Math.round(size * 0.05),
+                    // Sits on the baseline: Geist's descent less half the negative leading.
+                    marginBottom: Math.round(size * 0.115),
+                    borderRadius: Math.max(2, Math.round(size * 0.03)),
+                    background: mark,
+                  }}
+                />
+              ) : null}
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            paddingTop: 24,
+            borderTop: `1px solid ${rule}`,
+            fontSize: 22,
+            fontWeight: 500,
+            color: ink2,
+          }}
+        >
+          <div
+            style={{ display: "flex", width: 14, height: 14, borderRadius: 3, background: mark }}
+          />
+          <div style={{ display: "flex" }}>{domain}</div>
+        </div>
+      </div>
+      {photo ? (
+        <div
+          style={{
+            position: "absolute",
+            right: 80,
+            top: 90,
+            width: 360,
+            height: 450,
+            display: "flex",
+            overflow: "hidden",
+            borderRadius: 24,
+            background: mixHex(colors.ink, colors.bg, 0.08),
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- also drawn by the image renderer */}
+          <img
+            src={photo}
+            alt=""
+            width={344}
+            height={478}
+            style={{ width: 344, height: 478, objectFit: "cover" }}
+          />
         </div>
       ) : null}
     </div>

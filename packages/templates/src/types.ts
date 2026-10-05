@@ -55,6 +55,8 @@ export interface TemplateDefinition {
     aboutImage: boolean;
     /** Photos on selected work. */
     workImages: boolean;
+    /** The Focus section: a few cards on what the owner works on now. */
+    focusSection: boolean;
   };
   Component: (props: TemplateProps) => ReactNode;
 }
