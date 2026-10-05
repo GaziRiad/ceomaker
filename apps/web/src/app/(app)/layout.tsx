@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { appFontVariables } from "../fonts";
 import { appUrl } from "@/lib/routing";
 import "./globals.css";
+import { ProductAnalytics } from "@/components/product-analytics";
 
 export const metadata: Metadata = {
   // Resolves relative addresses in metadata (canonical, share image) to the product's own.
@@ -30,6 +31,8 @@ export default function AppRootLayout({ children }: { children: ReactNode }) {
             (the (sites) layout) keep only our cookieless analytics, which their owners see. */}
         <Analytics />
         <SpeedInsights />
+        {/* PostHog, without cookies or browser storage (see lib/product-analytics). */}
+        <ProductAnalytics />
       </body>
     </html>
   );

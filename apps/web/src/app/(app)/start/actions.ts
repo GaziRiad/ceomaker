@@ -3,6 +3,7 @@
 import { createSiteFromAnswers, getDb, getPrimarySiteId, saveSiteAnswers } from "@ceomaker/db";
 import { decodeAnswers } from "@ceomaker/schema";
 import { getSession } from "@/lib/auth";
+import { trackServerEvent } from "@/lib/product-analytics/server";
 
 export type FinishResult =
   { ok: true; siteId: string } | { ok: false; reason: "signed-out" | "invalid-answers" };
@@ -29,5 +30,6 @@ export async function finishOnboarding(encodedAnswers: string): Promise<FinishRe
     answers,
     email: session.user.email,
   });
+  trackServerEvent(userId, "site_created");
   return { ok: true, siteId: created.id };
 }

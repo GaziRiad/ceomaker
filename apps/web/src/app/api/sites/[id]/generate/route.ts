@@ -8,6 +8,7 @@ import { generateDraft } from "@/lib/ai/generate";
 import { planFor } from "@/lib/plan";
 import { isSameOrigin } from "@/lib/same-origin";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
+import { sendServerEvent } from "@/lib/product-analytics/server";
 
 /** A window long enough to count every draft an account has ever made. */
 const FOREVER_MS = 100 * 365 * DAY_MS;
@@ -56,10 +57,14 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
   const current = toEditableDraft(site.draft);
   const encoder = new TextEncoder();
   let open = true;
+  // How it ended, for product analytics.
+  let outcome: { result: string; reason: string | null } | null = null;
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: GenerateEvent) => {
+        if (event.type === "done") outcome = { result: event.source, reason: event.notice ?? null };
+        if (event.type === "error") outcome = { result: "error", reason: null };
         if (!open) return;
         try {
           controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
@@ -131,6 +136,10 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
         console.error("Draft generation failed", error);
         send({ type: "error", message: "Something went wrong while writing your draft." });
       } finally {
+        // Sent while the response is still open: the screen has already moved on at "done".
+        if (outcome) {
+          await sendServerEvent(userId, "draft_written", { ...outcome, cv: document !== null });
+        }
         if (open) {
           open = false;
           controller.close();

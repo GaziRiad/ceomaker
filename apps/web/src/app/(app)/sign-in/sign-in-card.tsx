@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Blueprint, Mail, Wordmark } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
+import { trackEvent, welcomeUrl } from "@/lib/product-analytics/browser";
 import { signInErrorPath } from "@/lib/sign-in-errors";
 
 /** Google's "G" mark, as its sign-in branding guidelines require on the button. */
@@ -56,7 +57,7 @@ export function SignInCard({
       email: email.trim(),
       ...(name ? { name } : {}),
       callbackURL,
-      newUserCallbackURL: callbackURL,
+      newUserCallbackURL: welcomeUrl(callbackURL),
       errorCallbackURL: signInErrorPath("link"),
     });
     setPending(null);
@@ -68,16 +69,18 @@ export function SignInCard({
       );
       return;
     }
+    trackEvent("sign_in_requested", { method: "email", from_start: fromStart });
     setSentTo(email.trim());
   }
 
   async function continueWithGoogle() {
     setError(null);
     setPending("google");
+    trackEvent("sign_in_requested", { method: "google", from_start: fromStart });
     const result = await authClient.signIn.social({
       provider: "google",
       callbackURL,
-      newUserCallbackURL: callbackURL,
+      newUserCallbackURL: welcomeUrl(callbackURL),
       errorCallbackURL: signInErrorPath("google"),
     });
     if (result.error) {

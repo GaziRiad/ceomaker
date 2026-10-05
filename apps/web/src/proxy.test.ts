@@ -171,4 +171,43 @@ describe("proxy", () => {
     const response = await proxy(request("https://attacker.example/"));
     expect(getRewrittenUrl(response)).toBe("https://attacker.example/__not-found");
   });
+  it("drops a trailing slash with a permanent redirect, on every host, keeping the query", async () => {
+    const app = await proxy(request("https://ceomaker.com/pricing/?utm_source=x"));
+    expect(app.status).toBe(308);
+    expect(getRedirectUrl(app)).toBe("https://ceomaker.com/pricing?utm_source=x");
+    const tenant = await proxy(request("https://bruno.ceomaker.com/press//"));
+    expect(getRedirectUrl(tenant)).toBe("https://bruno.ceomaker.com/press");
+    const home = await proxy(request("https://bruno.ceomaker.com/"));
+    expect(getRedirectUrl(home)).toBeNull();
+  });
+
+  it("never turns a trailing-slash redirect into a jump to another site", async () => {
+    const response = await proxy(request("https://ceomaker.com//attacker.example/"));
+    const location = new URL(getRedirectUrl(response) ?? "", "https://ceomaker.com");
+    expect(location.host).toBe("ceomaker.com");
+  });
+
+  it("relays analytics from the product's pages to PostHog's EU servers, without cookies", async () => {
+    const response = await proxy(
+      request("https://ceomaker.com/relay/i/v0/e/?compression=gzip-js", "session=secret"),
+    );
+    expect(getRewrittenUrl(response)).toBe("https://eu.i.posthog.com/i/v0/e/?compression=gzip-js");
+    const forwarded = response.headers.get("x-middleware-override-headers")?.split(",") ?? [];
+    expect(forwarded).toContain("host");
+    expect(forwarded).not.toContain("cookie");
+    expect(response.headers.get("x-middleware-request-cookie")).toBeNull();
+    expect(response.headers.get("x-middleware-request-host")).toBe("eu.i.posthog.com");
+
+    const script = await proxy(
+      request("https://ceomaker.com/relay/static/exception-autocapture.js"),
+    );
+    expect(getRewrittenUrl(script)).toBe(
+      "https://eu-assets.i.posthog.com/static/exception-autocapture.js",
+    );
+  });
+
+  it("doesn't relay analytics on customer sites", async () => {
+    const response = await proxy(request("https://bruno.ceomaker.com/relay/e/"));
+    expect(getRewrittenUrl(response)).toBe("https://bruno.ceomaker.com/s/bruno/relay/e/");
+  });
 });

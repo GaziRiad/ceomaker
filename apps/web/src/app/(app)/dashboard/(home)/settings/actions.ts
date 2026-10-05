@@ -32,6 +32,7 @@ import { cancelFreemiusSubscriptions } from "@/lib/freemius";
 import { isUuid } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
 import { removeMedia } from "@/lib/media-store";
+import { trackServerEvent } from "@/lib/product-analytics/server";
 
 // Settings changes. Each action re-checks the session; queries scope everything by owner.
 
@@ -212,13 +213,17 @@ export async function connectDomainAction(siteId: string, domain: string): Promi
   if (!isPro(await planFor(owned.session.user.id))) {
     return { ok: false, error: "Custom domains are part of Pro." };
   }
-  return connectDomain({
+  const result = await connectDomain({
     userId: owned.session.user.id,
     siteId,
     subdomain: owned.site.subdomain,
     raw: String(domain).slice(0, 300),
     invalidate,
   });
+  if (result.ok && result.view) {
+    trackServerEvent(owned.session.user.id, "domain_added", { kind: result.view.kind });
+  }
+  return result;
 }
 
 export async function domainRecordsAddedAction(siteId: string): Promise<DomainResult> {

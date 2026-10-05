@@ -1,4 +1,23 @@
-import { bigint, boolean, index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
+
+/** See user.signupSource. `source` is a short label: "linkedin", "google", "direct", a campaign's name… */
+export interface SignupSource {
+  source: string;
+  referrerHost: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  landingPath: string | null;
+}
 
 // Tables required by Better Auth (verified against `getAuthTables` for better-auth 1.7).
 // Property names must match Better Auth's field names; column names are snake_case.
@@ -30,6 +49,11 @@ export const user = pgTable("user", {
   proNote: text("pro_note"),
   /** When the "your gift ends soon" email went out for the current gift. */
   proRemindedAt: timestamp("pro_reminded_at", { withTimezone: true }),
+  /**
+   * Where the visit that led to the sign-up came from (referrer and campaign tags), saved once
+   * just after the account is created. Null for accounts made before this was recorded.
+   */
+  signupSource: jsonb("signup_source").$type<SignupSource>(),
   /** Last canvas size the owner picked in the editor: "desktop", "tablet" or "phone". */
   editorDevice: text("editor_device"),
   ...timestamps,

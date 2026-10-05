@@ -2,6 +2,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 import { liveDomainFor, siteForHost } from "./lib/domain-routing";
 import { isPro } from "@ceomaker/schema";
+import { isRelayPath, relayTarget } from "./lib/product-analytics/config";
 import {
   isInternalTenantPath,
   NOT_FOUND_PATH,
@@ -32,11 +33,40 @@ function rewriteToTenant(request: NextRequest, subdomain: string, rest: string) 
   return NextResponse.rewrite(new URL(`${TENANT_PATH_PREFIX}/${subdomain}${rest}`, request.url));
 }
 
+/**
+ * Product analytics requests from the product's pages, forwarded to PostHog's EU servers so they
+ * go to our own address. Cookies and credentials are dropped first: PostHog never sees a session.
+ */
+function relayToPostHog(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const target = new URL(relayTarget(pathname, search));
+  const headers = new Headers(request.headers);
+  headers.delete("cookie");
+  headers.delete("authorization");
+  headers.set("host", target.host);
+  return NextResponse.rewrite(target, { request: { headers } });
+}
+
+/**
+ * Next's own trailing-slash redirect is off (next.config) because PostHog's paths end in a
+ * slash. Every other path gets the same redirect here: /pricing/ → /pricing.
+ */
+function withoutTrailingSlash(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (pathname === "/" || !pathname.endsWith("/") || isRelayPath(pathname)) return null;
+  // Edits the URL rather than building one from text, so "//other.site/" stays on our host. A
+  // plain URL: NextURL would put the trailing slash back.
+  const url = new URL(request.url);
+  url.pathname = pathname.replace(/\/+$/, "") || "/";
+  return NextResponse.redirect(url, 308);
+}
+
 /** Product routes. */
 function serveApp(request: NextRequest) {
   // Optimistic check on cookie presence only, so signed-out visitors get a real redirect
   // instead of a streamed one. Pages and server actions still verify the session itself.
   const { pathname, search } = request.nextUrl;
+  if (isRelayPath(pathname)) return relayToPostHog(request);
   if (isProtected(pathname) && !getSessionCookie(request)) {
     const signIn = new URL("/sign-in", request.url);
     signIn.searchParams.set("callbackURL", `${pathname}${search}`);
@@ -101,6 +131,8 @@ async function serveCustomDomain(request: NextRequest, hostname: string, rootDom
 export async function proxy(request: NextRequest) {
   const routing = routingConfigFromEnv();
   const { pathname, search } = request.nextUrl;
+  const trimmed = withoutTrailingSlash(request);
+  if (trimmed) return trimmed;
 
   const resolution = resolveHost(request.headers.get("host"), routing);
   switch (resolution.kind) {

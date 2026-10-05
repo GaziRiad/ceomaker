@@ -23,6 +23,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { ScaledFrame } from "@/components/scaled-frame";
+import { trackEvent } from "@/lib/product-analytics/browser";
 import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
 import { finishOnboarding } from "./actions";
 import { clearFlow, hasProgress, loadFlow, saveFlow } from "./storage";
@@ -134,8 +135,13 @@ export function QuestionsFlow({
     setResumed(stored !== null && hasProgress(stored));
     setLoaded(true);
     /* eslint-enable react-hooks/set-state-in-effect */
+    trackEvent("questions_started", {
+      signed_in: signedIn,
+      resumed: stored !== null && hasProgress(stored),
+      role_from_landing: role !== null,
+    });
     return () => clearTimeout(advanceTimer.current);
-  }, [initialRole]);
+  }, [initialRole, signedIn]);
 
   useEffect(() => {
     if (loaded) saveFlow({ answers, step });
@@ -177,6 +183,7 @@ export function QuestionsFlow({
       return;
     }
     const encoded = encodeAnswers(parsed.data);
+    trackEvent("questions_completed", { signed_in: signedIn });
     if (!signedIn) {
       const callbackURL = `/start/finish?a=${encoded}`;
       router.push(`/sign-in?from=start&callbackURL=${encodeURIComponent(callbackURL)}`);

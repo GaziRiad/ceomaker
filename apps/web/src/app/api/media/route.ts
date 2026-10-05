@@ -6,6 +6,7 @@ import { DAY_MS } from "@/lib/ai/client";
 import { imageInfo } from "@/lib/image-info";
 import { mediaStore } from "@/lib/media-store";
 import { isSameOrigin } from "@/lib/same-origin";
+import { trackServerEvent } from "@/lib/product-analytics/server";
 
 /**
  * Image uploads per user per rolling day. Room for a full Salon site in one sitting: portrait,
@@ -89,5 +90,6 @@ export async function POST(request: Request) {
     await store.remove([id]).catch(() => undefined);
     throw error;
   }
+  trackServerEvent(session.user.id, "photo_uploaded");
   return json(201, { id, src: mediaPath(id), width: info.width, height: info.height });
 }

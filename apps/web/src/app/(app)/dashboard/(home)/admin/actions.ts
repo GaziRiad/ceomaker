@@ -4,6 +4,7 @@ import { endProGift, getDb, giveProGift } from "@ceomaker/db";
 import { GIFT_MONTHS, type GiftMonths } from "@ceomaker/schema";
 import { adminSession } from "@/lib/admin";
 import { refreshLiveSites } from "@/lib/billing";
+import { trackServerEvent } from "@/lib/product-analytics/server";
 
 // Gifts of Pro from the admin page. Each action checks again that an admin is signed in. When
 // the plan changes, the owner's live site shows it on its next visit.
@@ -39,7 +40,10 @@ export async function giveProGiftAction(
   const text = typeof note === "string" ? note.trim().slice(0, NOTE_MAX) : "";
   const gift = await giveProGift(getDb(), { userId, months, note: text || null });
   if (!gift?.proUntil) return NO_ACCOUNT;
-  if (gift.planChanged) await refreshLiveSites(userId);
+  if (gift.planChanged) {
+    await refreshLiveSites(userId);
+    trackServerEvent(userId, "plan_changed", { plan: gift.plan, cause: "gift" });
+  }
   return { ok: true, message: `Pro until ${longDate.format(gift.proUntil)}` };
 }
 
@@ -49,7 +53,10 @@ export async function endProGiftAction(userId: string): Promise<Result> {
   if (typeof userId !== "string" || !userId) return NO_ACCOUNT;
   const ended = await endProGift(getDb(), { userId });
   if (!ended) return { ok: false, error: "There's no gift to end." };
-  if (ended.planChanged) await refreshLiveSites(userId);
+  if (ended.planChanged) {
+    await refreshLiveSites(userId);
+    trackServerEvent(userId, "plan_changed", { plan: ended.plan, cause: "gift_ended" });
+  }
   return {
     ok: true,
     message: ended.plan === "pro" ? "Gift ended. Their subscription keeps Pro." : "Gift ended",

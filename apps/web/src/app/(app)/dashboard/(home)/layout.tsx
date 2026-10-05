@@ -5,6 +5,8 @@ import { getSession } from "@/lib/auth";
 import { displayName, initialsFor } from "@/lib/site-data";
 import { DashboardBar, DashboardBarSkeleton } from "./_components/dashboard-bar";
 import { Toasts } from "./_components/toasts";
+import { IdentifyAccount } from "@/components/product-analytics";
+import { isAdmin } from "@/lib/admin";
 
 async function Bar() {
   const session = await getSession();
@@ -13,12 +15,15 @@ async function Bar() {
   const unread = await countUnreadMessages(getDb(), user.id);
   const name = displayName(user);
   return (
-    <DashboardBar
-      name={name}
-      email={user.email}
-      initials={initialsFor(user.name, user.email)}
-      unread={unread}
-    />
+    <>
+      <IdentifyAccount id={user.id} internal={isAdmin(user)} />
+      <DashboardBar
+        name={name}
+        email={user.email}
+        initials={initialsFor(user.name, user.email)}
+        unread={unread}
+      />
+    </>
   );
 }
 

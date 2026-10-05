@@ -6,6 +6,7 @@ import { siteAddressParts } from "@/lib/routing";
 import { initialsFor, loadOwnedSite, toEditableDraft } from "@/lib/site-data";
 import { BuilderHeader } from "../../../builder-header";
 import { TemplatePicker } from "./picker";
+import { IdentifyAccount } from "@/components/product-analytics";
 
 export const metadata: Metadata = { title: "Choose a template", robots: { index: false } };
 
@@ -23,6 +24,7 @@ async function Picker({
   );
   return (
     <>
+      <IdentifyAccount id={user.id} />
       <BuilderHeader
         address={`${address.prefix}${site.subdomain}${address.suffix}`}
         status={
