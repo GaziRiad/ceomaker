@@ -30,6 +30,9 @@ const FONT_FILES = [
   ["Italiana", "Italiana-400.ttf", 400],
   ["Hanken Grotesk", "HankenGrotesk-400.ttf", 400],
   ["Hanken Grotesk", "HankenGrotesk-600.ttf", 600],
+  ["Geist", "Geist-500.ttf", 500],
+  ["Geist", "Geist-600.ttf", 600],
+  ["Geist Mono", "GeistMono-400.ttf", 400],
 ] as const;
 
 let fonts: Promise<{ name: string; data: Buffer; weight: 400 | 500 | 600 | 900 }[]> | null = null;
@@ -52,6 +55,8 @@ const IMAGE_FONTS = {
   body: "Public Sans",
   salonDisplay: "Italiana",
   salonBody: "Hanken Grotesk",
+  folio: "Geist",
+  folioMono: "Geist Mono",
 };
 
 /** What the card shows for a live site (already entitled), without the portrait's bytes. */

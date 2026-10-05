@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/colors.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/typography.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/effects.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/base.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/components.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>body{margin:0;background:var(--color-surface)} a{color:var(--color-accent-700)} a:hover{color:var(--color-accent-600)}</style>
+</helmet>
+<section data-screen-label="Folio board" style="padding:80px;display:flex;flex-direction:column;gap:128px;width:4400px;box-sizing:border-box;font-family:var(--font-body);color:var(--color-text)">
+  <div style="display:flex;flex-direction:column;gap:16px;max-width:1080px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">CEOMaker · Site template · Pro · Round 4</span>
+    <h1 style="margin:0;font-family:'Geist',sans-serif;font-weight:600;font-size:140px;line-height:0.9;letter-spacing:-0.05em">Folio<span style="display:inline-block;width:0.17em;height:0.17em;margin-left:0.04em;border-radius:0.03em;background:#d0501f"></span></h1>
+    <span style="font-size:20px;line-height:1.5;color:var(--color-neutral-800)">Your work as large projects people can swipe through, with a clear story around them. For founders, investors and operators whose career is best shown as projects.</span>
+    <span style="font-size:16px;line-height:1.6;color:var(--color-neutral-700);max-width:980px">A warm paper ground, Geist set large with tight tracking, Geist Mono for kinds, years and counters, soft-cornered cards, and a full-bleed work carousel at the centre. It follows the reference's order and spacing: floating pill header, name beside portrait, about, figures, focus cards, career list, work carousel, a dark closing panel. Apart from Meridian (quiet serif), Monument (condensed type on colour) and Salon (dark gallery, serif collage), Folio is a light, project-first grotesk layout. Every frame below is the live template; all copy belongs to a fictional owner, Maya Lindqvist.</span>
+    <span style="margin-top:8px;padding:14px 18px;max-width:980px;background:var(--color-neutral-100);border:1px solid var(--color-divider);font-size:15px;line-height:1.55">Dashed tiles are image slots. Drop a photo on any of them; double-click a dropped photo to pan and scale it, which stands in for the owner's focal point. Slots share ids across frames (fo-portrait, fo-about, fo-g1–12, fo-w1–12, fo-q1–10), so a photo dropped once fills every frame after a reload. On a live site an empty slot never renders.</span>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:15px"><span style="color:var(--color-neutral-700)">Boards:</span><span class="tag tag-accent">Overview · this page</span><a href="Folio States.dc.html">Section states</a><span>·</span><a href="Folio Small Screens.dc.html">Sections at 390 and 820</a><span>·</span><a href="Folio Variants.dc.html">Longest content, contact form, presets, photo treatment</a><span>·</span><a href="Folio.dc.html">Live template</a></div>
+  <dc-import name="Folio Frames" set="overview" hint-size="2400px,6000px"></dc-import>
+
+  <div id="T" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">T</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Token sheet</h2><span style="font-size:17px;color:var(--color-neutral-700)">Type, spacing, derived colours, image treatments and motion. Widths are the page container's own width (1280 / 820 / 390), never the viewport.</span></div>
+    <div id="T1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:64px 72px;font-family:'Geist',sans-serif;color:#1b1a17">
+      <div style="display:flex;flex-direction:column">
+        <span style="font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#a33e14;margin-bottom:14px">Type · Geist 400/500/600 + Geist Mono 400 · Google Fonts · sizes at 1280 / 820 / 390</span>
+        <sc-for list="{{ type }}" as="t" hint-placeholder-count="14"><div style="display:grid;grid-template-columns:150px minmax(0,1fr) 330px;gap:20px;align-items:baseline;padding:13px 0;border-top:1px solid #e8e3da"><span style="font-size:13px;color:#5d5a55">{{ t.role }}</span><span style="font-family:{{ t.ff }};font-weight:{{ t.fw }};font-size:{{ t.size }};line-height:1.05;letter-spacing:{{ t.ls }};text-transform:{{ t.tt }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.sample }}</span><span style="font-size:13px;line-height:1.5">{{ t.spec }}</span></div></sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <span style="font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#a33e14;margin-bottom:14px">Spacing and shape · 1280 / 820 / 390</span>
+        <sc-for list="{{ space }}" as="sp" hint-placeholder-count="12"><div style="display:grid;grid-template-columns:180px 160px minmax(0,1fr);gap:16px;align-items:center;padding:11px 0;border-top:1px solid #e8e3da;font-size:14px"><span style="color:#5d5a55">{{ sp.role }}</span><span>{{ sp.val }}</span><span style="height:10px;width:{{ sp.w }};border-radius:3px;background:#d0501f"></span></div></sc-for>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column">
+        <span style="font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#a33e14;margin-bottom:14px">Colour roles · the owner sets three; every other shade is mixed with color-mix() and stepped until it passes</span>
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="13"><div style="display:grid;grid-template-columns:200px minmax(0,1fr) 420px;gap:20px;padding:11px 0;border-top:1px solid #e8e3da;font-size:14px;line-height:1.5"><span style="font-weight:600">{{ r.name }}</span><span style="font-family:'Geist Mono',monospace;font-size:13px">{{ r.formula }}</span><span style="color:#5d5a55">{{ r.use }}</span></div></sc-for>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column;gap:16px">
+        <span style="font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#a33e14">Presets · derived values and worst-case contrast</span>
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px">
+          <sc-for list="{{ presets }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:12px;min-width:0;padding:22px;border-radius:16px;background:{{ p.bg }};color:{{ p.ink }};box-shadow:inset 0 0 0 1px {{ p.rule }}">
+              <span style="font-size:38px;font-weight:600;line-height:1;letter-spacing:-0.045em">{{ p.name }}<span style="display:inline-block;width:0.17em;height:0.17em;margin-left:0.05em;border-radius:0.03em;background:{{ p.acg }}"></span></span>
+              <span style="font-family:'Geist Mono',monospace;font-size:12px;color:{{ p.ink2 }}">{{ p.kind }}</span>
+              <span style="display:flex;gap:6px"><span style="width:30px;height:30px;border-radius:6px;background:{{ p.bg }};box-shadow:inset 0 0 0 1px {{ p.rule }}"></span><span style="width:30px;height:30px;border-radius:6px;background:{{ p.ink }}"></span><span style="width:30px;height:30px;border-radius:6px;background:{{ p.ac }}"></span><span style="width:30px;height:30px;border-radius:6px;background:{{ p.tint }}"></span><span style="width:30px;height:30px;border-radius:6px;background:{{ p.sf2 }}"></span></span>
+              <span style="font-family:'Geist Mono',monospace;font-size:12px;line-height:1.7">bg {{ p.bg }}<br>text {{ p.ink }}<br>accent {{ p.ac }}</span>
+              <span style="font-size:13px;line-height:1.7;border-top:1px solid {{ p.rule }};padding-top:10px">Body {{ p.r1 }}<br><span style="color:{{ p.ink2 }}">Secondary {{ p.ink2 }} · {{ p.r2 }}</span><br><span style="color:{{ p.act }}">Accent text {{ p.act }} · {{ p.ra }}</span><br>Accent mark {{ p.acg }} · {{ p.rg }}<br>Field border {{ p.br }} · {{ p.rb }}</span>
+              <span style="margin-top:4px;padding:14px;border-radius:10px;background:{{ p.ink }};color:{{ p.bg }};font-size:13px;line-height:1.6">Closing panel {{ p.ri }}<br><span style="color:{{ p.iink2 }}">Secondary · {{ p.ri2 }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column">
+        <span style="font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#a33e14;margin-bottom:14px">Image slots · ratio, crop and focal point, and what happens when the image is missing</span>
+        <div style="display:grid;grid-template-columns:190px 220px minmax(0,1.2fr) minmax(0,1fr);gap:20px;padding-bottom:10px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#5d5a55"><span>Slot</span><span>Ratio · size</span><span>Crop and focal point</span><span>When missing</span></div>
+        <sc-for list="{{ images }}" as="x" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:190px 220px minmax(0,1.2fr) minmax(0,1fr);gap:20px;padding:12px 0;border-top:1px solid #e8e3da;font-size:14px;line-height:1.5"><span style="font-weight:600">{{ x.slot }}</span><span>{{ x.ratio }}</span><span>{{ x.crop }}</span><span style="color:#45423d">{{ x.empty }}</span></div></sc-for>
+        <div style="margin-top:28px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <span style="font-size:15px;font-weight:600">Mixed shapes into one slide ratio (3:2 at 1280 and 820, 4:5 at 390)</span>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+              <sc-for list="{{ crops }}" as="cr" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="position:relative;height:190px;display:flex;align-items:center;justify-content:center">
+                    <div style="position:relative;width:{{ cr.sw }};height:{{ cr.sh }};background:repeating-linear-gradient(135deg,#efe9df 0 8px,#e6dfd3 8px 16px);box-shadow:inset 0 0 0 1px #cfc6b8">
+                      <div style="position:absolute;left:{{ cr.fl }};top:{{ cr.ft }};width:{{ cr.fw }};height:{{ cr.fh }};box-sizing:border-box;border:2px solid #d0501f;border-radius:6px;background:rgba(208,80,31,.08)"></div>
+                      <div style="position:absolute;left:{{ cr.dx }};top:{{ cr.dy }};width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #d0501f"></div>
+                    </div>
+                  </div>
+                  <span style="font-size:14px;font-weight:600">{{ cr.name }}</span>
+                  <span style="font-size:13px;line-height:1.5;color:#45423d">{{ cr.note }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+            <sc-for list="{{ grades }}" as="gr" hint-placeholder-count="3"><div style="padding:18px;border-radius:14px;border:1px solid #e8e3da;display:flex;flex-direction:column;gap:8px"><span style="font-size:24px;font-weight:600;letter-spacing:-0.03em">{{ gr.name }}</span><span style="font-family:'Geist Mono',monospace;font-size:12px;line-height:1.6">{{ gr.css }}</span><span style="font-size:13px;line-height:1.5;color:#45423d">{{ gr.why }}</span></div></sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="grid-column:1 / -1;display:flex;flex-direction:column">
+        <span style="font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:#a33e14;margin-bottom:14px">Motion · base easing cubic-bezier(.2,.7,.2,1) · scripts only for smooth scroll and the carousel</span>
+        <div style="display:grid;grid-template-columns:190px 240px 230px minmax(0,1fr) 250px;gap:20px;padding-bottom:10px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#5d5a55"><span>Moment</span><span>Trigger</span><span>Duration · easing</span><span>Movement</span><span>Touch · reduced motion · no JS</span></div>
+        <sc-for list="{{ motion }}" as="mo" hint-placeholder-count="10"><div style="display:grid;grid-template-columns:190px 240px 230px minmax(0,1fr) 250px;gap:20px;padding:13px 0;border-top:1px solid #e8e3da;font-size:14px;line-height:1.5"><span style="font-weight:600">{{ mo.name }}</span><span>{{ mo.trigger }}</span><span style="font-family:'Geist Mono',monospace;font-size:12.5px">{{ mo.dur }}</span><span>{{ mo.dist }}</span><span style="color:#45423d">{{ mo.reduced }}</span></div></sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div id="M" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">M</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Content map</h2><span style="font-size:17px;color:var(--color-neutral-700)">Every visible element and the field it shows. Anything not listed is not on the page.</span></div>
+    <div id="M1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;font-family:'Geist',sans-serif;color:#1b1a17">
+      <div style="display:grid;grid-template-columns:150px 300px minmax(0,1fr) 110px minmax(0,1fr);gap:20px;padding-bottom:10px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#5d5a55"><span>Section</span><span>Element</span><span>Field</span><span>Kind</span><span>Notes</span></div>
+      <sc-for list="{{ cmap }}" as="r" hint-placeholder-count="30"><div style="display:grid;grid-template-columns:150px 300px minmax(0,1fr) 110px minmax(0,1fr);gap:20px;padding:10px 0;border-top:1px solid #e8e3da;font-size:14px;line-height:1.5"><span style="font-weight:600">{{ r.sec }}</span><span>{{ r.el }}</span><span style="font-family:'Geist Mono',monospace;font-size:13px">{{ r.field }}</span><span><span style="padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;background:{{ r.kbg }};color:{{ r.kfg }}">{{ r.kind }}</span></span><span style="color:#45423d">{{ r.note }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div id="N" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span class="tag" style="background:#fdf3e2;color:#7a4b0c;font-size:15px">New fields</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Proposed content</h2><span style="font-size:17px;color:var(--color-neutral-700)">How the reference's sections map onto ours, and the one new section Folio needs. Existing sites have none of it and still look finished.</span></div>
+    <div id="N1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:56px;font-family:'Geist',sans-serif;color:#1b1a17">
+      <sc-for list="{{ proposed }}" as="pr" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:40px;font-weight:600;line-height:1;letter-spacing:-0.045em">{{ pr.name }}</span><span style="font-family:'Geist Mono',monospace;font-size:13px;line-height:1.6">{{ pr.fields }}</span><span style="font-size:15px;line-height:1.6">{{ pr.why }}</span><span style="font-size:15px;line-height:1.6;color:#45423d">{{ pr.how }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div id="E" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">E</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Editing notes</h2><span style="font-size:17px;color:var(--color-neutral-700)">What the owner can click, and what they see while editing.</span></div>
+    <div id="E1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:72px;font-family:'Geist',sans-serif;color:#1b1a17">
+      <sc-for list="{{ edits }}" as="e" hint-placeholder-count="12"><div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid #e8e3da;font-size:14px;line-height:1.55"><span style="font-weight:600">{{ e.t }}</span><span style="color:#45423d">{{ e.d }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div id="H" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">H</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Engineering handoff</h2><span style="font-size:17px;color:var(--color-neutral-700)">Notes for the React and Tailwind rebuild. Folio.dc.html is the reference implementation.</span></div>
+    <div id="H1" style="width:1680px;box-sizing:border-box;background:#fff;box-shadow:var(--shadow-lg);padding:56px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:72px;font-family:'Geist',sans-serif;color:#1b1a17">
+      <sc-for list="{{ handoff }}" as="e" hint-placeholder-count="10"><div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid #e8e3da;font-size:14px;line-height:1.55"><span style="font-weight:600">{{ e.t }}</span><span style="color:#45423d">{{ e.d }}</span></div></sc-for>
+    </div>
+  </div>
+
+  <div id="P" style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">P</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase">Template picker</h2><span style="font-size:17px;color:var(--color-neutral-700)">Name and two-line description, as they appear beside Meridian, Monument and Salon.</span></div>
+    <div id="P1" style="display:flex;gap:48px;align-items:flex-start">
+      <div style="position:relative;width:420px;background:var(--color-neutral-100);border:1px solid var(--color-divider);box-shadow:var(--shadow-md)">
+        <div style="height:300px;overflow:hidden;border-bottom:1px solid var(--color-divider);background:#f6f1e9"><div style="width:1280px;zoom:0.328"><sc-if value="{{ pickerOn }}" hint-placeholder-val="{{ false }}"><dc-import name="Folio" device="desktop" sample="typical" only="hero" lite="{{ true }}" defer="{{ 12000 }}" motion="{{ false }}" smooth="{{ false }}" hint-size="1280px,900px"></dc-import></sc-if></div></div>
+        <div style="padding:22px 24px 26px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="font-family:var(--font-heading);font-weight:600;font-size:30px;line-height:1;text-transform:uppercase">Folio</span><span class="tag tag-accent">Pro</span></div>
+          <span style="font-size:16px;line-height:1.5">Your work as large projects people can swipe through.</span>
+          <span style="font-size:16px;line-height:1.5;color:var(--color-neutral-700)">For founders, investors and operators whose career is best told as projects.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TYPE = [
+  ["Name · h1", "Maya Lindqvist", "'Geist'", 600, "56px", "-0.045em", "none", "600 · −0.045em · lh 0.94 · 128 (168 without portrait) / 84 (120) / 64. Steps down at 16, 26, 40 chars (×.82, .66, .54); the longest word always fits; max 2 lines (3 on phones)."],
+  ["Positioning line", "I build supply networks that keep working", "'Geist'", 500, "30px", "-0.025em", "none", "500 · −0.025em · lh 1.16 · 34 (40) / 26 (32) / 24 · ×0.88 over 90 chars"],
+  ["Section title · h2", "Selected work", "'Geist'", 600, "52px", "-0.045em", "none", "600 · −0.045em · lh 0.96 · 96 / 76 / 50 · steps at 12, 24, 44 chars (×.76, .56, .44), fitted, max 3 lines · accent square after the last word"],
+  ["CTA headline", "Building something that has to work?", "'Geist'", 600, "40px", "-0.045em", "none", "600 · 88 / 72 / 44 up to 32 chars, 68 / 56 / 36 up to 64, 52 / 44 / 30 beyond"],
+  ["Figure", "€340M", "'Geist'", 600, "52px", "-0.045em", "none", "600 · tabular · 88 / 72 / 44, fitted to its card (one figure: 168 / 128 / 88)"],
+  ["Typographic slide", "Resilience is a design choice", "'Geist'", 600, "40px", "-0.04em", "none", "600 · −0.04em · lh 1.02 · 60 / 48 / 32 up to 40 chars, 46 / 38 / 27 up to 80, 36 / 30 / 23 beyond"],
+  ["Statement", "I started Northline with three trucks", "'Geist'", 500, "30px", "-0.022em", "none", "About lead · 500 · lh 1.26 · 46 / 36 / 26 alone, 30 / 24 / 22 beside a photo"],
+  ["Slide title · h3", "Turning around Havenkade", "'Geist'", 600, "30px", "-0.03em", "none", "600 · −0.03em · 34 / 30 / 24 (28 / 25 / 21 over 40 chars)"],
+  ["Quote", "“Exact about what matters.”", "'Geist'", 500, "26px", "-0.02em", "none", "Single quote 44 / 34 / 26; cards 21 / 18 / 16 by length · 500"],
+  ["Role", "Interim Chief Operating Officer", "'Geist'", 600, "20px", "-0.015em", "none", "600 · 20 / 20 / 18 · dates 500 · 26 / 22 / 14 tabular"],
+  ["Body", "For twenty years I have built, fixed and funded", "'Geist'", 400, "17px", "0", "none", "400 · 17/1.6 · secondary 15–16/1.55"],
+  ["Label", "Book · 2022", "'Geist Mono'", 400, "13px", "0.04em", "uppercase", "Geist Mono 400 · 13 · uppercase · +0.04em · kinds, years, counters, eyebrow"],
+  ["Button", "Get in touch →", "'Geist'", 500, "15px", "0", "none", "500 · 15 (header 14) · pill · 52 tall (44 in header)"]
+].map(([role, sample, ff, fw, size, ls, tt, spec]) => ({ role, sample, ff, fw, size, ls, tt, spec }));
+const SPACE = [["Page padding", "48 / 36 / 20", 48], ["Content max width", "1184", 200], ["Section padding", "136 / 112 / 80", 136], ["Title to content", "64 / 52 / 36", 64], ["Header bar", "60 / 60 / 56, inset 14 / 14 / 10", 60], ["Card padding", "28 / 24 / 20", 28], ["Card gap", "16 / 16 / 12", 16], ["Slide gap", "24 / 20 / 12", 24], ["Slide width", "64% / 80% / 86% of content", 128], ["Card radius", "18 / 16 / 14", 18], ["Image radius", "16 / 14 / 12", 16], ["Closing panel radius", "28 / 28 / 20", 28]].map(([role, val, w]) => ({ role, val, w: w + "px" }));
+const ROLES = [
+  ["Background", "owner", "Page ground; text on the closing panel and dark buttons"], ["Text", "owner", "Body, headings, dark buttons, closing panel ground"], ["Accent", "owner", "Only through the derived roles below, never as raw text"],
+  ["Secondary text", "mix(text, bg, p) · lowest p reaching 4.5:1 on bg, Surface 2 and Tint", "Intro, paragraphs, captions, roles, labels"], ["Rule", "mix(text 13%, bg)", "Hairlines, header outline, progress track"], ["Field border", "mix(text, bg, p) · 3:1 on bg", "Inputs, outline buttons and pills"],
+  ["Surface", "mix(text 4%, bg)", "Cards: figures, focus, quotes, form"], ["Surface 2", "mix(text 8%, bg)", "Ground behind photos while they load"], ["Tint", "mix(accent 16%, bg)", "Typographic slides; highlight behind bold words in the statement"],
+  ["Accent mark", "mix(accent, text, p) · highest p keeping 3:1 on bg and Surface 2", "Square marks, progress fill, focus ring, link underlines"], ["Accent text", "mix(accent, text, p) · 4.5:1", "Eyebrow, kinds and years, focus numbers, error marks"], ["Wash", "mix(text 7%, bg)", "Hover fill on nav links and outline buttons"],
+  ["Closing panel", "ground text · type bg · secondary mix(bg, text) to 4.5:1 · mark mix(accent, bg) to 3:1", "Call to action panel"]
+].map(([name, formula, use]) => ({ name, formula, use }));
+const IMAGES = [
+  ["Hero portrait", "4:5 · 4 of 12 cols / 5 of 12 / full width", "Cover at the owner's focal point; default 50% 30% so faces stay in frame.", "Name spans the page at a larger size; the closing panel drops its avatar."],
+  ["Gallery photo", "3:2 for 1–3 · 4:3 at 240 / 200 / 160 tall for 4–12", "Cover at focal point. Caption under each photo and as alt text.", "No strip."],
+  ["About image", "4:5 · 5 of 12 cols, full width on phones", "Cover at focal point.", "Statement goes full width and larger, other paragraphs in two columns."],
+  ["Project image", "3:2 at 1280 and 820 · 4:5 at 390", "One ratio per width so slides line up. Cover at focal point. Logos read best uploaded with a margin on a plain ground.", "Typographic slide on Tint: kind, year and title."],
+  ["Testimonial photo", "1:1 circle · 48 in cards, 64 for a single quote", "Cover at focal point.", "Name and role only; no initials or silhouette."],
+  ["Closing avatar", "1:1 circle 56 · reuses the hero portrait", "Same focal point as the portrait.", "Name and eyebrow only."]
+].map(([slot, ratio, crop, empty]) => ({ slot, ratio, crop, empty }));
+const CROPS = [
+  { name: "Portrait book cover · 2:3", sw: "100px", sh: "150px", fl: "0", ft: "33px", fw: "100px", fh: "67px", dx: "50px", dy: "62px", note: "Focal point on the title. Cropped to a 3:2 band across the cover." },
+  { name: "Wide product shot · 2:1", sw: "220px", sh: "110px", fl: "55px", ft: "0", fw: "165px", fh: "110px", dx: "150px", dy: "55px", note: "Focal point on the truck. Sides trimmed, height kept." },
+  { name: "Square logo · 1:1", sw: "140px", sh: "140px", fl: "0", ft: "23px", fw: "140px", fh: "94px", dx: "70px", dy: "70px", note: "Centred. Top and bottom trimmed, so the logo needs breathing room." }
+];
+const GRADES = [["Original", "filter: none", "Default. True colours."], ["Tinted", "grayscale(1) contrast(1.05) + accent layer, mix-blend-mode: color, 38%", "Duotone in the site accent."], ["Mono", "grayscale(1) contrast(1.08)", "Black and white, slightly crisp."]].map(([name, css, why]) => ({ name, css, why }));
+const MOTION = [
+  ["Smooth scroll", "Mouse wheel or trackpad, fine pointer only", "lerp 0.1 per frame · settles ≈ 0.9s", "Like Lenis { lerp: 0.1, smoothWheel: true }. The page eases toward the target scroll position.", "Off on touch and under reduced motion: native scroll."],
+  ["Anchor glide", "Nav, buttons, Back to top", "700ms + 0.15ms per px, max 1.6s · easeOutExpo", "Glides to the section top.", "Reduced motion jumps. No JS: native jump."],
+  ["Carousel step", "Arrows, ←/→, Home/End, click a peeking slide", "700ms · easeOutCubic", "Snap is lifted during the glide and restored on arrival.", "Reduced motion jumps. No JS: native scroll-snap, controls hidden."],
+  ["Carousel drag", "Mouse drag on the track", "1:1 follow, then 700ms glide", "Release past 60px moves one slide in the drag direction, otherwise the nearest slide. A drag never fires a link.", "Touch uses native swipe and snap."],
+  ["Slide focus", "Active slide changes", "600ms · base easing", "Peeking slides sit at 45% opacity; progress bar width follows.", "No JS: every slide at full opacity."],
+  ["Text reveal", "Element enters the viewport", "CSS view timeline · entry 0–40%", "Rise 22px and fade in.", "Wrapped in @supports (animation-timeline: view()); otherwise shown in place."],
+  ["Image reveal", "Image enters the viewport", "CSS view timeline · entry 0–55%", "Scale 1.05 → 1 and fade in.", "As above."],
+  ["Hero entrance", "Page load", "0.8–1.2s · delays 0.05–0.35s", "Eyebrow, name, line, portrait and intro rise in turn.", "fill-mode both runs without JS; removed under reduced motion."],
+  ["Gallery strip", "Always, from 4 photos", "linear · 6s per photo", "Moves left at about 50 px/s; pauses on hover or focus.", "Reduced motion: still, swipeable row without the duplicate."],
+  ["Hover", "Pointer over", "0.3–0.9s · base easing", "Images 103.5%, list rows fill with Surface, button arrows widen, outline buttons get Wash.", "Removed under reduced motion."]
+].map(([name, trigger, dur, dist, reduced]) => ({ name, trigger, dur, dist, reduced }));
+const K = { T: ["Text", "#e8eef5", "#2e4c6b"], I: ["Image", "#fdf0e8", "#8a3a12"], X: ["Derived", "#efefef", "#444"], N: ["New", "#fdf3e2", "#7a4b0c"], L: ["Label", "#eef3ea", "#3c5a2a"] };
+const CMAP = [
+  ["Header", "Name with square mark", "name", "T", "The square is a graphic in the accent mark colour, not text."], ["Header", "Section links", "{section}.heading", "X", "Visible sections in page order, then Contact. Default name when a heading is empty."], ["Header", "Button", "hero.button.label / link", "T", "Falls back to the Contact heading linking to #contact."], ["Header", "Menu / Close", "words.menu, words.close", "L", "Below 1000px, or when the links don't fit."],
+  ["Hero", "Eyebrow", "hero.eyebrow", "T", "Mono, uppercase, accent text."], ["Hero", "Name (h1)", "name", "T", "60 chars. Fitted, never broken mid-word."], ["Hero", "Positioning line", "hero.headline", "T", "120 chars."], ["Hero", "Intro", "hero.subheadline", "T", "280 chars."], ["Hero", "Button", "hero.button", "T", "Optional."], ["Hero", "Portrait", "hero.image + focal point", "I", "Optional."], ["Hero", "Gallery strip", "gallery[].image, gallery[].caption", "I", "Up to 12; caption 120 chars."],
+  ["About", "Heading", "about.heading", "T", ""], ["About", "Statement", "about.body · first paragraph", "T", "Bold renders on a tint highlight; links underline in the accent mark."], ["About", "Paragraphs", "about.body · later paragraphs", "T", ""], ["About", "Photo", "about.image + focal point", "I", "Optional."],
+  ["Achievements", "Heading · figure · label", "achievements.heading, items[].value, items[].label", "T", "Up to 8."],
+  ["Focus", "Heading · title · description", "focus.heading, items[].title, items[].description", "N", "New section, up to 6. Index numbers come from item order."],
+  ["Experience", "Role · organisation · location · summary · dates", "experience.items[]", "T", "Up to 20. “start – end”."], ["Experience", "Show more", "words.more", "L", "Rows 9–20 sit in a native details element when there are more than 10."],
+  ["Work", "Heading", "portfolio.heading", "T", ""], ["Work", "Counter · progress", "item count, active index", "X", ""], ["Work", "Arrows", "words.prev, words.next", "L", "Visible as icons; the words are their accessible names."], ["Work", "Slide image", "portfolio.items[].image + focal point", "I", "Optional per item."], ["Work", "Kind · year · title · meta · description", "portfolio.items[]", "T", "Title required; others optional."], ["Work", "View project ↗", "items[].link · label words.view", "L", "Only when a link exists. Opens in a new tab."], ["Work", "Typographic tile", "items[].title, kind, year", "X", "Repeat of the item's own fields, aria-hidden."],
+  ["Testimonials", "Heading · quote · author · role", "testimonials.heading, items[]", "T", "Up to 10."], ["Testimonials", "Photo", "items[].photo + focal point", "I", "Optional."],
+  ["Call to action", "Avatar · name · eyebrow", "hero.image, name, hero.eyebrow", "X", "Reused from the hero."], ["Call to action", "Body · button · headline", "cta.body, cta.button, cta.headline", "T", "Button optional."],
+  ["Contact", "Heading · blurb · email", "contact.heading, blurb, email", "T", ""], ["Contact", "Links", "contact.links[]", "T", "Label plus an icon for its type."], ["Contact", "Form", "contact.form.enabled, topics[]", "T", "Up to 8 topics."], ["Contact", "Field labels · send · reassurance", "words.*, name", "L", "Reassurance uses the owner's first name."],
+  ["Footer", "Name · links · Back to top", "name, headings, words.top", "X", "No ©, year or city."]
+].map(([sec, el, field, k, note]) => ({ sec, el, field, kind: K[k][0], kbg: K[k][1], kfg: K[k][2], note }));
+const PROPOSED = [
+  { name: "Focus", fields: "focus.heading (80) · items[] up to 6: title (60), description (200, optional)", why: "The reference's services. Nothing in Experience, Achievements or Portfolio says what an executive works on now, so this is the one new section.", how: "Heading on the left and cards on the right at 1280; cards in two columns at 820, one at 390. Hidden until it has an item." },
+  { name: "Interface words", fields: "words.menu, close, view, prev, next, more (“Show {n} more”), top, send, form labels · 30 chars each", why: "Folio has a few interface words. Making them a site setting keeps rule 8 and lets a site in another language read correctly.", how: "Defaults follow the site language. Edited once in Site settings, not on the page." },
+  { name: "Mapped, not added", fields: "Services → Focus · Awards → Portfolio item with kind “Award” or an Achievement · Logo strip → Gallery strip", why: "A logo strip needs logos most executives can't use, so Folio uses the owner's own photos there instead.", how: "Uses fields from this round: name, gallery with captions, testimonial photo, focal point, photo treatment and an optional CTA button." }
+];
+const EDITS = [
+  { t: "Text", d: "Every word on the page is click-to-edit in place, including figures, kinds, years and dates. Display sizes adjust as the owner types; there are no font-size controls." },
+  { t: "Image slots", d: "Click to upload or replace; drag the focal dot to set the focal point; the crop preview updates for 1280, 820 and 390 at once." },
+  { t: "Empty slots", d: "In the editor only, an empty slot shows as a soft dashed tile on Surface 2 with “Add a portrait”, “Add an image” or “Add a photo”. On the live site it doesn't render and the layout closes up." },
+  { t: "Projects without images", d: "The editor shows the typographic slide with a small “Add image” chip on hover. Publishing it as typographic is a normal, finished state." },
+  { t: "Adding items", d: "Each list section ends with a quiet “+ Add” row in the editor: a ghost card, row or slide. New items copy the shape of the last item." },
+  { t: "Reorder and remove", d: "Drag handles and a remove button appear on hover in the section's side panel. In the carousel, reordering happens in the panel, because dragging on the track scrolls it." },
+  { t: "Carousel in the editor", d: "Clicking a slide's text enters edit mode and stops drag-scrolling. Arrows still work. The panel shows the projects as a list." },
+  { t: "Long experience lists", d: "In the editor every role is listed open, so roles 9–20 can be edited without opening “Show more”." },
+  { t: "Sections", d: "Add, hide, rename and reorder from the page outline. Renaming changes the header link. Empty sections are hidden on the live site with a note in the outline." },
+  { t: "Gallery", d: "Up to 12 photos with optional captions in the Gallery panel. 1–3 show as a still row, 4 or more as the moving strip." },
+  { t: "Contact form", d: "One switch turns the form on or off; topics are a short editable list. Messages go to the dashboard inbox." },
+  { t: "Colour and photos", d: "Three colour pickers plus five presets, and one Photo treatment switch: Original, Tinted, Mono. Derived shades are recalculated so contrast always passes; there is no warning to read." },
+  { t: "Motion", d: "Smooth scroll and the moving strip are off inside the editor frame; Preview turns them on." }
+];
+const HANDOFF = [
+  { t: "Breakpoints", d: "Container queries on the page wrapper: phone under 600px, tablet 600–999, desktop 1000 and up (Tailwind @container with @[600px] and @[1000px]). The editor frame and the live site use the same rules." },
+  { t: "Fitted type", d: "Name, section titles, figures, slide tiles and the CTA headline use a fit(text, cap, room, maxLines) helper: measure each word with canvas at the loaded Geist weight, cap by length tier, then shrink until the longest word fits. Shared with Salon." },
+  { t: "No mid-word breaks", d: "overflow-wrap: normal and hyphens: manual on display type; the last word of each heading is wrapped with the accent square in a nowrap span. Emails and URLs alone may wrap anywhere." },
+  { t: "Colour", d: "Per-site CSS variables for the three owner colours. Derived percentages are computed at publish (the derive() function in Folio.dc.html) and written as color-mix() so the editor can preview live." },
+  { t: "Carousel", d: "Server-render the scroll-snap track (scroll-snap-type: x mandatory, scroll-padding-left = page gutter, right padding so the last slide can reach the start). Controls render hidden and appear on hydration; dimming of peeking slides starts only after hydration." },
+  { t: "Carousel a11y", d: "Track: role region, aria-roledescription carousel, tabindex 0, labelled by the section heading. Slides: role group, aria-roledescription slide, “3 / 12”. Links in peeking slides get tabindex -1. Counter is aria-live polite." },
+  { t: "Smooth scroll", d: "Lenis 1.x with { lerp: 0.1, smoothWheel: true, syncTouch: false }, created only when (pointer: fine) and not prefers-reduced-motion. Anchors via lenis.scrollTo(target, { duration, easing: expo }). Or port the 40-line script in the reference." },
+  { t: "Reveals", d: "CSS only: animation-timeline: view() under @supports. No IntersectionObserver, no initial hidden state." },
+  { t: "Experience over 10", d: "Rows 9–20 inside a native details element so it works without JS; the summary hides once open." },
+  { t: "Images", d: "object-fit: cover with object-position from the focal point (default 50% 50%, portraits 50% 30%). Grades are a filter plus an optional accent overlay with mix-blend-mode: color." }
+];
+
+const rgb = h => { const n = parseInt(String(h).replace("#", ""), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = Array.isArray(a) ? a : rgb(a), B = Array.isArray(b) ? b : rgb(b); return A.map((v, i) => Math.round(v * p + B[i] * (1 - p))); };
+const hex = c => "#" + c.map(v => v.toString(16).padStart(2, "0")).join("");
+const PRE = [["Paper", "Light · default", "#f6f1e9", "#1b1a17", "#d0501f"], ["Graphite", "Dark", "#151515", "#eeebe5", "#ff6b3d"], ["Cobalt", "Light", "#eef0f3", "#121721", "#2d55d8"], ["Sage", "Light", "#e6e9de", "#1b2219", "#55782f"], ["Midnight", "Dark", "#0f1626", "#e9edf4", "#8fb0ff"]];
+function tokens([name, kind, bg, ink, ac]) {
+  const sf2 = mix(ink, bg, 0.08), tint = mix(ac, bg, 0.16), sf = mix(ink, bg, 0.04), worst = (c, gs) => Math.min(...gs.map(g => ratio(c, g)));
+  const toward = (a, b, gs, min, from) => { let q = from; while (q < 100 && worst(mix(a, b, q / 100), gs) < min) q += 2; return Math.min(q, 100); };
+  const keep = (a, b, gs, min) => { let q = 100; while (q > 0 && worst(mix(a, b, q / 100), gs) < min) q -= 2; return q; };
+  const ink2 = mix(ink, bg, toward(ink, bg, [bg, sf2, tint], 4.6, 50) / 100), br = mix(ink, bg, toward(ink, bg, [bg, sf], 3.1, 24) / 100);
+  const acg = mix(ac, ink, keep(ac, ink, [bg, sf2], 3.05) / 100), act = mix(ac, ink, keep(ac, ink, [bg, sf], 4.6) / 100), iink2 = mix(bg, ink, toward(bg, ink, [ink], 4.6, 50) / 100);
+  const r = (c, gs) => worst(c, gs).toFixed(1) + ":1";
+  return { name, kind, bg, ink, ac, tint: hex(tint), sf2: hex(sf2), rule: hex(mix(ink, bg, 0.13)), ink2: hex(ink2), br: hex(br), acg: hex(acg), act: hex(act), iink2: hex(iink2),
+    r1: r(rgb(ink), [rgb(bg), sf2, tint]), r2: r(ink2, [rgb(bg), sf2, tint]), ra: r(act, [rgb(bg), sf]), rg: r(acg, [rgb(bg), sf2]), rb: r(br, [rgb(bg)]), ri: r(rgb(bg), [rgb(ink)]), ri2: r(iink2, [rgb(ink)]) };
+}
+
+class Component extends DCLogic {
+  renderVals() {
+    return { type: TYPE, space: SPACE, roles: ROLES, presets: PRE.map(tokens), images: IMAGES, crops: CROPS, grades: GRADES, motion: MOTION, cmap: CMAP, proposed: PROPOSED, edits: EDITS, handoff: HANDOFF, pickerOn: true };
+  }
+}
+</script>
+</body>
+</html>

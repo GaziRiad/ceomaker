@@ -81,6 +81,23 @@ export const achievementsSection = z.object({
   items: z.array(achievementItem).max(8),
 });
 
+/** One area the owner works on now: "Cold-chain networks", "Board work". */
+export const focusItem = z.object({
+  title: requiredText(60),
+  description: longText(200).optional(),
+});
+
+/**
+ * What the owner works on now, as a few short cards. Templates that have it (Folio) show it;
+ * others leave it out.
+ */
+export const focusSection = z.object({
+  ...base,
+  type: z.literal("focus"),
+  heading,
+  items: z.array(focusItem).max(6),
+});
+
 export const portfolioItem = z.object({
   title: requiredText(120),
   /** Short category label: "Keynote", "Essay", "Board". */
@@ -175,6 +192,7 @@ export const sectionSchema = z.discriminatedUnion("type", [
   testimonialsSection,
   contactSection,
   ctaSection,
+  focusSection,
 ]);
 
 export type Section = z.output<typeof sectionSchema>;
@@ -183,6 +201,7 @@ export type SectionType = Section["type"];
 export type SectionOf<T extends SectionType> = Extract<Section, { type: T }>;
 export type ExperienceItem = z.output<typeof experienceItem>;
 export type AchievementItem = z.output<typeof achievementItem>;
+export type FocusItem = z.output<typeof focusItem>;
 export type PortfolioItem = z.output<typeof portfolioItem>;
 export type TestimonialItem = z.output<typeof testimonialItem>;
 export type SocialLink = z.output<typeof socialLink>;
@@ -197,6 +216,7 @@ export const SECTION_TYPES = [
   "testimonials",
   "contact",
   "cta",
+  "focus",
 ] as const satisfies readonly SectionType[];
 
 /** Sections the editor offers, in the default order of a new site. Hero and contact are fixed. */
@@ -204,6 +224,7 @@ export const EDITABLE_SECTION_TYPES = [
   "hero",
   "achievements",
   "about",
+  "focus",
   "experience",
   "portfolio",
   "testimonials",

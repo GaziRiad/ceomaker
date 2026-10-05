@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:128px">
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+    <div id="{{ g.n }}" style="display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid var(--color-divider);padding-bottom:14px"><span style="font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;color:var(--color-accent-700)">{{ g.n }}</span><h2 style="margin:0;font-family:var(--font-heading);font-weight:600;font-size:44px;line-height:1;text-transform:uppercase;white-space:nowrap">{{ g.title }}</h2><span style="font-size:17px;line-height:1.5;color:var(--color-neutral-700);max-width:1100px">{{ g.note }}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:64px;align-items:flex-start;max-width:{{ g.max }}">
+        <sc-for list="{{ g.frames }}" as="f" hint-placeholder-count="3">
+          <div id="{{ f.id }}" style="flex:none;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;gap:12px;max-width:{{ f.owp }}"><span class="tag tag-accent">{{ f.id }}</span><span style="font-family:var(--font-heading);font-weight:600;font-size:22px;text-transform:uppercase;white-space:nowrap">{{ f.label }}</span><span style="font-size:14px;color:var(--color-neutral-700);white-space:nowrap">{{ f.wl }}</span></div>
+            <div style="width:{{ f.owp }};height:{{ f.oh }};overflow:hidden;box-shadow:var(--shadow-lg);background:{{ f.bg }}">
+              <div style="width:{{ f.wp }};zoom:{{ f.z }}">
+                <dc-import name="Folio" device="{{ f.dev }}" sample="{{ f.sample }}" preset="{{ f.preset }}" grade="{{ f.grade }}" patch="{{ f.patch }}" only="{{ f.only }}" works="{{ f.works }}" work-img="{{ f.workImg }}" pf-start="{{ f.pfStart }}" pf-demo="{{ f.pfDemo }}" form-demo="{{ f.formDemo }}" hide="{{ f.hide }}" menu="{{ f.menu }}" portrait="{{ f.portrait }}" gallery="{{ f.gallery }}" defer="{{ f.defer }}" lite="{{ f.lite }}" motion="{{ false }}" smooth="{{ false }}" hint-size="{{ f.hint }}"></dc-import>
+              </div>
+            </div>
+            <sc-if value="{{ f.hasNote }}" hint-placeholder-val="{{ false }}"><span style="max-width:{{ f.owp }};font-size:15px;line-height:1.55;color:var(--color-neutral-800)">{{ f.note }}</span></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;set&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;overview&quot;,&quot;states&quot;,&quot;small&quot;,&quot;variants&quot;],&quot;default&quot;:&quot;overview&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const D = (id, label, dev, extra) => ({ id, label, dev, ...extra });
+const LONG_HERO = { eyebrow: "Chief Executive and Founding Partner · Montgomery-Fitzgerald Infrastructure Group", headline: "I rebuild the ports, rail corridors and cold-storage networks that four hundred million Europeans depend on every day.", sub: "Over twenty-five years I have led infrastructure companies through privatisation, two recessions and a pandemic, and sat on the boards of seven listed businesses across transport, energy and food supply. Today I advise governments and founders.", button: { label: "Arrange an introductory conversation", href: "#fo-contact" }, image: { slot: "fo-portrait", caption: "Alexandra Montgomery-Fitzgerald" } };
+const LONG = { name: "Alexandra Montgomery-Fitzgerald", hero: LONG_HERO };
+const LONG_WORK = { portfolio: { heading: "Selected infrastructure projects, ventures and board positions from twenty-five years", items: [
+  { title: "The Rotterdam–Duisburg–Milan freight corridor: rebuilding cross-border rail capacity for a decade of growth", kind: "Infrastructure", meta: "Programme director for the Northern Corridor Consortium and its eleven member railways", year: "2016–2022", desc: "Coordinated eleven national rail operators, three port authorities and the European Commission to add forty daily freight paths without closing a single line for more than a weekend.", href: "https://example.com/" },
+  { title: "Cold Chain Index", kind: "Research", meta: "Annual report", year: "2025", desc: "", href: "" } ] } };
+const LONG_EXP = { experience: { heading: "Career", items: [
+  { role: "Senior Independent Non-executive Director and Chair of the Audit, Risk and Sustainability Committee", org: "The European Federation of Independent Port, Terminal and Inland Waterway Operators (EFIPTIWO)", loc: "Brussels", start: "2019", end: "Present", summary: "Chairs the committee overseeing audit, climate risk and the federation's €1.2B transition fund." },
+  { role: "Chief Executive", org: "Northline Freight", loc: "Stockholm", start: "2014", end: "Present", summary: "" } ] } };
+const FORM_OFF = { contact: { heading: "Contact", blurb: "For board roles, investment and speaking, write to me directly.", email: "office@mayalindqvist.com", links: [{ type: "linkedin", label: "LinkedIn", href: "#" }, { type: "x", label: "X", href: "#" }, { type: "youtube", label: "YouTube", href: "#" }], form: { enabled: false } } };
+const SECS = [["about", "About"], ["achievements", "Achievements"], ["focus", "Focus · new"], ["experience", "Experience"], ["testimonials", "Testimonials"], ["cta", "Call to action"], ["contact", "Contact"]];
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const SETS = {
+  overview: [
+    { n: "F", title: "Full page", note: "The typical site at all three container widths, then the full site with every field filled. Frames are scaled; the page inside lays out at its true width.", max: "4200px", frames: [
+      D("F1", "Typical", "desktop", { z: 0.5 }), D("F2", "Typical", "tablet", { z: 0.6 }), D("F3", "Typical", "phone", { z: 1 }), D("F4", "Full", "desktop", { sample: "full", z: 0.4 }) ] },
+    { n: "A", title: "Hero", note: "Name as the h1, positioning line beneath, intro and button below a hairline. With a portrait the name takes 8 of 12 columns; without one it spans the page and grows. Gallery photos run as a strip under the hero: a still row for 1–3, a slow moving strip from 4.", max: "4200px", frames: [
+      D("A1", "With portrait", "desktop", { only: "hero", z: 0.5 }), D("A2", "Without portrait", "desktop", { only: "hero", portrait: false, z: 0.5 }), D("A3", "With portrait", "tablet", { only: "hero", z: 0.6 }),
+      D("A4", "With portrait", "phone", { only: "hero", z: 0.9 }), D("A5", "Without portrait", "phone", { only: "hero", portrait: false, z: 0.9 }), D("A6", "Phone menu open", "phone", { menu: true, z: 0.9, clip: 820 }),
+      D("A7", "Gallery · 12 photos", "desktop", { only: "hero", gallery: 12, z: 0.5, note: "Shown paused. Live, the strip moves at about 50 px/s, pauses on hover or focus, and becomes a still, swipeable row under reduced motion." }) ] },
+    { n: "W", title: "Work carousel", note: "The centrepiece. A horizontal scroll-snap track that bleeds off the right edge: one project in focus, the next peeking. Drag with a mouse, swipe on touch, arrow buttons, ←/→/Home/End when the track has focus. Counter and progress bar follow. One project becomes a featured split, not a carousel.", max: "4200px", frames: [
+      D("W1", "1 item · featured", "desktop", { only: "portfolio", works: [0], z: 0.5 }), D("W2", "1 item · no image", "desktop", { only: "portfolio", works: [5], workImg: "none", z: 0.5 }),
+      D("W3", "3 items", "desktop", { only: "portfolio", works: 3, z: 0.5 }), D("W4", "12 items · at 05", "desktop", { only: "portfolio", works: 12, pfStart: 4, z: 0.5 }),
+      D("W5", "No images · typographic slides", "desktop", { only: "portfolio", works: [5, 1, 9, 10], workImg: "none", z: 0.5, note: "Kind and year top, title set large on a 16% tint of the accent. The caption repeats the title as the h3; the tile copy is aria-hidden." }),
+      D("W6", "Mixed shapes", "desktop", { only: "portfolio", works: [2, 0, 3], slots: true, z: 0.5, note: "Live drop targets: a portrait book cover, a wide product shot and a square logo, all cropped into 3:2. Double-click a dropped photo to set its framing. Other frames show the editor placeholder instead of a drop target." }),
+      D("W7", "Hover and focus", "desktop", { only: "portfolio", works: 4, pfDemo: "hover", z: 0.5, note: "Hover: the image eases to 103.5% over 0.9s and the link underline thickens. Focus: 2px accent-mark ring offset 3px, here on the Next button." }),
+      D("W8", "12 items", "phone", { only: "portfolio", works: 12, z: 0.9, note: "Arrows and counter move below the track on phones, 48px targets. Slides switch to 4:5." }) ] }
+  ],
+  states: [
+    { n: "S", title: "Section states", note: "Minimal, typical and full for every section at 1280. A section with no items is not rendered and drops out of the navigation.", max: "3000px", frames: SECS.flatMap(([k, l]) => ["minimal", "typical", "full"].map((s, i) => D("S-" + k + "-" + (i + 1), l + " · " + s, "desktop", { only: k, sample: s, z: 0.42 }))) }
+  ],
+  small: [
+    { n: "R", title: "Sections at 390 and 820", note: "The full state of each section on a phone, plus the tablet and phone cases that differ from desktop.", max: "3400px", frames: [
+      ...SECS.map(([k, l]) => D("R-" + k, l + " · full", "phone", { only: k, sample: "full", z: 0.8 })),
+      D("R-w1", "Work · 1 item", "phone", { only: "portfolio", works: [0], z: 0.8 }), D("R-w12", "Work · 12 items", "tablet", { only: "portfolio", works: 12, z: 0.6 }),
+      D("R-g2", "Gallery · 2 photos", "desktop", { only: "hero", gallery: 2, z: 0.5 }), D("R-g12", "Gallery · 12 photos", "phone", { only: "hero", gallery: 12, z: 0.8 }),
+      D("R-a4", "Hero without portrait", "tablet", { only: "hero", portrait: false, z: 0.6 }), D("R-f5", "Full page", "phone", { sample: "full", z: 0.6 }) ] }
+  ],
+  variants: [
+    { n: "L", title: "Longest content", note: "60-character name with a hyphen, 80-character eyebrow, 120-character positioning line, 120-character project title, 100-character organisation, 80-character section title. Words never break; the hyphen is the only break point inside a name.", max: "4200px", frames: [
+      D("L1", "Longest hero", "desktop", { only: "hero", patch: LONG, z: 0.5 }), D("L2", "Longest hero", "phone", { only: "hero", patch: LONG, z: 0.9 }),
+      D("L3", "Longest project", "desktop", { only: "portfolio", patch: LONG_WORK, z: 0.5 }), D("L4", "Longest project", "phone", { only: "portfolio", patch: LONG_WORK, z: 0.9 }),
+      D("L5", "Longest role", "desktop", { only: "experience", patch: LONG_EXP, z: 0.5 }), D("L6", "Longest role", "phone", { only: "experience", patch: LONG_EXP, z: 0.9 }) ] },
+    { n: "C", title: "Contact form", note: "Form on beside the direct details, form off with a larger email and link pills. Errors say what to do; nothing is sent until the three required fields pass.", max: "4200px", frames: [
+      D("C1", "Form on", "desktop", { only: "contact", z: 0.5 }), D("C2", "Form off", "desktop", { only: "contact", patch: FORM_OFF, z: 0.5 }), D("C3", "Errors", "desktop", { only: "contact", formDemo: "error", z: 0.5 }),
+      D("C4", "Sent", "desktop", { only: "contact", formDemo: "sent", z: 0.5 }), D("C5", "Form off", "phone", { only: "contact", patch: FORM_OFF, z: 0.9 }) ] },
+    { n: "K", title: "Colour presets", note: "Paper is the default, closest to the reference's warm cream and near-black. Three light, two dark. Every other shade is derived from the owner's three colours.", max: "4200px", frames: ["paper", "graphite", "cobalt", "sage", "midnight"].map((k, i) => D("K" + (i + 1), cap(k), "desktop", { preset: k, z: 0.3 })) },
+    { n: "G", title: "Photo treatment", note: "One site-wide setting. Original is the default; Tinted and Mono pull mixed uploads into one set. Drop photos into the slots to compare.", max: "4200px", frames: ["original", "tinted", "mono"].map((k, i) => D("G" + (i + 1), cap(k), "desktop", { grade: k, only: "portfolio", works: [2, 0, 3], slots: true, z: 0.45 })) }
+  ]
+};
+const DEVW = { desktop: 1280, tablet: 820, phone: 390 };
+const BG = { paper: "#f6f1e9", graphite: "#151515", cobalt: "#eef0f3", sage: "#e6e9de", midnight: "#0f1626" };
+
+class Component extends DCLogic {
+  renderVals() {
+    let k = 0;
+    const pick = this.props.pick || (window.__foPick);
+    const groups = (SETS[this.props.set] || SETS.overview).map(g => ({ ...g, frames: g.frames.filter(f => !pick || pick.includes(f.id)) })).filter(g => g.frames.length).map(g => ({ ...g, frames: g.frames.map(f => { const i = k++, w = DEVW[f.dev], z = f.z || 0.5; return { ...f, lite: !f.slots, defer: 300 + i * 500, wp: w + "px", z, owp: Math.round(w * z) + "px", oh: f.clip ? Math.round(f.clip * z) + "px" : "auto", wl: w + " px", bg: BG[f.preset || "paper"], hint: w + "px,900px", hasNote: !!f.note, note: f.note || "", sample: f.sample || "typical", preset: f.preset || "paper", grade: f.grade || "original" }; }) }));
+    return { groups };
+  }
+}
+</script>
+</body>
+</html>

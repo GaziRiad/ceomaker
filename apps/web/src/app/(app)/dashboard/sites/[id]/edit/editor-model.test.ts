@@ -12,6 +12,7 @@ import {
   fingerprint,
   liveFingerprint,
   normalizeForEditing,
+  offersSection,
   prepareForSave,
   respan,
   sectionIdOfField,
@@ -239,6 +240,49 @@ describe("the closing section", () => {
       body: undefined,
       button: undefined,
     });
+  });
+});
+
+describe("focus areas", () => {
+  it("are offered hidden and empty before experience, and only where the template shows them", () => {
+    const content = demo();
+    const types = content.sections.map((section) => section.type);
+    expect(types.indexOf("focus")).toBe(types.indexOf("experience") - 1);
+    expect(sectionOf(content, "focus")).toMatchObject({ id: "focus", visible: false, items: [] });
+    const shows = { cta: false, focusSection: false };
+    expect(offersSection(shows, "focus")).toBe(false);
+    expect(offersSection({ ...shows, focusSection: true }, "focus")).toBe(true);
+    expect(offersSection(shows, "about")).toBe(true);
+  });
+
+  it("drop blank rows and empty descriptions, and edit in place", () => {
+    const base = demo();
+    const content = {
+      ...base,
+      sections: base.sections.map((section) =>
+        section.type === "focus"
+          ? {
+              ...section,
+              visible: true,
+              items: [
+                { title: "", description: "" },
+                { title: "Board work", description: " " },
+                { title: "Turnarounds", description: "Back to profit." },
+              ],
+            }
+          : section,
+      ),
+    };
+    const saved = prepareForSave(content);
+    expect(saved.ok && sectionOf(saved.content, "focus")?.items).toEqual([
+      { title: "Board work", description: undefined },
+      { title: "Turnarounds", description: "Back to profit." },
+    ]);
+    // The second row shown is the third in the draft, past the blank one.
+    const edited = editInPlace(content, "focus.items.1.description", "Back to profit.", "Fixed.");
+    expect(sectionOf(edited!, "focus")?.items[2]?.description).toBe("Fixed.");
+    const titled = editInPlace(content, "focus.heading", "Focus", "What I work on");
+    expect(sectionOf(titled!, "focus")?.heading).toBe("What I work on");
   });
 });
 

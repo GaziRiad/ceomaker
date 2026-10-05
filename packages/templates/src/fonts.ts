@@ -9,6 +9,8 @@ export const FONT_VARIABLES = {
   publicSans: "--font-public-sans",
   italiana: "--font-italiana",
   hankenGrotesk: "--font-hanken-grotesk",
+  geist: "--font-geist",
+  geistMono: "--font-geist-mono",
 } as const;
 
 /** Each template hard-codes its pairing; users pick colours, not fonts. */
@@ -19,6 +21,8 @@ export const FONTS = {
   publicSans: `var(${FONT_VARIABLES.publicSans}), "Public Sans", "Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans Arabic", system-ui, sans-serif`,
   italiana: `var(${FONT_VARIABLES.italiana}), Italiana, "Noto Serif", "Noto Serif SC", "Noto Serif JP", Georgia, serif`,
   hankenGrotesk: `var(${FONT_VARIABLES.hankenGrotesk}), "Hanken Grotesk", "Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans Arabic", system-ui, sans-serif`,
+  geist: `var(${FONT_VARIABLES.geist}), Geist, "Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans Arabic", system-ui, sans-serif`,
+  geistMono: `var(${FONT_VARIABLES.geistMono}), "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace`,
 } as const;
 
 /** Design width every template is drawn at; previews render at this width and scale down. */

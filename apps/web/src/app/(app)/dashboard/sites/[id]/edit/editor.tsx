@@ -43,6 +43,7 @@ import {
   fingerprint,
   liveFingerprint,
   normalizeForEditing,
+  offersSection,
   prepareForSave,
   previewContent,
   sectionIdOfField,
@@ -561,7 +562,7 @@ export function Editor({
             onDevice={chooseDevice}
             address={address}
             selectedLabel={
-              selected?.visible && (selected.type !== "cta" || template.shows.cta)
+              selected?.visible && offersSection(template.shows, selected.type)
                 ? SECTION_LABELS[selected.type]
                 : null
             }

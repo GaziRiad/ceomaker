@@ -366,6 +366,22 @@ describe("photos and the closing section", () => {
     };
     expect(parseSiteContent(content).success).toBe(true);
   });
+
+  it("holds up to six focus areas with short titles and optional descriptions", () => {
+    const withFocus = (items: unknown[]) =>
+      parseSiteContent({
+        ...demoSiteContent,
+        sections: [...demoSiteContent.sections, { id: "focus", type: "focus", items }],
+      }).success;
+    expect(withFocus([])).toBe(true);
+    expect(
+      withFocus([{ title: "Board work" }, { title: "Turnarounds", description: "Fixes" }]),
+    ).toBe(true);
+    expect(withFocus(Array.from({ length: 7 }, () => ({ title: "Board work" })))).toBe(false);
+    expect(withFocus([{ title: "x".repeat(61) }])).toBe(false);
+    expect(withFocus([{ title: "Board work", description: "x".repeat(201) }])).toBe(false);
+    expect(withFocus([{ title: "" }])).toBe(false);
+  });
 });
 
 describe("emphasis markup", () => {
@@ -545,6 +561,7 @@ describe("plans", () => {
     expect(planOf(undefined)).toBe("free");
     expect(isPremiumTemplate("monument")).toBe(true);
     expect(isPremiumTemplate("salon")).toBe(true);
+    expect(isPremiumTemplate("folio")).toBe(true);
     expect(isPremiumTemplate("meridian")).toBe(false);
   });
 

@@ -22,6 +22,7 @@ export function isPro(plan: Plan): boolean {
 export const PREMIUM_TEMPLATES: ReadonlySet<TemplateKey> = new Set<TemplateKey>([
   "monument",
   "salon",
+  "folio",
 ]);
 
 export function isPremiumTemplate(key: TemplateKey): boolean {

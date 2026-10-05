@@ -17,6 +17,7 @@ export { DESIGN_WIDTH, FONT_VARIABLES, FONTS } from "./fonts";
 export { themeToStyle } from "./theme-style";
 export type { SendContactMessage, TemplateDefinition, TemplateProps } from "./types";
 export {
+  folioNameSize,
   meridianNameSize,
   monumentNameSize,
   SHARE_CARD_HEIGHT,

@@ -7,6 +7,7 @@ import {
   richTextToPlain,
   type EditableSectionType,
   type ExperienceItem,
+  type FocusItem,
   type PortfolioItem,
   type Section,
   type SectionOf,
@@ -25,7 +26,7 @@ import {
 } from "react";
 import { Blueprint, Spinner } from "@/components/ui";
 import type { RewriteMode } from "@/lib/ai/draft";
-import { SECTION_LABELS, sectionIdOfField, type FieldErrors } from "./editor-model";
+import { offersSection, SECTION_LABELS, sectionIdOfField, type FieldErrors } from "./editor-model";
 import { RemoveButton, TextAreaField, TextField } from "./fields";
 import { ImageField, PhotosField, PortraitField } from "./portrait-field";
 import { UpgradePrompt } from "@/components/pro";
@@ -74,7 +75,7 @@ export interface ContentPanelProps {
 
 /** Sections the current template shows. The rest stay in the content, untouched. */
 function offered(template: ContentPanelProps["template"]) {
-  return (section: Section) => section.type !== "cta" || template.shows.cta;
+  return (section: Section) => offersSection(template.shows, section.type);
 }
 
 export function ContentPanel(props: ContentPanelProps) {
@@ -286,6 +287,8 @@ function SectionForm(props: ContentPanelProps & { section: Editable }) {
       );
     case "achievements":
       return <ImpactForm section={section} error={error} update={update} />;
+    case "focus":
+      return <FocusForm section={section} error={error} update={update} />;
     case "experience":
       return <ExperienceForm section={section} error={error} update={update} />;
     case "portfolio":
@@ -715,6 +718,62 @@ function ItemList<T>({
           {addLabel}
         </button>
       ) : null}
+    </>
+  );
+}
+
+function FocusForm({ section, error, update }: FormProps<"focus">) {
+  const setItem = (index: number, patch: Partial<FocusItem>) =>
+    update((current) => ({
+      ...current,
+      items: current.items.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    }));
+  return (
+    <>
+      <ItemList
+        items={section.items}
+        invalid={(index) => Boolean(error(`items.${index}.`, true))}
+        max={6}
+        addLabel="+ Add an area"
+        removeLabel="Remove this area"
+        onAdd={() =>
+          update((current) => ({ ...current, items: [...current.items, { title: "" }] }))
+        }
+        onRemove={(index) =>
+          update((current) => ({ ...current, items: current.items.filter((_, i) => i !== index) }))
+        }
+        summary={(item) => (
+          <>
+            <span className="font-medium">{item.title || "New area"}</span>
+            {item.description ? (
+              <span className="line-clamp-1 text-[13px] text-neutral-700">{item.description}</span>
+            ) : null}
+          </>
+        )}
+        editor={(item, index) => (
+          <>
+            <TextField
+              label="Area"
+              value={item.title}
+              placeholder="Board work"
+              maxLength={60}
+              error={error(`items.${index}.title`)}
+              onChange={(title) => setItem(index, { title })}
+            />
+            <TextAreaField
+              label="What you do there (optional)"
+              value={item.description}
+              maxLength={200}
+              error={error(`items.${index}.description`)}
+              onChange={(description) => setItem(index, { description })}
+            />
+          </>
+        )}
+      />
+      <span className="text-[13px] text-neutral-700">
+        Up to 6 areas you work on now. Four reads best.
+      </span>
+      <HiddenNote section={section} count={section.items.length} noun="area" />
     </>
   );
 }
