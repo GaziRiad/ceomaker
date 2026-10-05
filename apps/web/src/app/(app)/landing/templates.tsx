@@ -107,11 +107,11 @@ export function TemplatesSection() {
     >
       <div data-reveal="" className="flex flex-col items-center gap-3.5 text-center">
         <span className={kicker}>Templates</span>
-        <h2 className={sectionTitle}>One profile. Five designs.</h2>
+        <h2 className={sectionTitle}>Your profile, in any design</h2>
         <span className="max-w-[640px] text-neutral-800">
-          Every template shows the same content, so you can switch before you publish. Meridian is
-          free; the others come with Pro. Each opens a sample site for Amelia Hart, a fictional
-          executive.
+          Every template shows the same content, so you can switch before you publish, and new
+          designs are added regularly. Meridian is free; the rest come with Pro. Each opens a sample
+          site for Amelia Hart, a fictional executive.
         </span>
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-6">
@@ -131,7 +131,7 @@ export function TemplatesSection() {
             href="/templates"
             className="mt-2 flex items-center gap-1.5 text-[15px] after:absolute after:inset-0 after:content-['']"
           >
-            Compare the templates <ArrowRight size={16} />
+            See all templates <ArrowRight size={16} />
           </Link>
         </Blueprint>
       </div>

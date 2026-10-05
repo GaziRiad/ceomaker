@@ -10,7 +10,7 @@ import { PlanTag, SampleSiteLink, TEMPLATE_SHOTS } from "../landing/templates";
 export const metadata: Metadata = {
   title: "Templates",
   description:
-    "Five personal website templates for executives, founders and board members. Meridian is free; Monument, Salon, Folio and Tempo come with Pro.",
+    "Personal website templates for executives, founders and board members. Switch until you publish; Meridian is free, the rest come with Pro.",
   alternates: { canonical: "/templates" },
 };
 
@@ -96,15 +96,15 @@ export default function TemplatesPage() {
               className="cm-rise m-0 font-heading text-[clamp(52px,7.5vw,96px)] leading-[0.95] font-semibold text-balance uppercase"
               style={delay(90)}
             >
-              Five designs for one profile
+              A design for every kind of leader
             </h1>
             <p
               className="cm-rise m-0 max-w-[640px] text-xl leading-normal text-pretty text-neutral-800"
               style={delay(200)}
             >
-              Every template shows the same content, and you can switch until you publish. Meridian
-              is free; the others come with Pro. The samples show Amelia Hart, a fictional
-              executive.
+              Every template shows the same content, so you can switch until you publish, and new
+              designs are added regularly. Meridian is free; the rest come with Pro. The samples
+              show Amelia Hart, a fictional executive.
             </p>
             <div className="cm-rise mt-2 flex flex-wrap justify-center gap-3" style={delay(300)}>
               <Link href="/start" className="btn btn-primary gap-2">
