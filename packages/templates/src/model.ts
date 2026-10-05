@@ -167,6 +167,11 @@ export interface SiteModel {
    * that support it show soft placeholder lines where copy will be written.
    */
   draft: boolean;
+  /**
+   * A thumbnail: templates draw only the header and the hero (all a card shows), and the
+   * sections' own content is left out of the model. The menu still lists every section.
+   */
+  top: boolean;
   fields: {
     name: FieldPath;
     role: FieldPath;
@@ -338,7 +343,11 @@ function quoteOf(
 
 export function buildSiteModel(
   content: RenderableSiteContent,
-  { editable = false, draft = false }: { editable?: boolean; draft?: boolean } = {},
+  {
+    editable = false,
+    draft = false,
+    top = false,
+  }: { editable?: boolean; draft?: boolean; top?: boolean } = {},
 ): SiteModel {
   const { sections } = content;
   const meta = content.meta;
@@ -477,7 +486,7 @@ export function buildSiteModel(
     }
   }
 
-  return {
+  const model: SiteModel = {
     name,
     first: words[0] ?? "",
     last: words.slice(1).join(" "),
@@ -491,6 +500,7 @@ export function buildSiteModel(
     keywords: meta?.keywords ?? [],
     editable,
     draft,
+    top,
     fields: {
       name: "meta.name",
       role: "meta.role",
@@ -562,6 +572,21 @@ export function buildSiteModel(
       },
     },
   };
+  // A thumbnail keeps what headers and heroes use (the name, the hero, the menu's sections and
+  // titles, the contact links some headers show), so edits further down don't redraw it.
+  return top
+    ? {
+        ...model,
+        stats: [],
+        about: null,
+        experience: [],
+        work: [],
+        testimonials: [],
+        pullQuote: null,
+        cta: null,
+        focus: null,
+      }
+    : model;
 }
 
 /** A section's title: the owner's, else the template's own label. */

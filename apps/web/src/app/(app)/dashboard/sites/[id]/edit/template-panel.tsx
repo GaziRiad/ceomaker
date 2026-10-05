@@ -1,26 +1,16 @@
 "use client";
 
 import {
-  resolvePhotoGrade,
-  resolveSiteColors,
   type RenderableSiteContent,
   type TemplateKey,
   type TemplateRef,
   type ThemeSettings,
   isPremiumTemplate,
 } from "@ceomaker/schema";
-import {
-  designOnChoosing,
-  getTemplate,
-  newerDesign,
-  templateList,
-  TemplateView,
-} from "@ceomaker/templates";
-import { ScaledFrame } from "@/components/scaled-frame";
+import { designOnChoosing, getTemplate, newerDesign, templateList } from "@ceomaker/templates";
+import { TemplateThumbnail } from "@/components/template-thumbnail";
 import { ExternalLink } from "@/components/icons";
 import { ProTag, UpgradePrompt } from "@/components/pro";
-
-const PREVIEW_DATE = new Date("2026-01-01T00:00:00Z");
 
 export function TemplatePanel({
   siteId,
@@ -101,7 +91,7 @@ export function TemplatePanel({
         choice.
       </p>
       <div role="radiogroup" aria-label="Template" className="flex flex-col gap-3">
-        {choices.map((template) => {
+        {choices.map((template, index) => {
           const selected = template.key === current.key;
           return (
             // Preview beside the radio, not inside it (templates contain buttons and forms).
@@ -112,22 +102,15 @@ export function TemplatePanel({
                 border: `1px solid ${selected ? "var(--color-accent)" : "var(--color-divider)"}`,
               }}
             >
-              <ScaledFrame
+              <TemplateThumbnail
+                templateKey={template.key}
+                templateVersion={template.version}
+                theme={theme}
+                content={content}
+                height={120}
                 initialZoom={0.255}
-                className="w-full border-b border-divider"
-                style={{ height: 120 }}
-              >
-                <TemplateView
-                  templateKey={template.key}
-                  templateVersion={template.version}
-                  colors={resolveSiteColors(theme, template.key, template.version)}
-                  photoGrade={resolvePhotoGrade(theme)}
-                  content={content}
-                  publishedAt={PREVIEW_DATE}
-                  preview
-                  still
-                />
-              </ScaledFrame>
+                eager={index < 3}
+              />
               <div className="flex items-center gap-3 px-3 py-2.5">
                 <button
                   type="button"

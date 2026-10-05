@@ -203,9 +203,50 @@ describe.each(DESIGNS)("%s v%i template", (key, version) => {
     });
     expect(html).toContain("Maximiliana");
   });
+
+  it("draws only the header and the hero for a thumbnail, keeping the full menu", () => {
+    const html = renderToStaticMarkup(
+      <TemplateView
+        templateKey={key}
+        templateVersion={version}
+        colors={defaultColors(key, version)}
+        content={parseSiteContentForRender(demoSiteContent)}
+        publishedAt={publishedAt}
+        top
+      />,
+    );
+    expect(html).toContain("Building supply chains that hold up under pressure.");
+    expect(html).toContain('<nav aria-label="Sections"');
+    expect(html).toContain('href="#experience"');
+    expect(html).not.toContain("Chief Operating Officer");
+    expect(html).not.toContain('id="experience"');
+    expect(html).not.toContain('id="contact"');
+    expect(html).not.toContain("<footer");
+  });
 });
 
 describe("site model", () => {
+  it("leaves the sections' content out of a thumbnail's model, but not their place", () => {
+    const content = parseSiteContentForRender(demoSiteContent);
+    const full = buildSiteModel(content);
+    const top = buildSiteModel(content, { top: true });
+    expect(top.order).toEqual(full.order);
+    expect(top.headings).toEqual(full.headings);
+    expect(top.contact).toEqual(full.contact);
+    expect(top).toMatchObject({ stats: [], about: null, experience: [], work: [], cta: null });
+    // An edit below the hero leaves a thumbnail's model, and so its picture, the same.
+    const edited = parseSiteContentForRender(
+      withSections(
+        demoSections.map((section) =>
+          section.type === "experience"
+            ? { ...section, items: section.items.map((item) => ({ ...item, summary: "Edited." })) }
+            : section,
+        ),
+      ),
+    );
+    expect(JSON.stringify(buildSiteModel(edited, { top: true }))).toBe(JSON.stringify(top));
+  });
+
   it("follows the order the user arranged and skips hidden sections", () => {
     const byId = (id: string) => demoSections.find((section) => section.id === id)!;
     const model = buildSiteModel(

@@ -38,6 +38,8 @@ decisions, and "Current state" at the end: what's done, parked and next).
   and frozen (`packages/templates/src/<key>/v<N>/`); only bug, accessibility and security fixes
   go into a shipped design. The design snapshots in `packages/templates/src/__snapshots__/` must
   stay identical for untouched content; a redesign is a new version.
+  Until real users publish, the current templates can still change in place at version 1
+  (owner, October 2026); update the snapshots and say why in the commit.
 - New content fields are optional and additive, so older published versions keep rendering.
 - Truthful drafts: AI never invents numbers, roles, work or quotes.
 

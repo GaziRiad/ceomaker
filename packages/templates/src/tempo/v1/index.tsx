@@ -983,37 +983,41 @@ export function TempoTemplate({ model, colors, photoGrade, sendMessage }: Templa
       }
     >
       <SkipLink />
-      <TempoMotion />
+      {model.top ? null : <TempoMotion />}
       <Header model={model} />
       <main id="main">
         <Hero model={model} />
-        <Gallery model={model} />
-        {model.sequence.map((kind) => (
-          <Fragment key={kind}>{renderers[kind]()}</Fragment>
-        ))}
-        <Contact model={model} number={at("contact")} sendMessage={sendMessage} />
+        {model.top ? null : <Gallery model={model} />}
+        {model.top
+          ? null
+          : model.sequence.map((kind) => <Fragment key={kind}>{renderers[kind]()}</Fragment>)}
+        {model.top ? null : (
+          <Contact model={model} number={at("contact")} sendMessage={sendMessage} />
+        )}
       </main>
-      <footer className="tp-footer">
-        <div className="tp-in">
-          <div
-            aria-hidden="true"
-            data-sp=""
-            className="tp-big"
-            style={sizeVars("tp-fs", bigNameSizes(model.name))}
-          >
-            <Rising text={model.name} />
+      {model.top ? null : (
+        <footer className="tp-footer">
+          <div className="tp-in">
+            <div
+              aria-hidden="true"
+              data-sp=""
+              className="tp-big"
+              style={sizeVars("tp-fs", bigNameSizes(model.name))}
+            >
+              <Rising text={model.name} />
+            </div>
+            <div className="tp-foot">
+              <span {...editable(model, model.fields.name)}>{model.name}</span>
+              <a href={`#${ANCHORS.top}`} className="tp-top">
+                <Roll copy={top.text}>
+                  <Words model={model} text={top} />
+                </Roll>
+                <span aria-hidden="true">↑</span>
+              </a>
+            </div>
           </div>
-          <div className="tp-foot">
-            <span {...editable(model, model.fields.name)}>{model.name}</span>
-            <a href={`#${ANCHORS.top}`} className="tp-top">
-              <Roll copy={top.text}>
-                <Words model={model} text={top} />
-              </Roll>
-              <span aria-hidden="true">↑</span>
-            </a>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

@@ -780,38 +780,42 @@ export function SalonTemplate({ model, colors, photoGrade, sendMessage }: Templa
       <main id="main">
         <Hero model={model} />
         {after === 0 ? cta : null}
-        {model.order.map((kind, index) => (
-          <Fragment key={kind}>
-            {renderers[kind]()}
-            {after === index + 1 ? cta : null}
-          </Fragment>
-        ))}
-        <Contact model={model} sendMessage={sendMessage} />
-      </main>
-      <footer className="sl-footer">
-        <div className="sl-footer-in">
-          <a href={`#${ANCHORS.top}`} className="sl-footer-name">
-            <Words model={model} text={{ text: model.name, field: model.fields.name }} />
-          </a>
-          <nav aria-label="Footer" className="sl-footer-nav">
-            {navOf(model).map((item) => (
-              <a key={item.href} href={item.href} className="sl-footer-link">
-                <Words model={model} text={item.text} />
-              </a>
+        {model.top
+          ? null
+          : model.order.map((kind, index) => (
+              <Fragment key={kind}>
+                {renderers[kind]()}
+                {after === index + 1 ? cta : null}
+              </Fragment>
             ))}
-          </nav>
-          <a href={`#${ANCHORS.top}`} className="sl-top">
-            {model.editable ? (
-              <>
-                <Words model={model} text={top} />
-                <span aria-hidden="true"> ↑</span>
-              </>
-            ) : (
-              `${top.text} ↑`
-            )}
-          </a>
-        </div>
-      </footer>
+        {model.top ? null : <Contact model={model} sendMessage={sendMessage} />}
+      </main>
+      {model.top ? null : (
+        <footer className="sl-footer">
+          <div className="sl-footer-in">
+            <a href={`#${ANCHORS.top}`} className="sl-footer-name">
+              <Words model={model} text={{ text: model.name, field: model.fields.name }} />
+            </a>
+            <nav aria-label="Footer" className="sl-footer-nav">
+              {navOf(model).map((item) => (
+                <a key={item.href} href={item.href} className="sl-footer-link">
+                  <Words model={model} text={item.text} />
+                </a>
+              ))}
+            </nav>
+            <a href={`#${ANCHORS.top}`} className="sl-top">
+              {model.editable ? (
+                <>
+                  <Words model={model} text={top} />
+                  <span aria-hidden="true"> ↑</span>
+                </>
+              ) : (
+                `${top.text} ↑`
+              )}
+            </a>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
