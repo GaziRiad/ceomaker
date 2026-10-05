@@ -82,8 +82,8 @@ export function TemplatePanel({
       ) : null}
       {!pro && isPremiumTemplate(current.key) ? (
         <UpgradePrompt title={`${name} is a Pro template`}>
-          Try it here as much as you like. Upgrade to publish it, or switch back to Meridian, which
-          is included in the free plan.
+          Try it here as much as you like. Upgrade to publish it, or switch to Meridian or Harbour,
+          which are included in the free plan.
         </UpgradePrompt>
       ) : null}
       <p className="m-0 text-[13px] text-neutral-700">

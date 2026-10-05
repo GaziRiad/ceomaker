@@ -18,6 +18,7 @@ export { themeToStyle } from "./theme-style";
 export type { SendContactMessage, TemplateDefinition, TemplateProps } from "./types";
 export {
   folioNameSize,
+  harbourNameSize,
   meridianNameSize,
   monumentNameSize,
   SHARE_CARD_HEIGHT,

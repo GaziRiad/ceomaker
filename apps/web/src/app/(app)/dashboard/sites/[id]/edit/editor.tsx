@@ -331,7 +331,7 @@ export function Editor({
       (pro && template.contactForm && contact.form?.enabled !== false));
   const blocker =
     !pro && isPremiumTemplate(draft.templateKey)
-      ? `${template.name} is a Pro template. Switch to Meridian under Template to publish on the free plan.`
+      ? `${template.name} is a Pro template. Switch to Meridian or Harbour under Template to publish on the free plan.`
       : !isPublishableColors(colors)
         ? `Text contrast is ${contrastRatio(colors.ink, colors.bg).toFixed(1)}:1. Publishing needs at least ${MIN_TEXT_CONTRAST}:1: adjust your colours in Brand.`
         : errors.size

@@ -4,6 +4,7 @@
  * stylesheet serves every tenant. Import this after `@import "tailwindcss"`.
  */
 @import "./meridian/v1/meridian.css";
+@import "./harbour/v1/harbour.css";
 @import "./monument/v1/monument.css";
 @import "./salon/v1/salon.css";
 @import "./folio/v1/folio.css";

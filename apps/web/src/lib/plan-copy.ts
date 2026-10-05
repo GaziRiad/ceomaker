@@ -8,7 +8,7 @@ export const PRO_PRICES = {
 } as const;
 
 export const FREE_FEATURES = [
-  "The Meridian template",
+  "The Meridian and Harbour templates",
   "yourname.ceomaker.app address",
   `An AI first draft, and ${FREE_AI_LIMITS.rewritesPerDay} AI rewrites a day`,
   "Visitors reach you by email and your links",

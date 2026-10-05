@@ -9,6 +9,7 @@ import { sampleSitePath } from "@/lib/template-samples";
 import { kicker, pad, sectionTitle } from "./chrome";
 import { CARD_GRID, cardColumns, cardDelay } from "./columns";
 import folio from "./shots/folio-desktop.png";
+import harbour from "./shots/harbour-desktop.png";
 import meridian from "./shots/meridian-desktop.png";
 import monument from "./shots/monument-desktop.png";
 import salon from "./shots/salon-desktop.png";
@@ -22,7 +23,14 @@ import tempo from "./shots/tempo-desktop.png";
  * scripts/template-shots.mjs; take them again when the sample content or a template's newest
  * design changes.
  */
-const SHOTS: Record<TemplateKey, StaticImageData> = { meridian, monument, salon, folio, tempo };
+const SHOTS: Record<TemplateKey, StaticImageData> = {
+  meridian,
+  harbour,
+  monument,
+  salon,
+  folio,
+  tempo,
+};
 
 /** One template: its picture, plan and line, opening its sample site in a new tab. */
 export function TemplateCard({ template }: { template: TemplateDefinition }) {

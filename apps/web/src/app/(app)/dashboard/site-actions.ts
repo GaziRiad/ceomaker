@@ -175,7 +175,7 @@ export async function publishAction(
   if (isPremiumTemplate(draft.templateKey) && !isPro(await planFor(userId))) {
     return {
       ok: false,
-      error: `${getTemplate(draft.templateKey, draft.templateVersion).name} is a Pro template. Switch to Meridian under Template to publish on the free plan.`,
+      error: `${getTemplate(draft.templateKey, draft.templateVersion).name} is a Pro template. Switch to Meridian or Harbour under Template to publish on the free plan.`,
     };
   }
   try {

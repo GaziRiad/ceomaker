@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..700;1,300..500&display=swap">
+<script src="./image-slot.js"></script>
+<style>body{margin:0}
+@keyframes hb-rise{from{opacity:0;transform:translateY(24px)}}
+[data-hb] a:focus-visible,[data-hb] button:focus-visible,[data-hb] input:focus-visible,[data-hb] textarea:focus-visible{outline:2px solid var(--acg);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){
+[data-hb][data-motion="1"] [data-in]{animation:hb-rise .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+@supports (animation-timeline:view()){[data-hb][data-motion="1"] [data-rise]{animation:hb-rise linear both;animation-timeline:view();animation-range:entry 0% entry 30%}}
+}</style>
+</helmet>
+<div data-hb="" data-motion="{{ motion }}" ref="{{ rootRef }}" style="{{ rootStyle }}">
+  <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+  <header style="position:sticky; top:0; z-index:6; background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule)">
+    <div style="max-width:var(--max); margin:0 auto; padding:12px var(--pad); min-height:var(--hh); box-sizing:border-box; display:flex; align-items:center; gap:24px">
+      <a href="#hb-top" style="margin-right:auto; min-width:0; font-size:18px; line-height:1.2; font-weight:600; letter-spacing:-.005em; color:var(--ink); text-decoration:none; text-wrap:balance">{{ name }}</a>
+      <sc-if value="{{ navInline }}" hint-placeholder-val="{{ true }}">
+        <nav aria-label="Sections" style="display:flex; align-items:center; gap:26px">
+          <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6"><a href="{{ n.href }}" style="padding:10px 0; font-size:15px; color:var(--ink2); text-decoration:none; white-space:nowrap" style-hover="color:var(--ink)">{{ n.label }}</a></sc-for>
+        </nav>
+      </sc-if>
+      <sc-if value="{{ navMenu }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ openMenu }}" aria-expanded="{{ menuOpen }}" aria-controls="hb-menu" style="flex:none; min-height:44px; padding:0 20px; border-radius:999px; border:1px solid var(--br); background:transparent; color:var(--ink); font:inherit; font-size:15px; font-weight:500; cursor:pointer">{{ words.menu }}</button>
+      </sc-if>
+    </div>
+  </header>
+  </sc-if>
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div id="hb-menu" role="dialog" aria-modal="true" aria-label="{{ words.menu }}" style="position:absolute; inset:0 0 auto 0; min-height:720px; z-index:10; background:var(--bg); display:flex; flex-direction:column; padding:12px var(--pad) 40px; box-sizing:border-box">
+      <div style="min-height:var(--hh); display:flex; align-items:center; justify-content:space-between; gap:16px">
+        <span style="font-size:18px; font-weight:600; line-height:1.2">{{ name }}</span>
+        <button type="button" onClick="{{ closeMenu }}" style="flex:none; min-height:44px; padding:0 20px; border-radius:999px; border:1px solid var(--br); background:transparent; color:var(--ink); font:inherit; font-size:15px; font-weight:500; cursor:pointer">{{ words.close }}</button>
+      </div>
+      <nav aria-label="Sections" style="margin-top:32px; display:flex; flex-direction:column">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6"><a href="{{ n.href }}" onClick="{{ closeMenu }}" style="min-height:60px; display:flex; align-items:center; border-bottom:1px solid var(--rule); font-size:30px; font-weight:300; letter-spacing:-.01em; color:var(--ink); text-decoration:none">{{ n.label }}</a></sc-for>
+      </nav>
+    </div>
+  </sc-if>
+  <main>
+    <sc-if value="{{ showHero }}" hint-placeholder-val="{{ true }}">
+    <section id="hb-top" aria-labelledby="hb-name" style="padding:var(--heroTop) var(--pad) {{ heroBottom }}">
+      <div data-in="" style="max-width:900px; margin:0 auto; display:flex; flex-direction:column; align-items:center; text-align:center; gap:18px">
+        <p style="margin:0; max-width:640px; font-size:var(--greet); line-height:1.35; font-weight:500; color:var(--act); text-wrap:balance">{{ hero.greet }}</p>
+        <h1 id="hb-name" style="margin:0; font-size:{{ h1 }}; line-height:1.02; font-weight:300; letter-spacing:-.025em; text-wrap:balance; overflow-wrap:normal; word-break:normal; hyphens:manual">{{ name }}</h1>
+        <p style="margin:6px 0 0; max-width:780px; font-size:var(--lede); line-height:1.3; font-weight:400; letter-spacing:-.01em; text-wrap:balance">{{ hero.headline }}</p>
+        <sc-if value="{{ hero.hasSub }}" hint-placeholder-val="{{ true }}">
+          <p style="margin:0; max-width:620px; font-size:var(--body); line-height:1.6; color:var(--ink2); text-wrap:pretty">{{ hero.sub }}</p>
+        </sc-if>
+        <sc-if value="{{ hero.hasBtn }}" hint-placeholder-val="{{ true }}">
+          <a href="{{ hero.btnHref }}" style="margin-top:10px; min-height:48px; display:inline-flex; align-items:center; gap:10px; padding:0 26px; border-radius:999px; background:var(--ink); color:var(--bg); font-size:16px; font-weight:500; text-decoration:none; transition:background .3s" style-hover="background:var(--act)">{{ hero.btnLabel }}<span aria-hidden="true">→</span></a>
+        </sc-if>
+      </div>
+      <sc-if value="{{ hero.hasImg }}" hint-placeholder-val="{{ true }}">
+        <div data-in="" style="--d:160ms; position:relative; margin:var(--stageTop) calc(-1 * var(--pad)) 0; display:flex; justify-content:center">
+          <div aria-hidden="true" style="position:absolute; left:0; right:0; bottom:0; height:44%; background:var(--sf2)"></div>
+          <figure style="position:relative; margin:0; width:var(--pw); aspect-ratio:4/5; border-radius:999px 999px 0 0; overflow:hidden; background:var(--sf2)">
+            <div style="position:absolute; inset:0; filter:{{ grade.f }}"><image-slot id="{{ hero.img.slot }}" placeholder="{{ hero.img.ph }}" style="display:block; width:100%; height:100%"></image-slot></div>
+            <div aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; background:var(--ac); mix-blend-mode:multiply; opacity:{{ grade.o }}"></div>
+          </figure>
+        </div>
+      </sc-if>
+    </section>
+    </sc-if>
+    <sc-for list="{{ sections }}" as="s" hint-placeholder-count="0">
+      <sc-if value="{{ s.is_about }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:var(--secY) var(--pad)">
+          <div style="max-width:var(--max); margin:0 auto; display:grid; grid-template-columns:{{ s.grid }}; gap:48px 72px; align-items:center">
+            <sc-if value="{{ s.hasImg }}" hint-placeholder-val="{{ false }}">
+              <figure data-rise="" style="position:relative; margin:0; aspect-ratio:4/5; border-radius:24px; overflow:hidden; background:var(--sf2)">
+                <div style="position:absolute; inset:0; filter:{{ grade.f }}"><image-slot id="{{ s.img.slot }}" placeholder="{{ s.img.ph }}" style="display:block; width:100%; height:100%"></image-slot></div>
+                <div aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; background:var(--ac); mix-blend-mode:multiply; opacity:{{ grade.o }}"></div>
+              </figure>
+            </sc-if>
+            <div data-rise="" style="max-width:680px; width:100%; justify-self:center; display:flex; flex-direction:column; gap:20px">
+              <sc-if value="{{ s.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 id="{{ s.hid }}" style="margin:0 0 8px; font-size:var(--h2); line-height:1.1; font-weight:300; letter-spacing:-.02em; text-wrap:balance">{{ s.title }}</h2></sc-if>
+              <sc-for list="{{ s.paras }}" as="pa" hint-placeholder-count="3">
+                <p style="margin:0; font-size:var(--body); line-height:1.7; text-wrap:pretty"><sc-for list="{{ pa.segs }}" as="g" hint-placeholder-count="1"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if><sc-if value="{{ g.b }}" hint-placeholder-val="{{ false }}"><strong style="font-weight:600">{{ g.t }}</strong></sc-if><sc-if value="{{ g.i }}" hint-placeholder-val="{{ false }}"><em>{{ g.t }}</em></sc-if><sc-if value="{{ g.a }}" hint-placeholder-val="{{ false }}"><a href="{{ g.href }}" style="color:var(--ink); text-decoration:underline; text-decoration-color:var(--ac); text-decoration-thickness:2px; text-underline-offset:4px">{{ g.t }}</a></sc-if></sc-for></p>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_focus }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:var(--secY) var(--pad)">
+          <div style="max-width:var(--max); margin:0 auto">
+            <sc-if value="{{ s.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 id="{{ s.hid }}" data-rise="" style="margin:0 0 var(--hgap); text-align:center; font-size:var(--h2); line-height:1.1; font-weight:300; letter-spacing:-.02em; text-wrap:balance">{{ s.title }}</h2></sc-if>
+            <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:{{ s.grid }}; gap:20px">
+              <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="4">
+                <li data-rise="" style="display:flex; flex-direction:column; gap:12px; padding:32px; border-radius:24px; background:var(--bg); border:1px solid var(--rule)">
+                  <span aria-hidden="true" style="width:10px; height:10px; border-radius:50%; background:var(--ac)"></span>
+                  <h3 style="margin:8px 0 0; font-size:22px; line-height:1.25; font-weight:500; letter-spacing:-.01em; text-wrap:balance">{{ it.title }}</h3>
+                  <sc-if value="{{ it.hasDesc }}" hint-placeholder-val="{{ true }}"><p style="margin:0; font-size:16px; line-height:1.6; color:var(--ink2); text-wrap:pretty">{{ it.desc }}</p></sc-if>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_experience }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:var(--secY) var(--pad)">
+          <div style="max-width:880px; margin:0 auto">
+            <sc-if value="{{ s.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 id="{{ s.hid }}" data-rise="" style="margin:0 0 var(--hgap); text-align:center; font-size:var(--h2); line-height:1.1; font-weight:300; letter-spacing:-.02em; text-wrap:balance">{{ s.title }}</h2></sc-if>
+            <ol style="list-style:none; margin:0; padding:0; border-top:1px solid var(--rule)">
+              <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="4">
+                <li data-rise="" style="display:grid; grid-template-columns:{{ s.grid }}; gap:6px 32px; padding:28px 0; border-bottom:1px solid var(--rule)">
+                  <span style="font-size:15px; line-height:1.5; color:var(--ink2); padding-top:3px; font-variant-numeric:tabular-nums">{{ it.dates }}</span>
+                  <div style="display:flex; flex-direction:column; gap:4px; min-width:0">
+                    <h3 style="margin:0; font-size:21px; line-height:1.3; font-weight:500; letter-spacing:-.01em; text-wrap:balance">{{ it.role }}</h3>
+                    <span style="font-size:16px; color:var(--act); font-weight:500">{{ it.org }}</span>
+                    <sc-if value="{{ it.hasSum }}" hint-placeholder-val="{{ true }}"><p style="margin:8px 0 0; font-size:16px; line-height:1.6; color:var(--ink2); max-width:620px; text-wrap:pretty">{{ it.summary }}</p></sc-if>
+                  </div>
+                </li>
+              </sc-for>
+            </ol>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_achievements }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:{{ s.padT }} var(--pad) var(--secY)">
+          <div style="max-width:var(--max); margin:0 auto">
+            <sc-if value="{{ s.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 id="{{ s.hid }}" data-rise="" style="margin:0 0 40px; text-align:center; font-size:15px; line-height:1.4; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--act)">{{ s.title }}</h2></sc-if>
+            <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:{{ s.grid }}; gap:40px 24px; text-align:center">
+              <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="4">
+                <li data-rise="" style="display:flex; flex-direction:column; align-items:center; gap:10px">
+                  <span style="font-size:{{ s.vsize }}; line-height:1; font-weight:300; letter-spacing:-.03em; color:var(--acg); white-space:nowrap">{{ it.value }}</span>
+                  <span style="max-width:220px; font-size:15px; line-height:1.5; color:var(--ink2); text-wrap:balance">{{ it.label }}</span>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_portfolio }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:var(--secY) var(--pad)">
+          <div style="max-width:var(--max); margin:0 auto">
+            <sc-if value="{{ s.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 id="{{ s.hid }}" data-rise="" style="margin:0 0 var(--hgap); text-align:center; font-size:var(--h2); line-height:1.1; font-weight:300; letter-spacing:-.02em; text-wrap:balance">{{ s.title }}</h2></sc-if>
+            <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:{{ s.grid }}; gap:20px">
+              <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="3">
+                <li data-rise="" style="position:relative; display:flex; flex-direction:column; border-radius:24px; overflow:hidden; background:var(--sf); border:1px solid var(--rule)">
+                  <sc-if value="{{ it.hasImg }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:relative; aspect-ratio:3/2; background:var(--sf2)"><div style="position:absolute; inset:0; filter:{{ grade.f }}"><image-slot id="{{ it.img.slot }}" placeholder="{{ it.img.ph }}" style="display:block; width:100%; height:100%"></image-slot></div><div aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; background:var(--ac); mix-blend-mode:multiply; opacity:{{ grade.o }}"></div></div>
+                  </sc-if>
+                  <div style="flex:1; display:flex; flex-direction:column; gap:10px; padding:28px 28px 24px">
+                    <sc-if value="{{ it.hasLine }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px; font-weight:500; color:var(--act)">{{ it.line }}</span></sc-if>
+                    <h3 style="margin:0; font-size:23px; line-height:1.25; font-weight:500; letter-spacing:-.01em; text-wrap:balance">{{ it.title }}</h3>
+                    <sc-if value="{{ it.hasMeta }}" hint-placeholder-val="{{ true }}"><span style="font-size:15px; color:var(--ink2)">{{ it.meta }}</span></sc-if>
+                    <sc-if value="{{ it.hasDesc }}" hint-placeholder-val="{{ true }}"><p style="margin:4px 0 0; font-size:16px; line-height:1.6; color:var(--ink2); text-wrap:pretty">{{ it.desc }}</p></sc-if>
+                    <sc-if value="{{ it.hasLink }}" hint-placeholder-val="{{ true }}"><a href="{{ it.href }}" style="margin-top:auto; padding-top:12px; min-height:44px; display:inline-flex; align-items:center; gap:8px; align-self:flex-start; font-size:15px; font-weight:500; color:var(--ink); text-decoration:none" style-after="content:''; position:absolute; inset:0" style-hover="color:var(--act)">{{ words.more }}<span class="sr" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap">: {{ it.title }}</span><span aria-hidden="true">→</span></a></sc-if>
+                  </div>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_testimonials }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:var(--secY) var(--pad)">
+          <div style="max-width:820px; margin:0 auto">
+            <sc-if value="{{ s.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 id="{{ s.hid }}" data-rise="" style="margin:0 0 var(--hgap); text-align:center; font-size:var(--h2); line-height:1.1; font-weight:300; letter-spacing:-.02em; text-wrap:balance">{{ s.title }}</h2></sc-if>
+            <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:var(--hgap)">
+              <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="3">
+                <li data-rise="">
+                  <figure style="margin:0; display:flex; flex-direction:column; align-items:center; gap:22px; text-align:center">
+                    <span aria-hidden="true" style="font-size:56px; line-height:.6; height:26px; font-weight:400; color:var(--acg)">“</span>
+                    <blockquote style="margin:0; font-size:var(--quote); line-height:1.45; font-weight:400; letter-spacing:-.01em; text-wrap:pretty">{{ it.quote }}</blockquote>
+                    <figcaption style="display:flex; align-items:center; gap:14px; text-align:left">
+                      <sc-if value="{{ it.hasPh }}" hint-placeholder-val="{{ false }}"><span style="position:relative; flex:none; width:48px; height:48px; border-radius:50%; overflow:hidden; background:var(--sf2)"><span style="position:absolute; inset:0; filter:{{ grade.f }}"><image-slot id="{{ it.ph.slot }}" placeholder="{{ it.ph.ph }}" shape="circle" style="display:block; width:100%; height:100%"></image-slot></span></span></sc-if>
+                      <span style="display:flex; flex-direction:column; font-size:15px; line-height:1.4"><span style="font-weight:600">{{ it.author }}</span><sc-if value="{{ it.hasRole }}" hint-placeholder-val="{{ true }}"><span style="color:var(--ink2)">{{ it.role }}</span></sc-if></span>
+                    </figcaption>
+                  </figure>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_cta }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:var(--secY) var(--pad) 0">
+          <div data-rise="" style="max-width:var(--max); margin:0 auto; box-sizing:border-box; border-radius:32px; background:var(--tint); padding:var(--ctaPad); display:flex; flex-direction:column; align-items:center; text-align:center; gap:18px">
+            <h2 id="{{ s.hid }}" style="margin:0; max-width:760px; font-size:var(--h2); line-height:1.1; font-weight:300; letter-spacing:-.02em; text-wrap:balance">{{ s.headline }}</h2>
+            <sc-if value="{{ s.hasBody }}" hint-placeholder-val="{{ true }}"><p style="margin:0; max-width:560px; font-size:var(--body); line-height:1.6; color:var(--ink2); text-wrap:pretty">{{ s.body }}</p></sc-if>
+            <sc-if value="{{ s.hasBtn }}" hint-placeholder-val="{{ true }}"><a href="{{ s.btnHref }}" style="margin-top:8px; min-height:48px; display:inline-flex; align-items:center; gap:10px; padding:0 26px; border-radius:999px; background:var(--ink); color:var(--bg); font-size:16px; font-weight:500; text-decoration:none; transition:background .3s" style-hover="background:var(--act)">{{ s.btnLabel }}<span aria-hidden="true">→</span></a></sc-if>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_contact }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:var(--secY) var(--pad)">
+          <div style="max-width:var(--max); margin:0 auto; display:grid; grid-template-columns:{{ s.grid }}; gap:{{ s.gap }}; align-items:start">
+            <div data-rise="" style="display:flex; flex-direction:column; gap:20px; min-width:0">
+              <h2 id="{{ s.hid }}" style="margin:0; font-size:var(--h2); line-height:1.1; font-weight:300; letter-spacing:-.02em; text-wrap:balance">{{ s.title }}</h2>
+              <sc-if value="{{ s.hasBlurb }}" hint-placeholder-val="{{ true }}"><p style="margin:0; max-width:480px; font-size:var(--body); line-height:1.6; color:var(--ink2); text-wrap:pretty">{{ s.blurb }}</p></sc-if>
+              <sc-if value="{{ s.form }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:12px; display:flex; flex-direction:column; gap:16px">
+                  <sc-if value="{{ s.hasEmail }}" hint-placeholder-val="{{ true }}"><a href="{{ s.mailto }}" style="align-self:flex-start; min-height:44px; display:inline-flex; align-items:center; font-size:20px; font-weight:500; color:var(--ink); text-decoration:underline; text-decoration-color:var(--ac); text-decoration-thickness:2px; text-underline-offset:6px; overflow-wrap:anywhere" style-hover="color:var(--act)">{{ s.email }}</a></sc-if>
+                  <sc-if value="{{ s.hasLinks }}" hint-placeholder-val="{{ true }}"><ul style="list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:10px"><sc-for list="{{ s.links }}" as="l" hint-placeholder-count="3"><li><a href="{{ l.href }}" style="min-height:44px; display:inline-flex; align-items:center; gap:8px; padding:0 18px; border-radius:999px; border:1px solid var(--br); color:var(--ink); font-size:15px; font-weight:500; text-decoration:none" style-hover="border-color:var(--ink)"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ l.d }}"></path></svg>{{ l.label }}</a></li></sc-for></ul></sc-if>
+                </div>
+              </sc-if>
+            </div>
+            <sc-if value="{{ s.noForm }}" hint-placeholder-val="{{ true }}">
+              <div data-rise="" style="display:flex; flex-direction:column; gap:28px; min-width:0; padding:var(--cardPad); border-radius:28px; background:var(--sf2)">
+                <sc-if value="{{ s.hasEmail }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex; flex-direction:column; gap:6px">
+                    <span style="font-size:14px; font-weight:500; color:var(--act)">{{ words.emailMe }}</span>
+                    <a href="{{ s.mailto }}" style="align-self:flex-start; min-height:44px; display:inline-flex; align-items:center; font-size:var(--mail); line-height:1.2; font-weight:300; letter-spacing:-.015em; color:var(--ink); text-decoration:underline; text-decoration-color:var(--ac); text-decoration-thickness:2px; text-underline-offset:8px; overflow-wrap:anywhere" style-hover="color:var(--act)">{{ s.email }}</a>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ s.hasLinks }}" hint-placeholder-val="{{ true }}">
+                  <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; border-top:1px solid var(--rule)"><sc-for list="{{ s.links }}" as="l" hint-placeholder-count="3"><li style="border-bottom:1px solid var(--rule)"><a href="{{ l.href }}" style="min-height:56px; display:flex; align-items:center; gap:14px; color:var(--ink); font-size:17px; font-weight:500; text-decoration:none" style-hover="color:var(--act)"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ l.d }}"></path></svg><span style="flex:1; min-width:0; overflow-wrap:anywhere">{{ l.label }}</span><span aria-hidden="true" style="color:var(--ink2)">↗</span></a></li></sc-for></ul>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ s.form }}" hint-placeholder-val="{{ false }}">
+              <form data-rise="" onSubmit="{{ submit }}" style="display:grid; grid-template-columns:var(--c2); gap:18px; padding:var(--cardPad); border-radius:28px; background:var(--sf2)">
+                <label style="display:flex; flex-direction:column; gap:8px; font-size:14px; font-weight:500">{{ words.name }}<input type="text" autocomplete="name" style="min-height:48px; box-sizing:border-box; padding:0 16px; border-radius:14px; border:1px solid var(--br); background:var(--bg); color:var(--ink); font:inherit; font-size:16px; font-weight:400"></label>
+                <label style="display:flex; flex-direction:column; gap:8px; font-size:14px; font-weight:500">{{ words.email }}<input type="email" autocomplete="email" style="min-height:48px; box-sizing:border-box; padding:0 16px; border-radius:14px; border:1px solid var(--br); background:var(--bg); color:var(--ink); font:inherit; font-size:16px; font-weight:400"></label>
+                <label style="grid-column:1 / -1; display:flex; flex-direction:column; gap:8px; font-size:14px; font-weight:500">{{ words.org }}<input type="text" autocomplete="organization" style="min-height:48px; box-sizing:border-box; padding:0 16px; border-radius:14px; border:1px solid var(--br); background:var(--bg); color:var(--ink); font:inherit; font-size:16px; font-weight:400"></label>
+                <fieldset style="grid-column:1 / -1; margin:0; padding:0; border:0; display:flex; flex-direction:column; gap:10px">
+                  <legend style="padding:0; margin-bottom:10px; font-size:14px; font-weight:500">{{ words.topic }}</legend>
+                  <div style="display:flex; flex-wrap:wrap; gap:8px"><sc-for list="{{ s.topics }}" as="tp" hint-placeholder-count="4"><button type="button" aria-pressed="{{ tp.on }}" onClick="{{ tp.pick }}" style="min-height:44px; padding:0 18px; border-radius:999px; border:1px solid {{ tp.bd }}; background:{{ tp.bgc }}; color:{{ tp.fg }}; font:inherit; font-size:15px; font-weight:500; cursor:pointer">{{ tp.t }}</button></sc-for></div>
+                </fieldset>
+                <label style="grid-column:1 / -1; display:flex; flex-direction:column; gap:8px; font-size:14px; font-weight:500">{{ words.msg }}<textarea rows="5" style="box-sizing:border-box; padding:14px 16px; border-radius:14px; border:1px solid var(--br); background:var(--bg); color:var(--ink); font:inherit; font-size:16px; font-weight:400; line-height:1.5; resize:vertical"></textarea></label>
+                <div style="grid-column:1 / -1"><button type="submit" style="min-height:48px; display:inline-flex; align-items:center; gap:10px; padding:0 26px; border-radius:999px; border:0; background:var(--ink); color:var(--bg); font:inherit; font-size:16px; font-weight:500; cursor:pointer; transition:background .3s" style-hover="background:var(--act)">{{ words.send }}<span aria-hidden="true">→</span></button></div>
+              </form>
+            </sc-if>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ s.is_gallery }}" hint-placeholder-val="{{ false }}">
+        <section id="{{ s.id }}" aria-labelledby="{{ s.hid }}" style="background:{{ s.bg }}; padding:{{ s.padT }} var(--pad) var(--secY)">
+          <div style="max-width:var(--max); margin:0 auto">
+            <sc-if value="{{ s.hasTitle }}" hint-placeholder-val="{{ true }}"><h2 id="{{ s.hid }}" data-rise="" style="margin:0 0 32px; text-align:center; font-size:15px; line-height:1.4; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--act)">{{ s.title }}</h2></sc-if>
+            <ul style="list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; justify-content:center; gap:{{ s.ggap }}">
+              <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="4">
+                <li data-rise="" style="flex:0 0 {{ s.basis }}; min-width:0">
+                  <figure style="margin:0; display:flex; flex-direction:column; gap:10px">
+                    <div style="position:relative; aspect-ratio:1/1; border-radius:20px; overflow:hidden; background:var(--sf2)"><div style="position:absolute; inset:0; filter:{{ grade.f }}"><image-slot id="{{ it.img.slot }}" placeholder="{{ it.img.ph }}" style="display:block; width:100%; height:100%"></image-slot></div><div aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; background:var(--ac); mix-blend-mode:multiply; opacity:{{ grade.o }}"></div></div>
+                    <sc-if value="{{ it.hasCap }}" hint-placeholder-val="{{ true }}"><figcaption style="font-size:14px; line-height:1.45; color:var(--ink2); text-wrap:pretty">{{ it.cap }}</figcaption></sc-if>
+                  </figure>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </section>
+      </sc-if>
+    </sc-for>
+  </main>
+  <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+  <footer style="border-top:1px solid var(--rule); padding:48px var(--pad) 96px">
+    <div style="max-width:var(--max); margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; font-size:15px; color:var(--ink2)">
+      <span style="font-weight:500; color:var(--ink)">{{ name }}</span>
+      <a href="#hb-top" style="min-height:44px; display:inline-flex; align-items:center; color:var(--ink2); text-decoration:underline; text-decoration-color:var(--br); text-underline-offset:4px" style-hover="color:var(--ink)">{{ words.top }}</a>
+    </div>
+  </footer>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;linen&quot;,&quot;sand&quot;,&quot;sage&quot;,&quot;dusk&quot;,&quot;harbour&quot;],&quot;default&quot;:&quot;linen&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;grade&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;original&quot;,&quot;tinted&quot;,&quot;mono&quot;],&quot;default&quot;:&quot;original&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;sample&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;typical&quot;,&quot;max&quot;,&quot;long&quot;],&quot;default&quot;:&quot;typical&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;photos&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;on&quot;,&quot;0&quot;],&quot;default&quot;:&quot;on&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;device&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;only&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;still&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;menuOpen&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;boolean&quot;},&quot;patch&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;theme&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}">
+const DEV = { desktop: 1280, phone: 390 };
+const T_DEF = { about: "About", focus: "How I help", experience: "Experience", achievements: "Along the way", portfolio: "Selected work", testimonials: "Kind words", cta: "", contact: "Say hello", gallery: "Moments" };
+const NAV_DEF = { about: "About", focus: "Focus", experience: "Experience", portfolio: "Work", testimonials: "Kind words", contact: "Contact" };
+const W_DEF = { greet: "Hello, I'm", menu: "Menu", close: "Close", top: "Back to top", more: "Read more", send: "Send message", name: "Your name", email: "Email", org: "Organisation (optional)", topic: "What is it about?", msg: "Message", emailMe: "Email" };
+const ICON = {
+  linkedin: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
+  x: "M4 4l16 16M20 4l-6.5 6.5M10.5 13.5L4 20",
+  github: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4M9 18c-4.51 2-5-2-7-2",
+  instagram: "M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zM16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37zM17.5 6.5h.01",
+  youtube: "M2.5 17a24 24 0 0 1 0-10a2 2 0 0 1 1.4-1.4a49.6 49.6 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24 24 0 0 1 0 10a2 2 0 0 1-1.4 1.4a49.6 49.6 0 0 1-16.2 0A2 2 0 0 1 2.5 17M10 15l5-3l-5-3z",
+  website: "M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10a15.3 15.3 0 0 1-4 10a15.3 15.3 0 0 1-4-10a15.3 15.3 0 0 1 4-10z",
+  other: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+};
+const im = (slot, caption, ph) => ({ slot, caption, ph });
+const X = (role, org, loc, start, end, summary) => ({ role, org, loc, start, end, summary });
+const TYPICAL = {
+  name: "Maya Lindqvist",
+  order: ["about", "focus", "experience", "achievements", "portfolio", "testimonials", "cta", "contact", "gallery"],
+  hero: { eyebrow: "", headline: "I help founders grow into the chief executives their companies need next.", sub: "Operating partner at Northbeam Ventures. I ran two software companies through their hardest years and now spend my time beside the people who run them.", button: { label: "Let's talk", href: "#hb-contact" }, image: im("hb-portrait", "Maya Lindqvist", "Drop a portrait") },
+  about: { heading: "About", image: null, body: [
+    [["I spent twenty years building software companies, the last eight as chief executive of "], ["Fernhill", "b"], [", which grew from a Stockholm office of twelve to a team of four hundred across Europe."]],
+    "When Fernhill was acquired I realised the part I loved most was never the product. It was helping the people around me take on more than they thought they could.",
+    [["Today I'm an operating partner at Northbeam Ventures, I chair the board of "], ["Kestrel Health", "i"], [", and I coach a handful of founders through their first years in the top job."]]
+  ] },
+  focus: { heading: "How I help", items: [
+    { title: "Coaching first-time CEOs", desc: "A standing hour every fortnight for founders in their first two years as chief executive." },
+    { title: "Board readiness", desc: "Preparing leadership teams for their first independent board, and the meetings that follow." },
+    { title: "Building the executive team", desc: "Hiring and shaping the leadership team between fifty and five hundred people." },
+    { title: "Exits, and what comes after", desc: "Sale processes, earn-outs, and deciding what to do with the next ten years." }
+  ] },
+  experience: { heading: "Experience", items: [
+    X("Operating Partner", "Northbeam Ventures", "Stockholm", "2022", "Present", "I work alongside the chief executives of our portfolio companies on leadership, hiring and board practice."),
+    X("Chair of the Board", "Kestrel Health", "Copenhagen", "2023", "Present", ""),
+    X("Chief Executive", "Fernhill", "Stockholm", "2013", "2021", "Led the company from Series A to its acquisition by Aldra Group, growing revenue tenfold."),
+    X("Vice President, Product", "Corvid Systems", "London", "2008", "2013", "Built and ran the product organisation through two acquisitions.")
+  ] },
+  achievements: { heading: "Along the way", items: [
+    { value: "400", label: "People on the Fernhill team at acquisition" }, { value: "20+", label: "Chief executives I work with today" },
+    { value: "3", label: "Boards served on as chair or director" }, { value: "25", label: "Years in European software" }
+  ] },
+  portfolio: { heading: "Selected work", items: [
+    { title: "Fernhill", kind: "Company", year: "2013–2021", meta: "Chief Executive", desc: "Workforce planning software for European retailers, acquired by Aldra Group.", href: "#" },
+    { title: "The Second Chair", kind: "Newsletter", year: "2024", meta: "Monthly letters", desc: "Short, practical notes for founders stepping into the chief executive role.", href: "#" },
+    { title: "What boards want from a first-time CEO", kind: "Talk", year: "2025", meta: "Nordic Founders Forum, Oslo", desc: "", href: "#" }
+  ] },
+  testimonials: { heading: "Kind words", items: [
+    { quote: "Maya makes a hard conversation feel like the obvious next step. Every founder should have someone like her in their corner.", author: "Jonas Berg", role: "Founder and CEO, Tallow", photo: im("hb-q1", "", "Photo") },
+    { quote: "She asks the question you have been avoiding, then helps you answer it. Our first board meeting went well because of the six weeks before it.", author: "Priya Raman", role: "Chief Executive, Lumen Labs" },
+    { quote: "Calm, direct and generous with her time. Maya made me a better chair.", author: "Erik Holm", role: "Chair, Aldra Group" }
+  ] },
+  cta: { headline: "Stepping into the top job?", body: "I keep a few hours each month for founders and new chief executives. Tell me where you are.", button: { label: "Write to me", href: "#hb-contact" } },
+  contact: { heading: "Say hello", blurb: "For coaching, board roles and speaking, email me or use the links below. I reply to every message within a few days.", email: "maya@lindqvist.example", links: [{ type: "linkedin", label: "LinkedIn", href: "#" }, { type: "x", label: "X", href: "#" }, { type: "website", label: "thesecondchair.example", href: "#" }], form: { enabled: true, topics: ["Coaching", "Board roles", "Speaking", "Something else"] } },
+  gallery: { heading: "Moments", items: ["On stage in Oslo", "Fernhill's last all-hands", "Board offsite, Copenhagen", "A Friday coaching walk"].map((c, i) => im("hb-g" + (i + 1), c, "Drop a photo")) }
+};
+const MAXH = { ...TYPICAL, hero: { eyebrow: "Operating Partner, Northbeam Ventures · Chair, Kestrel Health · Coach to founders", headline: "I help founders grow into the chief executives their companies need next, from the first board meeting to the exit.", sub: "Operating partner at Northbeam Ventures and chair of Kestrel Health. I ran two software companies through their hardest years, sold one of them, and now spend my time beside the people who run companies like them, one fortnightly hour at a time.", button: { label: "Book an introductory call", href: "#" }, image: TYPICAL.hero.image } };
+const LONG = { ...TYPICAL, name: "Alexandra Montgomery-Fitzgerald" };
+const SAMPLES = { typical: TYPICAL, max: MAXH, long: LONG };
+const PRESETS = {
+  linen: { name: "Linen", kind: "Light · default", bg: "#ffffff", ink: "#2b2724", accent: "#c97b63" },
+  sand: { name: "Sand", kind: "Warm light", bg: "#f5efe6", ink: "#2e2621", accent: "#a0603f" },
+  sage: { name: "Sage", kind: "Soft green", bg: "#eef1ea", ink: "#1f2a23", accent: "#557a5f" },
+  dusk: { name: "Dusk", kind: "Dark", bg: "#1d1c21", ink: "#f2ede6", accent: "#e6a58f" },
+  harbour: { name: "Harbour", kind: "Dark blue", bg: "#13252d", ink: "#e9f0ef", accent: "#8ccfc2" }
+};
+const GRADES = { original: { f: "none", o: "0" }, tinted: { f: "grayscale(1) contrast(1.05)", o: "0.35" }, mono: { f: "grayscale(1) contrast(1.08)", o: "0" } };
+const rgb = h => { const n = parseInt(String(h).replace("#", ""), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = Array.isArray(a) ? a : rgb(a), B = Array.isArray(b) ? b : rgb(b); return A.map((v, i) => Math.round(v * p + B[i] * (1 - p))); };
+const hex = c => "#" + c.map(v => v.toString(16).padStart(2, "0")).join("");
+const cm = (a, p, b) => "color-mix(in srgb,var(" + a + ") " + p + "%,var(" + b + "))";
+function derive({ bg, ink, accent }) {
+  const worst = (c, gs) => Math.min(...gs.map(g => ratio(c, g)));
+  const toward = (a, b, gs, min, from) => { let q = from; while (q < 100 && worst(mix(a, b, q / 100), gs) < min) q += 2; return Math.min(q, 100); };
+  const keep = (a, b, gs, min) => { let q = 100; while (q > 0 && worst(mix(a, b, q / 100), gs) < min) q -= 2; return q; };
+  const sf = mix(ink, bg, 0.04), sf2 = mix(ink, bg, 0.07), tint = mix(accent, bg, 0.16);
+  const p2 = toward(ink, bg, [bg, sf, sf2, tint], 4.6, 50), pb = toward(ink, bg, [bg, sf], 3.1, 24);
+  const pg = keep(accent, ink, [bg, sf, sf2], 3.05), pa = keep(accent, ink, [bg, sf, sf2, tint], 4.6);
+  const v = { ink2: mix(ink, bg, p2 / 100), act: mix(accent, ink, pa / 100), acg: mix(accent, ink, pg / 100) };
+  const r = x => x.toFixed(1) + ":1";
+  return {
+    vars: { "--bg": bg, "--ink": ink, "--ac": accent, "--ink2": cm("--ink", p2, "--bg"), "--br": cm("--ink", pb, "--bg"), "--rule": cm("--ink", 12, "--bg"), "--sf": cm("--ink", 4, "--bg"), "--sf2": cm("--ink", 7, "--bg"), "--tint": cm("--ac", 16, "--bg"), "--act": pa >= 100 ? "var(--ac)" : cm("--ac", pa, "--ink"), "--acg": pg >= 100 ? "var(--ac)" : cm("--ac", pg, "--ink") },
+    pct: { p2, pb, pa, pg },
+    hex: { ink2: hex(v.ink2), act: hex(v.act), acg: hex(v.acg), sf2: hex(sf2), tint: hex(tint), br: hex(mix(ink, bg, pb / 100)) },
+    ratios: { r1: r(ratio(ink, bg)), r2: r(worst(v.ink2, [bg, sf2, tint])), ra: r(worst(v.act, [bg, sf2, tint])), rg: r(worst(v.acg, [bg, sf2])) }
+  };
+}
+const segs = para => (Array.isArray(para) ? para : [[String(para)]]).map(s => { const mk = s[1] || "", href = /^(https?:|mailto:|#)/.test(mk) ? mk : ""; return { t: s[0], b: mk === "b", i: mk === "i", a: !!href, href: href || undefined, plain: !mk }; });
+const IM = o => o && o.slot ? { slot: o.slot, ph: o.ph || "Drop a photo", alt: o.caption || "", cap: o.caption || "", hasCap: !!o.caption } : null;
+const range = (a, b) => [a, b].filter(Boolean).join(" – ");
+const longestSeg = t => Math.max(1, ...String(t || "").split(/\s+/).flatMap(w => w.split(/(?<=-)/)).map(w => w.length));
+
+class Component extends DCLogic {
+  state = { w: 0, menu: false, topic: null };
+  rootRef = el => {
+    if (this._ro) { this._ro.disconnect(); this._ro = null; }
+    if (!el || DEV[this.props.device]) return;
+    this._ro = new ResizeObserver(() => { const w = el.offsetWidth; if (w && Math.abs(w - (this.state.w || 0)) > 4) this.setState({ w }); });
+    this._ro.observe(el);
+  };
+  componentWillUnmount() { if (this._ro) this._ro.disconnect(); }
+  src() {
+    const p = this.props; let s = { ...(SAMPLES[p.sample] || TYPICAL), ...(p.patch || {}) };
+    if (p.photos === "0" || p.photos === 0) s = { ...s, hero: { ...s.hero, image: null }, about: { ...s.about, image: null }, gallery: { ...s.gallery, items: [] }, testimonials: { ...s.testimonials, items: s.testimonials.items.map(x => ({ ...x, photo: null })) }, portfolio: { ...s.portfolio, items: s.portfolio.items.map(x => ({ ...x, img: null })) } };
+    return s;
+  }
+  renderVals() {
+    const p = this.props, s = this.src();
+    const W = DEV[p.device] || this.state.w || 1280, P = W < 640, D = W >= 1000;
+    const pad = P ? 20 : D ? 40 : 32, inner = Math.min(W - 2 * pad, 1120);
+    const th = derive({ ...(PRESETS[p.preset] || PRESETS.linen), ...(p.theme || {}) });
+    const grade = GRADES[p.grade] || GRADES.original, words = { ...W_DEF, ...(s.words || {}) }, titles = { ...T_DEF, ...(s.titles || {}) };
+    const pro = p.plan === "pro";
+    const hero = s.hero || {}, heroImg = IM(hero.image);
+    const name = s.name || "";
+    const base = P ? (name.length > 22 ? 44 : 54) : (name.length > 24 ? 76 : 96);
+    const h1 = Math.max(32, Math.min(base + (heroImg ? 0 : (P ? 6 : 16)), Math.floor(Math.min(inner, 900) / (longestSeg(name) * 0.56)))) + "px";
+    const vars = { ...th.vars, "--pad": pad + "px", "--max": "1120px", "--hh": P ? "68px" : "76px", "--heroTop": P ? "48px" : "88px", "--stageTop": P ? "44px" : "64px", "--pw": P ? Math.min(300, inner - 40) + "px" : "440px", "--greet": P ? "17px" : "20px", "--lede": P ? "21px" : "28px", "--body": P ? "17px" : "18px", "--h2": P ? "34px" : "48px", "--secY": P ? "72px" : "120px", "--hgap": P ? "36px" : "56px", "--c2": P ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))", "--quote": P ? "21px" : "27px", "--ctaPad": P ? "48px 24px" : "88px 64px", "--cardPad": P ? "24px" : "40px", "--mail": P ? "24px" : "34px" };
+    const rootStyle = Object.entries(vars).map(([k, v]) => k + ":" + v).join(";") + ";background:var(--bg);color:var(--ink);font-family:'Figtree',system-ui,sans-serif;font-size:17px;line-height:1.55;position:relative;-webkit-font-smoothing:antialiased";
+    const order = (s.order || TYPICAL.order).filter(k => s[k] && !(s[k].hidden));
+    const has = k => { const x = s[k]; if (!x) return false; if (k === "about") return (x.body || []).length > 0; if (k === "cta") return !!x.headline; if (k === "contact") return true; return (x.items || []).length > 0; };
+    const keys = order.filter(has);
+    const TINT = { focus: 1, testimonials: 1 };
+    let prevTint = false, prevBg = "var(--bg)";
+    const cols = (n, max) => "repeat(" + Math.max(1, Math.min(n, max)) + ",minmax(0,1fr))";
+    const sections = keys.map(k => {
+      const x = s[k], id = "hb-" + k, title = x.heading || titles[k];
+      const tint = !!TINT[k] && !prevTint; prevTint = tint;
+      const bgv = tint ? "var(--sf)" : "var(--bg)"; const o = { key: k, id, hid: id + "-h", title, hasTitle: !!title, bg: bgv, padT: (k === "achievements" || k === "gallery") && prevBg === bgv ? "0" : "var(--secY)" }; prevBg = k === "cta" ? "cta" : bgv;
+      ["about", "focus", "experience", "achievements", "portfolio", "testimonials", "cta", "contact", "gallery"].forEach(t => { o["is_" + t] = t === k; });
+      if (k === "about") { const img = IM(x.image); Object.assign(o, { paras: (x.body || []).map((b, i) => ({ i, segs: segs(b) })), img, hasImg: !!img, noImg: !img, grid: img && !P ? "minmax(0,5fr) minmax(0,7fr)" : "minmax(0,1fr)" }); }
+      if (k === "focus") { const n = x.items.length; Object.assign(o, { items: x.items.map((it, i) => ({ ...it, hasDesc: !!it.desc })), grid: P ? "minmax(0,1fr)" : cols(n % 3 === 0 || n > 4 ? 3 : 2, 3) }); }
+      if (k === "experience") Object.assign(o, { items: x.items.map(it => ({ role: it.role, org: [it.org, it.loc].filter(Boolean).join(" · "), dates: range(it.start, it.end), summary: it.summary, hasSum: !!it.summary })), grid: P ? "minmax(0,1fr)" : "180px minmax(0,1fr)" });
+      if (k === "achievements") { const n = x.items.length; const c = P ? Math.min(n, 2) : Math.min(n, 4), cw = (inner - (c - 1) * 24) / c, ml = Math.max(2, ...x.items.map(i => String(i.value || "").length)); Object.assign(o, { items: x.items, grid: cols(c, 4), vsize: Math.min(P ? 44 : 64, Math.floor(cw / (ml * 0.58))) + "px" }); }
+      if (k === "portfolio") { const n = x.items.length; Object.assign(o, { items: x.items.map(it => { const img = IM(it.img); return { ...it, img, hasImg: !!img, line: [it.kind, it.year].filter(Boolean).join(" · "), hasLine: !!(it.kind || it.year), hasMeta: !!it.meta, hasDesc: !!it.desc, hasLink: !!it.href }; }), grid: P ? "minmax(0,1fr)" : cols(n % 3 === 0 ? 3 : 2, 3) }); }
+      if (k === "testimonials") Object.assign(o, { items: x.items.map(it => { const ph = IM(it.photo); return { ...it, ph, hasPh: !!ph, hasRole: !!it.role }; }) });
+      if (k === "cta") Object.assign(o, { headline: x.headline, body: x.body, hasBody: !!x.body, hasBtn: !!(x.button && x.button.label), btnLabel: x.button && x.button.label, btnHref: x.button && x.button.href });
+      if (k === "contact") { const form = pro && x.form && x.form.enabled; Object.assign(o, { blurb: x.blurb, hasBlurb: !!x.blurb, email: x.email, hasEmail: !!x.email, mailto: "mailto:" + x.email, links: (x.links || []).map(l => ({ ...l, d: ICON[l.type] || ICON.other })), hasLinks: (x.links || []).length > 0, form: !!form, noForm: !form, topics: ((x.form || {}).topics || []).map(t => { const on = this.state.topic === t; return { t, on, bd: on ? "var(--ink)" : "var(--br)", bgc: on ? "var(--ink)" : "var(--bg)", fg: on ? "var(--bg)" : "var(--ink)", pick: () => this.setState({ topic: on ? null : t }) }; }), grid: P ? "minmax(0,1fr)" : form ? "minmax(0,5fr) minmax(0,7fr)" : "minmax(0,1fr) minmax(0,1fr)", gap: P ? "40px" : "72px" }); }
+      if (k === "gallery") { const n = x.items.length, c = P ? (n === 1 ? 1 : 2) : n <= 6 ? Math.max(n, 3) : [6, 4, 5, 3].find(c => n % c === 0) || 4; Object.assign(o, { items: x.items.map(it => ({ img: IM(it), cap: it.caption, hasCap: !!it.caption })), basis: "calc((100% - " + (c - 1) * (P ? 12 : 20) + "px) / " + c + ")", ggap: P ? "12px" : "20px" }); }
+      return o;
+    });
+    const nav = keys.filter(k => NAV_DEF[k]).map(k => ({ href: "#hb-" + k, label: (s.nav && s.nav[k]) || NAV_DEF[k] }));
+    return {
+      motion: p.still ? "0" : "1", rootRef: this.rootRef, rootStyle, name, words, grade, h1,
+      navInline: D && nav.length <= 7, navMenu: !(D && nav.length <= 7), nav, menuOpen: !!(this.state.menu || p.menuOpen),
+      openMenu: () => this.setState({ menu: true }), closeMenu: () => this.setState({ menu: false }),
+      hero: { greet: hero.eyebrow || words.greet, headline: hero.headline, sub: hero.sub, hasSub: !!hero.sub, hasBtn: !!(hero.button && hero.button.label), btnLabel: hero.button && hero.button.label, btnHref: hero.button && hero.button.href, img: heroImg, hasImg: !!heroImg },
+      heroBottom: heroImg ? "0" : (P ? "72px" : "112px"),
+      sections: p.only === "hero" ? [] : p.only ? sections.filter(x => x.key === p.only) : sections,
+      showHero: !p.only || p.only === "hero", chrome: !p.only || p.only === "hero", submit: e => e.preventDefault()
+    };
+  }
+}
+</script>
+</body>
+</html>

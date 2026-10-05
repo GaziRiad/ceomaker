@@ -3,12 +3,15 @@
 // app; the output is committed. Needs Playwright, which isn't a dependency of the app:
 //
 //   PLAYWRIGHT=/path/to/node_modules/playwright/index.mjs \
-//     node scripts/template-shots.mjs http://localhost:3000
+//     node scripts/template-shots.mjs http://localhost:3000 [key ...]
+//
+// With keys, only those templates are taken (a new template: just its key).
 
 const { chromium } = await import(process.env.PLAYWRIGHT ?? "playwright");
 const base = process.argv[2] ?? "http://localhost:3000";
 const out = new URL("../src/app/(app)/landing/shots/", import.meta.url);
-const KEYS = ["meridian", "monument", "salon", "folio", "tempo"];
+const ALL = ["meridian", "harbour", "monument", "salon", "folio", "tempo"];
+const KEYS = process.argv.length > 3 ? process.argv.slice(3) : ALL;
 const SIZES = [["desktop", { width: 1280, height: 800 }, 1]];
 
 const browser = await chromium.launch();

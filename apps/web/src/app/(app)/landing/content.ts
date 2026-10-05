@@ -108,7 +108,7 @@ export const faq: [string, string][] = [
   ],
   [
     "What happens if I cancel Pro?",
-    "Your site stays live on the free plan: on Meridian, at yourname.ceomaker.app, with the badge. Nothing is deleted, and upgrading again brings everything back.",
+    "Your site stays live on the free plan, at yourname.ceomaker.app with the badge; a Pro template shows as Meridian. Nothing is deleted, and upgrading again brings everything back.",
   ],
   [
     "Is my information used to train AI?",

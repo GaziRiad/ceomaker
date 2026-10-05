@@ -105,7 +105,7 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>
-          The free plan lets you publish a site on the Meridian template at an address on
+          The free plan lets you publish a site on the Meridian or Harbour template at an address on
           ceomaker.app, with a small &ldquo;Made with CEOMaker&rdquo; badge. It includes one AI
           draft per account and a few AI rewrites a day.
         </p>

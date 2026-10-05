@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..700;1,300..500&display=swap">
+<style>body{margin:0;background:#dcd8d2}a{color:#7a4a3a}a:hover{color:#2b2724}</style>
+</helmet>
+<div style="background:#dcd8d2; padding:56px 64px 120px; display:flex; flex-direction:column; gap:80px; font-family:'Figtree',system-ui,sans-serif; color:#2b2724">
+  <div style="display:flex; flex-direction:column; gap:8px; max-width:960px">
+    <span style="font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#7a4a3a">CEOMaker template · Free</span>
+    <h1 style="margin:0; font-size:56px; line-height:1; font-weight:300; letter-spacing:-.02em">Harbour</h1>
+    <span style="font-size:16px; line-height:1.5; color:#4f4843">A warm greeting and a large arched portrait on soft white. For leaders who want to come across as personal and easy to reach.</span>
+  </div>
+
+  <div style="display:flex; gap:64px; align-items:flex-start">
+    <div style="display:flex; flex-direction:column; gap:12px">
+      <div style="display:flex; align-items:baseline; gap:10px"><span style="font-size:11px; font-weight:700; padding:3px 8px; background:#2b2724; color:#fff">1</span><span style="font-size:15px; font-weight:600">Typical · 1280 · Free plan</span><span style="font-size:13px; color:#5a524c">Linen preset, no form, platform pill shown</span></div>
+      <div data-screen-label="1 Harbour 1280" style="position:relative; width:1280px; box-shadow:0 20px 50px rgba(40,30,20,.18)">
+        <dc-import name="Harbour" device="desktop" plan="free" still="{{ true }}" hint-size="1280px,7000px"></dc-import>
+        <div style="position:absolute; right:16px; bottom:16px; display:flex; align-items:center; gap:10px; flex-direction:row-reverse">
+          <span style="width:150px; height:32px; box-sizing:border-box; border-radius:999px; background:#1d1f20; color:#f2f2f3; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:500; box-shadow:0 4px 12px rgba(0,0,0,.2)">Made with CEOMaker</span>
+          <span style="font-size:11px; padding:3px 8px; background:#fff3c4; color:#5a4300; border:1px dashed #b8962e">Platform pill · not part of the template</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px">
+      <div style="display:flex; align-items:baseline; gap:10px"><span style="font-size:11px; font-weight:700; padding:3px 8px; background:#2b2724; color:#fff">2</span><span style="font-size:15px; font-weight:600">Typical · 390 · Pro plan</span><span style="font-size:13px; color:#5a524c">Contact form on</span></div>
+      <div data-screen-label="2 Harbour 390" style="width:390px; box-shadow:0 20px 50px rgba(40,30,20,.18)">
+        <dc-import name="Harbour" device="phone" plan="pro" still="{{ true }}" hint-size="390px,9000px"></dc-import>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:40px">
+        <div style="display:flex; align-items:baseline; gap:10px"><span style="font-size:11px; font-weight:700; padding:3px 8px; background:#2b2724; color:#fff">2b</span><span style="font-size:15px; font-weight:600">Phone menu · 390</span></div>
+        <div data-screen-label="2b Phone menu" style="position:relative; width:390px; height:760px; overflow:hidden; box-shadow:0 20px 50px rgba(40,30,20,.18)">
+          <dc-import name="Harbour" device="phone" plan="pro" still="{{ true }}" menu-open="{{ true }}" hint-size="390px,760px"></dc-import>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <div style="display:flex; align-items:baseline; gap:10px"><span style="font-size:11px; font-weight:700; padding:3px 8px; background:#2b2724; color:#fff">3</span><span style="font-size:15px; font-weight:600">States · hero and arched portrait, then contact</span><span style="font-size:13px; color:#5a524c">1280 frames shown at 45 %, 390 frames at 60 %</span></div>
+    <div data-screen-label="3 States" style="width:2440px; box-sizing:border-box; background:#f4f1ec; padding:40px; display:flex; flex-direction:column; gap:48px; box-shadow:0 20px 50px rgba(40,30,20,.18)">
+      <div style="display:flex; gap:32px; align-items:flex-start">
+        <sc-for list="{{ heroStates }}" as="st" hint-placeholder-count="4">
+          <div style="display:flex; flex-direction:column; gap:10px; width:576px">
+            <span style="font-size:13px; font-weight:600">{{ st.label }}</span>
+            <span style="font-size:12px; line-height:1.45; color:#5a524c; min-height:36px">{{ st.note }}</span>
+            <div style="width:1280px; zoom:.45; background:#fff; outline:1px solid rgba(0,0,0,.08)"><dc-import name="Harbour" device="desktop" only="hero" still="{{ true }}" sample="{{ st.sample }}" photos="{{ st.photos }}" hint-size="1280px,1200px"></dc-import></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex; gap:32px; align-items:flex-start">
+        <sc-for list="{{ phoneStates }}" as="st" hint-placeholder-count="4">
+          <div style="display:flex; flex-direction:column; gap:10px; width:234px">
+            <span style="font-size:13px; font-weight:600">{{ st.label }}</span>
+            <div style="width:390px; zoom:.6; background:#fff; outline:1px solid rgba(0,0,0,.08)"><dc-import name="Harbour" device="phone" only="hero" still="{{ true }}" sample="{{ st.sample }}" photos="{{ st.photos }}" hint-size="390px,900px"></dc-import></div>
+          </div>
+        </sc-for>
+        <div style="display:flex; flex-direction:column; gap:10px; width:576px">
+          <span style="font-size:13px; font-weight:600">Contact · Free plan (form off)</span>
+          <span style="font-size:12px; line-height:1.45; color:#5a524c; min-height:36px">Email and links become the right-hand card. Complete with blurb, email and links only.</span>
+          <div style="width:1280px; zoom:.45; background:#fff; outline:1px solid rgba(0,0,0,.08)"><dc-import name="Harbour" device="desktop" only="contact" plan="free" still="{{ true }}" hint-size="1280px,700px"></dc-import></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; width:576px">
+          <span style="font-size:13px; font-weight:600">Contact · Pro plan (form on)</span>
+          <span style="font-size:12px; line-height:1.45; color:#5a524c; min-height:36px">Email and links move under the blurb; the form takes the card. Topics are the owner's own list.</span>
+          <div style="width:1280px; zoom:.45; background:#fff; outline:1px solid rgba(0,0,0,.08)"><dc-import name="Harbour" device="desktop" only="contact" plan="pro" still="{{ true }}" hint-size="1280px,900px"></dc-import></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <div style="display:flex; align-items:baseline; gap:10px"><span style="font-size:11px; font-weight:700; padding:3px 8px; background:#2b2724; color:#fff">4</span><span style="font-size:15px; font-weight:600">Presets</span><span style="font-size:13px; color:#5a524c">Owner picks bg, text, accent; the rest is derived</span></div>
+    <div data-screen-label="4 Presets" style="display:flex; gap:24px; align-items:flex-start">
+      <sc-for list="{{ presets }}" as="pr" hint-placeholder-count="5">
+        <div style="width:300px; background:#fff; padding:16px; box-sizing:border-box; display:flex; flex-direction:column; gap:14px; box-shadow:0 12px 30px rgba(40,30,20,.12)">
+          <div style="width:268px; height:250px; overflow:hidden; outline:1px solid rgba(0,0,0,.08)"><div style="width:1280px; zoom:.209375"><dc-import name="Harbour" device="desktop" only="hero" still="{{ true }}" preset="{{ pr.key }}" hint-size="1280px,1200px"></dc-import></div></div>
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px"><span style="font-size:18px; font-weight:600">{{ pr.name }}</span><span style="font-size:12px; color:#5a524c">{{ pr.kind }}</span></div>
+          <div style="display:flex; gap:6px">
+            <sc-for list="{{ pr.chips }}" as="c" hint-placeholder-count="6"><div style="flex:1; display:flex; flex-direction:column; gap:4px; min-width:0"><span style="height:30px; background:{{ c.v }}; outline:1px solid rgba(0,0,0,.1)"></span><span style="font-size:10px; line-height:1.3; color:#5a524c">{{ c.k }}</span></div></sc-for>
+          </div>
+          <span style="font-size:11px; line-height:1.5; color:#5a524c; font-variant-numeric:tabular-nums">{{ pr.ratios }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <div style="display:flex; align-items:baseline; gap:10px"><span style="font-size:11px; font-weight:700; padding:3px 8px; background:#2b2724; color:#fff">5</span><span style="font-size:15px; font-weight:600">Handoff notes</span></div>
+    <div data-screen-label="5 Handoff" style="width:2440px; box-sizing:border-box; background:#fff; padding:48px; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:48px; font-size:15px; line-height:1.55; color:#4f4843; box-shadow:0 20px 50px rgba(40,30,20,.18)">
+      <div style="display:flex; flex-direction:column; gap:10px">
+        <h3 style="margin:0; font-size:22px; font-weight:500; color:#2b2724">Name and picker copy</h3>
+        <p style="margin:0"><strong style="color:#2b2724">Harbour</strong> · Free<br>A warm greeting and a large arched portrait on soft white.<br>For leaders who want to come across as personal and easy to reach.</p>
+        <h3 style="margin:12px 0 0; font-size:22px; font-weight:500; color:#2b2724">Type · Figtree only</h3>
+        <p style="margin:0">Desktop / phone. Name h1: 300, 96 / 54 px (76 / 44 if over 24 characters), +16 / +6 with no hero image, then capped at container ÷ (longest unbroken part × 0.56). Line height 1.02, tracking −0.025em. Greeting 500, 20 / 17. Headline 400, 28 / 21, line height 1.3. Section h2 300, 48 / 34. Quote 400, 27 / 21. Item titles 500, 21–23. Body 400, 18 / 17, line height 1.6–1.7. Labels 500, 14–15. Small section labels (Achievements, Gallery) 500, 15, caps, 0.08em.</p>
+        <p style="margin:0">No mid-word breaks: overflow-wrap normal, hyphens manual. Emails and URLs may wrap anywhere.</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px">
+        <h3 style="margin:0; font-size:22px; font-weight:500; color:#2b2724">Derived colours</h3>
+        <p style="margin:0">Owner sets <code>bg</code>, <code>ink</code>, <code>ac</code>. Each derived value is a color-mix; the percentage is found by stepping until the contrast target is met against every ground it sits on.</p>
+        <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px">
+          <li>sf = ink 4 % into bg (tinted bands). sf2 = ink 7 % (cards, portrait band).</li>
+          <li>tint = accent 16 % into bg (call-to-action panel).</li>
+          <li>ink2 = ink into bg from 50 %, up until ≥ 4.6:1 on bg, sf, sf2 and tint.</li>
+          <li>br (inputs, link pills) = ink into bg, ≥ 3.1:1. rule = ink 12 % (decorative lines only).</li>
+          <li>act (small accent text) = accent toward ink until ≥ 4.6:1 on all grounds.</li>
+          <li>acg (large figures, quote mark, focus ring) = accent toward ink until ≥ 3:1.</li>
+          <li>Buttons: ink fill, bg text; hover fills act.</li>
+        </ul>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px">
+        <h3 style="margin:0; font-size:22px; font-weight:500; color:#2b2724">Images</h3>
+        <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px">
+          <li>Hero portrait 4:5, arch (top radius half the width), 440 px desktop, up to 300 px phone. Tinted band behind its lower 44 %.</li>
+          <li>About 4:5, radius 24. Portfolio 3:2 on top of the card. Gallery 1:1, radius 20. Quote photo 48 px circle.</li>
+          <li>All crops object-fit cover at the owner's focal point. Tinted = grayscale + accent multiply at 35 %; Mono = grayscale.</li>
+          <li>Missing image: hero turns typographic; About becomes one centred column; portfolio cards stay text-only; quotes show the name only; Gallery with no photos is hidden.</li>
+          <li>Gallery per row: desktop up to 6 (never fewer than 3 slots wide); 7–12 use 6, 4, 5 or 3, whichever divides evenly, else 4 with the last row centred. Phone 2.</li>
+        </ul>
+        <h3 style="margin:12px 0 0; font-size:22px; font-weight:500; color:#2b2724">Motion · CSS only</h3>
+        <p style="margin:0">Fade and rise 24 px, cubic-bezier(.2,.7,.2,1). Hero on load, 0.9 s, portrait +160 ms. Sections and items rise on scroll with animation-timeline: view(), range entry 0–30 %, inside @supports and prefers-reduced-motion: no-preference. Without support or JavaScript, everything is simply visible.</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px">
+        <h3 style="margin:0; font-size:22px; font-weight:500; color:#2b2724">Layout and choices</h3>
+        <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:4px">
+          <li>Container breakpoints on the root (container-type: inline-size): phone &lt; 640, tablet 640–999, desktop ≥ 1000. Inline nav at desktop when 7 items or fewer, otherwise a Menu pill and full-screen sheet.</li>
+          <li>Sections render in the owner's order. Focus and Testimonials sit on the sf band, never two bands in a row.</li>
+          <li>Free plan: no form, so email and links fill the right-hand card. Pro: they move under the blurb and the form takes the card. Nothing fixed on the page; the footer keeps 96 px below its last line so the platform pill never covers it.</li>
+          <li>The greeting is template wording ("Hello, I'm", up to 40 characters). An eyebrow, if set, replaces it.</li>
+          <li>New content: none needed.</li>
+          <li>The Sofia screenshots weren't in the project, so the structure follows the live demo and the Linen palette is an approximation of its white, charcoal and soft rose.</li>
+          <li>Rounded cards and pill buttons keep it warm and clearly apart from Meridian's square serif masthead.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PRESETS = [
+  { key: "linen", name: "Linen", kind: "Light · default", bg: "#ffffff", ink: "#2b2724", accent: "#c97b63" },
+  { key: "sand", name: "Sand", kind: "Warm light", bg: "#f5efe6", ink: "#2e2621", accent: "#a0603f" },
+  { key: "sage", name: "Sage", kind: "Soft green", bg: "#eef1ea", ink: "#1f2a23", accent: "#557a5f" },
+  { key: "dusk", name: "Dusk", kind: "Dark", bg: "#1d1c21", ink: "#f2ede6", accent: "#e6a58f" },
+  { key: "harbour", name: "Harbour", kind: "Dark blue", bg: "#13252d", ink: "#e9f0ef", accent: "#8ccfc2" }
+];
+const rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = c => { const [r, g, b] = Array.isArray(c) ? c : rgb(c); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const mix = (a, b, p) => { const A = Array.isArray(a) ? a : rgb(a), B = Array.isArray(b) ? b : rgb(b); return A.map((v, i) => Math.round(v * p + B[i] * (1 - p))); };
+const hex = c => "#" + c.map(v => v.toString(16).padStart(2, "0")).join("");
+function derive({ bg, ink, accent }) {
+  const worst = (c, gs) => Math.min(...gs.map(g => ratio(c, g)));
+  const toward = (a, b, gs, min, from) => { let q = from; while (q < 100 && worst(mix(a, b, q / 100), gs) < min) q += 2; return q; };
+  const keep = (a, b, gs, min) => { let q = 100; while (q > 0 && worst(mix(a, b, q / 100), gs) < min) q -= 2; return q; };
+  const sf2 = mix(ink, bg, 0.07), tint = mix(accent, bg, 0.16), sf = mix(ink, bg, 0.04);
+  const ink2 = mix(ink, bg, toward(ink, bg, [bg, sf, sf2, tint], 4.6, 50) / 100);
+  const act = mix(accent, ink, keep(accent, ink, [bg, sf, sf2, tint], 4.6) / 100);
+  const acg = mix(accent, ink, keep(accent, ink, [bg, sf, sf2], 3.05) / 100);
+  const f = x => x.toFixed(1);
+  return { chips: [{ k: "bg", v: bg }, { k: "text", v: ink }, { k: "accent", v: accent }, { k: "text 2", v: hex(ink2) }, { k: "accent text", v: hex(act) }, { k: "tint", v: hex(tint) }],
+    ratios: "Text " + f(ratio(ink, bg)) + " · text 2 " + f(worst(ink2, [bg, sf2, tint])) + " · accent text " + f(worst(act, [bg, sf2, tint])) + " · accent large " + f(worst(acg, [bg, sf2])) + " (:1, worst ground)" };
+}
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      heroStates: [
+        { label: "No images", note: "Portrait and band close up. The name grows 16 px and the hero ends on text with full section spacing.", sample: "typical", photos: "0" },
+        { label: "One image (typical)", note: "Portrait in a 4:5 arch, centred over a tinted band that runs edge to edge.", sample: "typical", photos: "on" },
+        { label: "Maximum", note: "80-character eyebrow replaces the greeting. 120-character headline, 280-character introduction, long button label.", sample: "max", photos: "on" },
+        { label: "Longest name", note: "Size is capped so the longest unbroken part fits. Breaks only at spaces and after the hyphen.", sample: "long", photos: "on" }
+      ],
+      phoneStates: [
+        { label: "390 · No images", sample: "typical", photos: "0" },
+        { label: "390 · Maximum", sample: "max", photos: "on" },
+        { label: "390 · Longest name", sample: "long", photos: "on" }
+      ],
+      presets: PRESETS.map(p => ({ ...p, ...derive(p) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

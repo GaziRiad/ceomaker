@@ -7,6 +7,7 @@ import {
   type TemplateRef,
   type TemplateVersionOf,
 } from "@ceomaker/schema";
+import { HarbourTemplate as HarbourV1 } from "./harbour/v1";
 import { MeridianTemplate as MeridianV1 } from "./meridian/v1";
 import { MonumentTemplate as MonumentV1 } from "./monument/v1";
 import { FolioTemplate as FolioV1 } from "./folio/v1";
@@ -42,6 +43,27 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
       contactForm: true,
       shows: NONE,
       Component: MeridianV1,
+    },
+  },
+  harbour: {
+    1: {
+      name: "Harbour",
+      description:
+        "A warm greeting and a large arched portrait on soft white. For leaders who want to come across as personal and easy to reach.",
+      tagline:
+        "A warm greeting and a large arched portrait on soft white. For leaders who want to come across as personal and easy to reach.",
+      contactForm: true,
+      shows: {
+        gallery: true,
+        quotePhotos: true,
+        photoGrade: true,
+        cta: true,
+        focal: true,
+        aboutImage: true,
+        workImages: true,
+        focusSection: true,
+      },
+      Component: HarbourV1,
     },
   },
   monument: {

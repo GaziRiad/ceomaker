@@ -565,6 +565,7 @@ describe("plans", () => {
     expect(isPremiumTemplate("monument")).toBe(true);
     expect(isPremiumTemplate("salon")).toBe(true);
     expect(isPremiumTemplate("folio")).toBe(true);
+    expect(isPremiumTemplate("harbour")).toBe(false);
     expect(isPremiumTemplate("tempo")).toBe(true);
     expect(isPremiumTemplate("meridian")).toBe(false);
   });

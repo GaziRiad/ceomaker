@@ -122,7 +122,7 @@ async function Billing({ searchParams }: { searchParams: Search }) {
           <p className="m-0 max-w-[620px] text-[17px] text-pretty">
             {pro
               ? "Every template, your own domain, the contact form and analytics."
-              : "Your site can be live for free, on Meridian at yourname.ceomaker.app."}
+              : "Your site can be live for free, on Meridian or Harbour at yourname.ceomaker.app."}
           </p>
           {search.card === "updated" ? <Note>Your card is updated.</Note> : null}
           {search.card === "unavailable" ? (

@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   folioNameSize,
+  harbourNameSize,
   meridianNameSize,
   monumentNameSize,
   salonNameSize,
@@ -20,6 +21,7 @@ const fonts = {
   folioMono: "folio-mono",
   tempo: "tempo",
   tempoMono: "tempo-mono",
+  harbour: "Figtree",
 };
 const colors = { bg: "#f3f0e8", ink: "#15130f", accent: "#ff5a1f" };
 
@@ -60,8 +62,17 @@ describe("share card", () => {
     expect(tempoNameSize("Maximilianaconstantinopolous", false)).toBeLessThan(80);
   });
 
+  it("fits Harbour names to their column, smaller beside the portrait", () => {
+    expect(harbourNameSize("Amelia Hart", false)).toBe(120);
+    expect(harbourNameSize("Amelia Hart", true)).toBe(92);
+    // Long names break between words and after hyphens, so only the longest piece must fit.
+    expect(harbourNameSize("Alexandra Montgomery-Fitzgerald", true)).toBe(92);
+    expect(harbourNameSize("Maximilianaconstantinopolous", true)).toBeLessThan(45);
+  });
+
   it("draws each template with the name, role line and address", () => {
-    for (const template of ["meridian", "monument", "salon", "folio", "tempo", "retired-key"]) {
+    const templates = ["meridian", "harbour", "monument", "salon", "folio", "tempo", "retired-key"];
+    for (const template of templates) {
       const html = renderToStaticMarkup(
         <ShareCard
           template={template}
@@ -75,8 +86,10 @@ describe("share card", () => {
       );
       // Tempo sets the address in capitals, as its labels are.
       expect(html.toLowerCase()).toContain("eloise.ceomaker.app");
-      // Salon, Folio and Tempo set the name alone; the others carry the initials.
-      if (!["salon", "folio", "tempo"].includes(template)) expect(html).toContain("ÉH");
+      // Harbour, Salon, Folio and Tempo set the name alone; the others carry the initials.
+      if (!["harbour", "salon", "folio", "tempo"].includes(template)) {
+        expect(html).toContain("ÉH");
+      }
       // Folio sets each word apart, so the accent square can follow the last one.
       expect(html).toMatch(/Éloïse Hart|ÉLOÏSE|Éloïse<\/div>/);
     }

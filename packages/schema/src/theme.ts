@@ -88,6 +88,15 @@ export const TEMPLATE_PALETTES: {
       palette("Night", "#111316", "#ecebe6", "#a9bfdc"),
     ],
   },
+  harbour: {
+    1: [
+      palette("Linen", "#ffffff", "#2b2724", "#c97b63"),
+      palette("Sand", "#f5efe6", "#2e2621", "#a0603f"),
+      palette("Sage", "#eef1ea", "#1f2a23", "#557a5f"),
+      palette("Dusk", "#1d1c21", "#f2ede6", "#e6a58f"),
+      palette("Harbour", "#13252d", "#e9f0ef", "#8ccfc2"),
+    ],
+  },
   monument: {
     1: [
       palette("Signal", "#f3f0e8", "#15130f", "#ff5a1f"),
