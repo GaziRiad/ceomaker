@@ -2,6 +2,7 @@
 
 import type { SocialKind } from "@ceomaker/schema";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Icon } from "./icons";
 
 /**
@@ -80,6 +81,11 @@ export function SalonMenu({
   const closeButton = useRef<HTMLButtonElement>(null);
   const openButton = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
+  // The sheet is drawn at the page root, not inside the header: the header's blur
+  // (backdrop-filter) makes it the box a fixed sheet fills, which on iPhone squeezed the menu
+  // into the bar.
+  const [root, setRoot] = useState<HTMLElement | null>(null);
+  useEffect(() => setRoot(openButton.current?.closest<HTMLElement>(".sl") ?? null), []);
 
   useEffect(() => {
     if (open) closeButton.current?.focus();
@@ -104,52 +110,55 @@ export function SalonMenu({
       >
         {openLabel}
       </button>
-      {open ? (
-        <div role="dialog" aria-modal="true" aria-label={openLabel} className="sl-menu">
-          <div className="sl-menu-top">
-            <span className="sl-menu-name">{name}</span>
-            <button
-              ref={closeButton}
-              type="button"
-              className="sl-bracket sl-menu-button"
-              onClick={() => setOpen(false)}
-            >
-              {closeLabel}
-            </button>
-          </div>
-          <nav aria-label="Sections" className="sl-menu-nav">
-            {items.map((item, index) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="sl-menu-item"
-                style={{ animationDelay: `${50 + index * 50}ms` }}
-                onClick={() => setOpen(false)}
-              >
-                <span className="sl-menu-n">{String(index + 1).padStart(2, "0")}</span>
-                <span className="sl-menu-label">{item.label}</span>
-              </a>
-            ))}
-          </nav>
-          {links.length ? (
-            <div className="sl-menu-links">
-              {links.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener me"
-                  aria-label={link.label}
-                  title={link.label}
-                  className="sl-icon-link"
+      {open && root
+        ? createPortal(
+            <div role="dialog" aria-modal="true" aria-label={openLabel} className="sl-menu">
+              <div className="sl-menu-top">
+                <span className="sl-menu-name">{name}</span>
+                <button
+                  ref={closeButton}
+                  type="button"
+                  className="sl-bracket sl-menu-button"
+                  onClick={() => setOpen(false)}
                 >
-                  <Icon kind={link.kind} />
-                </a>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+                  {closeLabel}
+                </button>
+              </div>
+              <nav aria-label="Sections" className="sl-menu-nav">
+                {items.map((item, index) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="sl-menu-item"
+                    style={{ animationDelay: `${50 + index * 50}ms` }}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="sl-menu-n">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="sl-menu-label">{item.label}</span>
+                  </a>
+                ))}
+              </nav>
+              {links.length ? (
+                <div className="sl-menu-links">
+                  {links.map((link, index) => (
+                    <a
+                      key={index}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener me"
+                      aria-label={link.label}
+                      title={link.label}
+                      className="sl-icon-link"
+                    >
+                      <Icon kind={link.kind} />
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </div>,
+            root,
+          )
+        : null}
     </>
   );
 }
