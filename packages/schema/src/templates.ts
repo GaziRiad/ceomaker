@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** Template keys are part of the contract: stored on sites and versions, implemented in @ceomaker/templates. */
-export const TEMPLATE_KEYS = ["meridian", "monument", "salon", "folio"] as const;
+export const TEMPLATE_KEYS = ["meridian", "monument", "salon", "folio", "tempo"] as const;
 export type TemplateKey = (typeof TEMPLATE_KEYS)[number];
 
 export const DEFAULT_TEMPLATE_KEY: TemplateKey = "meridian";
@@ -17,6 +17,7 @@ export const TEMPLATE_VERSIONS = {
   monument: [1],
   salon: [1],
   folio: [1],
+  tempo: [1],
 } as const satisfies Record<TemplateKey, readonly [number, ...number[]]>;
 
 export type TemplateVersionOf<K extends TemplateKey> = (typeof TEMPLATE_VERSIONS)[K][number];

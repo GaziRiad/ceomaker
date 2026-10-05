@@ -4,6 +4,7 @@ import { mixHex } from "./meridian/v1/measure";
 import { folioRoles, textWidth as folioWidth } from "./folio/v1/measure";
 import { initialsOf } from "./monogram";
 import { salonRoles, textWidth } from "./salon/v1/measure";
+import { splitName, tempoRoles, textWidth as tempoWidth } from "./tempo/v1/measure";
 
 // The image shown when a link to a site is shared (LinkedIn, WhatsApp, email): 1200 x 630,
 // drawn from the template's three colours, the name, role and organisation, and the initials or
@@ -15,7 +16,7 @@ export const SHARE_CARD_WIDTH = 1200;
 export const SHARE_CARD_HEIGHT = 630;
 
 export interface ShareCardProps {
-  /** "meridian", "monument", "salon" or "folio"; anything else is drawn as Meridian. */
+  /** "meridian", "monument", "salon", "folio" or "tempo"; anything else is drawn as Meridian. */
   template: string;
   colors: SiteColors;
   name: string;
@@ -37,6 +38,9 @@ export interface ShareCardProps {
     /** Folio's grotesk (Geist) and its mono (Geist Mono). */
     folio: string;
     folioMono: string;
+    /** Tempo's expanded grotesk (Archivo at width 125) and its mono (Martian Mono). */
+    tempo: string;
+    tempoMono: string;
   };
 }
 
@@ -117,10 +121,22 @@ export function folioNameSize(name: string, withPhoto: boolean): number {
   return Math.round(Math.min(largest, (room * 0.97) / longest, (room * lines) / (total * 1.12)));
 }
 
+/**
+ * Name size on Tempo, in expanded Archivo on two lines (first part left, the rest right): as
+ * large as the wider line fits the card, and as the height left beside the portrait allows.
+ */
+export function tempoNameSize(name: string, withPhoto: boolean): number {
+  const lines = splitName(name).filter(Boolean);
+  const widest = Math.max(1.5, ...lines.map((line) => tempoWidth(line)));
+  const largest = withPhoto ? 112 : 196;
+  return Math.max(48, Math.round(Math.min(largest, (1072 * 0.97) / widest)));
+}
+
 export function ShareCard(props: ShareCardProps) {
   if (props.template === "monument") return <MonumentCard {...props} />;
   if (props.template === "salon") return <SalonCard {...props} />;
   if (props.template === "folio") return <FolioCard {...props} />;
+  if (props.template === "tempo") return <TempoCard {...props} />;
   return <MeridianCard {...props} />;
 }
 
@@ -647,6 +663,104 @@ function FolioCard({ colors, name, role, organization, domain, photo, fonts }: S
           />
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function TempoCard({ colors, name, role, organization, domain, photo, fonts }: ShareCardProps) {
+  const tempo = tempoRoles(colors);
+  const ink2 = mixHex(colors.ink, colors.bg, tempo.secondary / 100);
+  const act = mixHex(colors.accent, colors.ink, tempo.accentText / 100);
+  const mark = mixHex(colors.accent, colors.ink, tempo.mark / 100);
+  const kicker = [role, organization].filter(Boolean).join(" · ");
+  const size = tempoNameSize(name, Boolean(photo));
+  const [first, rest] = splitName(name || " ");
+  const line = (text: string, right: boolean) => (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: right ? "flex-end" : "flex-start",
+        fontFamily: fonts.tempo,
+        // The image renderer has only this weight (registered as 400); browsers set it exactly.
+        fontWeight: 440,
+        fontStretch: "125%",
+        fontSize: size,
+        lineHeight: 0.86,
+        letterSpacing: "-0.045em",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {text}
+    </div>
+  );
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        width: SHARE_CARD_WIDTH,
+        height: SHARE_CARD_HEIGHT,
+        padding: "60px 64px 56px",
+        overflow: "hidden",
+        background: colors.bg,
+        color: colors.ink,
+      }}
+    >
+      {line(first, false)}
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 40 }}>
+        {photo ? (
+          <div
+            style={{
+              display: "flex",
+              flex: "none",
+              width: 208,
+              height: 260,
+              overflow: "hidden",
+              background: mixHex(colors.ink, colors.bg, 0.09),
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- also drawn by the image renderer */}
+            <img
+              src={photo}
+              alt=""
+              width={208}
+              height={260}
+              style={{ width: 208, height: 260, objectFit: "cover" }}
+            />
+          </div>
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            flexDirection: photo ? "column" : "row",
+            alignItems: photo ? "flex-start" : "flex-end",
+            justifyContent: "space-between",
+            gap: photo ? 18 : 40,
+            fontFamily: fonts.tempoMono,
+            fontSize: 20,
+            lineHeight: 1.5,
+            letterSpacing: "0.04em",
+          }}
+        >
+          <div style={{ display: "flex", maxWidth: 680, color: act, ...clamp2 }}>
+            {kicker.toLocaleUpperCase() || " "}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, color: ink2 }}>
+            {/* The template's ✦, drawn: neither font has the glyph. */}
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M8 0C8.6 5.4 10.6 7.4 16 8C10.6 8.6 8.6 10.6 8 16C7.4 10.6 5.4 8.6 0 8C5.4 7.4 7.4 5.4 8 0Z"
+                fill={mark}
+              />
+            </svg>
+            <div style={{ display: "flex" }}>{domain.toLocaleUpperCase()}</div>
+          </div>
+        </div>
+      </div>
+      {rest ? line(rest, true) : null}
     </div>
   );
 }

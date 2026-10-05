@@ -1,4 +1,5 @@
 import {
+  Archivo,
   Barlow,
   Barlow_Condensed,
   Big_Shoulders,
@@ -7,6 +8,7 @@ import {
   Hanken_Grotesk,
   Inter,
   Italiana,
+  Martian_Mono,
   Newsreader,
   Public_Sans,
 } from "next/font/google";
@@ -88,6 +90,22 @@ export const geistMono = Geist_Mono({
   preload: false,
 });
 
+// Tempo stretches its name along Archivo's width axis, so the width axis is loaded too.
+export const archivo = Archivo({
+  subsets: ["latin", "latin-ext"],
+  style: ["normal", "italic"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+  preload: false,
+});
+export const martianMono = Martian_Mono({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-martian-mono",
+  display: "swap",
+  preload: false,
+});
+
 // The same families for the "not live" and "paused" cards on customer addresses, without
 // preloading: published sites never use them.
 export const barlowLazy = Barlow({
@@ -114,6 +132,8 @@ const siteFonts = [
   hankenGrotesk,
   geist,
   geistMono,
+  archivo,
+  martianMono,
 ];
 
 export const siteFontVariables = [...siteFonts, barlowLazy, barlowCondensedLazy]

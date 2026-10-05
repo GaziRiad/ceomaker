@@ -1,6 +1,6 @@
 # CEOMaker
 
-Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of four templates (Meridian, Monument, Salon or Folio), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Billing ($9.99 a month or $99 a year) comes in Phase 3; publishing is free during the beta.
+Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of five templates (Meridian, Monument, Salon, Folio or Tempo), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Billing ($9.99 a month or $99 a year) comes in Phase 3; publishing is free during the beta.
 
 The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 
@@ -36,7 +36,7 @@ apps/web            Next.js app: landing, guided questions, sign-in, builder, ed
                     AI drafting (lib/ai), media uploads, proxy routing, tenant renderer route
 packages/schema     Zod contract: sections, colours, rich text, answers, subdomains, fixtures
 packages/db         Drizzle schema, migrations, owner-scoped queries, seed
-packages/templates  The site templates (Meridian, Monument, Salon, Folio), their shared view model,
+packages/templates  The site templates (Meridian, Monument, Salon, Folio, Tempo), their shared view model,
                     the shared contact form and the registry
 ```
 
@@ -211,7 +211,7 @@ Live sites send anonymous page views and clicks on email, phone, LinkedIn and we
 
 ### Plans (Free and Pro)
 
-Every account starts on the free plan: a site on Meridian at `<name>.ceomaker.app`, reached by email and links, one AI draft and 5 AI rewrites a day, and a "Made with CEOMaker" badge. Pro adds Monument, Salon and Folio (and future premium templates), a custom domain, the contact form and Messages inbox, analytics, more AI and drafting from a CV, and removes the badge. The rules live in `packages/schema/src/plans.ts`; the plan is `user.plan` (`free` or `pro`).
+Every account starts on the free plan: a site on Meridian at `<name>.ceomaker.app`, reached by email and links, one AI draft and 5 AI rewrites a day, and a "Made with CEOMaker" badge. Pro adds Monument, Salon, Folio and Tempo (and future premium templates), a custom domain, the contact form and Messages inbox, analytics, more AI and drafting from a CV, and removes the badge. The rules live in `packages/schema/src/plans.ts`; the plan is `user.plan` (`free` or `pro`).
 
 Free accounts can try Pro templates in the draft but not publish them. When an account isn't Pro, its live site is shown as Meridian, its form is off, its custom domain forwards to its own address and the badge appears; nothing stored changes, so Pro brings it all back.
 

@@ -6,6 +6,7 @@ import {
   monumentNameSize,
   salonNameSize,
   ShareCard,
+  tempoNameSize,
 } from "./share-card";
 
 const fonts = {
@@ -17,6 +18,8 @@ const fonts = {
   salonBody: "salon-body",
   folio: "folio",
   folioMono: "folio-mono",
+  tempo: "tempo",
+  tempoMono: "tempo-mono",
 };
 const colors = { bg: "#f3f0e8", ink: "#15130f", accent: "#ff5a1f" };
 
@@ -50,8 +53,15 @@ describe("share card", () => {
     expect(folioNameSize("Maximilianaconstantinopolous", true)).toBeLessThan(50);
   });
 
+  it("fits Tempo names on two lines, smaller beside a portrait", () => {
+    expect(tempoNameSize("Nadia Ferreira", false)).toBe(196);
+    expect(tempoNameSize("Nadia Ferreira", true)).toBe(112);
+    expect(tempoNameSize("Alexandra Montgomery-Fitzgerald", false)).toBeLessThan(110);
+    expect(tempoNameSize("Maximilianaconstantinopolous", false)).toBeLessThan(80);
+  });
+
   it("draws each template with the name, role line and address", () => {
-    for (const template of ["meridian", "monument", "salon", "folio", "retired-key"]) {
+    for (const template of ["meridian", "monument", "salon", "folio", "tempo", "retired-key"]) {
       const html = renderToStaticMarkup(
         <ShareCard
           template={template}
@@ -63,9 +73,10 @@ describe("share card", () => {
           fonts={fonts}
         />,
       );
-      expect(html).toContain("eloise.ceomaker.app");
-      // Salon and Folio set the name alone; the others carry the initials.
-      if (template !== "salon" && template !== "folio") expect(html).toContain("ÉH");
+      // Tempo sets the address in capitals, as its labels are.
+      expect(html.toLowerCase()).toContain("eloise.ceomaker.app");
+      // Salon, Folio and Tempo set the name alone; the others carry the initials.
+      if (!["salon", "folio", "tempo"].includes(template)) expect(html).toContain("ÉH");
       // Folio sets each word apart, so the accent square can follow the last one.
       expect(html).toMatch(/Éloïse Hart|ÉLOÏSE|Éloïse<\/div>/);
     }

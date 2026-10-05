@@ -10,6 +10,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { Arrow } from "./icons";
 
 // Folio's client parts: the phone menu, the work carousel's controls and smooth scrolling. Each
@@ -150,6 +151,11 @@ export function FolioMenu({
   const closeButton = useRef<HTMLButtonElement>(null);
   const openButton = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
+  // The sheet is drawn at the page root, not inside the header: the header bar's blur
+  // (backdrop-filter) makes it the box a fixed sheet fills, which on iPhone squeezed the menu
+  // into the bar.
+  const [root, setRoot] = useState<HTMLElement | null>(null);
+  useEffect(() => setRoot(openButton.current?.closest<HTMLElement>(".fo") ?? null), []);
 
   useEffect(() => {
     if (open) closeButton.current?.focus();
@@ -174,49 +180,52 @@ export function FolioMenu({
       >
         {openLabel}
       </button>
-      {open ? (
-        <div role="dialog" aria-modal="true" aria-label={openLabel} className="fo-menu">
-          <div className="fo-bar fo-menu-bar">
-            <span className="fo-brand">
-              <span aria-hidden="true" className="fo-mark" />
-              <span className="fo-brand-name">{name}</span>
-            </span>
-            <button
-              ref={closeButton}
-              type="button"
-              className="fo-pill fo-menu-close"
-              onClick={() => setOpen(false)}
-            >
-              {closeLabel}
-            </button>
-          </div>
-          <nav aria-label="Sections" className="fo-menu-nav">
-            {items.map((item, index) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="fo-menu-item"
-                style={{ animationDelay: `${40 + index * 40}ms` }}
-                onClick={() => setOpen(false)}
-              >
-                <span className="fo-menu-label">{item.label}</span>
-                <span aria-hidden="true" className="fo-menu-n">
-                  {pad2(index + 1)}
+      {open && root
+        ? createPortal(
+            <div role="dialog" aria-modal="true" aria-label={openLabel} className="fo-menu">
+              <div className="fo-bar fo-menu-bar">
+                <span className="fo-brand">
+                  <span aria-hidden="true" className="fo-mark" />
+                  <span className="fo-brand-name">{name}</span>
                 </span>
-              </a>
-            ))}
-          </nav>
-          {button ? (
-            <a
-              href={button.href}
-              className="fo-pill fo-cta-pill fo-menu-cta"
-              onClick={() => setOpen(false)}
-            >
-              {button.label} <span aria-hidden="true">→</span>
-            </a>
-          ) : null}
-        </div>
-      ) : null}
+                <button
+                  ref={closeButton}
+                  type="button"
+                  className="fo-pill fo-menu-close"
+                  onClick={() => setOpen(false)}
+                >
+                  {closeLabel}
+                </button>
+              </div>
+              <nav aria-label="Sections" className="fo-menu-nav">
+                {items.map((item, index) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="fo-menu-item"
+                    style={{ animationDelay: `${40 + index * 40}ms` }}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="fo-menu-label">{item.label}</span>
+                    <span aria-hidden="true" className="fo-menu-n">
+                      {pad2(index + 1)}
+                    </span>
+                  </a>
+                ))}
+              </nav>
+              {button ? (
+                <a
+                  href={button.href}
+                  className="fo-pill fo-cta-pill fo-menu-cta"
+                  onClick={() => setOpen(false)}
+                >
+                  {button.label} <span aria-hidden="true">→</span>
+                </a>
+              ) : null}
+            </div>,
+            root,
+          )
+        : null}
     </>
   );
 }
