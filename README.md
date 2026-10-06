@@ -1,6 +1,6 @@
 # CEOMaker
 
-Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of six templates (Meridian, Harbour, Monument, Salon, Folio or Tempo), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Billing ($9.99 a month or $99 a year) comes in Phase 3; publishing is free during the beta.
+Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of six templates (Meridian, Harbour, Monument, Salon, Folio or Tempo), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Free to publish; Pro is $19 a month or $190 a year.
 
 The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 
@@ -261,7 +261,7 @@ Pro set by hand (`update "user" set plan = 'pro' where email = '…'`) still wor
 
 Freemius is the merchant of record: it takes the payment, charges VAT and sales tax, sends receipts and handles refunds. Settings › Billing sends the owner to Freemius's hosted checkout (monthly or yearly, with their account email fixed). Everything after that stays in the app: Billing shows the cycle, price and renewal or end date (read live from Freemius), cancels renewal, and lists invoices as PDF downloads. Only typing a new card leaves the app, for Freemius's secure page, which returns to Billing; card details never reach our servers. Production takes real payments; previews and local development use Freemius's sandbox (test cards), and each ignores the other's licenses.
 
-1. **Freemius product:** one paid plan, Pro, at $9.99 monthly and $99 yearly (the prices shown in the app live in `apps/web/src/lib/plan-copy.ts`), one license, no trial, a 14-day refund policy, and the terms URL `https://www.ceomaker.app/terms`.
+1. **Freemius product:** one paid plan, Pro, at $19 monthly and $190 yearly (the prices shown in the app live in `apps/web/src/lib/plan-copy.ts`), one license, no trial, a 14-day refund policy, and the terms URL `https://www.ceomaker.app/terms`.
 2. **Keys:** from the product's (not the store's) Settings › API & Keys, set `FREEMIUS_PRODUCT_ID`, `FREEMIUS_PUBLIC_KEY`, `FREEMIUS_SECRET_KEY` and `FREEMIUS_API_KEY` (the API bearer token) in Vercel. Without all four, the Upgrade button says payments are coming soon.
 3. **Webhook** (Settings › Webhooks): `https://<app>/api/billing/freemius/webhook`, with the events `license.created`, `license.extended`, `license.shortened`, `license.updated`, `license.cancelled`, `license.expired`, `license.plan.changed`, `license.deleted` and `subscription.cancelled`. Every event is checked against the secret key and the license is read again from Freemius, so an event can't grant anything by itself.
 4. **Redirect after purchase** (Plans › Customization, toggle "Redirect Checkout to a custom URL"): `https://<app>/api/billing/freemius/return`. It applies the purchase at once and returns the owner to Billing; without it the webhook still does, moments later.
