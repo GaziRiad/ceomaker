@@ -629,6 +629,9 @@ describe("draft sources", () => {
     expect(normalizeSources(["I'll add it later", "Something else"])).toEqual([
       "I'll add it later",
     ]);
+    expect(normalizeSources(["I'll add it later", "Upload a CV or LinkedIn PDF"])).toEqual([
+      "Upload a CV or LinkedIn PDF",
+    ]);
     expect(wantsDocument(["Import from LinkedIn"])).toBe(true);
     expect(wantsDocument(["I'll add it later"])).toBe(false);
     expect(wantsDocument(undefined)).toBe(false);

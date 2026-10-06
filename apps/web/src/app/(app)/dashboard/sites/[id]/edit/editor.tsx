@@ -26,6 +26,8 @@ import {
 } from "@ceomaker/templates";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Sparkles } from "@/components/icons";
+import { ProTag } from "@/components/pro";
 import { ArrowRight, Wordmark } from "@/components/ui";
 import type { RewriteMode } from "@/lib/ai/draft";
 import {
@@ -57,6 +59,7 @@ import { InlineEditing } from "./inline-editing";
 import { SharingPanel, SharingPreviews, type ShareView } from "./sharing";
 import { sectionElement, sectionIdAt } from "./section-dom";
 import { PublishDialog, type PublishedResult } from "./publish-dialog";
+import { RedraftDialog } from "./redraft-dialog";
 import { TemplatePanel } from "./template-panel";
 
 type Tab = "content" | "brand" | "design" | "share";
@@ -138,6 +141,7 @@ export function Editor({
   const [designNoticeSeen, setDesignNoticeSeen] = useState(false);
   const [versions, setVersions] = useState(versionCount);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [redraftOpen, setRedraftOpen] = useState(false);
   const [rewriting, setRewriting] = useState(false);
   const [rewriteError, setRewriteError] = useState<string | null>(null);
   const [banner, setBanner] = useState(notice);
@@ -508,27 +512,40 @@ export function Editor({
             </div>
           ) : null}
           {tab === "content" ? (
-            <ContentPanel
-              content={draft.content}
-              selectedId={selectedId}
-              errors={errors}
-              initials={initials}
-              rewriting={rewriting}
-              rewriteError={rewriteError}
-              revision={formRevision}
-              fixRequest={fixRequest}
-              template={{
-                name: template.name,
-                contactForm: template.contactForm,
-                shows: template.shows,
-              }}
-              pro={pro}
-              onSelect={selectFromSidebar}
-              onSections={setSections}
-              onSection={updateSection}
-              onMeta={updateMeta}
-              onRewrite={rewrite}
-            />
+            <>
+              <div style={{ padding: "12px 12px 0" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary w-full gap-2"
+                  onClick={() => setRedraftOpen(true)}
+                >
+                  <Sparkles size={14} />
+                  Redraft with AI
+                  {pro ? null : <ProTag />}
+                </button>
+              </div>
+              <ContentPanel
+                content={draft.content}
+                selectedId={selectedId}
+                errors={errors}
+                initials={initials}
+                rewriting={rewriting}
+                rewriteError={rewriteError}
+                revision={formRevision}
+                fixRequest={fixRequest}
+                template={{
+                  name: template.name,
+                  contactForm: template.contactForm,
+                  shows: template.shows,
+                }}
+                pro={pro}
+                onSelect={selectFromSidebar}
+                onSections={setSections}
+                onSection={updateSection}
+                onMeta={updateMeta}
+                onRewrite={rewrite}
+              />
+            </>
           ) : tab === "brand" ? (
             <BrandPanel
               templateKey={draft.templateKey}
@@ -600,6 +617,13 @@ export function Editor({
         pro={pro}
         ensureSaved={ensureSaved}
         onPublished={onPublished}
+      />
+      <RedraftDialog
+        open={redraftOpen}
+        siteId={siteId}
+        pro={pro}
+        ensureSaved={ensureSaved}
+        onClose={() => setRedraftOpen(false)}
       />
     </div>
   );

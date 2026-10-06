@@ -87,12 +87,15 @@ export const DOCUMENT_SOURCE: SourceOption = "Upload a CV or LinkedIn PDF";
  */
 const LEGACY_DOCUMENT_SOURCES = new Set(["Upload CV (PDF or DOCX)", "Import from LinkedIn"]);
 
-/** Current choices only: legacy ones become the file upload, unknown ones are dropped. */
+/**
+ * The one current choice: legacy ones become the file upload, unknown ones are dropped, and the
+ * upload wins over "later" (answers saved when both could be picked).
+ */
 export function normalizeSources(values: readonly string[]): SourceOption[] {
   const known = values.map((value) =>
     LEGACY_DOCUMENT_SOURCES.has(value) ? DOCUMENT_SOURCE : value,
   );
-  return SOURCE_OPTIONS.filter((option) => known.includes(option));
+  return SOURCE_OPTIONS.filter((option) => known.includes(option)).slice(0, 1);
 }
 
 /** Whether the user wants to draft from a file, from answers saved at any time. */

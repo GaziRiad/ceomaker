@@ -1,4 +1,4 @@
-import { and, count, eq, gte, ne } from "drizzle-orm";
+import { and, count, eq, gte, isNotNull, ne, or } from "drizzle-orm";
 import type { Database } from "../client";
 import { aiUsage } from "../schema";
 
@@ -34,6 +34,9 @@ export async function startAiUsage(
         eq(aiUsage.userId, input.userId),
         eq(aiUsage.kind, input.kind),
         ne(aiUsage.status, "rejected"),
+        // A request that failed before the model wrote anything (an outage, a bad key) cost
+        // nothing and doesn't use up an allowance.
+        or(ne(aiUsage.status, "failed"), isNotNull(aiUsage.inputTokens)),
         gte(aiUsage.createdAt, new Date(Date.now() - input.windowMs)),
       ),
     );

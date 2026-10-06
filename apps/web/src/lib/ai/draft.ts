@@ -6,6 +6,7 @@ import {
   paragraphFromMarkup,
   parseSiteContent,
   type OnboardingAnswers,
+  type Section,
   type SectionInput,
   type SiteContent,
   type SiteContentInput,
@@ -249,6 +250,74 @@ export function contentFromDraft(
         blurb: clip(draft.contact.invitation, 280) || starterSection("contact").blurb,
       },
     ],
+  };
+  const parsed = parseSiteContent(content);
+  return parsed.success ? parsed.data : null;
+}
+
+/**
+ * A redraft of a site the owner has already worked on: the new draft's words go into the current
+ * content, and everything the AI doesn't write stays (photos, gallery, section order and
+ * visibility, testimonials, contact details, links, custom titles and wording). A work list
+ * with photos on it stays as it is too, since new items couldn't keep them.
+ */
+export function mergeRedraft(current: SiteContent, fresh: SiteContent): SiteContent | null {
+  const freshSection = (section: Section) =>
+    fresh.sections.find(
+      (candidate) => candidate.id === section.id && candidate.type === section.type,
+    );
+  // Only a list the AI wrote replaces the owner's (a hidden one is the answers' placeholder), and
+  // it shows: the point of redrafting from a CV is to fill these. Hiding it again is one click.
+  const list = <T extends { items: unknown[]; visible: boolean }>(own: T, next: T): T =>
+    next.visible && next.items.length ? { ...own, items: next.items, visible: true } : own;
+
+  const sections = current.sections.map((section): Section => {
+    const next = freshSection(section);
+    if (!next) return section;
+    switch (section.type) {
+      case "hero": {
+        const hero = next as typeof section;
+        return {
+          ...section,
+          eyebrow: hero.eyebrow,
+          headline: hero.headline,
+          subheadline: hero.subheadline,
+          primaryCta:
+            section.primaryCta && hero.primaryCta
+              ? { ...section.primaryCta, label: hero.primaryCta.label }
+              : (section.primaryCta ?? hero.primaryCta),
+        };
+      }
+      case "about":
+        return { ...section, body: (next as typeof section).body };
+      case "experience":
+      case "achievements":
+        return list(section, next as typeof section);
+      case "portfolio":
+        return section.items.some((item) => item.image)
+          ? section
+          : list(section, next as typeof section);
+      case "contact":
+        return { ...section, blurb: (next as typeof section).blurb ?? section.blurb };
+      default:
+        return section;
+    }
+  });
+
+  const meta = fresh.meta;
+  const content = {
+    ...current,
+    meta: {
+      ...current.meta,
+      role: meta.role ?? current.meta.role,
+      company: meta.company ?? current.meta.company,
+      location: meta.location ?? current.meta.location,
+      availability: meta.availability ?? current.meta.availability,
+      availabilityShort: meta.availabilityShort ?? current.meta.availabilityShort,
+      affiliations: meta.affiliations.length ? meta.affiliations : current.meta.affiliations,
+      keywords: meta.keywords.length ? meta.keywords : current.meta.keywords,
+    },
+    sections,
   };
   const parsed = parseSiteContent(content);
   return parsed.success ? parsed.data : null;

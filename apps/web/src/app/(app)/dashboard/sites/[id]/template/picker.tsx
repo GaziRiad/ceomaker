@@ -9,10 +9,11 @@ import {
 } from "@ceomaker/schema";
 import { designOnChoosing, getTemplate, templateList } from "@ceomaker/templates";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { TemplateThumbnail } from "@/components/template-thumbnail";
 import { ArrowRight } from "@/components/ui";
-import { DOCUMENT_ACCEPT, DOCUMENT_MAX_BYTES, setPendingDocument } from "@/lib/pending-document";
+import { LinkedInPdfHint, useDocumentFile } from "@/components/document-file";
+import { setPendingDocument } from "@/lib/pending-document";
 import { chooseTemplateAction } from "../../../site-actions";
 import { ProTag } from "@/components/pro";
 
@@ -37,25 +38,17 @@ export function TemplatePicker({
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<TemplateKey>(initialTemplate);
-  const [file, setFile] = useState<File | null>(null);
+  const cv = useDocumentFile();
+  const { file } = cv;
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const input = useRef<HTMLInputElement>(null);
+  // They said they'd draft from a file: attaching it is the main step, skipping it a choice.
+  const asksForFile = wantsDocument && pro && !file;
   // Each card shows the design the site would get: the one it uses, else the newest.
   const choices = templateList.map((template) =>
     getTemplate(template.key, designOnChoosing(template.key, current)),
   );
   const selectedName = choices.find((template) => template.key === selected)?.name;
-
-  const pickFile = (candidate: File | undefined) => {
-    setError(null);
-    if (!candidate) return;
-    if (candidate.size > DOCUMENT_MAX_BYTES) {
-      setError("That file is over 4 MB. Try a smaller one.");
-      return;
-    }
-    setFile(candidate);
-  };
 
   const write = () => {
     setError(null);
@@ -160,47 +153,35 @@ export function TemplatePicker({
           {wantsDocument && !pro ? (
             <span className="flex items-center gap-2 text-sm text-neutral-700">
               <ProTag />
-              Drafting from a CV or LinkedIn PDF is part of Pro.
+              Drafting from a CV or LinkedIn PDF is part of Pro, so this draft uses your answers.
             </span>
-          ) : wantsDocument ? (
+          ) : null}
+          {wantsDocument && pro ? (
             <span className="flex min-w-0 items-center gap-2 text-sm text-neutral-700">
-              <input
-                ref={input}
-                type="file"
-                accept={DOCUMENT_ACCEPT}
-                className="sr-only"
-                onChange={(event) => pickFile(event.target.files?.[0])}
-              />
+              {cv.input}
               {file ? (
                 <>
-                  <span className="max-w-[220px] truncate">File: {file.name}</span>
-                  <button type="button" className="btn btn-ghost" onClick={() => setFile(null)}>
+                  <span className="max-w-[260px] truncate">Drafting from {file.name}</span>
+                  <button type="button" className="btn btn-ghost" onClick={cv.clear}>
                     Remove
                   </button>
                 </>
               ) : (
-                <>
-                  <span className="hidden md:inline">
-                    Draft from your CV or LinkedIn PDF?{" "}
-                    <span className="text-neutral-600">
-                      (LinkedIn: More, then Save to PDF on your profile)
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => input.current?.click()}
-                  >
-                    Attach file
-                  </button>
-                </>
+                <span className="hidden max-w-[460px] md:inline">
+                  <LinkedInPdfHint />
+                </span>
               )}
             </span>
           ) : null}
-          {error ? (
+          {error || cv.error ? (
             <span role="alert" className="w-full text-sm text-danger md:order-last">
-              {error}
+              {error ?? cv.error}
             </span>
+          ) : null}
+          {asksForFile ? (
+            <button type="button" className="btn btn-ghost" disabled={pending} onClick={write}>
+              Skip, use my answers
+            </button>
           ) : null}
           <button
             type="button"
@@ -212,9 +193,10 @@ export function TemplatePicker({
               fontSize: 16,
             }}
             disabled={pending}
-            onClick={write}
+            onClick={asksForFile ? cv.choose : write}
           >
-            {pending ? "Saving…" : "Write my site"} <ArrowRight />
+            {pending ? "Saving…" : asksForFile ? "Attach CV or LinkedIn PDF" : "Write my site"}{" "}
+            <ArrowRight />
           </button>
         </div>
       </div>

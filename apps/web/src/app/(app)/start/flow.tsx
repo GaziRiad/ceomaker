@@ -24,6 +24,7 @@ import { TemplateView } from "@ceomaker/templates";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { LinkedInPdfHint } from "@/components/document-file";
 import { ProTag } from "@/components/pro";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { trackEvent } from "@/lib/product-analytics/browser";
@@ -362,7 +363,8 @@ export function QuestionsFlow({
                 fontSize={16}
                 tag={source === DOCUMENT_SOURCE ? <ProTag /> : null}
                 selected={chosenSources.includes(source)}
-                onClick={() => update({ sources: toggle(chosenSources, source) })}
+                // One or the other: choosing one clears the other.
+                onClick={() => update({ sources: chosenSources.includes(source) ? [] : [source] })}
               />
             ))}
           </div>
@@ -372,12 +374,7 @@ export function QuestionsFlow({
                 Drafting from a file is part of Pro. You&apos;ll attach it after choosing a
                 template; it&apos;s used once to draft your site and isn&apos;t stored.
               </span>
-              <span>
-                <strong className="font-medium text-text">No CV to hand?</strong> Use your LinkedIn
-                profile: open it on LinkedIn, select <strong className="font-medium">More</strong>{" "}
-                (or <strong className="font-medium">Resources</strong>) under your name, then{" "}
-                <strong className="font-medium">Save to PDF</strong>.
-              </span>
+              <LinkedInPdfHint />
             </div>
           ) : null}
         </>
