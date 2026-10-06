@@ -6,13 +6,30 @@ import { encodeVisitSource, readVisitSource, type VisitSource } from "./visit-so
 
 // PostHog in the browser, on the product's own pages only (the (app) layout starts it; customer
 // sites never load it). Nothing is stored in the browser: the visitor's id lives in memory for
-// this page load, so a new tab or a reload is a new visitor until they sign in.
+// this page load, so a new tab or a reload is a new visitor until they sign in. The one exception
+// is our own admins' browsers, flagged so they're left out entirely (INTERNAL_KEY).
 
 let started = false;
+let internal = false;
 let visit: VisitSource | null = null;
 
+/**
+ * Set in a browser where one of our own admin accounts has signed in, so its visits stay out of
+ * the numbers on every page, including the home page before sign-in (which can't know who it
+ * is). A preference flag, not an identifier: it holds no id and is never sent anywhere.
+ */
+const INTERNAL_KEY = "ceomaker:internal";
+
+function internalBrowser(): boolean {
+  try {
+    return localStorage.getItem(INTERNAL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 function on(): boolean {
-  return started && posthogKey() !== null;
+  return started && !internal && posthogKey() !== null;
 }
 
 /** Starts once per page load. Reads where the visit came from even when PostHog is off. */
@@ -24,8 +41,9 @@ export function startProductAnalytics(): void {
     href: location.href,
     ownHost: location.host,
   });
+  internal = internalBrowser();
   const key = posthogKey();
-  if (!key) return;
+  if (!key || internal) return;
   posthog.init(key, {
     api_host: RELAY_PATH,
     ui_host: POSTHOG_UI_HOST,
@@ -61,10 +79,22 @@ export function startProductAnalytics(): void {
 }
 
 /** Links this page load to the signed-in account. `internal` marks our own accounts. */
-export function identifyAccount(id: string, internal: boolean): void {
+export function identifyAccount(id: string, isInternal: boolean): void {
   startProductAnalytics();
+  if (isInternal) {
+    try {
+      localStorage.setItem(INTERNAL_KEY, "1");
+    } catch {
+      // Storage blocked: this page load is still marked below.
+    }
+  }
   if (!on() || posthog.get_distinct_id() === id) return;
-  posthog.identify(id, internal ? { internal: true } : undefined);
+  posthog.identify(id, isInternal ? { internal: true } : undefined);
+  // From here on this browser sends nothing (the flag above covers later page loads).
+  if (isInternal) {
+    posthog.opt_out_capturing();
+    internal = true;
+  }
 }
 
 /** After signing out, the next person on this browser starts anonymous. */
