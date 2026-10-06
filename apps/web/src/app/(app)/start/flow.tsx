@@ -23,9 +23,8 @@ import {
 import { TemplateView } from "@ceomaker/templates";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { LinkedInPdfHint } from "@/components/document-file";
-import { ProTag } from "@/components/pro";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { trackEvent } from "@/lib/product-analytics/browser";
 import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
@@ -84,14 +83,11 @@ function Chip({
   selected,
   onClick,
   fontSize = 17,
-  tag,
 }: {
   label: string;
   selected: boolean;
   onClick: () => void;
   fontSize?: number;
-  /** Shown after the label, such as the Pro badge. */
-  tag?: ReactNode;
 }) {
   return (
     <button
@@ -103,7 +99,6 @@ function Chip({
     >
       {selected ? <span className="text-accent-700">✓</span> : null}
       {label}
-      {tag}
     </button>
   );
 }
@@ -361,7 +356,6 @@ export function QuestionsFlow({
                 key={source}
                 label={source}
                 fontSize={16}
-                tag={source === DOCUMENT_SOURCE ? <ProTag /> : null}
                 selected={chosenSources.includes(source)}
                 // One or the other: choosing one clears the other.
                 onClick={() => update({ sources: chosenSources.includes(source) ? [] : [source] })}
@@ -371,8 +365,8 @@ export function QuestionsFlow({
           {chosenSources.includes(DOCUMENT_SOURCE) ? (
             <div className="flex flex-col gap-1.5 text-sm text-neutral-700">
               <span>
-                Drafting from a file is part of Pro. You&apos;ll attach it after choosing a
-                template; it&apos;s used once to draft your site and isn&apos;t stored.
+                You&apos;ll attach it after choosing a template. It&apos;s used once to draft your
+                site and isn&apos;t stored.
               </span>
               <LinkedInPdfHint />
             </div>

@@ -92,6 +92,7 @@ export function Editor({
   initials,
   notice,
   pro,
+  freeDraftLeft,
   initialDevice,
   customDomain,
 }: {
@@ -109,6 +110,8 @@ export function Editor({
   notice: string | null;
   /** The account is on Pro: premium templates publish and the contact form can be on. */
   pro: boolean;
+  /** The account hasn't used its free AI draft (written without AI, or before AI was on). */
+  freeDraftLeft: boolean;
   /** The canvas size the owner last picked, on any computer. */
   initialDevice: Device;
   /** The site's own domain, when connected and the account is on Pro. */
@@ -520,8 +523,8 @@ export function Editor({
                   onClick={() => setRedraftOpen(true)}
                 >
                   <Sparkles size={14} />
-                  Redraft with AI
-                  {pro ? null : <ProTag />}
+                  {pro || !freeDraftLeft ? "Redraft with AI" : "Draft with AI"}
+                  {pro || freeDraftLeft ? null : <ProTag />}
                 </button>
               </div>
               <ContentPanel
@@ -622,6 +625,7 @@ export function Editor({
         open={redraftOpen}
         siteId={siteId}
         pro={pro}
+        freeDraftLeft={freeDraftLeft}
         ensureSaved={ensureSaved}
         onClose={() => setRedraftOpen(false)}
       />

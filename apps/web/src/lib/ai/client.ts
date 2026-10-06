@@ -20,6 +20,8 @@ export function anthropic(): Anthropic | null {
 }
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
+/** A window long enough to count every draft an account has ever made. */
+export const FOREVER_MS = 100 * 365 * DAY_MS;
 /** Per user per rolling day. Drafting is the expensive call; rewrites are small. */
 export const AI_LIMITS = { generate: 3, rewrite: 30 } as const;
 

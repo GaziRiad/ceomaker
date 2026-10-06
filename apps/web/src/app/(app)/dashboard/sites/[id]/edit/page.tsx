@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Blueprint, Wordmark } from "@/components/ui";
-import { getDb, getEditorDevice, getSiteDomain } from "@ceomaker/db";
-import { isPro } from "@ceomaker/schema";
+import { countAiUsage, getDb, getEditorDevice, getSiteDomain } from "@ceomaker/db";
+import { FREE_AI_LIMITS, isPro } from "@ceomaker/schema";
+import { FOREVER_MS } from "@/lib/ai/client";
 import { draftNoticeText } from "@/lib/ai/events";
 import { planFor } from "@/lib/plan";
 import { siteAddressParts } from "@/lib/routing";
@@ -23,10 +24,11 @@ async function EditSite({
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const { user, site, draft } = await loadOwnedSite(id, `/dashboard/sites/${id}/edit`);
-  const [plan, device, domain] = await Promise.all([
+  const [plan, device, domain, drafts] = await Promise.all([
     planFor(user.id),
     getEditorDevice(getDb(), user.id),
     getSiteDomain(getDb(), { userId: user.id, siteId: site.id }),
+    countAiUsage(getDb(), { userId: user.id, kind: "generate", windowMs: FOREVER_MS }),
   ]);
   const address = siteAddressParts();
   const notice = draftNoticeText(query.notice);
@@ -48,6 +50,7 @@ async function EditSite({
         initials={initialsFor(draft.content.meta.name || user.name, user.email)}
         notice={notice}
         pro={isPro(plan)}
+        freeDraftLeft={drafts < FREE_AI_LIMITS.drafts}
         initialDevice={isDevice(device) ? device : "desktop"}
         customDomain={isPro(plan) && domain?.stage === "connected" ? domain.domain : null}
       />

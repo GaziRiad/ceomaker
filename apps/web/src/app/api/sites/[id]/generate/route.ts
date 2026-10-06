@@ -1,7 +1,7 @@
 import { finishAiUsage, getDb, getSiteForOwner, saveDraft, startAiUsage } from "@ceomaker/db";
 import { FREE_AI_LIMITS, isPro, parseThemeSettingsForRender } from "@ceomaker/schema";
 import { getAuth } from "@/lib/auth";
-import { AI_LIMITS, aiEnabled, DAY_MS } from "@/lib/ai/client";
+import { AI_LIMITS, aiEnabled, DAY_MS, FOREVER_MS } from "@/lib/ai/client";
 import { DOCUMENT_MAX_BYTES, readSourceDocument, type SourceDocument } from "@/lib/ai/documents";
 import type { DraftNotice, GenerateEvent } from "@/lib/ai/events";
 import { mergeRedraft } from "@/lib/ai/draft";
@@ -10,9 +10,6 @@ import { planFor } from "@/lib/plan";
 import { isSameOrigin } from "@/lib/same-origin";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { sendServerEvent } from "@/lib/product-analytics/server";
-
-/** A window long enough to count every draft an account has ever made. */
-const FOREVER_MS = 100 * 365 * DAY_MS;
 
 // Drafting with a long CV can take a minute or more.
 export const maxDuration = 300;
@@ -41,7 +38,8 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
   if (!site.answers) return json(409, "This site has no answers to draft from");
   const pro = isPro(await planFor(userId));
   const redraft = new URL(request.url).searchParams.get("redraft") === "1";
-  if (redraft && !pro) return json(403, "Redrafting with AI is part of Pro.");
+  // A free account's one AI draft can also be a redraft, when its first draft was written without
+  // AI (before AI was switched on, or after a failure); the usage limit below decides.
   // Why a redraft didn't happen reads differently: nothing was replaced.
   const kept = (reason: "unavailable" | "limited" | "failed"): DraftNotice =>
     redraft ? `redraft-${reason}` : reason;
@@ -53,7 +51,6 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
     }
     const file = (await request.formData()).get("document");
     if (file instanceof File && file.size > 0) {
-      if (!pro) return json(403, "Drafting from a CV is part of Pro.");
       if (file.size > DOCUMENT_MAX_BYTES)
         return json(413, "That file is over 4 MB. Try a smaller one.");
       document = readSourceDocument(new Uint8Array(await file.arrayBuffer()));
@@ -101,7 +98,11 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
           windowMs: pro ? DAY_MS : FOREVER_MS,
         });
         if (!usage) {
-          send({ type: "done", source: "starter", notice: pro ? kept("limited") : "free-used" });
+          send({
+            type: "done",
+            source: "starter",
+            notice: pro ? kept("limited") : redraft ? "redraft-free-used" : "free-used",
+          });
           return;
         }
 

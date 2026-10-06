@@ -107,13 +107,14 @@ const sections: LegalSection[] = [
         <p>
           The free plan lets you publish a site on the Meridian or Harbour template at an address on
           ceomaker.app, with a small &ldquo;Made with CEOMaker&rdquo; badge. It includes one AI
-          draft per account and a few AI rewrites a day.
+          draft per account (from your answers and, if you attach one, your CV) and a few AI
+          rewrites a day.
         </p>
         <p>
           Pro adds the premium templates, your own domain, the contact form and its inbox, visitor
-          analytics, more AI use and drafting from a CV, and removes the badge. It is billed monthly
-          or yearly, at the price shown when you subscribe, and renews automatically until you
-          cancel.
+          analytics, more AI use including redrafting your site, and removes the badge. It is billed
+          monthly or yearly, at the price shown when you subscribe, and renews automatically until
+          you cancel.
         </p>
         <p>
           Our order process is conducted by our online reseller Freemius, Inc. Freemius is the

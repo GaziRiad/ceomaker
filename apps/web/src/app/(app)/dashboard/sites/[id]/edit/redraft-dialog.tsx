@@ -16,12 +16,15 @@ export function RedraftDialog({
   open,
   siteId,
   pro,
+  freeDraftLeft,
   ensureSaved,
   onClose,
 }: {
   open: boolean;
   siteId: string;
   pro: boolean;
+  /** A free account that hasn't had its one AI draft can use it here. */
+  freeDraftLeft: boolean;
   /** Saves pending edits first, so the redraft keeps the latest photos and settings. */
   ensureSaved: () => Promise<boolean>;
   onClose: () => void;
@@ -31,6 +34,8 @@ export function RedraftDialog({
   const cv = useDocumentFile();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const canDraft = pro || freeDraftLeft;
+  const free = !pro && freeDraftLeft;
 
   const close = () => {
     cv.clear();
@@ -56,15 +61,15 @@ export function RedraftDialog({
       labelledBy={titleId}
       locked={pending}
       onClose={close}
-      onSubmit={pro ? redraft : close}
+      onSubmit={canDraft ? redraft : close}
     >
       <h2
         id={titleId}
         className="m-0 font-heading text-[28px] leading-[1.05] font-semibold uppercase"
       >
-        Redraft with AI
+        {free ? "Draft with AI" : "Redraft with AI"}
       </h2>
-      {pro ? (
+      {canDraft ? (
         <>
           <div className="flex flex-col gap-2.5 text-base text-neutral-800">
             <p className="m-0">
@@ -75,6 +80,11 @@ export function RedraftDialog({
               It replaces that text. Photos, design, testimonials and contact details stay, and your
               live site doesn&apos;t change until you publish.
             </p>
+            {free ? (
+              <p className="m-0">
+                This uses your free AI draft. With Pro you can redraft any time.
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-2 text-sm text-neutral-700">
             {cv.input}
@@ -117,15 +127,15 @@ export function RedraftDialog({
               className="btn btn-primary min-h-11 flex-1 px-4 sm:min-h-10 sm:flex-none"
               disabled={pending}
             >
-              {pending ? "Starting…" : "Redraft"}
+              {pending ? "Starting…" : free ? "Draft" : "Redraft"}
             </button>
           </div>
         </>
       ) : (
         <>
           <UpgradePrompt title="Redrafting is part of Pro">
-            Write your site&apos;s text again with AI whenever you like, from your answers or from a
-            CV or LinkedIn PDF.
+            You&apos;ve used your free AI draft. With Pro, write your site&apos;s text again with AI
+            whenever you like, from your answers or from a CV or LinkedIn PDF.
           </UpgradePrompt>
           <div className="flex justify-end">
             <button type="button" className="btn btn-secondary px-4" onClick={close}>

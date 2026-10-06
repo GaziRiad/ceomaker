@@ -12,6 +12,8 @@ export const DRAFT_NOTICES = {
     "The AI draft didn't come through, so we kept the draft built from your answers. You can rewrite the headline with AI in the editor.",
   // A redraft that didn't happen leaves the owner's own text as it was.
   "redraft-unavailable": "AI drafting is unavailable right now, so your text is unchanged.",
+  "redraft-free-used":
+    "The free plan includes one AI draft, and this account has used it, so your text is unchanged. Pro can redraft any time.",
   "redraft-limited":
     "You've reached today's limit for AI drafts, so your text is unchanged. Try again tomorrow.",
   "redraft-failed":

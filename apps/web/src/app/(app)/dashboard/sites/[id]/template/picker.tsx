@@ -34,7 +34,7 @@ export function TemplatePicker({
   theme: ThemeSettings;
   content: RenderableSiteContent;
   wantsDocument: boolean;
-  /** Free accounts can pick any template, but publish premium ones and draft from a CV with Pro. */
+  /** Free accounts can pick any template, but publish premium ones with Pro. */
   pro: boolean;
 }) {
   const router = useRouter();
@@ -44,7 +44,7 @@ export function TemplatePicker({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   // They said they'd draft from a file: attaching it is the main step, skipping it a choice.
-  const asksForFile = wantsDocument && pro && !file;
+  const asksForFile = wantsDocument && !file;
   // Each card shows the design the site would get: the one it uses, else the newest.
   const choices = templateList.map((template) =>
     getTemplate(template.key, designOnChoosing(template.key, current)),
@@ -162,13 +162,7 @@ export function TemplatePicker({
           <span className="flex-1">
             Selected: <strong className="font-medium">{selectedName}</strong>
           </span>
-          {wantsDocument && !pro ? (
-            <span className="flex items-center gap-2 text-sm text-neutral-700">
-              <ProTag />
-              Drafting from a CV or LinkedIn PDF is part of Pro, so this draft uses your answers.
-            </span>
-          ) : null}
-          {wantsDocument && pro ? (
+          {wantsDocument ? (
             <span className="flex min-w-0 items-center gap-2 text-sm text-neutral-700">
               {cv.input}
               {file ? (
