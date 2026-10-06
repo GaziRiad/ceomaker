@@ -21,7 +21,7 @@ function Features({ items }: { items: readonly string[] }) {
 }
 
 export function Pricing() {
-  const [period, setPeriod] = useState<keyof typeof PRO_PRICES>("annual");
+  const [period, setPeriod] = useState<keyof typeof PRO_PRICES>("monthly");
   const price = PRO_PRICES[period];
   return (
     <div className="grid w-full max-w-[980px] grid-cols-1 gap-6 md:grid-cols-2">
