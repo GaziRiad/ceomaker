@@ -46,7 +46,7 @@ export const compare: {
     delay: 0,
     name: "CEOMaker",
     time: "Minutes",
-    cost: "Free, or $9.99 a month for Pro",
+    cost: "Free, or $19 a month for Pro",
     highlight: true,
     rows: [
       ["✓", "Copy drafted in your voice"],
