@@ -11,6 +11,7 @@ import { designOnChoosing, getTemplate, templateList } from "@ceomaker/templates
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { TemplateThumbnail } from "@/components/template-thumbnail";
+import { ExternalLink } from "@/components/icons";
 import { ArrowRight } from "@/components/ui";
 import { LinkedInPdfHint, useDocumentFile } from "@/components/document-file";
 import { setPendingDocument } from "@/lib/pending-document";
@@ -137,6 +138,17 @@ export function TemplatePicker({
                     }}
                   />
                 </button>
+                {/* Above the radio's overlay, so it opens the preview instead of choosing. */}
+                <a
+                  href={`/preview/${siteId}/${template.key}`}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`Preview ${template.name} full size in a new tab`}
+                  className="btn btn-secondary absolute top-3 right-3 z-[1] gap-1.5 bg-neutral-100 shadow-md"
+                  style={{ fontSize: 13, padding: "6px 10px" }}
+                >
+                  Preview <ExternalLink size={13} />
+                </a>
               </div>
             );
           })}
