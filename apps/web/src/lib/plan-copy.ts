@@ -3,8 +3,8 @@ import { FREE_AI_LIMITS } from "@ceomaker/schema";
 // What each plan includes, in one place for the landing page and Settings › Billing.
 
 export const PRO_PRICES = {
-  monthly: { price: "$19", amount: 19, per: "/ month", note: "Cancel any time" },
-  annual: { price: "$190", amount: 190, per: "/ year", note: "$15.83 a month, billed yearly" },
+  monthly: { price: "$12.99", amount: 12.99, per: "/ month", note: "Cancel any time" },
+  annual: { price: "$129", amount: 129, per: "/ year", note: "$10.75 a month, billed yearly" },
 } as const;
 
 export const FREE_FEATURES = [
