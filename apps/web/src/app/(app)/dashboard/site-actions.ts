@@ -194,7 +194,7 @@ export async function publishAction(
       first: published.versionNumber === 1,
     });
     if (published.versionNumber === 1)
-      lifecycleFirstPublished(session.user.email, siteUrl(subdomain), published.versionId);
+      lifecycleFirstPublished(session.user, siteUrl(subdomain), published.versionId);
     return {
       ok: true,
       versionNumber: published.versionNumber,

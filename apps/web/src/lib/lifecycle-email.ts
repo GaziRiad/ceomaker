@@ -55,6 +55,14 @@ export function firstName(name: string | null | undefined): string | undefined {
   return name?.trim().split(/\s+/)[0] || undefined;
 }
 
+/**
+ * The name the emails greet with ("Hi Riad,"), or "there" without one. Sent with each event:
+ * Automations don't fill the contact's name or a template's fallback into the greeting.
+ */
+export function greetingName(name: string | null | undefined): string {
+  return firstName(name) ?? "there";
+}
+
 /** A new account: becomes a contact, then starts the onboarding Automation. */
 export function lifecycleSignedUp(user: { id: string; email: string; name?: string | null }): void {
   later(async () => {
@@ -69,18 +77,23 @@ export function lifecycleSignedUp(user: { id: string; email: string; name?: stri
       email: user.email,
       // The welcome email's picture of the draft (the draft is written after sign-up, so the
       // Automation waits before sending it).
-      payload: { draft_card_url: draftCardUrl(user.id) },
+      payload: { greeting_name: greetingName(user.name), draft_card_url: draftCardUrl(user.id) },
     });
   });
 }
 
 /** The account's first site went live: ends the reminders and sends "you're live". */
-export function lifecycleFirstPublished(email: string, siteUrl: string, versionId: string): void {
+export function lifecycleFirstPublished(
+  user: { email: string; name?: string | null },
+  siteUrl: string,
+  versionId: string,
+): void {
   later(() =>
     resend("POST", "/events/send", {
       event: LIFECYCLE_EVENTS.firstPublished,
-      email,
+      email: user.email,
       payload: {
+        greeting_name: greetingName(user.name),
         site_url: siteUrl,
         site_address: new URL(siteUrl).host,
         // The site's share image, as LinkedIn shows it; the version keeps caches honest.
