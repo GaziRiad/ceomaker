@@ -24,7 +24,14 @@ import {
 } from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
 import { MonumentMenu, MonumentMotion } from "./client";
-import { displayWidth, monumentRoleStyle, nameLines, nameMeasure, titleScale } from "./measure";
+import {
+  displayWidth,
+  gradeStyle,
+  monumentRoleStyle,
+  nameLines,
+  nameMeasure,
+  titleScale,
+} from "./measure";
 
 // T4 Monument: the loud one. The name stacked edge to edge on a full accent field, the initials
 // printed tone on tone behind it, then sections that alternate between paper and an inverse
@@ -728,7 +735,13 @@ function Contact({
   );
 }
 
-export function MonumentTemplate({ model, publishedAt, colors, sendMessage }: TemplateProps) {
+export function MonumentTemplate({
+  model,
+  publishedAt,
+  colors,
+  photoGrade,
+  sendMessage,
+}: TemplateProps) {
   const renderers: Record<MiddleKind, (place: Place) => ReactNode> = {
     about: (place) => <About model={model} place={place} />,
     impact: (place) => <Impact model={model} place={place} />,
@@ -746,6 +759,7 @@ export function MonumentTemplate({ model, publishedAt, colors, sendMessage }: Te
       style={
         {
           ...monumentRoleStyle(colors),
+          ...gradeStyle(photoGrade),
           "--mon-measure": nameMeasure(model.name || "Name").toFixed(3),
           fontFamily: FONTS.publicSans,
           minHeight: "inherit",

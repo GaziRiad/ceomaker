@@ -73,7 +73,7 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
         "Your name stacked edge to edge on a full field of colour, then bold alternating sections. For leaders who want to be remembered.",
       tagline: "Your name on a full field of colour. For leaders who want to be remembered.",
       contactForm: true,
-      shows: { ...NONE, aboutImage: true, workImages: true },
+      shows: { ...NONE, aboutImage: true, workImages: true, photoGrade: true },
       Component: MonumentV1,
     },
   },
