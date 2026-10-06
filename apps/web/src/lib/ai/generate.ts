@@ -87,7 +87,8 @@ export async function generateDraft(input: {
     return site ? { status: "succeeded", content: site, ...usage } : { status: "failed", ...usage };
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
-      console.error(`AI draft failed: ${error.status ?? "network"} ${error.name}`);
+      // The API's own message says why (never the key itself).
+      console.error(`AI draft failed: ${error.status ?? "network"} ${error.message}`);
       return { status: "failed" };
     }
     throw error;
