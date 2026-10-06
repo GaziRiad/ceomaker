@@ -1,5 +1,6 @@
 import { getDb, recordSignupSource } from "@ceomaker/db";
 import { getAuth } from "@/lib/auth";
+import { lifecycleSignedUp } from "@/lib/lifecycle-email";
 import { recordSignup } from "@/lib/product-analytics/server";
 import { decodeVisitSource, UNKNOWN_SOURCE } from "@/lib/product-analytics/visit-source";
 import { safeCallbackPath } from "@/lib/redirects";
@@ -28,6 +29,7 @@ export async function GET(request: Request) {
         source,
         fromStart: next.startsWith("/start/"),
       });
+      lifecycleSignedUp(session.user);
     }
   }
   return Response.redirect(`${appUrl()}${next}`, 303);

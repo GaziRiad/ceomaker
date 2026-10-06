@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/colors.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/typography.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/effects.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/base.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/motion.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/tokens/components.css">
+<link rel="stylesheet" href="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/styles.css">
+<script src="_ds/ceomaker-design-system-fac0e473-47d5-42e3-aa81-0899d60fab96/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&amp;family=Inter:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#e9e9ea}
+a{color:#416180}
+a:hover{color:#597ea3}
+</style>
+</helmet>
+<div style="box-sizing:border-box;min-width:max-content;padding:80px;background:#e9e9ea;display:flex;flex-direction:column;gap:112px;font-family:var(--font-body),Barlow,sans-serif;color:#1d1f20">
+
+<header style="display:flex;flex-direction:column;gap:14px;max-width:900px">
+  <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180">CEOMaker · Onboarding emails · Handoff for Resend</span>
+  <h1 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:72px;line-height:0.95;text-transform:uppercase">Four emails, one job each</h1>
+  <p style="margin:0;font-size:20px;line-height:1.5;color:#424244;text-wrap:pretty">Before publishing: bring people back to their draft on a computer and get it published. After publishing: get the site seen. Emails 1, 2 and 4 share a header, button and footer. Email 3 is a plain note from the founder.</p>
+</header>
+
+<section data-screen-label="Desktop 600" style="display:flex;flex-direction:column;gap:32px">
+  <h2 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:40px;line-height:1;text-transform:uppercase">Desktop · 600px</h2>
+  <div style="display:flex;gap:56px;align-items:flex-start">
+
+    <div style="width:600px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px"><span style="font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">01 · Welcome</span><span style="font-size:15px;color:#5d5d60">Right after sign-up · with draft picture</span></div>
+      <div style="background:#f5f5f8;border:1px solid rgba(29,31,32,0.16);padding:14px 16px;display:flex;flex-direction:column;gap:3px">
+        <span style="font-size:13px;color:#5d5d60">From: CEOMaker</span>
+        <span style="font-size:16px;font-weight:700">Your draft is saved</span>
+        <span style="font-size:14px;color:#5d5d60">Read it over, make it sound like you, then publish. Free, about a minute.</span>
+      </div>
+      <div data-screen-label="Email 1 · 600" style="width:600px;background:#f2f2f3;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1d1f20;outline:1px solid rgba(29,31,32,0.16);box-shadow:0 3px 10px rgba(29,31,32,0.08)">
+        <div style="padding:40px 40px 0"><img src="assets/ceomaker-icon.png" alt="CEOMaker" width="40" height="40" style="display:block;width:40px;height:40px;border:0"></div>
+        <div style="padding:40px 40px 0">
+          <p style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">Welcome to CEOMaker</p>
+          <h1 style="margin:12px 0 0;font-size:28px;line-height:32px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#1d1f20">Your draft is saved</h1>
+        </div>
+        <div style="padding:24px 40px 0">
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">{{ hi }}</p>
+          <p style="margin:0;font-size:16px;line-height:25px">The hard part is done: we've drafted your website from your answers and saved it to your account.</p>
+        </div>
+        <sc-if value="{{ showPic }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:28px 40px 0"><div style="background:#d4d4d7;padding:1px">
+          <div role="img" aria-label="Your draft website, with your name, headline and portrait" style="width:518px;height:272px;overflow:hidden;background:#f3efe7">
+            <div style="position:relative;width:1200px;height:630px;transform:scale(0.43167);transform-origin:0 0;background:#f3efe7;color:#22201c">
+              <div style="position:absolute;left:80px;top:178px;font-family:Inter,sans-serif;font-size:17px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#8a5a3c">Group Chief Executive · Northline Freight</div>
+              <div style="position:absolute;left:80px;top:216px;font-family:Newsreader,Georgia,serif;font-size:108px;line-height:1;letter-spacing:-0.02em">Helen Okafor</div>
+              <div style="position:absolute;left:80px;top:356px;width:600px;font-family:Newsreader,Georgia,serif;font-size:34px;line-height:1.28;color:#4a463f">I lead Northline through its move to zero-emission freight.</div>
+              <div style="position:absolute;right:96px;top:135px;width:360px;height:360px;border-radius:50%;border:1px solid #8a5a3c;box-sizing:border-box"></div>
+              <div style="position:absolute;right:118px;top:157px;width:316px;height:316px;border-radius:50%;background:linear-gradient(140deg,#d8c7b1,#8f735a);display:flex;align-items:center;justify-content:center;font-family:Newsreader,Georgia,serif;font-style:italic;font-size:112px;color:#f3efe7">HO</div>
+            </div>
+          </div>
+        </div></div>
+        </sc-if>
+        <div style="padding:28px 40px 0">
+          <h3 style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">What's left</h3>
+          <ol style="margin:12px 0 0;padding:0 0 0 22px;font-size:16px;line-height:25px">
+            <li style="margin:0 0 8px;padding-left:4px"><strong>Review.</strong> Read it the way a visitor would.</li>
+            <li style="margin:0 0 8px;padding-left:4px"><strong>Make it yours.</strong> Change anything that doesn't sound like you.</li>
+            <li style="margin:0;padding-left:4px"><strong>Publish.</strong> Free, and it takes about a minute.</li>
+          </ol>
+        </div>
+        <div style="padding:28px 40px 0">
+          <p style="margin:0 0 20px;font-size:16px;line-height:25px"><strong>It's easiest on a computer,</strong> so open this email there.</p>
+          <a href="#" style="display:inline-block;background:#416180;color:#ffffff;font-size:15px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:15px 28px">Open my draft →</a>
+        </div>
+        <div style="padding:40px 40px 0">
+          <p style="margin:0 0 4px;font-size:16px;line-height:25px">Questions? Reply to this email and I'll help.</p>
+          <p style="margin:0;font-size:16px;line-height:25px;color:#5d5d60">Riad Hallouch, founder of CEOMaker</p>
+        </div>
+        <div style="padding:40px 40px 0"><div style="height:1px;background:#d4d4d7"></div></div>
+        <div style="padding:32px 40px 48px">
+          <p style="margin:0;font-size:13px;line-height:20px;color:#5d5d60">You're getting this because you created a CEOMaker account.</p>
+          <p style="margin:4px 0 0;font-size:13px;line-height:20px"><a href="#" style="color:#5d5d60;text-decoration:underline">Unsubscribe</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:600px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px"><span style="font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">02 · One step</span><span style="font-size:15px;color:#5d5d60">1 day later, if not published · first name empty</span></div>
+      <div style="background:#f5f5f8;border:1px solid rgba(29,31,32,0.16);padding:14px 16px;display:flex;flex-direction:column;gap:3px">
+        <span style="font-size:13px;color:#5d5d60">From: CEOMaker</span>
+        <span style="font-size:16px;font-weight:700">Your site is one step from live</span>
+        <span style="font-size:14px;color:#5d5d60">It doesn't need to be perfect. You can keep editing after you publish.</span>
+      </div>
+      <div data-screen-label="Email 2 · 600" style="width:600px;background:#f2f2f3;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1d1f20;outline:1px solid rgba(29,31,32,0.16);box-shadow:0 3px 10px rgba(29,31,32,0.08)">
+        <div style="padding:40px 40px 0"><img src="assets/ceomaker-icon.png" alt="CEOMaker" width="40" height="40" style="display:block;width:40px;height:40px;border:0"></div>
+        <div style="padding:40px 40px 0">
+          <p style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">Saved · Not yet live</p>
+          <h1 style="margin:12px 0 0;font-size:28px;line-height:32px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#1d1f20">Your site is one step from live</h1>
+        </div>
+        <div style="padding:24px 40px 0">
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">Hi there,</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">Your draft is ready to publish, and it doesn't need to be perfect first. You can keep changing it, and your changes go live each time you publish again.</p>
+          <p style="margin:0;font-size:16px;line-height:25px">Publishing is free and takes about a minute.</p>
+        </div>
+        <div style="padding:28px 40px 0">
+          <a href="#" style="display:inline-block;background:#416180;color:#ffffff;font-size:15px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:15px 28px">Finish and publish →</a>
+          <p style="margin:20px 0 0;font-size:16px;line-height:25px;color:#5d5d60">Reading on your phone? Editing is easier on a computer, so open this email there later.</p>
+        </div>
+        <div style="padding:40px 40px 0"><div style="height:1px;background:#d4d4d7"></div></div>
+        <div style="padding:32px 40px 48px">
+          <p style="margin:0;font-size:13px;line-height:20px;color:#5d5d60">You're getting this because you created a CEOMaker account.</p>
+          <p style="margin:4px 0 0;font-size:13px;line-height:20px"><a href="#" style="color:#5d5d60;text-decoration:underline">Unsubscribe</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:600px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px"><span style="font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">03 · Need a hand</span><span style="font-size:15px;color:#5d5d60">3 days after 02, if still not published · plain</span></div>
+      <div style="background:#f5f5f8;border:1px solid rgba(29,31,32,0.16);padding:14px 16px;display:flex;flex-direction:column;gap:3px">
+        <span style="font-size:13px;color:#5d5d60">From: Riad Hallouch</span>
+        <span style="font-size:16px;font-weight:700">Need a hand?</span>
+        <span style="font-size:14px;color:#5d5d60">If something in your draft didn't feel right, reply and I'll help.</span>
+      </div>
+      <div data-screen-label="Email 3 · 600" style="width:600px;background:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1d1f20;outline:1px solid rgba(29,31,32,0.16);box-shadow:0 3px 10px rgba(29,31,32,0.08)">
+        <div style="padding:40px 40px 0">
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">{{ hi }}</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">I'm Riad, the founder of CEOMaker. Your site is drafted but not published yet, so I wanted to check in.</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">Did something get in the way? Perhaps a section that didn't sound like you, the photo, or the web address.</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">Whatever it was, reply to this email and tell me. Your reply comes straight to me, and I'll help you sort it out.</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">Your draft is saved where you left it: <a href="#" style="color:#416180;text-decoration:underline">open your draft</a>.</p>
+          <p style="margin:0;font-size:16px;line-height:25px">Thanks,</p>
+          <p style="margin:0;font-size:16px;line-height:25px">Riad Hallouch, founder of CEOMaker</p>
+        </div>
+        <div style="padding:40px 40px 40px">
+          <p style="margin:0;font-size:13px;line-height:20px;color:#5d5d60">You're getting this because you created a CEOMaker account. <a href="#" style="color:#5d5d60;text-decoration:underline">Unsubscribe</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:600px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:14px"><span style="font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">04 · Live</span><span style="font-size:15px;color:#5d5d60">On first publish · with site picture</span></div>
+      <div style="background:#f5f5f8;border:1px solid rgba(29,31,32,0.16);padding:14px 16px;display:flex;flex-direction:column;gap:3px">
+        <span style="font-size:13px;color:#5d5d60">From: CEOMaker</span>
+        <span style="font-size:16px;font-weight:700">You're live. Now share it</span>
+        <span style="font-size:14px;color:#5d5d60">helen-okafor.ceomaker.app is live. Share it on LinkedIn.</span>
+      </div>
+      <div data-screen-label="Email 4 · 600" style="width:600px;background:#f2f2f3;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1d1f20;outline:1px solid rgba(29,31,32,0.16);box-shadow:0 3px 10px rgba(29,31,32,0.08)">
+        <div style="padding:40px 40px 0"><img src="assets/ceomaker-icon.png" alt="CEOMaker" width="40" height="40" style="display:block;width:40px;height:40px;border:0"></div>
+        <div style="padding:40px 40px 0">
+          <p style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">✓ Published</p>
+          <h1 style="margin:12px 0 0;font-size:28px;line-height:32px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#1d1f20">You're live. Now share it.</h1>
+        </div>
+        <div style="padding:24px 40px 0">
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px">{{ hi }}</p>
+          <p style="margin:0 0 8px;font-size:16px;line-height:25px">Congratulations. Your site is published, and anyone can visit it at:</p>
+          <p style="margin:0;font-size:20px;line-height:26px;font-weight:700"><a href="#" style="color:#416180;text-decoration:underline">helen-okafor.ceomaker.app</a></p>
+        </div>
+        <div style="padding:28px 40px 0">
+          <div style="background:#d4d4d7;padding:1px">
+            <div role="img" aria-label="Your site as it appears when shared on LinkedIn" style="width:518px;height:272px;overflow:hidden;background:#f3efe7">
+              <div style="position:relative;width:1200px;height:630px;transform:scale(0.43167);transform-origin:0 0;background:#f3efe7;color:#22201c">
+                <div style="position:absolute;left:80px;top:178px;font-family:Inter,sans-serif;font-size:17px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#8a5a3c">Group Chief Executive · Northline Freight</div>
+                <div style="position:absolute;left:80px;top:216px;font-family:Newsreader,Georgia,serif;font-size:108px;line-height:1;letter-spacing:-0.02em">Helen Okafor</div>
+                <div style="position:absolute;left:80px;top:356px;width:600px;font-family:Newsreader,Georgia,serif;font-size:34px;line-height:1.28;color:#4a463f">I lead Northline through its move to zero-emission freight.</div>
+                <div style="position:absolute;left:80px;bottom:64px;font-family:Inter,sans-serif;font-size:20px;color:#4a463f">helen-okafor.ceomaker.app</div>
+                <div style="position:absolute;right:96px;top:135px;width:360px;height:360px;border-radius:50%;border:1px solid #8a5a3c;box-sizing:border-box"></div>
+                <div style="position:absolute;right:118px;top:157px;width:316px;height:316px;border-radius:50%;background:linear-gradient(140deg,#d8c7b1,#8f735a);display:flex;align-items:center;justify-content:center;font-family:Newsreader,Georgia,serif;font-style:italic;font-size:112px;color:#f3efe7">HO</div>
+              </div>
+            </div>
+          </div>
+          <p style="margin:12px 0 0;font-size:16px;line-height:25px;color:#5d5d60">This is the preview LinkedIn shows when you share your link.</p>
+        </div>
+        <div style="padding:28px 40px 0">
+          <a href="#" style="display:inline-block;background:#416180;color:#ffffff;font-size:15px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:15px 28px">Share on LinkedIn →</a>
+          <p style="margin:20px 0 0;font-size:16px;line-height:25px;font-weight:700"><a href="#" style="color:#416180;text-decoration:underline">View my site ↗</a></p>
+        </div>
+        <div style="padding:40px 40px 0"><div style="height:1px;background:#d4d4d7"></div></div>
+        <div style="padding:32px 40px 0">
+          <h3 style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">One tip</h3>
+          <p style="margin:12px 0 16px;font-size:16px;line-height:25px">Add your address to the Website field on your LinkedIn profile, so anyone who looks you up can find your site.</p>
+          <p style="margin:0;font-size:16px;line-height:25px;color:#5d5d60">You can keep editing at any time. Changes go live when you publish again.</p>
+        </div>
+        <div style="padding:40px 40px 0"><div style="height:1px;background:#d4d4d7"></div></div>
+        <div style="padding:32px 40px 48px">
+          <p style="margin:0;font-size:13px;line-height:20px;color:#5d5d60">You're getting this because you created a CEOMaker account.</p>
+          <p style="margin:4px 0 0;font-size:13px;line-height:20px"><a href="#" style="color:#5d5d60;text-decoration:underline">Unsubscribe</a></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="Phone 375 and handoff" style="display:flex;gap:96px;align-items:flex-start">
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:40px;line-height:1;text-transform:uppercase">Phone · 375px</h2>
+    <div style="display:flex;gap:56px;align-items:flex-start">
+
+      <div style="width:375px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">01 · Welcome</span><span style="font-size:15px;color:#5d5d60">No draft picture: the section is removed</span></div>
+        <div data-screen-label="Email 1 · 375" style="width:375px;background:#f2f2f3;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1d1f20;outline:1px solid rgba(29,31,32,0.16);box-shadow:0 3px 10px rgba(29,31,32,0.08)">
+          <div style="padding:28px 20px 0"><img src="assets/ceomaker-icon.png" alt="CEOMaker" width="40" height="40" style="display:block;width:40px;height:40px;border:0"></div>
+          <div style="padding:32px 20px 0">
+            <p style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">Welcome to CEOMaker</p>
+            <h1 style="margin:12px 0 0;font-size:24px;line-height:28px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#1d1f20">Your draft is saved</h1>
+          </div>
+          <div style="padding:24px 20px 0">
+            <p style="margin:0 0 16px;font-size:16px;line-height:25px">{{ hi }}</p>
+            <p style="margin:0;font-size:16px;line-height:25px">The hard part is done: we've drafted your website from your answers and saved it to your account.</p>
+          </div>
+          <div style="padding:28px 20px 0">
+            <h3 style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">What's left</h3>
+            <ol style="margin:12px 0 0;padding:0 0 0 22px;font-size:16px;line-height:25px">
+              <li style="margin:0 0 8px;padding-left:4px"><strong>Review.</strong> Read it the way a visitor would.</li>
+              <li style="margin:0 0 8px;padding-left:4px"><strong>Make it yours.</strong> Change anything that doesn't sound like you.</li>
+              <li style="margin:0;padding-left:4px"><strong>Publish.</strong> Free, and it takes about a minute.</li>
+            </ol>
+          </div>
+          <div style="padding:28px 20px 0">
+            <p style="margin:0 0 20px;font-size:16px;line-height:25px"><strong>It's easiest on a computer,</strong> so open this email there.</p>
+            <a href="#" style="display:block;text-align:center;background:#416180;color:#ffffff;font-size:15px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:15px 20px">Open my draft →</a>
+          </div>
+          <div style="padding:32px 20px 0">
+            <p style="margin:0 0 4px;font-size:16px;line-height:25px">Questions? Reply to this email and I'll help.</p>
+            <p style="margin:0;font-size:16px;line-height:25px;color:#5d5d60">Riad Hallouch, founder of CEOMaker</p>
+          </div>
+          <div style="padding:32px 20px 0"><div style="height:1px;background:#d4d4d7"></div></div>
+          <div style="padding:28px 20px 40px">
+            <p style="margin:0;font-size:13px;line-height:20px;color:#5d5d60">You're getting this because you created a CEOMaker account.</p>
+            <p style="margin:4px 0 0;font-size:13px;line-height:20px"><a href="#" style="color:#5d5d60;text-decoration:underline">Unsubscribe</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:375px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">04 · Live</span><span style="font-size:15px;color:#5d5d60">Images off: alt text shows, frame holds its size</span></div>
+        <div data-screen-label="Email 4 · 375 · images off" style="width:375px;background:#f2f2f3;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1d1f20;outline:1px solid rgba(29,31,32,0.16);box-shadow:0 3px 10px rgba(29,31,32,0.08)">
+          <div style="padding:28px 20px 0"><div style="height:40px;font-size:13px;line-height:16px;font-weight:700;color:#416180">CEOMaker</div></div>
+          <div style="padding:32px 20px 0">
+            <p style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">✓ Published</p>
+            <h1 style="margin:12px 0 0;font-size:24px;line-height:28px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#1d1f20">You're live. Now share it.</h1>
+          </div>
+          <div style="padding:24px 20px 0">
+            <p style="margin:0 0 16px;font-size:16px;line-height:25px">{{ hi }}</p>
+            <p style="margin:0 0 8px;font-size:16px;line-height:25px">Congratulations. Your site is published, and anyone can visit it at:</p>
+            <p style="margin:0;font-size:18px;line-height:24px;font-weight:700"><a href="#" style="color:#416180;text-decoration:underline">helen-okafor.ceomaker.app</a></p>
+          </div>
+          <div style="padding:28px 20px 0">
+            <div style="background:#d4d4d7;padding:1px"><div style="box-sizing:border-box;height:175px;background:#e9e9ea;padding:12px 14px;font-size:14px;line-height:20px;color:#5d5d60">Your site as it appears when shared on LinkedIn</div></div>
+            <p style="margin:12px 0 0;font-size:16px;line-height:25px;color:#5d5d60">This is the preview LinkedIn shows when you share your link.</p>
+          </div>
+          <div style="padding:28px 20px 0">
+            <a href="#" style="display:block;text-align:center;background:#416180;color:#ffffff;font-size:15px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:15px 20px">Share on LinkedIn →</a>
+            <p style="margin:20px 0 0;font-size:16px;line-height:25px;font-weight:700;text-align:center"><a href="#" style="color:#416180;text-decoration:underline">View my site ↗</a></p>
+          </div>
+          <div style="padding:32px 20px 0"><div style="height:1px;background:#d4d4d7"></div></div>
+          <div style="padding:28px 20px 0">
+            <h3 style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#416180">One tip</h3>
+            <p style="margin:12px 0 16px;font-size:16px;line-height:25px">Add your address to the Website field on your LinkedIn profile, so anyone who looks you up can find your site.</p>
+            <p style="margin:0;font-size:16px;line-height:25px;color:#5d5d60">You can keep editing at any time. Changes go live when you publish again.</p>
+          </div>
+          <div style="padding:32px 20px 0"><div style="height:1px;background:#d4d4d7"></div></div>
+          <div style="padding:28px 20px 40px">
+            <p style="margin:0;font-size:13px;line-height:20px;color:#5d5d60">You're getting this because you created a CEOMaker account.</p>
+            <p style="margin:4px 0 0;font-size:13px;line-height:20px"><a href="#" style="color:#5d5d60;text-decoration:underline">Unsubscribe</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:375px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:28px;line-height:1;text-transform:uppercase">01 · Dark mode</span><span style="font-size:15px;color:#5d5d60">Apple Mail with the dark values · images unchanged</span></div>
+        <div data-screen-label="Email 1 · 375 · dark" style="width:375px;background:#1d1f20;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#f2f2f3;outline:1px solid rgba(29,31,32,0.16);box-shadow:0 3px 10px rgba(29,31,32,0.08)">
+          <div style="padding:28px 20px 0"><img src="assets/ceomaker-icon.png" alt="CEOMaker" width="40" height="40" style="display:block;width:40px;height:40px;border:0"></div>
+          <div style="padding:32px 20px 0">
+            <p style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#94bce3">Welcome to CEOMaker</p>
+            <h1 style="margin:12px 0 0;font-size:24px;line-height:28px;font-weight:700;letter-spacing:0.01em;text-transform:uppercase;color:#f2f2f3">Your draft is saved</h1>
+          </div>
+          <div style="padding:24px 20px 0">
+            <p style="margin:0 0 16px;font-size:16px;line-height:25px">{{ hi }}</p>
+            <p style="margin:0;font-size:16px;line-height:25px">The hard part is done: we've drafted your website from your answers and saved it to your account.</p>
+          </div>
+          <div style="padding:28px 20px 0"><div style="background:#424244;padding:1px">
+            <div role="img" aria-label="Your draft website, with your name, headline and portrait" style="width:333px;height:175px;overflow:hidden;background:#f3efe7">
+              <div style="position:relative;width:1200px;height:630px;transform:scale(0.2775);transform-origin:0 0;background:#f3efe7;color:#22201c">
+                <div style="position:absolute;left:80px;top:178px;font-family:Inter,sans-serif;font-size:17px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:#8a5a3c">Group Chief Executive · Northline Freight</div>
+                <div style="position:absolute;left:80px;top:216px;font-family:Newsreader,Georgia,serif;font-size:108px;line-height:1;letter-spacing:-0.02em">Helen Okafor</div>
+                <div style="position:absolute;left:80px;top:356px;width:600px;font-family:Newsreader,Georgia,serif;font-size:34px;line-height:1.28;color:#4a463f">I lead Northline through its move to zero-emission freight.</div>
+                <div style="position:absolute;right:96px;top:135px;width:360px;height:360px;border-radius:50%;border:1px solid #8a5a3c;box-sizing:border-box"></div>
+                <div style="position:absolute;right:118px;top:157px;width:316px;height:316px;border-radius:50%;background:linear-gradient(140deg,#d8c7b1,#8f735a);display:flex;align-items:center;justify-content:center;font-family:Newsreader,Georgia,serif;font-style:italic;font-size:112px;color:#f3efe7">HO</div>
+              </div>
+            </div>
+          </div></div>
+          <div style="padding:28px 20px 0">
+            <h3 style="margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#94bce3">What's left</h3>
+            <ol style="margin:12px 0 0;padding:0 0 0 22px;font-size:16px;line-height:25px">
+              <li style="margin:0 0 8px;padding-left:4px"><strong>Review.</strong> Read it the way a visitor would.</li>
+              <li style="margin:0 0 8px;padding-left:4px"><strong>Make it yours.</strong> Change anything that doesn't sound like you.</li>
+              <li style="margin:0;padding-left:4px"><strong>Publish.</strong> Free, and it takes about a minute.</li>
+            </ol>
+          </div>
+          <div style="padding:28px 20px 0">
+            <p style="margin:0 0 20px;font-size:16px;line-height:25px"><strong>It's easiest on a computer,</strong> so open this email there.</p>
+            <a href="#" style="display:block;text-align:center;background:#416180;color:#ffffff;font-size:15px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;padding:15px 20px">Open my draft →</a>
+          </div>
+          <div style="padding:32px 20px 0">
+            <p style="margin:0 0 4px;font-size:16px;line-height:25px">Questions? Reply to this email and I'll help.</p>
+            <p style="margin:0;font-size:16px;line-height:25px;color:#b7b7ba">Riad Hallouch, founder of CEOMaker</p>
+          </div>
+          <div style="padding:32px 20px 0"><div style="height:1px;background:#424244"></div></div>
+          <div style="padding:28px 20px 40px">
+            <p style="margin:0;font-size:13px;line-height:20px;color:#b7b7ba">You're getting this because you created a CEOMaker account.</p>
+            <p style="margin:4px 0 0;font-size:13px;line-height:20px"><a href="#" style="color:#b7b7ba;text-decoration:underline">Unsubscribe</a></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <article data-screen-label="Handoff note" style="width:1320px;box-sizing:border-box;background:#f5f5f8;border:1px solid rgba(29,31,32,0.16);padding:48px;display:flex;flex-direction:column;gap:44px;font-size:15px;line-height:1.5">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h2 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:40px;line-height:1;text-transform:uppercase">Handoff note</h2>
+      <p style="margin:0;color:#424244">For rebuilding in Resend's visual editor. Font everywhere: 'Helvetica Neue', Helvetica, Arial, sans-serif. Phone values apply below 480px.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h3 style="margin:0;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180;font-weight:500">Subject and preview</h3>
+      <table style="width:100%;border-collapse:collapse">
+        <tr style="text-align:left;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#5d5d60"><th style="padding:6px 8px 6px 0;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">#</th><th style="padding:6px 8px;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">Trigger</th><th style="padding:6px 8px;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">From</th><th style="padding:6px 8px;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">Subject</th><th style="padding:6px 8px;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">Preview text</th></tr>
+        <tr style="vertical-align:top"><td style="padding:8px 8px 8px 0;border-bottom:1px solid rgba(29,31,32,0.08)">1</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">Right after sign-up</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">CEOMaker</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">Your draft is saved <span style="color:#5d5d60">· 19</span></td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">Read it over, make it sound like you, then publish. Free, about a minute. <span style="color:#5d5d60">· 73</span></td></tr>
+        <tr style="vertical-align:top"><td style="padding:8px 8px 8px 0;border-bottom:1px solid rgba(29,31,32,0.08)">2</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">1 day later, if not published</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">CEOMaker</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">Your site is one step from live <span style="color:#5d5d60">· 31</span></td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">It doesn't need to be perfect. You can keep editing after you publish. <span style="color:#5d5d60">· 70</span></td></tr>
+        <tr style="vertical-align:top"><td style="padding:8px 8px 8px 0;border-bottom:1px solid rgba(29,31,32,0.08)">3</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">3 days after 2, if still not published</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">Riad Hallouch</td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">Need a hand? <span style="color:#5d5d60">· 12</span></td><td style="padding:8px;border-bottom:1px solid rgba(29,31,32,0.08)">If something in your draft didn't feel right, reply and I'll help. <span style="color:#5d5d60">· 66</span></td></tr>
+        <tr style="vertical-align:top"><td style="padding:8px 8px 8px 0">4</td><td style="padding:8px">First publish</td><td style="padding:8px">CEOMaker</td><td style="padding:8px">You're live. Now share it <span style="color:#5d5d60">· 25</span></td><td style="padding:8px">{site_address} is live. Share it on LinkedIn. <span style="color:#5d5d60">· 31 + address</span></td></tr>
+      </table>
+      <p style="margin:0;color:#424244">Greeting: "Hi {first_name}," and "Hi there," when the name is empty (email 2 shows the fallback). Reply-to on emails 1 and 3 goes to Riad's inbox, since both invite a reply.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:48px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180;font-weight:500">Type · size/line height in px</h3>
+        <table style="width:100%;border-collapse:collapse">
+          <tr style="text-align:left;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#5d5d60"><th style="padding:6px 8px 6px 0;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">Role</th><th style="padding:6px 8px;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">Desktop</th><th style="padding:6px 8px;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">Phone</th><th style="padding:6px 8px;font-weight:500;border-bottom:1px solid rgba(29,31,32,0.16)">Style</th></tr>
+          <tr><td style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(29,31,32,0.08)">Kicker, H3</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">12/16</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">12/16</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">Bold, uppercase, 0.14em, #416180</td></tr>
+          <tr><td style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(29,31,32,0.08)">H1</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">28/32</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">24/28</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">Bold, uppercase, 0.01em, #1d1f20</td></tr>
+          <tr><td style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(29,31,32,0.08)">Site address (4)</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">20/26</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">18/24</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">Bold, underlined link, #416180</td></tr>
+          <tr><td style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(29,31,32,0.08)">Body, list</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">16/25</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">16/25</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">Regular, #1d1f20, lead words bold</td></tr>
+          <tr><td style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(29,31,32,0.08)">Secondary</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">16/25</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">16/25</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">Regular, #5d5d60</td></tr>
+          <tr><td style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(29,31,32,0.08)">Button</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">15/18</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">15/18</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">Bold, uppercase, 0.08em, #ffffff</td></tr>
+          <tr><td style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(29,31,32,0.08)">Footer</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">13/20</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">13/20</td><td style="padding:7px 8px;border-bottom:1px solid rgba(29,31,32,0.08)">Regular, #5d5d60</td></tr>
+          <tr><td style="padding:7px 8px 7px 0">Email 3</td><td style="padding:7px 8px">16/25</td><td style="padding:7px 8px">16/25</td><td style="padding:7px 8px">Regular only. No headings, no caps</td></tr>
+        </table>
+        <p style="margin:0;color:#424244">Barlow Condensed is carried by uppercase bold headings with tight leading, and wide tracking on the kicker and button label. Only H1, the address and side padding change at the breakpoint; if the editor can't switch, the phone values work at 600 too.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180;font-weight:500">Colours · contrast on ground</h3>
+        <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px 12px;align-items:center">
+          <span style="width:28px;height:28px;background:#f2f2f3;border:1px solid rgba(29,31,32,0.16);box-sizing:border-box"></span><span><strong>#f2f2f3</strong> Ground, every section (emails 1, 2, 4)</span>
+          <span style="width:28px;height:28px;background:#1d1f20"></span><span><strong>#1d1f20</strong> Ink, body and H1 · 14.8:1</span>
+          <span style="width:28px;height:28px;background:#5d5d60"></span><span><strong>#5d5d60</strong> Secondary text, footer · 5.9:1</span>
+          <span style="width:28px;height:28px;background:#416180"></span><span><strong>#416180</strong> Button, links, kicker · 5.8:1; white on it 6.5:1</span>
+          <span style="width:28px;height:28px;background:#d4d4d7"></span><span><strong>#d4d4d7</strong> Dividers, 1px picture frame</span>
+          <span style="width:28px;height:28px;background:#e9e9ea;border:1px solid rgba(29,31,32,0.16);box-sizing:border-box"></span><span><strong>#e9e9ea</strong> Picture background when images are off</span>
+          <span style="width:28px;height:28px;background:#ffffff;border:1px solid rgba(29,31,32,0.16);box-sizing:border-box"></span><span><strong>#ffffff</strong> Email 3 ground</span>
+        </div>
+        <p style="margin:8px 0 0;color:#424244"><strong>Dark values</strong> (prefers-color-scheme, where the client honours it): ground #1d1f20 · text #f2f2f3 · secondary #b7b7ba (8.3:1) · kicker and links #94bce3 (8.3:1) · dividers and frame #424244. Button, icon and pictures stay as they are.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180;font-weight:500">Spacing · desktop / phone</h3>
+        <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px">
+          <li>One column, 600 max, centred. Sections carry padding and the ground colour only.</li>
+          <li>Side padding 40 / 20. Header top 40 / 28; icon 40×40.</li>
+          <li>Icon to kicker 40 / 32 · kicker to H1 12 · H1 to greeting 24.</li>
+          <li>Paragraphs 16 apart · list items 8 · groups (picture, list, button) 28 · before a divider 40 / 32.</li>
+          <li>Picture: section with bg #d4d4d7 and 1px padding, image 518 / 333 wide, from a 1200×630 source. Caption 12 below.</li>
+          <li>Footer: divider, then 32 / 28 top and 48 / 40 bottom.</li>
+        </ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180;font-weight:500">Button · one style, emails 1, 2, 4</h3>
+        <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px">
+          <li>Background #416180, label #ffffff, square corners, no border or shadow.</li>
+          <li>Label 15/18 bold uppercase, 0.08em, ending in " →" (a character, not an icon).</li>
+          <li>Padding 15 × 28, so 48px tall. Desktop: auto width, left aligned.</li>
+          <li>Phone: 100% width, label centred, 335 × 48 tap target.</li>
+          <li>If the editor can't change width per breakpoint, use 100% everywhere.</li>
+          <li>Secondary actions are bold underlined text links in #416180.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h3 style="margin:0;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180;font-weight:500">Editor blocks and final copy · top to bottom</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;font-size:14px;line-height:1.45">
+        <div style="display:flex;flex-direction:column;gap:6px"><h4 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:20px;line-height:1.45;text-transform:uppercase">01 · Welcome</h4>
+        <ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+          <li><strong>Section · Image</strong> icon, alt "CEOMaker", links to ceomaker.app</li>
+          <li><strong>Paragraph</strong> (kicker) Welcome to CEOMaker</li>
+          <li><strong>Heading H1</strong> Your draft is saved</li>
+          <li><strong>Paragraph</strong> Hi {first_name},</li>
+          <li><strong>Paragraph</strong> The hard part is done: we've drafted your website from your answers and saved it to your account.</li>
+          <li><strong>Section · Image</strong> (optional; remove when there's no picture) draft picture, alt "Your draft website, with your name, headline and portrait", links to the draft</li>
+          <li><strong>Heading H3</strong> What's left</li>
+          <li><strong>List</strong> (ordered) Review. Read it the way a visitor would. / Make it yours. Change anything that doesn't sound like you. / Publish. Free, and it takes about a minute.</li>
+          <li><strong>Paragraph</strong> It's easiest on a computer, so open this email there.</li>
+          <li><strong>Button</strong> Open my draft →</li>
+          <li><strong>Paragraph</strong> Questions? Reply to this email and I'll help.</li>
+          <li><strong>Paragraph</strong> (secondary) Riad Hallouch, founder of CEOMaker</li>
+          <li><strong>Divider · Footer</strong></li>
+        </ol></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><h4 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:20px;line-height:1.45;text-transform:uppercase">02 · One step</h4>
+        <ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+          <li><strong>Section · Image</strong> icon, as 01</li>
+          <li><strong>Paragraph</strong> (kicker) Saved · Not yet live</li>
+          <li><strong>Heading H1</strong> Your site is one step from live</li>
+          <li><strong>Paragraph</strong> Hi {first_name},</li>
+          <li><strong>Paragraph</strong> Your draft is ready to publish, and it doesn't need to be perfect first. You can keep changing it, and your changes go live each time you publish again.</li>
+          <li><strong>Paragraph</strong> Publishing is free and takes about a minute.</li>
+          <li><strong>Button</strong> Finish and publish →</li>
+          <li><strong>Paragraph</strong> (secondary) Reading on your phone? Editing is easier on a computer, so open this email there later.</li>
+          <li><strong>Divider · Footer</strong></li>
+        </ol></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><h4 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:20px;line-height:1.45;text-transform:uppercase">03 · Need a hand</h4>
+        <ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+          <li><strong>Section</strong> bg #ffffff, paragraphs only. No icon, button, image or divider.</li>
+          <li><strong>Paragraph</strong> Hi {first_name},</li>
+          <li><strong>Paragraph</strong> I'm Riad, the founder of CEOMaker. Your site is drafted but not published yet, so I wanted to check in.</li>
+          <li><strong>Paragraph</strong> Did something get in the way? Perhaps a section that didn't sound like you, the photo, or the web address.</li>
+          <li><strong>Paragraph</strong> Whatever it was, reply to this email and tell me. Your reply comes straight to me, and I'll help you sort it out.</li>
+          <li><strong>Paragraph</strong> Your draft is saved where you left it: open your draft. (text link)</li>
+          <li><strong>Paragraph</strong> Thanks, / Riad Hallouch, founder of CEOMaker</li>
+          <li><strong>Footer</strong> one line, 40 below the signature</li>
+        </ol></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><h4 style="margin:0;font-family:var(--font-heading),'Barlow Condensed',sans-serif;font-weight:600;font-size:20px;line-height:1.45;text-transform:uppercase">04 · Live</h4>
+        <ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+          <li><strong>Section · Image</strong> icon, as 01</li>
+          <li><strong>Paragraph</strong> (kicker) ✓ Published</li>
+          <li><strong>Heading H1</strong> You're live. Now share it.</li>
+          <li><strong>Paragraph</strong> Hi {first_name},</li>
+          <li><strong>Paragraph</strong> Congratulations. Your site is published, and anyone can visit it at:</li>
+          <li><strong>Paragraph</strong> (address link) {site_address} → https://{site_address}</li>
+          <li><strong>Section · Image</strong> {site_image_url}, alt "Your site as it appears when shared on LinkedIn", links to the site</li>
+          <li><strong>Paragraph</strong> (secondary) This is the preview LinkedIn shows when you share your link.</li>
+          <li><strong>Button</strong> Share on LinkedIn → linkedin.com/sharing/share-offsite/?url={share_link}, URL-encoded</li>
+          <li><strong>Paragraph</strong> (link) View my site ↗</li>
+          <li><strong>Divider · Heading H3</strong> One tip</li>
+          <li><strong>Paragraph</strong> Add your address to the Website field on your LinkedIn profile, so anyone who looks you up can find your site.</li>
+          <li><strong>Paragraph</strong> (secondary) You can keep editing at any time. Changes go live when you publish again.</li>
+          <li><strong>Divider · Footer</strong></li>
+        </ol></div>
+      </div>
+      <p style="margin:0;color:#424244"><strong>Footer, all four:</strong> You're getting this because you created a CEOMaker account. · Unsubscribe (link to the unsubscribe URL).</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h3 style="margin:0;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#416180;font-weight:500">Decisions</h3>
+      <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+        <li><strong>Icon, not the lockup.</strong> The lockup's "CEO" is ink on transparent and disappears when a client darkens the ground. The icon is a solid accent tile with a white mark, so it reads on light and dark. Host: www.ceomaker.app/brand/ceomaker-icon-120.png at 40×40.</li>
+        <li><strong>Flat and mostly text.</strong> One ground colour, no cards or bands: fewer fills for dark mode to invert, and it reads as product mail rather than a newsletter.</li>
+        <li><strong>Pictures sit in a 1px frame</strong> (a section with 1px padding) so they keep an edge on any template colour. With images off the frame keeps its size and shows the alt text; give the image a #e9e9ea background and 14px #5d5d60 alt styling. The address and caption carry the meaning in text.</li>
+        <li><strong>Email 1 is complete without its picture.</strong> Nothing in the copy refers to it; remove the section when there's no URL.</li>
+        <li><strong>The computer prompt sits right above the button</strong> in email 1, and right below it in email 2, where people decide whether to tap now.</li>
+        <li><strong>Riad signs email 1,</strong> so email 3 comes from someone they've already heard from.</li>
+        <li><strong>Draft links</strong> go to www.ceomaker.app/dashboard (sign-in if needed, then the draft), because personalisation has no site id. If one becomes available, deep-link to /dashboard/sites/{id}/edit.</li>
+        <li><strong>Dark mode.</strong> If Resend allows head CSS, add &lt;meta name="color-scheme" content="light dark"&gt; and a prefers-color-scheme block with the dark values. Gmail ignores it and inverts on its own; the icon, the #416180 button with white label and the mid-grey dividers survive either path.</li>
+        <li><strong>Not included:</strong> a postal address in the footer. Add one if your sending region requires it. The pictures show sample content (Helen Okafor, Meridian template).</li>
+      </ul>
+    </div>
+  </article>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;firstName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Helen&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Personalisation&quot;},&quot;draftPicture&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Email 1&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const n = (this.props.firstName ?? 'Helen').trim();
+    return { hi: n ? `Hi ${n},` : 'Hi there,', showPic: this.props.draftPicture ?? true };
+  }
+}
+</script>
+</body>
+</html>

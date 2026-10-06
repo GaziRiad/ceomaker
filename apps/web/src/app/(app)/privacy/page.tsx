@@ -35,8 +35,9 @@ const sections: LegalSection[] = [
       <ul>
         <li>
           <strong>Your account:</strong> your name and email address, and your Google profile
-          picture if you sign in with Google. We use them to sign you in and to contact you about
-          your account.
+          picture if you sign in with Google. We use them to sign you in, to contact you about your
+          account, and for a few emails that help you get your site live (each has an unsubscribe
+          link).
         </li>
         <li>
           <strong>Sign-in sessions:</strong> the network address and browser of each signed-in
@@ -157,7 +158,8 @@ const sections: LegalSection[] = [
             <strong>Neon</strong> hosts the database (Frankfurt, Germany).
           </li>
           <li>
-            <strong>Resend</strong> sends our emails: sign-in links and account notices.
+            <strong>Resend</strong> sends our emails: sign-in links, account notices and those few
+            onboarding emails. It keeps your email address and first name for them.
           </li>
           <li>
             <strong>Anthropic</strong> writes AI drafts from your answers and, if attached, your CV.

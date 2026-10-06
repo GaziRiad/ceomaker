@@ -68,8 +68,14 @@ const IMAGE_FONTS = {
   harbour: "Figtree",
 };
 
-/** What the card shows for a live site (already entitled), without the portrait's bytes. */
-export function shareCardFor(site: PublishedSite): Omit<ShareCardProps, "fonts"> {
+/** What a card is drawn from: a live site (already entitled), or an owner's draft. */
+export type CardSource = Pick<
+  PublishedSite,
+  "subdomain" | "customDomain" | "templateKey" | "templateVersion" | "theme" | "content"
+>;
+
+/** What the card shows, without the portrait's bytes. */
+export function shareCardFor(site: CardSource): Omit<ShareCardProps, "fonts"> {
   const { meta, sections } = parseSiteContentForRender(site.content);
   const hero = sections.find((section) => section.type === "hero");
   const { key, version } = resolveTemplateRef(site.templateKey, site.templateVersion);
@@ -106,13 +112,18 @@ async function portrait(src: string | undefined): Promise<string | undefined> {
   return `data:${media.contentType};base64,${Buffer.from(media.data).toString("base64")}`;
 }
 
-export async function renderShareCard(site: PublishedSite): Promise<ImageResponse> {
+const LIVE_CACHE = "public, max-age=86400, s-maxage=31536000, immutable";
+
+export async function renderShareCard(
+  site: CardSource,
+  cacheControl: string = LIVE_CACHE,
+): Promise<ImageResponse> {
   const card = shareCardFor(site);
   const [loaded, photo] = await Promise.all([loadFonts(), portrait(card.photo)]);
   return new ImageResponse(<ShareCard {...card} photo={photo} fonts={IMAGE_FONTS} />, {
     width: 1200,
     height: 630,
     fonts: loaded.map((font) => ({ ...font, style: "normal" as const })),
-    headers: { "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable" },
+    headers: { "Cache-Control": cacheControl },
   });
 }

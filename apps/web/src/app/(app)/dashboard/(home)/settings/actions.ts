@@ -28,6 +28,7 @@ import {
   type DomainResult,
 } from "@/lib/domains/service";
 import { canSendEmail } from "@/lib/email";
+import { lifecycleAccountDeleted } from "@/lib/lifecycle-email";
 import { cancelFreemiusSubscriptions } from "@/lib/freemius";
 import { isUuid } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
@@ -171,6 +172,7 @@ export async function deleteAccountAction(confirmation: string): Promise<{ ok: t
     for (const subdomain of heldAddresses) updateTag(siteCacheTag(subdomain));
     for (const domain of domains) await releaseFromProvider(domain);
     if (domains.length) forgetDomainRouting();
+    lifecycleAccountDeleted(session.user.email);
   } catch (error) {
     if (error instanceof SiteNotFoundError) return SIGNED_OUT;
     throw error;
