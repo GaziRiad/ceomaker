@@ -46,6 +46,7 @@ import { getSession } from "@/lib/auth";
 import { planFor } from "@/lib/plan";
 import { forgetDomainRouting } from "@/lib/domain-routing";
 import { releaseFromProvider } from "@/lib/domains/service";
+import { lifecycleFirstPublished } from "@/lib/lifecycle-email";
 import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { isUuid, toEditableDraft } from "@/lib/site-data";
 import { siteCacheTag } from "@/lib/sites";
@@ -163,8 +164,9 @@ export async function publishAction(
   siteId: string,
   options: { subdomain?: string } = {},
 ): Promise<{ ok: true; versionNumber: number; url: string; subdomain: string } | Failure> {
-  const userId = await currentUserId();
-  if (!userId) return SIGNED_OUT;
+  const session = await getSession();
+  if (!session) return SIGNED_OUT;
+  const userId = session.user.id;
   if (!isUuid(siteId)) return NOT_FOUND;
   const db = getDb();
   const site = await getSiteForOwner(db, { userId, siteId });
@@ -191,6 +193,8 @@ export async function publishAction(
       template: draft.templateKey,
       first: published.versionNumber === 1,
     });
+    if (published.versionNumber === 1)
+      lifecycleFirstPublished(session.user.email, siteUrl(subdomain));
     return {
       ok: true,
       versionNumber: published.versionNumber,
