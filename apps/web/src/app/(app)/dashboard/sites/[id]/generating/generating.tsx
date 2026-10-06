@@ -33,6 +33,7 @@ export function GeneratingScreen({
   voice,
   colors,
   content,
+  redraft,
 }: {
   siteId: string;
   address: string;
@@ -42,6 +43,8 @@ export function GeneratingScreen({
   voice: string;
   colors: SiteColors;
   content: RenderableSiteContent;
+  /** Writing the text of a site the owner has worked on again (Pro), not its first draft. */
+  redraft: boolean;
 }) {
   const router = useRouter();
   const started = useRef(false);
@@ -60,7 +63,8 @@ export function GeneratingScreen({
       const document = takePendingDocument();
       const body = document ? new FormData() : undefined;
       if (document && body) body.set("document", document);
-      const response = await fetch(`/api/sites/${siteId}/generate`, { method: "POST", body });
+      const endpoint = `/api/sites/${siteId}/generate${redraft ? "?redraft=1" : ""}`;
+      const response = await fetch(endpoint, { method: "POST", body });
       if (!response.ok || !response.body) {
         const detail = (await response.json().catch(() => null)) as { error?: string } | null;
         setError(detail?.error ?? "We couldn't start your draft.");
@@ -94,7 +98,7 @@ export function GeneratingScreen({
     }
 
     run().catch(() => setError("The connection dropped while writing."));
-  }, [router, siteId]);
+  }, [router, siteId, redraft]);
 
   const progress = step / STEPS.length;
   return (

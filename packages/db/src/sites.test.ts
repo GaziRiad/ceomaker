@@ -416,6 +416,22 @@ describe.skipIf(!url)("sites (integration)", () => {
     await finishAiUsage(db, { id: a!.id, status: "succeeded", inputTokens: 10, outputTokens: 5 });
   });
 
+  it("doesn't count AI requests that failed before the model wrote anything", async () => {
+    const limits = { kind: "generate" as const, limit: 1, windowMs: 60_000, siteId: null };
+    const outage = await startAiUsage(db, { ...limits, userId: "alice" });
+    await finishAiUsage(db, { id: outage!.id, status: "failed" });
+    const written = await startAiUsage(db, { ...limits, userId: "alice" });
+    expect(written).not.toBeNull();
+    // A failure after the model wrote (cut off, unusable output) was paid for, so it counts.
+    await finishAiUsage(db, {
+      id: written!.id,
+      status: "failed",
+      inputTokens: 900,
+      outputTokens: 16_000,
+    });
+    expect(await startAiUsage(db, { ...limits, userId: "alice" })).toBeNull();
+  });
+
   it("finds images no version uses, sparing recent uploads", async () => {
     const image = (id: string, createdAt: Date) =>
       db.insert(media).values({

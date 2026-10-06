@@ -21,5 +21,5 @@ export const PRO_FEATURES = [
   "Your own domain",
   "Contact form and Messages inbox",
   "Visitor analytics",
-  "More AI rewrites, and drafting from your CV",
+  "Redraft your site with AI any time, and more AI rewrites",
 ] as const;

@@ -1,4 +1,4 @@
-import { and, count, eq, gte, ne } from "drizzle-orm";
+import { and, count, eq, gte, isNotNull, ne, or } from "drizzle-orm";
 import type { Database } from "../client";
 import { aiUsage } from "../schema";
 
@@ -26,6 +26,18 @@ export async function startAiUsage(
     .returning({ id: aiUsage.id });
   if (!row) throw new Error("AI usage insert returned no row");
 
+  if ((await countAiUsage(db, input)) > input.limit) {
+    await finishAiUsage(db, { id: row.id, status: "rejected" });
+    return null;
+  }
+  return row;
+}
+
+/** AI requests that count toward a user's allowance in the window, including any running now. */
+export async function countAiUsage(
+  db: Database,
+  input: { userId: string; kind: AiUsageKind; windowMs: number },
+): Promise<number> {
   const [used] = await db
     .select({ value: count() })
     .from(aiUsage)
@@ -34,14 +46,13 @@ export async function startAiUsage(
         eq(aiUsage.userId, input.userId),
         eq(aiUsage.kind, input.kind),
         ne(aiUsage.status, "rejected"),
+        // A request that failed before the model wrote anything (an outage, a bad key) cost
+        // nothing and doesn't use up an allowance.
+        or(ne(aiUsage.status, "failed"), isNotNull(aiUsage.inputTokens)),
         gte(aiUsage.createdAt, new Date(Date.now() - input.windowMs)),
       ),
     );
-  if ((used?.value ?? 0) > input.limit) {
-    await finishAiUsage(db, { id: row.id, status: "rejected" });
-    return null;
-  }
-  return row;
+  return used?.value ?? 0;
 }
 
 export async function finishAiUsage(

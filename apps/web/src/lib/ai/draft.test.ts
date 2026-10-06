@@ -2,7 +2,7 @@ import { onboardingAnswersSchema } from "@ceomaker/schema";
 import { zipSync, strToU8 } from "fflate";
 import { describe, expect, it } from "vitest";
 import { readSourceDocument } from "./documents";
-import { contentFromDraft, fallbackRewrite, type DraftOutput } from "./draft";
+import { contentFromDraft, fallbackRewrite, mergeRedraft, type DraftOutput } from "./draft";
 
 const answers = onboardingAnswersSchema.parse({
   role: "Chief executive",
@@ -123,6 +123,123 @@ describe("contentFromDraft", () => {
       headline: "Building supply chains that hold up under pressure.",
       primaryCta: { label: "Get in touch", href: "#contact" },
     });
+  });
+});
+
+describe("mergeRedraft", () => {
+  const photo = { src: "https://example.com/amelia.jpg", alt: "Amelia Hart" };
+  // A site the owner has worked on: photos, a testimonial, links, a reordered and hidden section.
+  function edited() {
+    const base = contentFromDraft(answers, draft(), { email: "amelia@example.com" })!;
+    const sections = base.sections.map((section) => {
+      switch (section.type) {
+        case "hero":
+          return {
+            ...section,
+            image: photo,
+            primaryCta: { label: "Write to me", href: "#contact" },
+          };
+        case "about":
+          return { ...section, heading: "My story", image: photo };
+        case "testimonials":
+          return {
+            ...section,
+            visible: true,
+            items: [{ quote: "A steady hand.", author: "Jon Bell" }],
+          };
+        case "contact":
+          return {
+            ...section,
+            links: [{ href: "https://www.linkedin.com/in/amelia", kind: "linkedin" as const }],
+          };
+        case "achievements":
+          return { ...section, visible: false, items: [{ value: "12", label: "Depots" }] };
+        default:
+          return section;
+      }
+    });
+    return {
+      ...base,
+      meta: { ...base.meta, name: "Amelia J. Hart", location: "Rotterdam" },
+      sections: [sections[0]!, ...sections.slice(1).reverse()],
+    };
+  }
+
+  it("replaces the words and keeps everything the AI doesn't write", () => {
+    const current = edited();
+    const fresh = contentFromDraft(
+      answers,
+      draft({
+        hero: {
+          eyebrow: "Chief Executive, Meridian Freight Group",
+          headline: "Freight that keeps its promises.",
+          introduction: "I run a logistics group across six countries.",
+          buttonLabel: "Get in touch",
+        },
+        impact: [{ value: "€780M", label: "Annual revenue" }],
+        experience: [
+          {
+            role: "Chief Executive Officer",
+            organization: "Meridian Freight Group",
+            location: "",
+            start: "2019",
+            end: "",
+            summary: "",
+          },
+        ],
+      }),
+    )!;
+    const merged = mergeRedraft(current, fresh)!;
+    expect(merged).not.toBeNull();
+    expect(merged.sections.map((section) => section.id)).toEqual(
+      current.sections.map((section) => section.id),
+    );
+    const byId = Object.fromEntries(merged.sections.map((section) => [section.id, section]));
+    expect(byId.hero).toMatchObject({
+      headline: "Freight that keeps its promises.",
+      image: photo,
+      primaryCta: { label: "Get in touch", href: "#contact" },
+    });
+    expect(byId.about).toMatchObject({ heading: "My story", image: photo });
+    // Lists the AI wrote replace the old ones and show, the hidden placeholder included.
+    expect(byId.impact).toMatchObject({ visible: true, items: [{ value: "€780M" }] });
+    expect(byId.experience).toMatchObject({
+      visible: true,
+      items: [{ role: "Chief Executive Officer" }],
+    });
+    expect(byId.testimonials).toMatchObject({ visible: true, items: [{ author: "Jon Bell" }] });
+    expect(byId.contact).toMatchObject({
+      email: "amelia@example.com",
+      links: [{ kind: "linkedin" }],
+    });
+    expect(merged.meta).toMatchObject({ name: "Amelia J. Hart", location: "Rotterdam" });
+  });
+
+  it("keeps a work list with photos, and lists the new draft leaves empty", () => {
+    const current = edited();
+    const withWork = {
+      ...current,
+      sections: current.sections.map((section) =>
+        section.type === "portfolio"
+          ? { ...section, items: [{ title: "Port of Rotterdam talk", image: photo }] }
+          : section.type === "experience"
+            ? {
+                ...section,
+                visible: true,
+                items: [{ role: "Chair", organization: "Freight Forum" }],
+              }
+            : section,
+      ),
+    };
+    const fresh = contentFromDraft(
+      answers,
+      draft({ work: [{ title: "Keynote", kind: "Talk", meta: "", year: "2025" }] }),
+    )!;
+    const byId = Object.fromEntries(
+      mergeRedraft(withWork, fresh)!.sections.map((section) => [section.id, section]),
+    );
+    expect(byId.work).toMatchObject({ items: [{ title: "Port of Rotterdam talk", image: photo }] });
+    expect(byId.experience).toMatchObject({ items: [{ role: "Chair" }] });
   });
 });
 

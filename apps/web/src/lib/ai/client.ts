@@ -2,14 +2,12 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { serverEnv } from "../env";
 
-/** Drafting quality is the product's first impression, so it uses the most capable model. */
-export const AI_MODEL = "claude-opus-5-5";
-
 /**
- * Server-side refusal fallbacks: if the model's safety classifiers decline a request, the API
- * re-runs it on Anthropic's recommended fallback model inside the same call.
+ * The smallest current model, for cost while most sign-ups don't publish (owner, October 2026):
+ * about $0.02 a draft and a tenth of a cent a rewrite. Without thinking or effort settings, which
+ * it doesn't take. Move drafting to a larger model once sign-ups convert.
  */
-export const FALLBACK_BETA = "server-side-fallback-2026-07-01";
+export const AI_MODEL = "claude-haiku-4-5";
 
 let client: Anthropic | null = null;
 
@@ -22,8 +20,10 @@ export function anthropic(): Anthropic | null {
 }
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
+/** A window long enough to count every draft an account has ever made. */
+export const FOREVER_MS = 100 * 365 * DAY_MS;
 /** Per user per rolling day. Drafting is the expensive call; rewrites are small. */
-export const AI_LIMITS = { generate: 10, rewrite: 60 } as const;
+export const AI_LIMITS = { generate: 3, rewrite: 30 } as const;
 
 export function aiEnabled(): boolean {
   return Boolean(serverEnv().ANTHROPIC_API_KEY);

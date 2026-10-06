@@ -2,11 +2,13 @@
 
 import {
   defaultColors,
+  DOCUMENT_SOURCE,
   encodeAnswers,
   formTopicsFromGoals,
   GOAL_OPTIONS,
   latestTemplateVersion,
   INDUSTRY_OPTIONS,
+  normalizeSources,
   ONBOARDING_STEP_NAMES,
   onboardingAnswersSchema,
   roleLabel,
@@ -22,6 +24,7 @@ import { TemplateView } from "@ceomaker/templates";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { LinkedInPdfHint } from "@/components/document-file";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { trackEvent } from "@/lib/product-analytics/browser";
 import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
@@ -165,6 +168,8 @@ export function QuestionsFlow({
       : [...(list ?? []), value];
 
   const goals = answers.goals ?? [];
+  // Saved answers may hold the earlier CV and LinkedIn choices; they show as the file upload.
+  const chosenSources = normalizeSources(answers.sources ?? []);
   const nextDisabled =
     (step === 0 && !answers.role) ||
     (step === 1 && !answers.industry) ||
@@ -351,16 +356,20 @@ export function QuestionsFlow({
                 key={source}
                 label={source}
                 fontSize={16}
-                selected={(answers.sources ?? []).includes(source)}
-                onClick={() => update({ sources: toggle(answers.sources, source) })}
+                selected={chosenSources.includes(source)}
+                // One or the other: choosing one clears the other.
+                onClick={() => update({ sources: chosenSources.includes(source) ? [] : [source] })}
               />
             ))}
           </div>
-          {(answers.sources ?? []).some((source) => source !== "I'll add it later") ? (
-            <span className="text-sm text-neutral-700">
-              You&apos;ll attach the file after choosing a template. It&apos;s used once to draft
-              your site and isn&apos;t stored.
-            </span>
+          {chosenSources.includes(DOCUMENT_SOURCE) ? (
+            <div className="flex flex-col gap-1.5 text-sm text-neutral-700">
+              <span>
+                You&apos;ll attach it after choosing a template. It&apos;s used once to draft your
+                site and isn&apos;t stored.
+              </span>
+              <LinkedInPdfHint />
+            </div>
           ) : null}
         </>
       ),

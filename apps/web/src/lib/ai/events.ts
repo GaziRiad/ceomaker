@@ -1,6 +1,6 @@
 import type { SiteContent } from "@ceomaker/schema";
 
-/** Why the editor opens with the draft built from the answers instead of an AI draft. */
+/** Why the editor opens without a new AI draft: kept the one from the answers, or the owner's own. */
 export const DRAFT_NOTICES = {
   unavailable:
     "AI drafting isn't switched on yet, so this first draft is built from your answers. Edit anything you like.",
@@ -10,6 +10,14 @@ export const DRAFT_NOTICES = {
     "The free plan includes one AI draft, and this account has used it, so this draft is built from your answers. Pro includes more.",
   failed:
     "The AI draft didn't come through, so we kept the draft built from your answers. You can rewrite the headline with AI in the editor.",
+  // A redraft that didn't happen leaves the owner's own text as it was.
+  "redraft-unavailable": "AI drafting is unavailable right now, so your text is unchanged.",
+  "redraft-free-used":
+    "The free plan includes one AI draft, and this account has used it, so your text is unchanged. Pro can redraft any time.",
+  "redraft-limited":
+    "You've reached today's limit for AI drafts, so your text is unchanged. Try again tomorrow.",
+  "redraft-failed":
+    "The new draft didn't come through, so your text is unchanged. Try again in a moment.",
 } as const;
 
 export type DraftNotice = keyof typeof DRAFT_NOTICES;

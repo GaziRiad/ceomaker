@@ -11,10 +11,12 @@ export const metadata: Metadata = { title: "Writing your draft", robots: { index
 
 async function Generating({
   params,
+  searchParams,
 }: {
   params: PageProps<"/dashboard/sites/[id]/generating">["params"];
+  searchParams: PageProps<"/dashboard/sites/[id]/generating">["searchParams"];
 }) {
-  const { id } = await params;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   const { user, site, draft } = await loadOwnedSite(id, `/dashboard/sites/${id}/generating`);
   const address = siteAddressParts();
   return (
@@ -29,6 +31,7 @@ async function Generating({
         voice={site.answers?.voice ?? "Measured"}
         colors={resolveSiteColors(draft.theme, draft.templateKey, draft.templateVersion)}
         content={parseSiteContentForRender(draft.content)}
+        redraft={query.redraft === "1"}
       />
     </>
   );
@@ -37,7 +40,7 @@ async function Generating({
 export default function GeneratingPage(props: PageProps<"/dashboard/sites/[id]/generating">) {
   return (
     <Suspense fallback={<div className="min-h-dvh" />}>
-      <Generating params={props.params} />
+      <Generating params={props.params} searchParams={props.searchParams} />
     </Suspense>
   );
 }

@@ -96,7 +96,7 @@ export const faq: [string, string][] = [
   ],
   [
     "Do I have to write anything?",
-    "Only your name. Everything else is a tap. With Pro, a CV or LinkedIn PDF fills in your experience.",
+    "Only your name. Everything else is a tap. Add a CV or LinkedIn PDF and it fills in your experience.",
   ],
   [
     "Who can see my site before I publish?",
