@@ -1,4 +1,4 @@
-import { contrastRatio, type SiteColors } from "@ceomaker/schema";
+import { contrastRatio, type PhotoGrade, type SiteColors } from "@ceomaker/schema";
 import type { CSSProperties } from "react";
 import { mixHex } from "../../meridian/v1/measure";
 
@@ -174,4 +174,19 @@ export function monumentRoleStyle(colors: SiteColors): CSSProperties {
     "--mon-rulea": `color-mix(in srgb, var(${on}) 30%, var(--site-accent))`,
     "--mon-tone": `color-mix(in srgb, var(${on}) 14%, var(--site-accent))`,
   } as CSSProperties;
+}
+
+/**
+ * The owner's photo tone. Tinted is Monument's own look: black and white, multiplied into the
+ * colour behind it. Original shows the photo as taken; mono is black and white on its own.
+ */
+const GRADES: Record<PhotoGrade, { filter: string; blend: string }> = {
+  original: { filter: "none", blend: "normal" },
+  tinted: { filter: "grayscale(1) contrast(1.08)", blend: "multiply" },
+  mono: { filter: "grayscale(1) contrast(1.08)", blend: "normal" },
+};
+
+export function gradeStyle(grade: PhotoGrade): CSSProperties {
+  const { filter, blend } = GRADES[grade] ?? GRADES.original;
+  return { "--mon-gf": filter, "--mon-gb": blend } as CSSProperties;
 }

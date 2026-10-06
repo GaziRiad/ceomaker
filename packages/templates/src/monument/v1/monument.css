@@ -440,8 +440,8 @@
   height: 100%;
   object-fit: cover;
   object-position: center 30%;
-  filter: grayscale(1) contrast(1.08);
-  mix-blend-mode: multiply;
+  filter: var(--mon-gf, none);
+  mix-blend-mode: var(--mon-gb, normal);
 }
 
 .mon-below {
@@ -724,7 +724,7 @@
 }
 
 .mon-grey {
-  filter: grayscale(1);
+  filter: var(--mon-gf, none);
 }
 
 .mon-lead {
@@ -1050,7 +1050,7 @@
 }
 
 .mon-multiply {
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--mon-gb, normal);
   transition: transform 600ms var(--mon-ease);
 }
 
