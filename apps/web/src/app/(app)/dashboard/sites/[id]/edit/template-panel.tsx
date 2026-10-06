@@ -9,7 +9,7 @@ import {
 } from "@ceomaker/schema";
 import { designOnChoosing, getTemplate, newerDesign, templateList } from "@ceomaker/templates";
 import { TemplateThumbnail } from "@/components/template-thumbnail";
-import { ExternalLink } from "@/components/icons";
+import { ExternalLink, Sparkles } from "@/components/icons";
 import { ProTag, UpgradePrompt } from "@/components/pro";
 
 export function TemplatePanel({
@@ -146,6 +146,14 @@ export function TemplatePanel({
             </div>
           );
         })}
+      </div>
+      <div className="flex items-start gap-2.5 border border-dashed border-divider p-3.5 text-[13px] text-neutral-700">
+        <Sparkles size={14} className="mt-0.5 flex-none text-accent-800" />
+        <span>
+          <strong className="font-medium text-text">More on the way.</strong> We add new templates
+          for executives regularly, and they appear here when they&apos;re ready. Your content moves
+          to any of them in one click.
+        </span>
       </div>
     </div>
   );
