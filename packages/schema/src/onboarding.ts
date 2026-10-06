@@ -75,18 +75,30 @@ export const VOICE_OPTIONS = [
 export const VOICE_LABELS = ["Measured", "Warm", "Bold"] as const;
 export type VoiceOption = (typeof VOICE_LABELS)[number];
 
-export const SOURCE_OPTIONS = [
-  "Upload CV (PDF or DOCX)",
-  "Import from LinkedIn",
-  "I'll add it later",
-] as const;
+export const SOURCE_OPTIONS = ["Upload a CV or LinkedIn PDF", "I'll add it later"] as const;
 export type SourceOption = (typeof SOURCE_OPTIONS)[number];
 
-/** Sources that mean the user wants to hand us a document to draft from. */
-export const DOCUMENT_SOURCES: ReadonlySet<SourceOption> = new Set([
-  "Upload CV (PDF or DOCX)",
-  "Import from LinkedIn",
-]);
+/** The choice that means the user will hand us a file to draft from. */
+export const DOCUMENT_SOURCE: SourceOption = "Upload a CV or LinkedIn PDF";
+
+/**
+ * Earlier answers offered a CV and a LinkedIn import separately; both meant the same file upload
+ * (LinkedIn's own "Save to PDF"). Saved answers keep those words, so they still count.
+ */
+const LEGACY_DOCUMENT_SOURCES = new Set(["Upload CV (PDF or DOCX)", "Import from LinkedIn"]);
+
+/** Current choices only: legacy ones become the file upload, unknown ones are dropped. */
+export function normalizeSources(values: readonly string[]): SourceOption[] {
+  const known = values.map((value) =>
+    LEGACY_DOCUMENT_SOURCES.has(value) ? DOCUMENT_SOURCE : value,
+  );
+  return SOURCE_OPTIONS.filter((option) => known.includes(option));
+}
+
+/** Whether the user wants to draft from a file, from answers saved at any time. */
+export function wantsDocument(sources: readonly string[] | undefined): boolean {
+  return normalizeSources(sources ?? []).includes(DOCUMENT_SOURCE);
+}
 
 export const ONBOARDING_STEP_NAMES = [
   "Your role",
@@ -105,7 +117,7 @@ export const onboardingAnswersSchema = z.object({
   voice: z.enum(VOICE_LABELS).default("Measured"),
   name: requiredText(60),
   org: text(80).default(""),
-  sources: z.array(z.enum(SOURCE_OPTIONS)).max(SOURCE_OPTIONS.length).default([]),
+  sources: z.array(z.string().max(60)).max(6).default([]).transform(normalizeSources),
 });
 
 export type OnboardingAnswers = z.output<typeof onboardingAnswersSchema>;

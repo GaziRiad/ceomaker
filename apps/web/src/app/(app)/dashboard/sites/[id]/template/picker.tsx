@@ -160,7 +160,7 @@ export function TemplatePicker({
           {wantsDocument && !pro ? (
             <span className="flex items-center gap-2 text-sm text-neutral-700">
               <ProTag />
-              Drafting from your CV is part of Pro.
+              Drafting from a CV or LinkedIn PDF is part of Pro.
             </span>
           ) : wantsDocument ? (
             <span className="flex min-w-0 items-center gap-2 text-sm text-neutral-700">
@@ -173,14 +173,19 @@ export function TemplatePicker({
               />
               {file ? (
                 <>
-                  <span className="max-w-[220px] truncate">CV: {file.name}</span>
+                  <span className="max-w-[220px] truncate">File: {file.name}</span>
                   <button type="button" className="btn btn-ghost" onClick={() => setFile(null)}>
                     Remove
                   </button>
                 </>
               ) : (
                 <>
-                  <span className="hidden md:inline">Draft from your CV or LinkedIn PDF?</span>
+                  <span className="hidden md:inline">
+                    Draft from your CV or LinkedIn PDF?{" "}
+                    <span className="text-neutral-600">
+                      (LinkedIn: More, then Save to PDF on your profile)
+                    </span>
+                  </span>
                   <button
                     type="button"
                     className="btn btn-secondary"

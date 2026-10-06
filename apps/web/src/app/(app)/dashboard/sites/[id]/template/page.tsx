@@ -1,4 +1,4 @@
-import { DOCUMENT_SOURCES, isPro, parseSiteContentForRender } from "@ceomaker/schema";
+import { isPro, parseSiteContentForRender, wantsDocument as wantsFile } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { planFor } from "@/lib/plan";
@@ -19,9 +19,7 @@ async function Picker({
   const { user, site, draft } = await loadOwnedSite(id, `/dashboard/sites/${id}/template`);
   const address = siteAddressParts();
   const pro = isPro(await planFor(user.id));
-  const wantsDocument = (site.answers?.sources ?? []).some((source) =>
-    DOCUMENT_SOURCES.has(source),
-  );
+  const wantsDocument = wantsFile(site.answers?.sources);
   return (
     <>
       <IdentifyAccount id={user.id} />

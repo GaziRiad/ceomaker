@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { BetaContentBlockParam } from "@anthropic-ai/sdk/resources/beta/messages/messages";
 import type { OnboardingAnswers, SiteContent } from "@ceomaker/schema";
-import { AI_MODEL, anthropic, FALLBACK_BETA } from "./client";
+import { AI_MODEL, anthropic } from "./client";
 import type { SourceDocument } from "./documents";
 import {
   contentFromDraft,
@@ -57,11 +57,9 @@ export async function generateDraft(input: {
     const stream = client.beta.messages.stream({
       model: AI_MODEL,
       max_tokens: 16_000,
-      betas: [FALLBACK_BETA],
-      fallbacks: "default",
       system: DRAFT_SYSTEM_PROMPT,
       messages: [{ role: "user", content }],
-      output_config: { effort: "medium", format: betaZodOutputFormat(draftOutputSchema) },
+      output_config: { format: betaZodOutputFormat(draftOutputSchema) },
     });
 
     let text = "";

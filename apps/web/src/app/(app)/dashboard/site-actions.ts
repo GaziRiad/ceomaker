@@ -35,7 +35,7 @@ import {
 import { designOnChoosing, getTemplate } from "@ceomaker/templates";
 import { updateTag } from "next/cache";
 import { z } from "zod";
-import { AI_LIMITS, AI_MODEL, anthropic, DAY_MS, FALLBACK_BETA } from "@/lib/ai/client";
+import { AI_LIMITS, AI_MODEL, anthropic, DAY_MS } from "@/lib/ai/client";
 import {
   fallbackRewrite,
   REWRITE_MODES,
@@ -350,9 +350,7 @@ export async function rewriteHeadlineAction(
   try {
     const message = await client.beta.messages.parse({
       model: AI_MODEL,
-      max_tokens: 4000,
-      betas: [FALLBACK_BETA],
-      fallbacks: "default",
+      max_tokens: 1000,
       system: REWRITE_SYSTEM_PROMPT,
       messages: [
         {
@@ -370,7 +368,7 @@ export async function rewriteHeadlineAction(
           }),
         },
       ],
-      output_config: { effort: "low", format: betaZodOutputFormat(rewriteOutput) },
+      output_config: { format: betaZodOutputFormat(rewriteOutput) },
     });
     const next = message.parsed_output?.headline.replace(/\s+/g, " ").trim().slice(0, 120);
     await finishAiUsage(db, {

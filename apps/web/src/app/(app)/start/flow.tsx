@@ -2,11 +2,13 @@
 
 import {
   defaultColors,
+  DOCUMENT_SOURCE,
   encodeAnswers,
   formTopicsFromGoals,
   GOAL_OPTIONS,
   latestTemplateVersion,
   INDUSTRY_OPTIONS,
+  normalizeSources,
   ONBOARDING_STEP_NAMES,
   onboardingAnswersSchema,
   roleLabel,
@@ -21,7 +23,8 @@ import {
 import { TemplateView } from "@ceomaker/templates";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { ProTag } from "@/components/pro";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { trackEvent } from "@/lib/product-analytics/browser";
 import { AddressBar, ArrowRight, Blueprint, Wordmark } from "@/components/ui";
@@ -80,11 +83,14 @@ function Chip({
   selected,
   onClick,
   fontSize = 17,
+  tag,
 }: {
   label: string;
   selected: boolean;
   onClick: () => void;
   fontSize?: number;
+  /** Shown after the label, such as the Pro badge. */
+  tag?: ReactNode;
 }) {
   return (
     <button
@@ -96,6 +102,7 @@ function Chip({
     >
       {selected ? <span className="text-accent-700">✓</span> : null}
       {label}
+      {tag}
     </button>
   );
 }
@@ -165,6 +172,8 @@ export function QuestionsFlow({
       : [...(list ?? []), value];
 
   const goals = answers.goals ?? [];
+  // Saved answers may hold the earlier CV and LinkedIn choices; they show as the file upload.
+  const chosenSources = normalizeSources(answers.sources ?? []);
   const nextDisabled =
     (step === 0 && !answers.role) ||
     (step === 1 && !answers.industry) ||
@@ -351,16 +360,25 @@ export function QuestionsFlow({
                 key={source}
                 label={source}
                 fontSize={16}
-                selected={(answers.sources ?? []).includes(source)}
-                onClick={() => update({ sources: toggle(answers.sources, source) })}
+                tag={source === DOCUMENT_SOURCE ? <ProTag /> : null}
+                selected={chosenSources.includes(source)}
+                onClick={() => update({ sources: toggle(chosenSources, source) })}
               />
             ))}
           </div>
-          {(answers.sources ?? []).some((source) => source !== "I'll add it later") ? (
-            <span className="text-sm text-neutral-700">
-              You&apos;ll attach the file after choosing a template. It&apos;s used once to draft
-              your site and isn&apos;t stored.
-            </span>
+          {chosenSources.includes(DOCUMENT_SOURCE) ? (
+            <div className="flex flex-col gap-1.5 text-sm text-neutral-700">
+              <span>
+                Drafting from a file is part of Pro. You&apos;ll attach it after choosing a
+                template; it&apos;s used once to draft your site and isn&apos;t stored.
+              </span>
+              <span>
+                <strong className="font-medium text-text">No CV to hand?</strong> Use your LinkedIn
+                profile: open it on LinkedIn, select <strong className="font-medium">More</strong>{" "}
+                (or <strong className="font-medium">Resources</strong>) under your name, then{" "}
+                <strong className="font-medium">Save to PDF</strong>.
+              </span>
+            </div>
           ) : null}
         </>
       ),

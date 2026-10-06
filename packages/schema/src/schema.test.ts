@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  normalizeSources,
+  wantsDocument,
   isPremiumTemplate,
   addMonths,
   giftEndAfter,
@@ -616,5 +618,19 @@ describe("gift dates", () => {
     expect(giftEndAfter(new Date("2026-09-01T00:00:00Z"), 1, now)).toEqual(
       new Date("2026-11-05T12:00:00Z"),
     );
+  });
+});
+
+describe("draft sources", () => {
+  it("reads the earlier CV and LinkedIn choices as the one file upload", () => {
+    expect(normalizeSources(["Import from LinkedIn", "Upload CV (PDF or DOCX)"])).toEqual([
+      "Upload a CV or LinkedIn PDF",
+    ]);
+    expect(normalizeSources(["I'll add it later", "Something else"])).toEqual([
+      "I'll add it later",
+    ]);
+    expect(wantsDocument(["Import from LinkedIn"])).toBe(true);
+    expect(wantsDocument(["I'll add it later"])).toBe(false);
+    expect(wantsDocument(undefined)).toBe(false);
   });
 });
