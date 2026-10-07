@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CookieSettings } from "@/components/cookie-consent";
 import Link from "next/link";
 import { LEGAL_CONTACT, LegalPage, type LegalSection } from "@/components/legal";
 
@@ -70,9 +71,10 @@ const sections: LegalSection[] = [
           to your sign-up came from (such as LinkedIn, Google or a campaign link), how fast pages
           load for you, errors you run into, your browser and device type, and the country you are
           in. Once you have an account this is linked to its id, never to your email, and it never
-          includes your site&apos;s text, your answers or your photos. Nothing is stored in your
-          browser for this: before you sign in, each page you open counts as a new, anonymous
-          visitor.
+          includes your site&apos;s text, your answers or your photos. If cookies are allowed (see
+          Cookies below), an anonymous id in a cookie recognises your browser across visits;
+          otherwise nothing is stored in your browser, and a code made from your network address and
+          browser, which changes every day, counts your visit instead.
         </li>
         <li>
           <strong>Session recordings:</strong> some visits to ceomaker.app are recorded so we can
@@ -136,11 +138,21 @@ const sections: LegalSection[] = [
     id: "cookies",
     title: "Cookies",
     body: (
-      <p>
-        ceomaker.app uses only the cookies needed to keep you signed in. They are not used for
-        advertising or tracking, and customer sites set none at all. Our usage statistics store
-        nothing on your device either. That is why there is no cookie banner.
-      </p>
+      <>
+        <p>
+          ceomaker.app uses cookies to keep you signed in, to remember your cookie choice, and, if
+          you allow them, for usage statistics (PostHog: an anonymous id that recognises your
+          browser across visits) and to measure our ads (Google Ads: whether a visit from an ad led
+          to a sign-up). Sites made with CEOMaker set no cookies at all.
+        </p>
+        <p>
+          In the European Economic Area, the UK and Switzerland we ask first, and statistics and ad
+          cookies stay off unless you accept. Elsewhere they are on unless you turn them off. Either
+          way you can change your mind here at any time; with cookies off, we still count your visit
+          without storing anything on your device.
+        </p>
+        <CookieSettings />
+      </>
     ),
   },
   {
@@ -176,12 +188,17 @@ const sections: LegalSection[] = [
             recordings and reports errors (servers in Frankfurt, Germany). It works out your country
             and doesn&apos;t keep your network address.
           </li>
+          <li>
+            <strong>Google</strong> measures our ads (Google Ads), with cookies only when allowed
+            (see Cookies).
+          </li>
         </ul>
         <p>
           Some of these providers are based in the United States, so data can be transferred outside
           the European Economic Area. We rely on the safeguards in their data processing terms, such
           as the European Commission&apos;s standard contractual clauses. We don&apos;t sell
-          personal data or share it for advertising.
+          personal data. With your consent (or, outside Europe, unless you turn it off), Google
+          learns that a visit from one of our ads led to a sign-up, to measure those ads.
         </p>
       </>
     ),
@@ -267,9 +284,8 @@ export default function PrivacyPage() {
       title="Privacy policy"
       intro={
         <p>
-          In short: we collect what we need to build and run your site, we don&apos;t sell it or use
-          it for advertising, sites made with CEOMaker set no cookies, and you can delete everything
-          yourself at any time.
+          In short: we collect what we need to build and run your site, we don&apos;t sell it, sites
+          made with CEOMaker set no cookies, and you can delete everything yourself at any time.
         </p>
       }
       sections={sections}

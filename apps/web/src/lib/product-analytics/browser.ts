@@ -2,12 +2,15 @@ import posthog from "posthog-js";
 import { POSTHOG_UI_HOST, posthogKey, RELAY_PATH } from "./config";
 import { RECORDING_OPTIONS } from "./recording";
 import { scrubEvent } from "./scrub";
+import { cookiesAllowed, onConsentChange } from "../consent";
 import { encodeVisitSource, readVisitSource, type VisitSource } from "./visit-source";
 
 // PostHog in the browser, on the product's own pages only (the (app) layout starts it; customer
-// sites never load it). Nothing is stored in the browser: the visitor's id lives in memory for
-// this page load, so a new tab or a reload is a new visitor until they sign in. The one exception
-// is our own admins' browsers, flagged so they're left out entirely (INTERNAL_KEY).
+// sites never load it). With cookies allowed (see lib/consent.ts) it keeps the visitor's id in a
+// first-party cookie on this host, so a visit is one visitor across pages and days. Without
+// them it stores nothing on the device: PostHog's servers count the visitor from a daily-salted
+// hash instead (cookieless mode), and a choice made later switches over. Our own admins'
+// browsers are flagged and left out entirely (INTERNAL_KEY).
 
 let started = false;
 let internal = false;
@@ -48,11 +51,13 @@ export function startProductAnalytics(): void {
     api_host: RELAY_PATH,
     ui_host: POSTHOG_UI_HOST,
     defaults: "2026-08-30",
-    persistence: "memory",
-    // A fresh anonymous id per page load, said explicitly (PostHog warns otherwise).
-    ...(typeof crypto.randomUUID === "function"
-      ? { bootstrap: { distinctID: crypto.randomUUID() } }
-      : {}),
+    // Cookies only with consent (or outside the consent region); otherwise the visitor is counted
+    // without storing anything, from a hash PostHog's servers make. Needs "Cookieless server hash
+    // mode" on in the PostHog project.
+    cookieless_mode: "on_reject",
+    opt_out_capturing_by_default: !cookiesAllowed(),
+    // On this host only: customer sites live on its sibling subdomains and must never get it.
+    cross_subdomain_cookie: false,
     person_profiles: "identified_only",
     capture_pageview: "history_change",
     capture_exceptions: true,
@@ -74,7 +79,18 @@ export function startProductAnalytics(): void {
     // The project's remote settings load (recordings need them); feature flags aren't used.
     advanced_disable_feature_flags: true,
     mask_personal_data_properties: true,
-    before_send: (event) => scrubEvent(event, location.host),
+    // Our own admins' events are dropped here, whatever the consent mode.
+    before_send: (event) => (internal ? null : scrubEvent(event, location.host)),
+  });
+  // Outside the consent region cookies are on until rejected: say so to PostHog, which otherwise
+  // waits for a choice before counting anything.
+  if (cookiesAllowed() && posthog.get_explicit_consent_status() === "pending") {
+    posthog.opt_in_capturing({ captureEventName: false });
+  }
+  // A choice on the banner (or the privacy page) applies at once.
+  onConsentChange((allowed) => {
+    if (allowed) posthog.opt_in_capturing({ captureEventName: false });
+    else posthog.opt_out_capturing();
   });
 }
 
@@ -91,10 +107,7 @@ export function identifyAccount(id: string, isInternal: boolean): void {
   if (!on() || posthog.get_distinct_id() === id) return;
   posthog.identify(id, isInternal ? { internal: true } : undefined);
   // From here on this browser sends nothing (the flag above covers later page loads).
-  if (isInternal) {
-    posthog.opt_out_capturing();
-    internal = true;
-  }
+  if (isInternal) internal = true;
 }
 
 /** After signing out, the next person on this browser starts anonymous. */

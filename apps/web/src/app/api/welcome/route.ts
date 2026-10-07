@@ -1,6 +1,7 @@
 import { getDb, recordSignupSource } from "@ceomaker/db";
 import { goalOfCallback } from "@/lib/product-analytics/goal";
 import { getAuth } from "@/lib/auth";
+import { googleAdsId, SIGNUP_COOKIE } from "@/lib/google-ads";
 import { lifecycleSignedUp } from "@/lib/lifecycle-email";
 import { recordSignup } from "@/lib/product-analytics/server";
 import { decodeVisitSource, UNKNOWN_SOURCE } from "@/lib/product-analytics/visit-source";
@@ -32,6 +33,16 @@ export async function GET(request: Request) {
         goal: goalOfCallback(next),
       });
       lifecycleSignedUp(session.user);
+      // For the Google tag's sign-up conversion, read once on the next page.
+      if (googleAdsId()) {
+        return new Response(null, {
+          status: 303,
+          headers: {
+            Location: `${appUrl()}${next}`,
+            "Set-Cookie": `${SIGNUP_COOKIE}=1; Max-Age=600; Path=/; SameSite=Lax${appUrl().startsWith("https:") ? "; Secure" : ""}`,
+          },
+        });
+      }
     }
   }
   return Response.redirect(`${appUrl()}${next}`, 303);

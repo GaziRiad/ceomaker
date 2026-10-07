@@ -130,25 +130,27 @@ Prefer Docker? `docker compose up -d` starts a local Postgres with `ceomaker` an
    - **Production branch** (Settings → Environments → Production): `main`
 2. **Environment variables** (Settings → Environment Variables):
 
-   | Variable                       | Production          | Preview                  |
-   | ------------------------------ | ------------------- | ------------------------ |
-   | `ENABLE_EXPERIMENTAL_COREPACK` | `1`                 | `1`                      |
-   | `DATABASE_URL`                 | Neon `main`, pooled | Neon `dev`, pooled       |
-   | `DATABASE_URL_UNPOOLED`        | Neon `main`, direct | Neon `dev`, direct       |
-   | `BETTER_AUTH_SECRET`           | new random value    | a different random value |
-   | `RESEND_API_KEY`               | Resend key          | Resend key               |
-   | `EMAIL_FROM`                   | see below           | see below                |
-   | `GOOGLE_CLIENT_ID`             | optional            | (leave unset)            |
-   | `GOOGLE_CLIENT_SECRET`         | optional            | (leave unset)            |
-   | `ANTHROPIC_API_KEY`            | Claude key          | Claude key               |
-   | `VERCEL_API_TOKEN`             | see Custom domains  | (leave unset)            |
-   | `VERCEL_PROJECT_ID`            | see Custom domains  | (leave unset)            |
-   | `VERCEL_TEAM_ID`               | see Custom domains  | (leave unset)            |
-   | `CRON_SECRET`                  | new random value    | (leave unset)            |
-   | `ADMIN_EMAILS`                 | your email          | your email               |
-   | `NEXT_PUBLIC_POSTHOG_KEY`      | PostHog project key | (leave unset)            |
-   | `FREEMIUS_*` (4 variables)     | see Payments        | same (sandbox)           |
-   | `R2_*` (4 variables)           | see Image storage   | same                     |
+   | Variable                              | Production                                                              | Preview                  |
+   | ------------------------------------- | ----------------------------------------------------------------------- | ------------------------ |
+   | `ENABLE_EXPERIMENTAL_COREPACK`        | `1`                                                                     | `1`                      |
+   | `DATABASE_URL`                        | Neon `main`, pooled                                                     | Neon `dev`, pooled       |
+   | `DATABASE_URL_UNPOOLED`               | Neon `main`, direct                                                     | Neon `dev`, direct       |
+   | `BETTER_AUTH_SECRET`                  | new random value                                                        | a different random value |
+   | `RESEND_API_KEY`                      | Resend key                                                              | Resend key               |
+   | `EMAIL_FROM`                          | see below                                                               | see below                |
+   | `GOOGLE_CLIENT_ID`                    | optional                                                                | (leave unset)            |
+   | `GOOGLE_CLIENT_SECRET`                | optional                                                                | (leave unset)            |
+   | `ANTHROPIC_API_KEY`                   | Claude key                                                              | Claude key               |
+   | `VERCEL_API_TOKEN`                    | see Custom domains                                                      | (leave unset)            |
+   | `VERCEL_PROJECT_ID`                   | see Custom domains                                                      | (leave unset)            |
+   | `VERCEL_TEAM_ID`                      | see Custom domains                                                      | (leave unset)            |
+   | `CRON_SECRET`                         | new random value                                                        | (leave unset)            |
+   | `ADMIN_EMAILS`                        | your email                                                              | your email               |
+   | `NEXT_PUBLIC_POSTHOG_KEY`             | PostHog project key                                                     | (leave unset)            |
+   | `NEXT_PUBLIC_GOOGLE_ADS_ID`           | Google tag id (`AW-…`); loads the tag and allows its origins in the CSP | (leave unset)            |
+   | `NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL` | Label of the sign-up conversion action                                  | (leave unset)            |
+   | `FREEMIUS_*` (4 variables)            | see Payments                                                            | same (sandbox)           |
+   | `R2_*` (4 variables)                  | see Image storage                                                       | same                     |
    - `ENABLE_EXPERIMENTAL_COREPACK=1` makes Vercel use the pnpm version pinned in `package.json`. Without it, Vercel builds with pnpm 9.
    - Set `ROOT_DOMAIN` and `APP_URL` as described in "Domain setup" below. Without a domain, customer sites can't be reached on a `*.vercel.app` address.
 
@@ -228,7 +230,8 @@ The product's own pages (landing, sign-in, dashboard, editor) also load Vercel W
 
 PostHog shows how people use the product: the sign-up funnel, editor usage, publishing and upgrades, and errors. It runs on the product's own pages only (customer sites never load it), stores nothing in the browser (no cookies, no local storage, so no consent banner), and uses PostHog's EU servers. Code: `apps/web/src/lib/product-analytics`.
 
-- **Anonymous visitors** get an id that lasts one page load. The steps before signing in (`questions_started`, `questions_completed`, `sign_in_requested`) happen within one page load, so they stay together.
+- **Cookies and consent** (`lib/consent.ts`, `components/cookie-consent.tsx`). `proxy.ts` sets `ceomaker_region` (`eu` or `other`, from Vercel's country header; unknown counts as `eu`) on product pages. In the EEA, UK and Switzerland the banner asks (Accept, Reject, equally prominent); elsewhere it's a notice ("I understand") and cookies are on unless turned off on the privacy page, which shows and changes the choice. With cookies, PostHog keeps an anonymous id in a first-party cookie on www only (`cross_subdomain_cookie: false`, so customer subdomains never get it), so a visitor is one person across pages and days. Without, PostHog runs in cookieless mode: nothing stored, the visitor counted from a daily-salted hash on PostHog's servers. **This needs "Cookieless server hash mode" on in the PostHog project (Settings > Web analytics)**, or rejected visitors aren't counted.
+- **Google Ads** (`components/google-ads.tsx`), once `NEXT_PUBLIC_GOOGLE_ADS_ID` is set: the Google tag with Consent Mode v2 (`ad_storage`, `ad_user_data`, `ad_personalization` denied until accepted in Europe, granted elsewhere unless rejected; `url_passthrough` and data redaction without cookies). A new account (`/api/welcome`) sets a ten-minute `ceomaker_signup` cookie; the next page sends the sign-up conversion (`NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL`) and clears it. Admin browsers are left out.
 - **Sign-up joins them to the account.** The sign-in link (and Google) send a new account to `/api/welcome` with that id and where the visit came from (referrer, `utm_*` tags, landing page). It saves the source on the account (`user.signup_source`), merges the visit into the account in PostHog and counts `signed_up` with the source.
 - **Signed-in pages** link each page load to the account id (never the email). Admins (`ADMIN_EMAILS`) get the person property `internal: true`.
 - **Server events** (they can't be blocked): `site_created`, `draft_written`, `template_chosen`, `site_published`, `ai_rewrite_used`, `photo_uploaded`, `domain_added`, `device_preview_changed`, `checkout_started`, `plan_changed` (cause: billing, gift or gift_ended). Server errors are reported from `instrumentation.ts`, browser errors by PostHog itself, and page speed (web vitals: LCP, CLS, FCP, INP) by PostHog too.
