@@ -1,11 +1,12 @@
 import {
   buildStarterContent,
+  readStoredAnswers,
+  RECOMMENDED_TEMPLATE,
   isPro,
   planOf,
   type Plan,
   contrastRatio,
   CURRENT_SCHEMA_VERSION,
-  DEFAULT_TEMPLATE_KEY,
   emptyThemeSettings,
   isPublishableColors,
   isTemplateVersion,
@@ -268,7 +269,7 @@ async function loadOwnedSite(db: Database, userId: string, which: SQL): Promise<
     id: owned.id,
     subdomain: owned.subdomain,
     status: owned.status,
-    answers: owned.answers ?? null,
+    answers: readStoredAnswers(owned.answers),
     createdAt: owned.createdAt,
     notifyMessages: owned.notifyMessages,
     draft: {
@@ -396,16 +397,19 @@ export async function createSite(
 }
 
 /**
- * Creates a user's site from their guided answers, with an honest starter draft and the best
+ * Creates a user's site from their guided answers, with an honest starter draft on the design
+ * recommended for their goal, and the best
  * free address derived from their name ("amelia", then "amelia-hart", ...).
  */
 export async function createSiteFromAnswers(
   db: Database,
   input: { userId: string; answers: OnboardingAnswers; email?: string },
 ) {
+  // The site starts on the design recommended for its goal; the picker offers all of them.
+  const templateKey = RECOMMENDED_TEMPLATE[input.answers.goal];
   const draft = {
-    templateKey: DEFAULT_TEMPLATE_KEY,
-    templateVersion: latestTemplateVersion(DEFAULT_TEMPLATE_KEY),
+    templateKey,
+    templateVersion: latestTemplateVersion(templateKey),
     theme: emptyThemeSettings,
     content: buildStarterContent(input.answers, { email: input.email }),
   };

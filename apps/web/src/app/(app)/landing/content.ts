@@ -1,6 +1,16 @@
-import { ROLE_OPTIONS } from "@ceomaker/schema";
-
-export const heroRoles = ROLE_OPTIONS;
+/**
+ * The roles the hero offers as a first tap. Each opens the questions on a leader's site with the
+ * role filled in ("Something else" on a general one); see start/page.tsx.
+ */
+export const heroRoles = [
+  "Chief executive",
+  "Founder",
+  "Investor",
+  "Board member",
+  "Executive",
+  "Managing partner",
+  "Something else",
+] as const;
 
 export const heroWords = "A personal website that matches your standing.".split(" ");
 

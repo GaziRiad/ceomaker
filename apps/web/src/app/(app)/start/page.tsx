@@ -1,4 +1,5 @@
 import { getDb, getPrimarySiteId } from "@ceomaker/db";
+import { ROLE_MAX, siteGoalFrom, type SiteGoal } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -16,10 +17,21 @@ async function Start({ searchParams }: { searchParams: PageProps<"/start">["sear
   // One site per account for now: returning users go straight to it.
   if (session && (await getPrimarySiteId(getDb(), session.user.id))) redirect("/dashboard");
   const address = siteAddressParts();
-  const role = typeof params.role === "string" ? params.role : null;
+  // `?goal=hired` (ads, the /cv page) starts on the role question. The landing page's role links
+  // (`?role=Founder`) start there too, for a leader's site with the role filled in.
+  const goal = siteGoalFrom(params.goal);
+  const role =
+    typeof params.role === "string" && params.role.length <= ROLE_MAX ? params.role.trim() : null;
+  const start: { goal: SiteGoal; role: string | null } | null = goal
+    ? { goal, role: null }
+    : role === "Something else"
+      ? { goal: "other", role: null }
+      : role
+        ? { goal: "credibility", role }
+        : null;
   return (
     <QuestionsFlow
-      initialRole={role}
+      start={start}
       signedIn={Boolean(session)}
       addressPrefix={address.prefix}
       addressSuffix={address.suffix}

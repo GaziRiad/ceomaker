@@ -61,16 +61,26 @@ async function settle(send: () => Promise<void>): Promise<void> {
   }
 }
 
-/** Sends an event once the response has gone, so it never slows down what the person did. */
+/**
+ * Sends an event once the response has gone, so it never slows down what the person did.
+ * `person` sets properties on the account's person, for breaking down every later event.
+ */
 export function trackServerEvent(
   userId: string,
   event: ProductEvent,
   properties: Record<string, Value> = {},
+  person?: Record<string, Value>,
 ): void {
   const posthog = posthogClient();
   if (!posthog) return;
   const send = () =>
-    settle(() => posthog.captureImmediate({ distinctId: userId, event, properties }));
+    settle(() =>
+      posthog.captureImmediate({
+        distinctId: userId,
+        event,
+        properties: person ? { ...properties, $set: person } : properties,
+      }),
+    );
   try {
     after(send);
   } catch {
@@ -108,6 +118,8 @@ export async function recordSignup(input: {
   anonymousId: string | null;
   source: VisitSource;
   fromStart: boolean;
+  /** What the site is for, when the sign-up came from the questions. */
+  goal: string | null;
 }): Promise<void> {
   const posthog = posthogClient();
   if (!posthog) return;
@@ -135,11 +147,16 @@ export async function recordSignup(input: {
       distinctId: input.userId,
       properties: {
         $set_once: person,
+        ...(input.goal ? { $set: { goal: input.goal } } : {}),
         ...(input.anonymousId ? { $anon_distinct_id: input.anonymousId } : {}),
       },
     }),
   );
-  trackServerEvent(input.userId, "signed_up", { ...properties, from_start: input.fromStart });
+  trackServerEvent(input.userId, "signed_up", {
+    ...properties,
+    from_start: input.fromStart,
+    ...(input.goal ? { goal: input.goal } : {}),
+  });
 }
 
 /** A server error (see instrumentation.ts): where it happened, never who or what was sent. */

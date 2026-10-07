@@ -20,7 +20,6 @@ function draft(overrides: Partial<DraftOutput> = {}): DraftOutput {
       eyebrow: "Chief Executive Officer, Meridian Freight Group",
       headline: "Building supply chains that hold up under pressure.",
       introduction: "I lead a logistics business. I speak about resilient operations.",
-      buttonLabel: "Get in touch",
     },
     about: {
       opening: "I run a freight network built on *one shared planning system* across depots.",
@@ -28,6 +27,7 @@ function draft(overrides: Partial<DraftOutput> = {}): DraftOutput {
     },
     impact: [],
     experience: [],
+    focus: [],
     work: [],
     profile: {
       role: "Chief Executive Officer",
@@ -94,6 +94,7 @@ describe("contentFromDraft", () => {
       "hero",
       "impact",
       "about",
+      "focus",
       "work",
       "experience",
       "testimonials",
@@ -106,7 +107,7 @@ describe("contentFromDraft", () => {
     const content = contentFromDraft(
       answers,
       draft({
-        hero: { ...draft().hero, headline: "word ".repeat(80), buttonLabel: "x".repeat(90) },
+        hero: { ...draft().hero, headline: "word ".repeat(80) },
       }),
     );
     expect(content).not.toBeNull();
@@ -117,12 +118,74 @@ describe("contentFromDraft", () => {
   it("falls back to the answers when the model leaves fields empty", () => {
     const content = contentFromDraft(
       answers,
-      draft({ hero: { eyebrow: "", headline: "", introduction: "", buttonLabel: "" } }),
+      draft({ hero: { eyebrow: "", headline: "", introduction: "" } }),
     )!;
     expect(content.sections[0]).toMatchObject({
       headline: "Building supply chains that hold up under pressure.",
       primaryCta: { label: "Get in touch", href: "#contact" },
     });
+  });
+});
+
+describe("contentFromDraft for job seekers", () => {
+  const seeker = onboardingAnswersSchema.parse({
+    version: 2,
+    goal: "hired",
+    role: "Product Manager",
+    industry: "Technology",
+    org: "Northwind",
+    orgStatus: "between_roles",
+    outcomes: ["Recruiters reaching out", "Referrals"],
+    voice: "Warm",
+    name: "Sam Okafor",
+  });
+
+  it("leads with experience and skills, and never presents a past employer as current", () => {
+    const content = contentFromDraft(
+      seeker,
+      draft({
+        hero: {
+          eyebrow: "Product Manager",
+          headline: "I turn messy problems into products people use.",
+          introduction: "I'm a product manager, most recently at Northwind. Open to new roles.",
+        },
+        experience: [
+          {
+            role: "Product Manager",
+            organization: "Northwind",
+            location: "",
+            start: "2021",
+            end: "2026",
+            summary: "",
+          },
+        ],
+        focus: [{ title: "Discovery", description: "Interviews and prototypes" }],
+        profile: {
+          ...draft().profile,
+          role: "Product Manager",
+          company: "Northwind",
+          affiliations: ["Northwind"],
+        },
+      }),
+    )!;
+    expect(content.sections.map((section) => section.id)).toEqual([
+      "hero",
+      "about",
+      "experience",
+      "focus",
+      "impact",
+      "work",
+      "testimonials",
+      "contact",
+    ]);
+    expect(content.sections.find((section) => section.id === "focus")).toMatchObject({
+      heading: "Skills",
+      visible: true,
+      items: [{ title: "Discovery", description: "Interviews and prototypes" }],
+    });
+    expect(content.sections[0]).toMatchObject({ primaryCta: { label: "Contact me" } });
+    expect(content.meta.company).toBeUndefined();
+    expect(content.meta.affiliations).toEqual([]);
   });
 });
 
@@ -174,7 +237,6 @@ describe("mergeRedraft", () => {
           eyebrow: "Chief Executive, Meridian Freight Group",
           headline: "Freight that keeps its promises.",
           introduction: "I run a logistics group across six countries.",
-          buttonLabel: "Get in touch",
         },
         impact: [{ value: "€780M", label: "Annual revenue" }],
         experience: [

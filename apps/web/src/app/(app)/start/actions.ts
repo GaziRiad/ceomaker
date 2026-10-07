@@ -30,6 +30,6 @@ export async function finishOnboarding(encodedAnswers: string): Promise<FinishRe
     answers,
     email: session.user.email,
   });
-  trackServerEvent(userId, "site_created");
+  trackServerEvent(userId, "site_created", { goal: answers.goal }, { goal: answers.goal });
   return { ok: true, siteId: created.id };
 }

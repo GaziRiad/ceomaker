@@ -1,4 +1,4 @@
-import type { OnboardingAnswers, SiteContent, TemplateKey, ThemeSettings } from "@ceomaker/schema";
+import type { SiteContent, TemplateKey, ThemeSettings } from "@ceomaker/schema";
 import { sql } from "drizzle-orm";
 import {
   boolean,
@@ -32,8 +32,11 @@ export const site = pgTable(
     subdomain: text("subdomain").notNull().unique(),
     status: siteStatus("status").notNull().default("draft"),
     publishedVersionId: uuid("published_version_id"),
-    /** The guided-question answers the site was drafted from. Input for AI rewrites. */
-    answers: jsonb("answers").$type<OnboardingAnswers>(),
+    /**
+     * The guided-question answers the site was drafted from. Input for AI rewrites. Rows hold
+     * answers of any age; read them with readStoredAnswers, never as they are.
+     */
+    answers: jsonb("answers").$type<unknown>(),
     /** Email the owner when someone writes through the contact form (once email is set up). */
     notifyMessages: boolean("notify_messages").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

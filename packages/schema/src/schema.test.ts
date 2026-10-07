@@ -16,7 +16,10 @@ import {
   defaultColors,
   demoSiteContent,
   encodeAnswers,
-  formTopicsFromGoals,
+  draftFromStored,
+  formTopicsFromOutcomes,
+  industryForRole,
+  industryLabel,
   imageRef,
   imageSrc,
   isPublishableColors,
@@ -28,7 +31,7 @@ import {
   parseSiteContent,
   parseSiteContentForRender,
   parseThemeSettingsForRender,
-  previewFromAnswers,
+  readStoredAnswers,
   readableTextOn,
   resolvePhotoGrade,
   resolveSiteColors,
@@ -53,6 +56,7 @@ import {
   latestTemplateVersion,
   themeSettingsSchema,
   type OnboardingAnswers,
+  type OnboardingAnswersInput,
 } from "./index";
 
 describe("site content", () => {
@@ -463,7 +467,8 @@ describe("search and sharing", () => {
 });
 
 describe("onboarding", () => {
-  const answers: OnboardingAnswers = onboardingAnswersSchema.parse({
+  // Answers as saved before October 2026, for executives only.
+  const legacy = {
     role: "Chief executive",
     industry: "Logistics",
     stage: "Mid-size, 500–5,000",
@@ -471,35 +476,67 @@ describe("onboarding", () => {
     voice: "Measured",
     name: "Amelia Hart",
     org: "Meridian Freight Group",
-  });
-
-  it("builds the live preview from partial answers", () => {
-    expect(previewFromAnswers({})).toMatchObject({
-      name: "Your Name",
-      eyebrow: "Leader",
-      headline: "Building work that holds up under pressure.",
+  };
+  const answers: OnboardingAnswers = onboardingAnswersSchema.parse(legacy);
+  const current = (patch: Partial<OnboardingAnswersInput>): OnboardingAnswers =>
+    onboardingAnswersSchema.parse({
+      version: 2,
+      goal: "hired",
+      role: "Nurse",
+      industry: "Healthcare",
+      org: "St Mary's Hospital",
+      orgStatus: "employed",
+      outcomes: ["Recruiters reaching out"],
+      voice: "Warm",
+      name: "Sam Okafor",
+      ...patch,
     });
-    const preview = previewFromAnswers(answers);
-    expect(preview.eyebrow).toBe("Chief executive, Meridian Freight Group");
-    expect(preview.headline).toBe("Building supply chains that hold up under pressure.");
-    expect(preview.subheadline).toBe(
-      "I lead a business of 500 to 5,000 people in logistics. Open to speaking invitations and board and advisory roles.",
-    );
+  const hero = (content: ReturnType<typeof buildStarterContent>) =>
+    content.sections.find((section) => section.type === "hero") as {
+      eyebrow: string;
+      headline: string;
+      subheadline: string;
+      primaryCta: { label: string };
+    };
+  const allText = (content: ReturnType<typeof buildStarterContent>) => JSON.stringify(content);
+
+  it("reads earlier executive answers as a credibility site with the same facts", () => {
+    expect(answers).toMatchObject({
+      version: 2,
+      goal: "credibility",
+      role: "Chief executive",
+      industry: "Other",
+      industryOther: "Logistics",
+      orgStatus: "employed",
+      outcomes: ["Board and advisory roles", "Speaking invitations"],
+      stage: "Mid-size, 500–5,000",
+    });
+    expect(readStoredAnswers(answers)).toEqual(answers);
+    expect(readStoredAnswers({ role: "Emperor" })).toBeNull();
+    expect(readStoredAnswers(null)).toBeNull();
   });
 
-  it("builds a valid starter site that invents nothing", () => {
+  it("builds a valid credibility starter that invents nothing", () => {
     const content = buildStarterContent(answers, { email: "amelia@example.com" });
     const parsed = parseSiteContent(content);
     expect(parsed.success).toBe(true);
     const sections = parsed.data!.sections;
     const hidden = sections.filter((section) => !section.visible).map((section) => section.id);
-    expect(hidden).toEqual(["impact", "experience", "work", "testimonials"]);
+    expect(hidden).toEqual(["impact", "focus", "experience", "work", "testimonials"]);
     for (const section of sections) {
       if (section.type === "achievements" || section.type === "testimonials") {
         expect(section.items).toEqual([]);
       }
     }
+    expect(hero(content)).toMatchObject({
+      eyebrow: "Chief executive, Meridian Freight Group",
+      headline: "Building supply chains that hold up under pressure.",
+      subheadline:
+        "I'm a Chief executive in logistics, leading Meridian Freight Group. I lead a business of 500 to 5,000 people. Open to speaking invitations and board and advisory roles.",
+      primaryCta: { label: "Get in touch" },
+    });
     expect(parsed.data!.meta.availability).toBe("Open to board and advisory roles");
+    expect(parsed.data!.meta.affiliations).toEqual(["Meridian Freight Group"]);
     const contact = sections.find((section) => section.type === "contact");
     expect(contact).toMatchObject({
       blurb: "For speaking, board and advisory enquiries.",
@@ -508,13 +545,113 @@ describe("onboarding", () => {
     });
   });
 
-  it("offers form topics only for goals someone would write about", () => {
-    expect(formTopicsFromGoals(["A credible first result on Google"])).toEqual([]);
-    expect(formTopicsFromGoals(["Attracting talent", "Investor relations"])).toEqual([
-      "Investors",
+  it("writes a job seeker's site with no executive wording", () => {
+    const content = buildStarterContent(current({}));
+    expect(parseSiteContent(content).success).toBe(true);
+    expect(hero(content)).toMatchObject({
+      eyebrow: "Nurse, St Mary's Hospital",
+      headline: "Nurse in healthcare.",
+      subheadline: "I'm a Nurse in healthcare at St Mary's Hospital. Open to new roles.",
+      primaryCta: { label: "Contact me" },
+    });
+    expect(content.meta.affiliations).toEqual([]);
+    expect(content.meta.availability).toBe("Open to new roles");
+    expect(content.sections.map((section) => section.id)).toEqual([
+      "hero",
+      "about",
+      "experience",
+      "focus",
+      "impact",
+      "work",
+      "testimonials",
+      "contact",
+    ]);
+    expect(content.sections.find((section) => section.id === "focus")).toMatchObject({
+      heading: "Skills",
+      visible: false,
+    });
+    expect(allText(content)).not.toMatch(/\b(lead|leading|founder|executive|board)\b/i);
+  });
+
+  it("never says 'currently' for someone between roles", () => {
+    const content = buildStarterContent(current({ orgStatus: "between_roles" }));
+    expect(hero(content).subheadline).toBe(
+      "I'm a Nurse in healthcare, most recently at St Mary's Hospital. Open to new roles.",
+    );
+    expect(hero(content).eyebrow).toBe("Nurse");
+    expect(content.meta.company).toBeUndefined();
+    expect(allText(content)).not.toMatch(/currently/i);
+    // Without a past employer there is no "at" at all.
+    const none = buildStarterContent(current({ orgStatus: "between_roles", org: "" }));
+    expect(hero(none).subheadline).toBe("I'm a Nurse in healthcare. Open to new roles.");
+  });
+
+  it("presents independents as independent, not tied to a company", () => {
+    const content = buildStarterContent(
+      current({
+        goal: "clients",
+        role: "Consultant",
+        industry: "Consulting",
+        org: "",
+        orgStatus: "independent",
+        outcomes: ["Bookings", "New leads"],
+      }),
+    );
+    expect(hero(content)).toMatchObject({
+      eyebrow: "Consultant · Independent",
+      subheadline: "I'm a Consultant in consulting, working independently. Taking on new clients.",
+      primaryCta: { label: "Book a call" },
+    });
+    expect(content.meta.company).toBeUndefined();
+    const contact = content.sections.find((section) => section.type === "contact");
+    expect(contact).toMatchObject({
+      blurb: "For new projects and bookings.",
+      form: { topics: ["Working together", "Booking", "Something else"] },
+    });
+    expect(content.sections.find((section) => section.id === "focus")).toMatchObject({
+      heading: "Services",
+    });
+  });
+
+  it("names an industry typed under Other, and keeps acronyms", () => {
+    const content = buildStarterContent(
+      current({ goal: "other", role: "Analyst", industry: "Other", industryOther: "SaaS" }),
+    );
+    expect(hero(content).headline).toBe("Analyst in SaaS.");
+    expect(industryLabel({ industry: "Other", industryOther: "SaaS" })).toBe("SaaS");
+    expect(hero(content).primaryCta.label).toBe("Contact me");
+  });
+
+  it("offers form topics only for outcomes someone would write about", () => {
+    expect(formTopicsFromOutcomes(["A credible first result on Google"])).toEqual([]);
+    expect(formTopicsFromOutcomes(["Attracting talent", "Investors or partners"])).toEqual([
+      "Investors and partners",
       "Careers",
       "Something else",
     ]);
+  });
+
+  it("starts the industry question answered for plain roles", () => {
+    expect(industryForRole(" nurse ")).toBe("Healthcare");
+    expect(industryForRole("Product Manager")).toBeNull();
+  });
+
+  it("reads unfinished answers of any age from the browser", () => {
+    expect(draftFromStored({ ...legacy, sources: ["Import from LinkedIn"] })).toEqual({
+      goal: "credibility",
+      role: "Chief executive",
+      industry: "Other",
+      industryOther: "Logistics",
+      org: "Meridian Freight Group",
+      outcomes: ["Board and advisory roles", "Speaking invitations"],
+      voice: "Measured",
+      name: "Amelia Hart",
+      sources: ["Upload a CV or LinkedIn PDF"],
+    });
+    expect(
+      draftFromStored({ goal: "clients", role: "Coach", outcomes: ["Bookings", "Nope"] }),
+    ).toMatchObject({ goal: "clients", role: "Coach", outcomes: ["Bookings"] });
+    expect(draftFromStored("nonsense")).toEqual({});
   });
 
   it("accepts contact messages within limits and rejects bad ones", () => {
@@ -551,10 +688,12 @@ describe("onboarding", () => {
   });
 
   it("round-trips answers through the sign-in link, including non-Latin names", () => {
-    const named = { ...answers, name: "Zoë Ångström 李" };
+    const named = current({ name: "Zoë Ångström 李" });
     expect(decodeAnswers(encodeAnswers(named))).toEqual(named);
     expect(decodeAnswers("not-base64!")).toBeNull();
-    expect(decodeAnswers(encodeAnswers({ ...answers, role: "Emperor" as never }))).toBeNull();
+    expect(decodeAnswers(encodeAnswers({ ...named, goal: "emperor" as never }))).toBeNull();
+    // A link sent before the questions changed still works.
+    expect(decodeAnswers(encodeAnswers(legacy as never))).toEqual(answers);
   });
 });
 

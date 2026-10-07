@@ -31,6 +31,7 @@ import {
   FREE_AI_LIMITS,
   isPremiumTemplate,
   isPro,
+  industryLabel,
 } from "@ceomaker/schema";
 import { designOnChoosing, getTemplate } from "@ceomaker/templates";
 import { updateTag } from "next/cache";
@@ -136,6 +137,7 @@ export async function chooseTemplateAction(
   trackServerEvent(userId, "template_chosen", {
     template: key.data,
     previous: draft.templateKey,
+    goal: site.answers?.goal ?? null,
   });
   return { ok: true };
 }
@@ -361,7 +363,7 @@ export async function rewriteHeadlineAction(
             person: site.answers
               ? {
                   role: site.answers.role,
-                  industry: site.answers.industry,
+                  industry: industryLabel(site.answers) || null,
                   voice: site.answers.voice,
                 }
               : null,

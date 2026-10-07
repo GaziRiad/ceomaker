@@ -1,6 +1,6 @@
 "use client";
 
-import { encodeAnswers, onboardingAnswersSchema } from "@ceomaker/schema";
+import { answersFromDraft, encodeAnswers } from "@ceomaker/schema";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Blueprint, Spinner } from "@/components/ui";
@@ -20,8 +20,8 @@ export function FinishOnboarding() {
     // The link carries the answers, so it works even when opened on another device.
     let encoded = params.get("a");
     if (!encoded) {
-      const stored = onboardingAnswersSchema.safeParse(loadFlow()?.answers);
-      encoded = stored.success ? encodeAnswers(stored.data) : null;
+      const stored = answersFromDraft(loadFlow()?.answers ?? {});
+      encoded = stored ? encodeAnswers(stored) : null;
     }
     if (!encoded) {
       router.replace("/start");

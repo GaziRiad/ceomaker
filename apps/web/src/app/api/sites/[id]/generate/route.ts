@@ -157,6 +157,7 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
             ...outcome,
             cv: document !== null,
             redraft,
+            goal: answers.goal,
           });
         }
         if (open) {

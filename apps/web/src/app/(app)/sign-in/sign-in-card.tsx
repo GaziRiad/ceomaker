@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { Blueprint, Mail, Wordmark } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { trackEvent, welcomeUrl } from "@/lib/product-analytics/browser";
+import { goalOfCallback } from "@/lib/product-analytics/goal";
 import { signInErrorPath } from "@/lib/sign-in-errors";
 import { MAGIC_LINK_LIFETIME, SIGN_IN_CODE_LENGTH } from "@/lib/sign-in-link";
 
@@ -89,7 +90,11 @@ export function SignInCard({
       );
       return;
     }
-    trackEvent("sign_in_requested", { method: "email", from_start: fromStart });
+    trackEvent("sign_in_requested", {
+      method: "email",
+      from_start: fromStart,
+      goal: goalOfCallback(callbackURL),
+    });
     setSentTo(email.trim());
     setCode("");
     setEnteringCode(true);
@@ -123,7 +128,11 @@ export function SignInCard({
   async function continueWithGoogle() {
     setError(null);
     setPending("google");
-    trackEvent("sign_in_requested", { method: "google", from_start: fromStart });
+    trackEvent("sign_in_requested", {
+      method: "google",
+      from_start: fromStart,
+      goal: goalOfCallback(callbackURL),
+    });
     const result = await authClient.signIn.social({
       provider: "google",
       callbackURL,
