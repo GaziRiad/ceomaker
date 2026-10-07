@@ -38,10 +38,11 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
     1: {
       name: "Meridian",
       description:
-        "A serif masthead on white with a monogram seal and a private contact form. For chief executives and chairs.",
-      tagline: "A serif masthead on white with a monogram seal. For chief executives and chairs.",
+        "A serif masthead on white with a monogram seal and a private contact form. Quiet and classic: your record speaks for itself.",
+      tagline:
+        "A serif masthead on white with a monogram seal. Quiet and classic: your record speaks for itself.",
       contactForm: true,
-      shows: NONE,
+      shows: { ...NONE, focusSection: true },
       Component: MeridianV1,
     },
   },
@@ -49,9 +50,9 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
     1: {
       name: "Harbour",
       description:
-        "A warm greeting and a large arched portrait on soft white. For leaders who want to come across as personal and easy to reach.",
+        "A warm greeting and a large arched portrait on soft white. For people who want to come across as personal and easy to reach.",
       tagline:
-        "A warm greeting and a large arched portrait on soft white. For leaders who want to come across as personal and easy to reach.",
+        "A warm greeting and a large arched portrait on soft white. For people who want to come across as personal and easy to reach.",
       contactForm: true,
       shows: {
         gallery: true,
@@ -70,10 +71,10 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
     1: {
       name: "Monument",
       description:
-        "Your name stacked edge to edge on a full field of colour, then bold alternating sections. For leaders who want to be remembered.",
-      tagline: "Your name on a full field of colour. For leaders who want to be remembered.",
+        "Your name stacked edge to edge on a full field of colour, then bold alternating sections. For people who want to be remembered.",
+      tagline: "Your name on a full field of colour. For people who want to be remembered.",
       contactForm: true,
-      shows: { ...NONE, aboutImage: true, workImages: true, photoGrade: true },
+      shows: { ...NONE, aboutImage: true, workImages: true, photoGrade: true, focusSection: true },
       Component: MonumentV1,
     },
   },
@@ -81,9 +82,9 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
     1: {
       name: "Salon",
       description:
-        "Your name in a large serif, hung salon-style among your own photographs, on a gallery ground. For leaders whose work is seen as much as read.",
+        "Your name in a large serif, hung salon-style among your own photographs, on a gallery ground. For people whose work is seen as much as read.",
       tagline:
-        "Your name in a large serif, hung salon-style among your own photographs. For leaders whose work is seen as much as read.",
+        "Your name in a large serif, hung salon-style among your own photographs. For people whose work is seen as much as read.",
       contactForm: true,
       shows: {
         gallery: true,
@@ -93,7 +94,7 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
         focal: true,
         aboutImage: true,
         workImages: true,
-        focusSection: false,
+        focusSection: true,
       },
       Component: SalonV1,
     },
@@ -102,9 +103,9 @@ const designs: { [K in TemplateKey]: Record<TemplateVersionOf<K>, Design> } = {
     1: {
       name: "Folio",
       description:
-        "Your work as large projects people can swipe through, with a clear story around them. For founders, investors and operators whose career is best told as projects.",
+        "Your work as large projects people can swipe through, with a clear story around them. For careers best told as projects.",
       tagline:
-        "Your work as large projects people can swipe through. For founders, investors and operators whose career is best told as projects.",
+        "Your work as large projects people can swipe through. For careers best told as projects.",
       contactForm: true,
       shows: {
         gallery: true,

@@ -51,6 +51,7 @@ async function EditSite({
         notice={notice}
         pro={isPro(plan)}
         freeDraftLeft={drafts < FREE_AI_LIMITS.drafts}
+        jobSeeker={site.answers?.goal === "hired"}
         initialDevice={isDevice(device) ? device : "desktop"}
         customDomain={isPro(plan) && domain?.stage === "connected" ? domain.domain : null}
       />

@@ -860,6 +860,49 @@
   text-wrap: balance;
 }
 
+/* Focus: skills, services or areas of work, in up to three columns */
+
+.sl-focus-list {
+  margin: 0 auto;
+  padding: 0;
+  max-width: 1184px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px 32px;
+}
+
+.sl-focus-item {
+  min-width: 0;
+  border-top: 1px solid var(--sl-ink2);
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sl-focus-name {
+  margin: 0;
+  font-family: var(--sl-display);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.sl-focus-item .sl-figure-label {
+  margin: 0;
+}
+
+@container (min-width: 600px) {
+  .sl-focus-list[data-count="2"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sl-focus-list[data-count="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 /* Selected work: framed 4:5 cards, the middle column hung lower; without an image, a tile. */
 
 .sl-works {

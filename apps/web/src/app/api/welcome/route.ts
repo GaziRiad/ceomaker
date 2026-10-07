@@ -1,4 +1,5 @@
 import { getDb, recordSignupSource } from "@ceomaker/db";
+import { goalOfCallback } from "@/lib/product-analytics/goal";
 import { getAuth } from "@/lib/auth";
 import { lifecycleSignedUp } from "@/lib/lifecycle-email";
 import { recordSignup } from "@/lib/product-analytics/server";
@@ -28,6 +29,7 @@ export async function GET(request: Request) {
         anonymousId: visitor && ANONYMOUS_ID.test(visitor) ? visitor : null,
         source,
         fromStart: next.startsWith("/start/"),
+        goal: goalOfCallback(next),
       });
       lifecycleSignedUp(session.user);
     }

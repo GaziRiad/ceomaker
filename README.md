@@ -1,6 +1,6 @@
 # CEOMaker
 
-Personal websites for founders, executives and investors. A visitor taps through five guided questions (optionally adding a CV), signs in without a password, picks one of six templates (Meridian, Harbour, Monument, Salon, Folio or Tempo), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Free to publish; Pro is $12.99 a month or $129 a year.
+Personal websites for professionals: job seekers, freelancers and consultants, and leaders. A visitor taps through six guided questions, starting with what the site is for (optionally adding a CV), signs in without a password, picks one of six templates (Meridian, Harbour, Monument, Salon, Folio or Tempo), gets an AI-drafted site, edits it, and publishes it at `yourname.ceomaker.com`. Free to publish; Pro is $12.99 a month or $129 a year.
 
 The full build plan and phase roadmap live in [`docs/PLAN.md`](docs/PLAN.md).
 
@@ -241,7 +241,8 @@ Setup:
 2. In the project's settings, turn on **Discard client IP data**, and switch on **session replay** (Record user sessions) for recordings. Leave surveys and heatmaps off (the code disables them anyway). Accept PostHog's data processing agreement.
 3. In Vercel, set `NEXT_PUBLIC_POSTHOG_KEY` to the project's API key (`phc_…`; it can only send events, so it's safe in the browser) for **Production**, and redeploy (the key is built into the pages). Leave it unset for Preview, or use a second project for testing, so test traffic stays out of the real numbers.
 4. In PostHog, filter out our own accounts: Settings › Product analytics › Filter out internal and test users, with the person property `internal` not equal to `true`.
-5. The funnel: page view of `/` → `questions_started` → `questions_completed` → `sign_in_requested` → `signed_up` → `site_created` → `site_published` → `checkout_started` → `plan_changed` (plan `pro`, cause `billing`). Break `signed_up` down by `source`.
+5. The funnel: page view of `/` → `questions_started` → `questions_completed` → `sign_in_requested` → `signed_up` → `site_created` → `site_published` → `checkout_started` → `plan_changed` (plan `pro`, cause `billing`). Break `signed_up` down by `source`, and any step by `goal` (what the site is for: `hired`, `clients`, `credibility`, `other`).
+6. Inside the questions: `onboarding_step_completed` (`step_name`, `step_index`, `goal`, `from_deep_link`; the role step adds `role_chip_used`, the industry step `industry`), then `cv_choice` (`upload` or `later`) at the end of the questions and `cv_attached` or `cv_skipped` (`asked`) on the template screen. `goal` is on `questions_completed`, `sign_in_requested`, `signed_up`, `site_created`, `template_chosen` and `draft_written`, and set on the account's person at `signed_up` and `site_created`. The role and company someone types are never sent.
 
 ### Plans (Free and Pro)
 

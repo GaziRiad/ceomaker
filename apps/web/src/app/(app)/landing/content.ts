@@ -1,29 +1,26 @@
-import { ROLE_OPTIONS } from "@ceomaker/schema";
-
-export const heroRoles = ROLE_OPTIONS;
-
-export const heroWords = "A personal website that matches your standing.".split(" ");
+export const heroWords = "A personal website that opens doors.".split(" ");
 
 export const audiences = [
-  "Chief executives",
+  "Job seekers",
+  "Career changers",
+  "Freelancers",
+  "Consultants",
+  "Coaches",
   "Founders",
-  "Board members",
-  "Investors",
-  "Managing partners",
-  "Chief financial officers",
-  "Non-executive directors",
+  "Executives",
+  "Advisors",
 ];
 
 export const realities = [
   {
     delay: 0,
     n: "1st",
-    t: "Your name is searched before almost every serious meeting, introduction or offer.",
+    t: "Your name is searched before almost every interview, project or introduction.",
   },
   {
     delay: 110,
     n: "3 lines",
-    t: "That's usually all a company bio says about you, and it's written for the company.",
+    t: "That's usually all a profile or company bio says about you, and someone else wrote it.",
   },
   {
     delay: 220,
@@ -50,7 +47,7 @@ export const compare: {
     highlight: true,
     rows: [
       ["✓", "Copy drafted in your voice"],
-      ["✓", "Templates designed for executives"],
+      ["✓", "Templates designed for professionals"],
       ["✓", "Edit anything, instantly"],
       ["✓", "Hosting and security included"],
     ],

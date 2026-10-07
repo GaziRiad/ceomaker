@@ -7,7 +7,7 @@ import { appUrl } from "@/lib/routing";
 // The image shown when a link to the product (the landing page, or any app page) is shared.
 // Drawn once at build time in the brand's own type: Barlow Condensed and Barlow.
 
-export const alt = "CEOMaker: a personal website that matches your standing";
+export const alt = "CEOMaker: a personal website that opens doors";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -63,7 +63,7 @@ export default async function Image() {
           maxWidth: 980,
         }}
       >
-        A PERSONAL WEBSITE THAT MATCHES YOUR STANDING.
+        A PERSONAL WEBSITE THAT OPENS DOORS.
       </div>
       <div
         style={{

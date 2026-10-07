@@ -60,6 +60,7 @@ import { SharingPanel, SharingPreviews, type ShareView } from "./sharing";
 import { sectionElement, sectionIdAt } from "./section-dom";
 import { PublishDialog, type PublishedResult } from "./publish-dialog";
 import { RedraftDialog } from "./redraft-dialog";
+import { CV_BUTTON_LABEL, CvLinkCard } from "./cv-link-card";
 import { TemplatePanel } from "./template-panel";
 
 type Tab = "content" | "brand" | "design" | "share";
@@ -93,6 +94,7 @@ export function Editor({
   notice,
   pro,
   freeDraftLeft,
+  jobSeeker,
   initialDevice,
   customDomain,
 }: {
@@ -112,6 +114,8 @@ export function Editor({
   pro: boolean;
   /** The account hasn't used its free AI draft (written without AI, or before AI was on). */
   freeDraftLeft: boolean;
+  /** The site is for getting hired: the editor offers to point the main button at a CV. */
+  jobSeeker: boolean;
   /** The canvas size the owner last picked, on any computer. */
   initialDevice: Device;
   /** The site's own domain, when connected and the account is on Pro. */
@@ -527,6 +531,19 @@ export function Editor({
                   {pro || freeDraftLeft ? null : <ProTag />}
                 </button>
               </div>
+              {jobSeeker && hero ? (
+                <CvLinkCard
+                  siteId={siteId}
+                  href={hero.primaryCta?.href}
+                  onSave={(href) =>
+                    updateSection(hero.id, (section) =>
+                      section.type === "hero"
+                        ? { ...section, primaryCta: { label: CV_BUTTON_LABEL, href } }
+                        : section,
+                    )
+                  }
+                />
+              ) : null}
               <ContentPanel
                 content={draft.content}
                 selectedId={selectedId}

@@ -151,8 +151,8 @@ export function TemplatePanel({
         <Sparkles size={14} className="mt-0.5 flex-none text-accent-800" />
         <span>
           <strong className="font-medium text-text">More on the way.</strong> We add new templates
-          for executives regularly, and they appear here when they&apos;re ready. Your content moves
-          to any of them in one click.
+          regularly, and they appear here when they&apos;re ready. Your content moves to any of them
+          in one click.
         </span>
       </div>
     </div>

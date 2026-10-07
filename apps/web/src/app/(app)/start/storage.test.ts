@@ -19,7 +19,10 @@ afterEach(() => {
   delete (globalThis as { window?: unknown }).window;
 });
 
-const flow = { answers: { role: "Founder", name: "Sam" }, step: 4 } as const;
+const flow = {
+  answers: { goal: "credibility", role: "Founder", name: "Sam", outcomes: [], sources: [] },
+  step: 4,
+} as const;
 
 describe("saved answers", () => {
   it("come back within a week of the last change", () => {
@@ -46,10 +49,31 @@ describe("saved answers", () => {
   });
 
   it("count as progress only past the defaults", () => {
-    expect(hasProgress({ answers: { voice: "Measured", goals: [], sources: [] }, step: 0 })).toBe(
-      false,
-    );
+    expect(
+      hasProgress({ answers: { voice: "Measured", outcomes: [], sources: [] }, step: 0 }),
+    ).toBe(false);
     expect(hasProgress({ answers: { role: "Founder" }, step: 1 })).toBe(true);
     expect(hasProgress({ answers: { name: "Sam" }, step: 0 })).toBe(true);
+  });
+
+  it("read answers saved before the questions changed, one step further on", () => {
+    store.set(
+      KEY,
+      JSON.stringify({
+        answers: { role: "Founder", industry: "Finance", goals: ["Press and media"] },
+        step: 3,
+        savedAt: 1_000,
+      }),
+    );
+    expect(loadFlow(2_000)).toEqual({
+      answers: {
+        goal: "credibility",
+        role: "Founder",
+        industry: "Finance & Banking",
+        outcomes: ["Press & media"],
+        sources: [],
+      },
+      step: 4,
+    });
   });
 });

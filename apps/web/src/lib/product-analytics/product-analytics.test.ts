@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { encodeAnswers } from "@ceomaker/schema";
 import { isRelayPath, relayTarget } from "./config";
 import { maskAttribute } from "./recording";
 import { scrubEvent, scrubPath, scrubUrl } from "./scrub";
 import { decodeVisitSource, encodeVisitSource, readVisitSource } from "./visit-source";
+import { goalOfCallback } from "./goal";
 
 const OWN = "www.ceomaker.app";
 
@@ -151,5 +153,21 @@ describe("recordings", () => {
     expect(maskAttribute("class", "mer-name")).toBe("mer-name");
     expect(maskAttribute("style", "width: 40px")).toBe("width: 40px");
     expect(maskAttribute("title", "")).toBe("");
+  });
+});
+
+describe("goalOfCallback", () => {
+  it("reads only the goal from a callback carrying the answers", () => {
+    const answers = encodeAnswers({
+      version: 2,
+      goal: "clients",
+      role: "Coach",
+      industry: "Education",
+      outcomes: ["Bookings"],
+      name: "Dana Reyes",
+    });
+    expect(goalOfCallback(`/start/finish?a=${answers}`)).toBe("clients");
+    expect(goalOfCallback("/dashboard")).toBeNull();
+    expect(goalOfCallback("/start/finish?a=broken")).toBeNull();
   });
 });

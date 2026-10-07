@@ -1,4 +1,4 @@
-import type { AnswersDraft } from "@ceomaker/schema";
+import { draftFromStored, type AnswersDraft } from "@ceomaker/schema";
 
 // Answers live in the browser until the user signs in, so nothing is stored for visitors
 // who never create an account. "Save and exit" relies on this to resume later.
@@ -30,7 +30,10 @@ export function loadFlow(now: number = Date.now()): StoredFlow | null {
       clearFlow();
       return null;
     }
-    return { answers: parsed.answers ?? {}, step: Number(parsed.step) || 0 };
+    const step = Number(parsed.step) || 0;
+    // Answers saved before the questions changed (no version) had no "what for" step first.
+    const legacy = (parsed as { v?: number }).v !== 2;
+    return { answers: draftFromStored(parsed.answers), step: legacy ? step + 1 : step };
   } catch {
     return null;
   }
@@ -38,7 +41,7 @@ export function loadFlow(now: number = Date.now()): StoredFlow | null {
 
 export function saveFlow(flow: StoredFlow, now: number = Date.now()) {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify({ ...flow, savedAt: now }));
+    window.localStorage.setItem(KEY, JSON.stringify({ ...flow, v: 2, savedAt: now }));
   } catch {
     // Private mode or full storage: the flow still works, it just won't survive a reload.
   }
@@ -57,11 +60,12 @@ export function hasProgress(flow: StoredFlow): boolean {
   const { answers } = flow;
   return Boolean(
     flow.step > 0 ||
+    answers.goal ||
+    answers.role?.trim() ||
     answers.industry ||
-    answers.stage ||
     answers.name?.trim() ||
     answers.org?.trim() ||
-    answers.goals?.length ||
+    answers.outcomes?.length ||
     answers.sources?.length,
   );
 }

@@ -207,9 +207,50 @@ describe.skipIf(!url)("sites (integration)", () => {
 
     const owned = await getSiteForOwner(db, { userId: "alice", siteId: first.id });
     expect(owned?.answers?.name).toBe("Amelia Hart");
+    expect(owned?.answers?.goal).toBe("credibility");
     expect(owned?.draft.templateKey).toBe("meridian");
     expect(owned?.published).toBeNull();
     expect(await getSiteForOwner(db, { userId: "mallory", siteId: first.id })).toBeNull();
+  });
+
+  it("starts on the design recommended for the goal, and reads answers of any age", async () => {
+    const coach = onboardingAnswersSchema.parse({
+      version: 2,
+      goal: "clients",
+      role: "Coach",
+      industry: "Education",
+      orgStatus: "independent",
+      outcomes: ["Bookings"],
+      name: "Dana Reyes",
+    });
+    const created = await createSiteFromAnswers(db, { userId: "alice", answers: coach });
+    const owned = await getSiteForOwner(db, { userId: "alice", siteId: created.id });
+    expect(owned?.draft.templateKey).toBe("harbour");
+    expect(owned?.answers).toEqual(coach);
+
+    // A row saved before the questions changed, as it is in the database.
+    await db
+      .update(site)
+      .set({
+        answers: {
+          role: "Founder",
+          industry: "Technology",
+          stage: "Early-stage startup",
+          goals: ["Press and media"],
+          voice: "Bold",
+          name: "Dana Reyes",
+          org: "",
+          sources: [],
+        },
+      })
+      .where(eq(site.id, created.id));
+    const old = await getSiteForOwner(db, { userId: "alice", siteId: created.id });
+    expect(old?.answers).toMatchObject({
+      goal: "credibility",
+      role: "Founder",
+      outcomes: ["Press & media"],
+      stage: "Early-stage startup",
+    });
   });
 
   it("falls back to a random address for names without Latin letters", async () => {

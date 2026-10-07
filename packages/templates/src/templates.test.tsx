@@ -126,6 +126,30 @@ describe.each(DESIGNS)("%s v%i template", (key, version) => {
     }
   });
 
+  it("shows skills or services from the Focus section, where it sits", () => {
+    const focus: SectionInput = {
+      id: "focus",
+      type: "focus",
+      heading: "Skills",
+      items: [
+        { title: "Product discovery", description: "Interviews and prototypes" },
+        { title: "Roadmaps" },
+      ],
+    };
+    const html = render(key, version, withSections([demoHero, focus, ...demoRest]));
+    expect(html).toContain("Skills");
+    expect(html).toContain("Product discovery");
+    expect(html).toContain("Interviews and prototypes");
+    expect(html).toContain("Roadmaps");
+    // Hidden, it shows nothing.
+    const hidden = render(
+      key,
+      version,
+      withSections([demoHero, { ...focus, visible: false }, ...demoRest]),
+    );
+    expect(hidden).not.toContain("Product discovery");
+  });
+
   it("opens contact links in a new tab with rel=me and no opener", () => {
     const html = render(key, version, demoSiteContent);
     expect(html).toMatch(/href="https:\/\/www\.linkedin\.com\/" target="_blank" rel="noopener me"/);

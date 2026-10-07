@@ -2,6 +2,8 @@
 
 import {
   isPremiumTemplate,
+  RECOMMENDED_TEMPLATE,
+  type SiteGoal,
   type RenderableSiteContent,
   type TemplateKey,
   type TemplateRef,
@@ -17,6 +19,7 @@ import { LinkedInPdfHint, useDocumentFile } from "@/components/document-file";
 import { setPendingDocument } from "@/lib/pending-document";
 import { chooseTemplateAction } from "../../../site-actions";
 import { ProTag } from "@/components/pro";
+import { trackEvent } from "@/lib/product-analytics/browser";
 
 export function TemplatePicker({
   siteId,
@@ -26,6 +29,7 @@ export function TemplatePicker({
   content,
   wantsDocument,
   pro,
+  goal,
 }: {
   siteId: string;
   initialTemplate: TemplateKey;
@@ -36,6 +40,8 @@ export function TemplatePicker({
   wantsDocument: boolean;
   /** Free accounts can pick any template, but publish premium ones with Pro. */
   pro: boolean;
+  /** What the site is for: its recommended design is marked. */
+  goal: SiteGoal | null;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<TemplateKey>(initialTemplate);
@@ -50,6 +56,7 @@ export function TemplatePicker({
     getTemplate(template.key, designOnChoosing(template.key, current)),
   );
   const selectedName = choices.find((template) => template.key === selected)?.name;
+  const recommended = goal ? RECOMMENDED_TEMPLATE[goal] : null;
 
   const write = () => {
     setError(null);
@@ -59,6 +66,11 @@ export function TemplatePicker({
         setError(result.error);
         return;
       }
+      trackEvent(file ? "cv_attached" : "cv_skipped", {
+        goal,
+        asked: wantsDocument,
+        template: selected,
+      });
       setPendingDocument(file);
       router.push(`/dashboard/sites/${siteId}/generating`);
     });
@@ -121,6 +133,11 @@ export function TemplatePicker({
                         {template.name}
                       </span>
                       {isPremiumTemplate(template.key) ? <ProTag /> : null}
+                      {template.key === recommended ? (
+                        <span className="rounded-full bg-accent-100 px-2 py-0.5 text-[12px] font-medium tracking-[0.06em] text-accent-800 uppercase">
+                          Recommended
+                        </span>
+                      ) : null}
                     </span>
                     <span className="text-sm text-neutral-700">{template.tagline}</span>
                     {isPremiumTemplate(template.key) && !pro ? (

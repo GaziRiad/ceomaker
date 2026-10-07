@@ -227,9 +227,9 @@ describe("Focus in the shared model", () => {
     });
   });
 
-  it("leaves Meridian, Monument and Salon unchanged by a focus section", () => {
+  it("shows a focus section in Meridian, Monument and Salon too", () => {
     for (const key of ["meridian", "monument", "salon"] as const) {
-      expect(render(site([focus, ...middle]), { key })).toBe(render(site(middle), { key }));
+      expect(render(site([focus, ...middle]), { key })).not.toBe(render(site(middle), { key }));
     }
   });
 });

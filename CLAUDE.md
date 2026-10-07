@@ -58,7 +58,7 @@ Vercel (Hobby, `fra1`).
   carousel of projects) and Tempo (`tempo/v1`, the name parted around the portrait, moving with
   the scroll). All support in-place editing of every visible text and the contact form.
   Retired keys render as Meridian. Optional content only some templates show (gallery, quote
-  photos, call to action, photo grade, the Focus section) is flagged per design in `registry.ts`
+  photos, call to action, photo grade; the Focus section is in all six) is flagged per design in `registry.ts`
   (`shows`), so the editor offers it only there.
 - `apps/web`: the app. Customer sites `src/app/(sites)`, dashboard `src/app/(app)/dashboard`,
   editor `dashboard/sites/[id]/edit`, domains `src/lib/domains`, analytics `src/lib/analytics`,

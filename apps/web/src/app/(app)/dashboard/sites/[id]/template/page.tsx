@@ -42,6 +42,7 @@ async function Picker({
         content={parseSiteContentForRender(draft.content)}
         wantsDocument={wantsDocument}
         pro={pro}
+        goal={site.answers?.goal ?? null}
       />
     </>
   );
