@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 import { appFontVariables } from "../fonts";
 import { appUrl } from "@/lib/routing";
 import "./globals.css";
+import { CookieConsent } from "@/components/cookie-consent";
+import { GoogleAds } from "@/components/google-ads";
 import { ProductAnalytics } from "@/components/product-analytics";
 
 export const metadata: Metadata = {
@@ -31,8 +33,11 @@ export default function AppRootLayout({ children }: { children: ReactNode }) {
             (the (sites) layout) keep only our cookieless analytics, which their owners see. */}
         <Analytics />
         <SpeedInsights />
-        {/* PostHog, without cookies or browser storage (see lib/product-analytics). */}
+        {/* PostHog and the Google tag (Google Ads, once set up), with cookies only as the
+            visitor's choice allows (see lib/consent.ts), and the banner that asks. */}
         <ProductAnalytics />
+        <GoogleAds />
+        <CookieConsent />
       </body>
     </html>
   );

@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { liveDomainFor, siteForHost } from "./lib/domain-routing";
 import { isPro } from "@ceomaker/schema";
 import { isRelayPath, relayTarget } from "./lib/product-analytics/config";
+import { regionForCountry, REGION_COOKIE } from "./lib/consent";
 import {
   isInternalTenantPath,
   NOT_FOUND_PATH,
@@ -72,7 +73,25 @@ function serveApp(request: NextRequest) {
     signIn.searchParams.set("callbackURL", `${pathname}${search}`);
     return NextResponse.redirect(signIn, 307);
   }
-  return NextResponse.next();
+  return withConsentRegion(request, NextResponse.next());
+}
+
+/**
+ * Tells the page whether this visitor must choose about cookies (EEA, UK, Switzerland) or gets a
+ * notice, from Vercel's country header. Set only when missing or changed, so cached pages stay
+ * cacheable. It holds "eu" or "other", nothing about the person.
+ */
+function withConsentRegion(request: NextRequest, response: NextResponse): NextResponse {
+  const region = regionForCountry(request.headers.get("x-vercel-ip-country"));
+  if (request.cookies.get(REGION_COOKIE)?.value !== region) {
+    response.cookies.set(REGION_COOKIE, region, {
+      path: "/",
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+      maxAge: 60 * 60 * 24,
+    });
+  }
+  return response;
 }
 
 /**
