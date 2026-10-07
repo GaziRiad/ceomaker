@@ -151,8 +151,11 @@ export function QuestionsFlow({
   addressPrefix,
   addressSuffix,
 }: {
-  /** A goal chosen before the questions (a link): they open on the role question. */
-  start: { goal: SiteGoal; role: string | null } | null;
+  /**
+   * A goal chosen before the questions: they open on the role question. From a link (ads) the
+   * goal isn't counted as a step; from the home page, which asked it, it is.
+   */
+  start: { goal: SiteGoal; role: string | null; fromHome: boolean } | null;
   signedIn: boolean;
   addressPrefix: string;
   addressSuffix: string;
@@ -162,8 +165,9 @@ export function QuestionsFlow({
   const [step, setStep] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [resumed, setResumed] = useState(false);
-  // Arrived with the goal chosen: steps count from the role question until they go back to it.
-  const fromDeepLink = start !== null;
+  // Arrived from a link with the goal chosen: steps count from the role question until they go
+  // back to it.
+  const fromDeepLink = start !== null && !start.fromHome;
   const [goalShown, setGoalShown] = useState(!fromDeepLink);
   const [roleChipUsed, setRoleChipUsed] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -196,9 +200,19 @@ export function QuestionsFlow({
       signed_in: signedIn,
       resumed: stored !== null && hasProgress(stored),
       role_from_landing: Boolean(start?.role),
-      from_deep_link: start !== null,
+      from_deep_link: start !== null && !start.fromHome,
       ...(start ? { goal: start.goal } : {}),
     });
+    // The home page asked the first question: count it like any answered step.
+    if (start?.fromHome) {
+      trackEvent("onboarding_step_completed", {
+        step_name: "goal",
+        step_index: 1,
+        goal: start.goal,
+        from_deep_link: false,
+        from_home: true,
+      });
+    }
     return () => clearTimeout(advanceTimer.current);
   }, [start, signedIn]);
 

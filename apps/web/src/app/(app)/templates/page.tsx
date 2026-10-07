@@ -10,7 +10,7 @@ import { TemplateGrid } from "./template-grid";
 export const metadata: Metadata = {
   title: "Templates",
   description:
-    "Personal website templates for executives, founders and board members. Every template shows your own content; switch as often as you like until you publish.",
+    "Personal website templates for job seekers, freelancers, consultants and leaders. Every template shows your own content; switch as often as you like until you publish.",
   alternates: { canonical: "/templates" },
 };
 

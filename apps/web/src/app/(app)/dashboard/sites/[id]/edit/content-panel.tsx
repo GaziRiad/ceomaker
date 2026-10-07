@@ -458,7 +458,7 @@ function HeroForm({
           value={meta.role}
           error={errors.get("meta.role")}
           maxLength={80}
-          placeholder="Chief Executive Officer"
+          placeholder="Product Manager"
           onChange={(role) => onMeta({ role })}
         />
         <TextField
@@ -482,7 +482,7 @@ function HeroForm({
         value={meta.availability}
         error={errors.get("meta.availability")}
         maxLength={80}
-        placeholder="Open to board and advisory roles"
+        placeholder="Open to new roles"
         onChange={(availability) => onMeta({ availability })}
       />
       <TextField
@@ -490,14 +490,14 @@ function HeroForm({
         value={meta.availabilityShort}
         error={errors.get("meta.availabilityShort")}
         maxLength={40}
-        placeholder="Board and advisory roles"
+        placeholder="New roles"
         onChange={(availabilityShort) => onMeta({ availabilityShort })}
       />
       <TextAreaField
-        label="Boards and affiliations"
+        label="Affiliations"
         value={affiliations}
         minHeight={76}
-        hint="One per line. Shown as a strip or marquee in some templates."
+        hint="One per line: boards, memberships, organisations. Shown as a strip or marquee in some templates."
         onChange={(value) => {
           setAffiliations(value);
           onMeta({
@@ -512,7 +512,7 @@ function HeroForm({
       <TextField
         label="Keywords"
         value={keywords}
-        hint="Comma separated, e.g. Operator, Board member. Used by Monument."
+        hint="Comma separated, e.g. Product leader, Speaker. Used by Monument."
         onChange={(value) => {
           setKeywords(value);
           onMeta({
@@ -755,7 +755,7 @@ function FocusForm({ section, error, update }: FormProps<"focus">) {
             <TextField
               label="Area"
               value={item.title}
-              placeholder="Board work"
+              placeholder="Customer research"
               maxLength={60}
               error={error(`items.${index}.title`)}
               onChange={(title) => setItem(index, { title })}
@@ -875,7 +875,7 @@ function WorkForm({ section, error, update, template }: FormProps<"portfolio"> &
         items={section.items}
         invalid={(index) => Boolean(error(`items.${index}.`, true))}
         max={12}
-        addLabel="+ Add a talk, article or board seat"
+        addLabel="+ Add a project, talk or article"
         removeLabel="Remove this item"
         onAdd={() =>
           update((current) => ({ ...current, items: [...current.items, { title: "" }] }))
@@ -901,7 +901,7 @@ function WorkForm({ section, error, update, template }: FormProps<"portfolio"> &
             <TextField
               label="Kind"
               value={item.kind}
-              placeholder="Keynote, Essay, Board"
+              placeholder="Project, Keynote, Essay"
               maxLength={30}
               onChange={(kind) => setItem(index, { kind })}
             />

@@ -5,21 +5,15 @@ import { Blueprint, Check } from "@/components/ui";
 import { PRO_PRICES } from "@/lib/plan-copy";
 import { appUrl } from "@/lib/routing";
 import { jsonLd, productStructuredData } from "@/lib/seo";
-import {
-  audiences,
-  compare,
-  faq,
-  heroRoles,
-  heroWords,
-  quotes,
-  realities,
-} from "./landing/content";
+import { GOAL_CHOICES, type SiteGoal } from "@ceomaker/schema";
+import { audiences, compare, faq, heroWords, quotes, realities } from "./landing/content";
 import { delay, Footer, Header, kicker, pad, sectionTitle } from "./landing/chrome";
 import { Pricing } from "./landing/pricing";
 import { TemplatesSection } from "./landing/templates";
 
-function startHref(role: string) {
-  return `/start?role=${encodeURIComponent(role)}`;
+/** The questions, with what the site is for already answered here. */
+function startHref(goal: SiteGoal) {
+  return `/start?goal=${goal}&from=home`;
 }
 
 function Hero() {
@@ -50,7 +44,7 @@ function Hero() {
               </span>
             ))}
           </span>
-          Private beta · for founders, executives and investors
+          Private beta · for job seekers, freelancers and leaders
         </div>
         <h1 className="m-0 font-heading text-[clamp(56px,8vw,104px)] leading-[0.95] font-semibold tracking-[-0.01em] text-balance uppercase">
           {heroWords.map((word, index) => (
@@ -75,21 +69,22 @@ function Hero() {
           style={delay(640)}
         >
           <div className="flex items-center justify-between gap-4 border-b border-divider px-5 py-3.5 text-[13px] tracking-[0.1em] text-accent-700 uppercase">
-            <span>Step 1 of 5 · Let&apos;s start</span>
+            <span>Step 1 of 6 · Let&apos;s start</span>
             <span className="text-neutral-600">About 2 minutes</span>
           </div>
           <h2 className="m-0 px-5 pt-6 pb-2 font-heading text-[32px] leading-normal font-semibold tracking-[0.01em] uppercase">
-            I am a…
+            What&apos;s your website for?
           </h2>
-          <div className="flex flex-wrap gap-2.5 px-5 pt-2 pb-5">
-            {heroRoles.map((role) => (
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,340px),1fr))] gap-2.5 px-5 pt-2 pb-5">
+            {GOAL_CHOICES.map((choice) => (
               <Link
-                key={role}
-                href={startHref(role)}
-                className="chip hover:bg-accent-100 hover:shadow-sm"
+                key={choice.value}
+                href={startHref(choice.value)}
+                className="chip flex-col items-start gap-0.5 hover:bg-accent-100 hover:shadow-sm"
                 style={{ padding: "12px 18px", background: "var(--color-bg)" }}
               >
-                {role}
+                <span className="text-lg font-medium">{choice.label}</span>
+                <span className="text-[14px] leading-snug text-neutral-700">{choice.hint}</span>
               </Link>
             ))}
           </div>
@@ -151,12 +146,12 @@ function Problem() {
       className="mx-auto flex max-w-[1200px] flex-col items-center gap-5 text-center"
       style={{ padding: `112px ${pad}` }}
     >
-      <span className={kicker}>Before every meeting, they look you up</span>
+      <span className={kicker}>Before they reply, they look you up</span>
       <h2 data-reveal="" className={`${sectionTitle} max-w-[880px]`}>
         An outdated profile. A three-line bio. Someone else with your name.
       </h2>
       <p className="m-0 max-w-[600px] text-[19px] text-neutral-800">
-        Investors, boards, journalists and future hires form a view before you speak. Give them one
+        Recruiters, clients, investors and journalists form a view before you speak. Give them one
         page that tells your story the way you would.
       </p>
       <div className="mt-9 grid w-full grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-6 text-left">
@@ -221,14 +216,14 @@ function HowItWorks() {
           <StepCard
             number="01"
             title="Tap through a few questions"
-            body="Role, industry, what the site is for and the voice you want. Add your CV or LinkedIn if you like. Nothing is published yet."
+            body="What the site is for, your role, your industry and the voice you want. Add your CV or LinkedIn if you like. Nothing is published yet."
             delayMs={0}
           >
             <div className="flex flex-wrap gap-2 border border-divider bg-bg p-4">
-              <span className={`${chip} border-accent bg-accent-100`}>Chief executive</span>
-              <span className={`${chip} border-divider`}>Logistics</span>
-              <span className={`${chip} border-accent bg-accent-100`}>Board roles</span>
-              <span className={`${chip} border-divider`}>Measured</span>
+              <span className={`${chip} border-accent bg-accent-100`}>Get hired</span>
+              <span className={`${chip} border-divider`}>Product Manager</span>
+              <span className={`${chip} border-accent bg-accent-100`}>Recruiters reaching out</span>
+              <span className={`${chip} border-divider`}>Warm</span>
             </div>
           </StepCard>
           <StepCard
@@ -242,7 +237,7 @@ function HowItWorks() {
                 Drafting · Hero
               </span>
               <span className="font-heading text-[22px] leading-[1.05] font-semibold uppercase">
-                Building supply chains that hold up under pressure.
+                I turn messy problems into products people use.
               </span>
               <span className="h-1.5 w-[90%] bg-neutral-300" />
               <span className="h-1.5 w-[70%] bg-neutral-300" />
@@ -422,13 +417,13 @@ function Closing() {
           Two minutes of taps. A site you&apos;re proud to send.
         </span>
         <div className="mt-2 flex flex-wrap justify-center gap-2.5">
-          {heroRoles.map((role) => (
+          {GOAL_CHOICES.map((choice) => (
             <Link
-              key={role}
-              href={startHref(role)}
+              key={choice.value}
+              href={startHref(choice.value)}
               className="rounded-[4px] border border-accent-400 px-[18px] py-3 text-base text-bg no-underline transition-[transform,background] duration-200 ease-industry hover:-translate-y-0.5 hover:bg-accent-800 hover:text-bg"
             >
-              {role}
+              {choice.label}
             </Link>
           ))}
         </div>
@@ -443,7 +438,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "CEOMaker",
     url: "/",
-    title: "CEOMaker: personal websites for leaders",
+    title: "CEOMaker: personal websites for professionals",
     description:
       "Answer a few questions. CEOMaker drafts a polished personal site in your voice, and it goes live at your own address in minutes.",
   },

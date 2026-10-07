@@ -151,7 +151,7 @@ export function productStructuredData(appUrl: string, proMonthly: number, proYea
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         description:
-          "Personal websites for executives: answer a few questions, AI drafts a polished site in your voice, and it goes live at your own address in minutes.",
+          "Personal websites for professionals: answer a few questions, AI drafts a polished site in your voice, and it goes live at your own address in minutes.",
         publisher: { "@id": organization["@id"] },
         offers: [
           { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD" },
