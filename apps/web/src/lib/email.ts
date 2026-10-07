@@ -30,6 +30,8 @@ interface LinkEmail {
   intro: string;
   button: string;
   url: string;
+  /** A code to type in instead of opening the link, shown under the button. */
+  code?: { label: string; value: string };
   /** Under the button, e.g. "If you didn't ask for this email, you can ignore it." */
   footnote: string;
 }
@@ -41,11 +43,14 @@ interface LinkEmail {
  */
 async function sendLinkEmail(email: LinkEmail): Promise<void> {
   const env = serverEnv();
+  const code = email.code;
   if (!env.RESEND_API_KEY) {
     if (process.env.NODE_ENV === "production") {
       throw new Error("RESEND_API_KEY is not set, so emails can't be sent");
     }
-    console.info(`\n[dev] ${email.subject} for ${email.to}:\n${email.url}\n`);
+    console.info(
+      `\n[dev] ${email.subject} for ${email.to}:\n${email.url}\n${code ? `${code.label} ${code.value}\n` : ""}`,
+    );
     return;
   }
 
@@ -60,12 +65,12 @@ async function sendLinkEmail(email: LinkEmail): Promise<void> {
       from: env.EMAIL_FROM ?? "CEOMaker <onboarding@resend.dev>",
       to: [email.to],
       subject: email.subject,
-      text: `${email.intro}\n\n${email.url}\n\n${email.footnote}`,
+      text: `${email.intro}\n\n${email.url}\n\n${code ? `${code.label} ${code.value}\n\n` : ""}${email.footnote}`,
       html: `<div style="font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;color:#1d1f20;max-width:480px">
 <p style="font-size:20px;font-weight:600;letter-spacing:.02em;text-transform:uppercase"><img src="${appUrl()}/brand/ceomaker-icon-120.png" width="24" height="24" alt="" style="vertical-align:-4px;margin-right:10px;border:0">CEO<span style="color:#5980a6">Maker</span></p>
 <p>${escapeHtml(email.intro)}</p>
 <p><a href="${safeUrl}" style="display:inline-block;background:#5980a6;color:#f2f2f3;padding:12px 18px;text-decoration:none;font-weight:600">${escapeHtml(email.button)}</a></p>
-<p style="font-size:13px;color:#5d5d60">If the button doesn't work, paste this address into your browser:<br><span style="word-break:break-all">${safeUrl}</span></p>
+${code ? `<p style="margin-bottom:4px">${escapeHtml(code.label)}</p>\n<p style="margin-top:0;font-size:28px;font-weight:600;letter-spacing:.2em;font-family:Menlo,Consolas,monospace">${escapeHtml(code.value)}</p>\n` : ""}<p style="font-size:13px;color:#5d5d60">If the button doesn't work, paste this address into your browser:<br><span style="word-break:break-all">${safeUrl}</span></p>
 <p style="font-size:13px;color:#5d5d60">${escapeHtml(email.footnote)}</p>
 </div>`,
     }),
@@ -78,14 +83,15 @@ async function sendLinkEmail(email: LinkEmail): Promise<void> {
   }
 }
 
-/** The passwordless sign-in link. */
-export async function sendSignInEmail(email: string, url: string): Promise<void> {
+/** The passwordless sign-in email: a link, and a code for when the link doesn't work. */
+export async function sendSignInEmail(email: string, url: string, code: string): Promise<void> {
   await sendLinkEmail({
     to: email,
     subject: "Your CEOMaker sign-in link",
     intro: `Use this button to sign in. It works once and expires in ${MAGIC_LINK_LIFETIME}.`,
     button: "Sign in to CEOMaker",
     url,
+    code: { label: "Or enter this code on the sign-in page:", value: code },
     footnote: "If you didn't ask for this email, you can ignore it.",
   });
 }

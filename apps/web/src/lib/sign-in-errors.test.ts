@@ -21,5 +21,18 @@ describe("signInErrorMessage", () => {
 
   it("builds the paths the auth library appends its code to", () => {
     expect(signInErrorPath("google")).toBe("/sign-in?via=google");
+    expect(signInErrorPath("link", { callbackURL: "/dashboard", fromStart: false })).toBe(
+      "/sign-in?via=link",
+    );
+  });
+
+  it("keeps where a sign-in from the questions was going", () => {
+    const path = signInErrorPath("link", { callbackURL: "/start/finish?a=xyz", fromStart: true });
+    const params = new URL(path, "https://app.invalid").searchParams;
+    expect(Object.fromEntries(params)).toEqual({
+      via: "link",
+      from: "start",
+      callbackURL: "/start/finish?a=xyz",
+    });
   });
 });

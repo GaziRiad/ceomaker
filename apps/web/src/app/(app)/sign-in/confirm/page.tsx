@@ -3,12 +3,13 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Blueprint, Wordmark } from "@/components/ui";
 import { CONFIRM_ACTION, readLinkParams } from "@/lib/sign-in-link";
+import { AutoContinue } from "./auto-continue";
 
 export const metadata: Metadata = { title: "Sign in", robots: { index: false } };
 
 /**
  * Where a sign-in email's link opens. Opening it changes nothing (email scanners open links to
- * check them); the button posts the link back to be used. No script presses it for the visitor.
+ * check them); a script posts the link back to be used, so people go straight through.
  */
 async function Confirm({
   searchParams,
@@ -25,26 +26,17 @@ async function Confirm({
         <>
           <div className="flex flex-col gap-1.5">
             <h1 className="m-0 font-heading text-[40px] leading-none font-semibold uppercase">
-              One last step
+              Signing you in
             </h1>
-            <span className="text-neutral-700">Press the button to sign in to CEOMaker.</span>
+            <span role="status" className="text-neutral-700">
+              One moment…
+            </span>
           </div>
-          <form method="post" action={CONFIRM_ACTION} className="flex flex-col">
+          <AutoContinue action={CONFIRM_ACTION}>
             {Object.entries(params).map(([name, value]) => (
               <input key={name} type="hidden" name={name} value={value} />
             ))}
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ justifyContent: "center", padding: "13px 16px", fontSize: 16 }}
-            >
-              Sign in to CEOMaker
-            </button>
-          </form>
-          <span className="text-[13px] text-neutral-600">
-            This step keeps your link safe from email security checks, which open links before you
-            do.
-          </span>
+          </AutoContinue>
         </>
       ) : (
         <>

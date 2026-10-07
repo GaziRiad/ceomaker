@@ -49,7 +49,7 @@ packages/templates  The site templates (Meridian, Harbour, Monument, Salon, Foli
 
 - **Content is data.** User and AI content is validated structured data rendered as escaped text. There is no `dangerouslySetInnerHTML`. Links are restricted to `https`, `http`, `mailto:`, `tel:` and in-page anchors. Theme colors must be `#rrggbb`, so they can't inject CSS.
 - **Tenant isolation.** Queries that touch a site take the acting `userId` and scope to it. A composite foreign key means a site can only point at its own versions, so one tenant's content can never be served on another tenant's domain. Subdomain format is enforced in both the schema and a database `CHECK`.
-- **Sessions.** Sign-in is passwordless: a single-use email link (stored hashed, valid 1 hour, opened through a confirm page so email scanners can't use it up) or Google. Better Auth cookies are host-only on the product domain and are never shared with `*.ceomaker.com`. Customer sites set no cookies. Sign-in requests are rate limited, with counters stored in Postgres.
+- **Sessions.** Sign-in is passwordless: an email with a single-use link and a 6-digit code (both stored hashed, valid 1 hour; the link opens a page that continues by script so email scanners can't use it up, and the code covers scanners that run scripts) or Google. Better Auth cookies are host-only on the product domain and are never shared with `*.ceomaker.com`. Customer sites set no cookies. Sign-in requests are rate limited, with counters stored in Postgres.
 - **Uploads and AI.** Portraits are resized and re-encoded in the browser (which drops EXIF data such as GPS position), then checked again on the server by their bytes (JPEG, PNG or WebP only). CVs are sent once to the model to draft the site and never stored. AI drafts and rewrites are rate limited per user, and the model is told to use only facts from the answers and the CV: sections that need numbers, past roles or quotes start hidden and empty instead of invented.
 - **Headers.** CSP, HSTS (with `includeSubDomains`), `nosniff`, `frame-ancestors 'none'`, COOP and Permissions-Policy on every response. Inline scripts are allowed because cached pages can't carry per-request nonces (see `src/lib/security-headers.ts`). The structural guarantee above is the primary XSS defence.
 
@@ -93,7 +93,7 @@ Fill `.env`:
 
 Paste Neon's strings as they are. They may include `channel_binding=require`, which the app strips because the Postgres driver doesn't support it, and `sslmode=require`, which the app upgrades to `verify-full` so the server certificate is actually checked.
 
-Signing in locally needs no email setup: click "Email me a sign-in link" and the link prints in the terminal running `pnpm dev`.
+Signing in locally needs no email setup: click "Email me a sign-in link" and the link and code print in the terminal running `pnpm dev`.
 
 ```powershell
 pnpm db:migrate

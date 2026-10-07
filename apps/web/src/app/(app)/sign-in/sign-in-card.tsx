@@ -6,7 +6,7 @@ import { Blueprint, Mail, Wordmark } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { trackEvent, welcomeUrl } from "@/lib/product-analytics/browser";
 import { signInErrorPath } from "@/lib/sign-in-errors";
-import { MAGIC_LINK_LIFETIME } from "@/lib/sign-in-link";
+import { MAGIC_LINK_LIFETIME, SIGN_IN_CODE_LENGTH } from "@/lib/sign-in-link";
 
 /** Google's "G" mark, as its sign-in branding guidelines require on the button. */
 function GoogleMark() {
@@ -32,23 +32,42 @@ function GoogleMark() {
   );
 }
 
+/** What to say when a code doesn't sign in, by the auth library's error. */
+function codeErrorMessage(error: { status?: number; code?: string }): string {
+  if (error.status === 429) return "Too many tries. Wait a minute and try again.";
+  switch (error.code) {
+    case "TOO_MANY_ATTEMPTS":
+      return "Too many wrong codes. Ask for a new email below.";
+    case "OTP_EXPIRED":
+      return "That code has expired. Ask for a new email below.";
+    default:
+      return "That code didn't work. Check it against the latest email and try again.";
+  }
+}
+
 export function SignInCard({
   fromStart,
   callbackURL,
   name,
   googleEnabled,
   initialError,
+  linkFailed,
 }: {
   fromStart: boolean;
   callbackURL: string;
   name: string | null;
   googleEnabled: boolean;
   initialError: string | null;
+  /** Back from a sign-in link that didn't work: the code from the same email is the way in. */
+  linkFailed: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
+  // The code form shows after sending, and straight away after a failed link (with the email).
+  const [enteringCode, setEnteringCode] = useState(linkFailed);
+  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(initialError);
-  const [pending, setPending] = useState<"email" | "google" | null>(null);
+  const [pending, setPending] = useState<"email" | "code" | "google" | null>(null);
 
   async function sendLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,7 +78,7 @@ export function SignInCard({
       ...(name ? { name } : {}),
       callbackURL,
       newUserCallbackURL: welcomeUrl(callbackURL),
-      errorCallbackURL: signInErrorPath("link"),
+      errorCallbackURL: signInErrorPath("link", { callbackURL, fromStart }),
     });
     setPending(null);
     if (result.error) {
@@ -72,6 +91,33 @@ export function SignInCard({
     }
     trackEvent("sign_in_requested", { method: "email", from_start: fromStart });
     setSentTo(email.trim());
+    setCode("");
+    setEnteringCode(true);
+  }
+
+  async function signInWithCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setPending("code");
+    const result = await authClient.signIn.emailOtp({
+      email: (sentTo ?? email).trim(),
+      otp: code,
+      ...(name ? { name } : {}),
+    });
+    if (result.error) {
+      setPending(null);
+      setError(codeErrorMessage(result.error));
+      return;
+    }
+    // New accounts are counted there; for others it only goes on to where they were going.
+    window.location.assign(welcomeUrl(callbackURL));
+  }
+
+  function askForNewEmail() {
+    setSentTo(null);
+    setEnteringCode(false);
+    setCode("");
+    setError(null);
   }
 
   async function continueWithGoogle() {
@@ -82,7 +128,7 @@ export function SignInCard({
       provider: "google",
       callbackURL,
       newUserCallbackURL: welcomeUrl(callbackURL),
-      errorCallbackURL: signInErrorPath("google"),
+      errorCallbackURL: signInErrorPath("google", { callbackURL, fromStart }),
     });
     if (result.error) {
       setPending(null);
@@ -128,21 +174,71 @@ export function SignInCard({
           </div>
         </>
       ) : null}
-      {sentTo ? (
-        <div role="status" className="flex flex-col gap-1.5 border border-accent bg-accent-100 p-4">
-          <span className="font-medium">Check your inbox</span>
-          <span className="text-[15px] text-neutral-800">
-            We sent a sign-in link to {sentTo}. It works once and expires in {MAGIC_LINK_LIFETIME}.
-          </span>
+      {enteringCode ? (
+        <form onSubmit={signInWithCode} className="flex flex-col gap-[18px]">
+          {sentTo ? (
+            <div
+              role="status"
+              className="flex flex-col gap-1.5 border border-accent bg-accent-100 p-4"
+            >
+              <span className="font-medium">Check your inbox</span>
+              <span className="text-[15px] text-neutral-800">
+                We sent a sign-in link and a code to {sentTo}. Open the link, or enter the code
+                here. Both work once and expire in {MAGIC_LINK_LIFETIME}.
+              </span>
+            </div>
+          ) : (
+            <div className="field">
+              <label htmlFor="email">Work email</label>
+              <input
+                id="email"
+                className="input"
+                type="email"
+                required
+                autoComplete="email"
+                maxLength={254}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@company.com"
+              />
+            </div>
+          )}
+          <div className="field">
+            <label htmlFor="code">Code from the email</label>
+            <input
+              id="code"
+              className="input"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              pattern={`[0-9]{${SIGN_IN_CODE_LENGTH}}`}
+              maxLength={SIGN_IN_CODE_LENGTH}
+              value={code}
+              onChange={(event) =>
+                setCode(event.target.value.replace(/\D/g, "").slice(0, SIGN_IN_CODE_LENGTH))
+              }
+              placeholder={"0".repeat(SIGN_IN_CODE_LENGTH)}
+              style={{ letterSpacing: "0.3em", fontSize: 20 }}
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ justifyContent: "center", padding: "13px 16px", fontSize: 16 }}
+            disabled={pending !== null || code.length !== SIGN_IN_CODE_LENGTH}
+          >
+            {pending === "code" ? "Signing in…" : "Sign in"}
+          </button>
           <button
             type="button"
             className="btn btn-ghost self-start"
             style={{ paddingLeft: 0 }}
-            onClick={() => setSentTo(null)}
+            onClick={askForNewEmail}
           >
-            Use a different email
+            {sentTo ? "Use a different email" : "Email me a new link"}
           </button>
-        </div>
+        </form>
       ) : (
         <form onSubmit={sendLink} className="flex flex-col gap-[18px]">
           <div className="field">

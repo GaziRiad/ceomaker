@@ -52,6 +52,14 @@ describe("verifyPathFor", () => {
   it("needs a token", () => {
     expect(verifyPathFor(() => null)).toBeNull();
     expect(readLinkParams((name) => (name === "token" ? "" : "/x"))).toBeNull();
-    expect(readLinkParams((name) => (name === "token" ? "x".repeat(5000) : null))).toBeNull();
+    expect(readLinkParams((name) => (name === "token" ? "x".repeat(9000) : null))).toBeNull();
+  });
+
+  it("carries callback addresses holding long answers from the questions", () => {
+    const callbackURL = `/start/finish?a=${"x".repeat(4000)}`;
+    const params = readLinkParams((name) =>
+      name === "token" ? "abc123" : name === "callbackURL" ? callbackURL : null,
+    );
+    expect(params?.callbackURL).toBe(callbackURL);
   });
 });
