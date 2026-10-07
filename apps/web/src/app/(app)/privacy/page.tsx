@@ -201,7 +201,7 @@ const sections: LegalSection[] = [
           after deletion, so nobody else can take over links that still point to it.
         </li>
         <li>Contact-form messages: until the owner deletes them or deletes the site.</li>
-        <li>Sign-in links: they work once and expire after 15 minutes.</li>
+        <li>Sign-in links: they work once and expire after 1 hour.</li>
         <li>Payment records: as long as tax law requires, kept by Freemius.</li>
         <li>
           Usage statistics are linked only to an account id: once your account is deleted, they can

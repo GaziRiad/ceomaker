@@ -8,9 +8,7 @@ import { headers } from "next/headers";
 import { sendEmailChangeLink, sendSignInEmail } from "./email";
 import { googleSignInEnabled, serverEnv } from "./env";
 import { appUrl } from "./routing";
-
-/** How long a sign-in link stays valid. Links are single-use either way. */
-export const MAGIC_LINK_MINUTES = 15;
+import { confirmLinkFor, MAGIC_LINK_MINUTES } from "./sign-in-link";
 
 /** How long the link that confirms a new email address stays valid. */
 export const EMAIL_CHANGE_HOURS = 24;
@@ -97,7 +95,8 @@ function createAuth() {
         expiresIn: MAGIC_LINK_MINUTES * 60,
         // Only a hash is stored, so a database leak can't be replayed as sign-in links.
         storeToken: "hashed",
-        sendMagicLink: async ({ email, url }) => sendSignInEmail(email, url),
+        // The email links to a confirm page, so email scanners can't use the link up.
+        sendMagicLink: async ({ email, url }) => sendSignInEmail(email, confirmLinkFor(url)),
       }),
       nextCookies(),
     ],

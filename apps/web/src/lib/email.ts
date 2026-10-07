@@ -1,6 +1,7 @@
 import "server-only";
 import { serverEnv } from "./env";
 import { appUrl } from "./routing";
+import { MAGIC_LINK_LIFETIME } from "./sign-in-link";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
@@ -82,7 +83,7 @@ export async function sendSignInEmail(email: string, url: string): Promise<void>
   await sendLinkEmail({
     to: email,
     subject: "Your CEOMaker sign-in link",
-    intro: "Use this button to sign in. It works once and expires in 15 minutes.",
+    intro: `Use this button to sign in. It works once and expires in ${MAGIC_LINK_LIFETIME}.`,
     button: "Sign in to CEOMaker",
     url,
     footnote: "If you didn't ask for this email, you can ignore it.",

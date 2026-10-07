@@ -6,6 +6,7 @@ import { Blueprint, Mail, Wordmark } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { trackEvent, welcomeUrl } from "@/lib/product-analytics/browser";
 import { signInErrorPath } from "@/lib/sign-in-errors";
+import { MAGIC_LINK_LIFETIME } from "@/lib/sign-in-link";
 
 /** Google's "G" mark, as its sign-in branding guidelines require on the button. */
 function GoogleMark() {
@@ -131,7 +132,7 @@ export function SignInCard({
         <div role="status" className="flex flex-col gap-1.5 border border-accent bg-accent-100 p-4">
           <span className="font-medium">Check your inbox</span>
           <span className="text-[15px] text-neutral-800">
-            We sent a sign-in link to {sentTo}. It works once and expires in 15 minutes.
+            We sent a sign-in link to {sentTo}. It works once and expires in {MAGIC_LINK_LIFETIME}.
           </span>
           <button
             type="button"
