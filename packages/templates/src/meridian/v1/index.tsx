@@ -353,6 +353,41 @@ function Impact({ model }: { model: SiteModel }) {
   );
 }
 
+/** Skills, services or areas of work: short columns of a title and a line. */
+function Focus({ model }: { model: SiteModel }) {
+  const focus = model.focus;
+  if (!focus) return null;
+  const heading = { text: focus.heading || "Focus", field: focus.headingField };
+  return (
+    <section id="focus" className="mer-wrap mer-section mer-focus">
+      <div className="mer-columns mer-section-grid">
+        <h2 className="mer-label">
+          <Words model={model} text={heading} />
+        </h2>
+        <div className="mer-content">
+          <ul
+            className="mer-focus-list"
+            style={{ "--mer-cols": Math.min(focus.items.length, 3) } as CSSProperties}
+          >
+            {focus.items.map((item, index) => (
+              <li key={index} className="mer-focus-item">
+                <h3 {...editable(model, item.fields.title)} className="mer-role">
+                  {item.title}
+                </h3>
+                {item.description ? (
+                  <p {...editable(model, item.fields.description)} className="mer-focus-text">
+                    {item.description}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Experience({ model }: { model: SiteModel }) {
   return (
     <Section model={model} kind="experience">
@@ -610,16 +645,21 @@ function Contact({
   );
 }
 
+/** What sits between the hero and the contact section. */
+type Block = MiddleKind | "focus";
+
 export function MeridianTemplate({ model, publishedAt, colors, sendMessage }: TemplateProps) {
-  const renderers: Record<MiddleKind, () => ReactNode> = {
+  const renderers: Record<Block, () => ReactNode> = {
     about: () => <About model={model} />,
     impact: () => <Impact model={model} />,
+    focus: () => <Focus model={model} />,
     experience: () => <Experience model={model} />,
     work: () => <Work model={model} />,
     testimonials: () => <Testimonials model={model} />,
   };
+  const blocks = model.sequence.filter((kind): kind is Block => kind !== "cta");
   // The questions preview shows About as grey lines until it's written.
-  const order: MiddleKind[] = model.draft && !model.about ? ["about", ...model.order] : model.order;
+  const order: Block[] = model.draft && !model.about ? ["about", ...blocks] : blocks;
 
   return (
     <div

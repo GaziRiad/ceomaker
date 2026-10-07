@@ -88,8 +88,8 @@ export const focusItem = z.object({
 });
 
 /**
- * What the owner works on now, as a few short cards. Templates that have it (Folio) show it;
- * others leave it out.
+ * What the owner works on now, offers or is good at, as a few short cards: titled "Skills" for
+ * job seekers and "Services" for clients. Every template shows it.
  */
 export const focusSection = z.object({
   ...base,

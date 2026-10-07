@@ -579,6 +579,42 @@
   }
 }
 
+/* Focus: skills, services or areas of work, in up to three columns */
+
+.mer-focus-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px 32px;
+}
+
+.mer-focus-item {
+  min-width: 0;
+  border-top: 1px solid var(--site-ink);
+  padding-top: 18px;
+}
+
+.mer-focus-item .mer-role {
+  margin: 0;
+  font-weight: inherit;
+}
+
+.mer-focus-text {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--mer-ink2);
+  text-wrap: pretty;
+}
+
+@container (min-width: 700px) {
+  .mer-focus-list {
+    grid-template-columns: repeat(var(--mer-cols, 3), minmax(0, 1fr));
+  }
+}
+
 /* Experience and selected work: rows, so one to eight entries all read well */
 
 .mer-list {

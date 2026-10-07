@@ -384,6 +384,41 @@ function About({ model }: { model: SiteModel }) {
   );
 }
 
+/** Skills, services or areas of work: a title and a line each, in up to three columns. */
+function Focus({ model }: { model: SiteModel }) {
+  const focus = model.focus;
+  if (!focus) return null;
+  const heading = { text: focus.heading || "Focus", field: focus.headingField };
+  return (
+    <section id="focus" aria-labelledby="sl-focus-h" className="sl-sec">
+      <div className="sl-wrap">
+        <h2
+          id="sl-focus-h"
+          data-rise=""
+          className="sl-title sl-fit"
+          style={sizeVars("sl-fs", titleSizes(heading.text))}
+        >
+          <Words model={model} text={heading} />
+        </h2>
+        <ul className="sl-focus-list" data-count={Math.min(focus.items.length, 3)}>
+          {focus.items.map((item, index) => (
+            <li key={index} data-rise="" className="sl-focus-item">
+              <h3 {...editable(model, item.fields.title)} className="sl-focus-name">
+                {item.title}
+              </h3>
+              {item.description ? (
+                <p {...editable(model, item.fields.description)} className="sl-figure-label">
+                  {item.description}
+                </p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 function Impact({ model }: { model: SiteModel }) {
   const count = model.stats.length;
   return (
@@ -759,6 +794,11 @@ export function SalonTemplate({ model, colors, photoGrade, sendMessage }: Templa
   };
   const cta = model.cta ? <Closing model={model} /> : null;
   const after = model.cta?.after ?? 0;
+  // Focus sits right after the section it follows on the page (or first).
+  const blocks = model.sequence.filter((kind) => kind !== "cta");
+  const focusAt = blocks.indexOf("focus");
+  const focusAfter = focusAt > 0 ? blocks[focusAt - 1] : null;
+  const focus = model.focus ? <Focus model={model} /> : null;
   const top = label(model, "back-to-top", "Back to top");
 
   return (
@@ -780,11 +820,13 @@ export function SalonTemplate({ model, colors, photoGrade, sendMessage }: Templa
       <main id="main">
         <Hero model={model} />
         {after === 0 ? cta : null}
+        {model.top || focusAt !== 0 ? null : focus}
         {model.top
           ? null
           : model.order.map((kind, index) => (
               <Fragment key={kind}>
                 {renderers[kind]()}
+                {focusAfter === kind ? focus : null}
                 {after === index + 1 ? cta : null}
               </Fragment>
             ))}

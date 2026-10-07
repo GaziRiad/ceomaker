@@ -1095,6 +1095,37 @@
   }
 }
 
+/* Focus: skills, services or areas of work, in up to three columns */
+
+.mon-focus-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 var(--mon-gap);
+}
+
+.mon-focus-item {
+  min-width: 0;
+  padding: 24px 0 28px;
+  border-bottom: 1px solid var(--mon-gr);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mon-focus-item .mon-work-title,
+.mon-focus-item .mon-stat-label {
+  margin: 0;
+}
+
+@container (min-width: 720px) {
+  .mon-focus-list {
+    grid-template-columns: repeat(var(--mon-cols, 3), minmax(0, 1fr));
+  }
+}
+
 /* Testimonials */
 
 .mon-quotes {

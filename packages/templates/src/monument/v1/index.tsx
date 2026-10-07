@@ -429,6 +429,45 @@ function Impact({ model, place }: { model: SiteModel; place: Place }) {
   );
 }
 
+/** Skills, services or areas of work: a head like Impact's, then a title and a line each. */
+function Focus({ model, place }: { model: SiteModel; place: Place }) {
+  const focus = model.focus;
+  if (!focus) return null;
+  const heading = { text: focus.heading || "Focus", field: focus.headingField };
+  return (
+    <section
+      id="focus"
+      aria-labelledby="mon-focus-h"
+      className={cx("mon-sec", `mon-${place.ground}`, "mon-focus")}
+      data-wipe=""
+    >
+      <div data-rise="" className="mon-impact-head">
+        <h2 id="mon-focus-h" className="mon-title" style={titleStyle(heading.text)}>
+          <Words model={model} text={heading} />
+        </h2>
+        <Count place={place} />
+      </div>
+      <ul
+        className="mon-focus-list"
+        style={{ "--mon-cols": Math.min(focus.items.length, 3) } as CSSProperties}
+      >
+        {focus.items.map((item, index) => (
+          <li key={index} data-rise="" className="mon-focus-item">
+            <h3 {...editable(model, item.fields.title)} className="mon-work-title">
+              {item.title}
+            </h3>
+            {item.description ? (
+              <p {...editable(model, item.fields.description)} className="mon-stat-label">
+                {item.description}
+              </p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function Experience({ model, place }: { model: SiteModel; place: Place }) {
   const heading = title(model, "experience");
   return (
@@ -735,6 +774,9 @@ function Contact({
   );
 }
 
+/** What sits between the hero and the contact section. */
+type Block = MiddleKind | "focus";
+
 export function MonumentTemplate({
   model,
   publishedAt,
@@ -742,15 +784,17 @@ export function MonumentTemplate({
   photoGrade,
   sendMessage,
 }: TemplateProps) {
-  const renderers: Record<MiddleKind, (place: Place) => ReactNode> = {
+  const renderers: Record<Block, (place: Place) => ReactNode> = {
     about: (place) => <About model={model} place={place} />,
     impact: (place) => <Impact model={model} place={place} />,
+    focus: (place) => <Focus model={model} place={place} />,
     experience: (place) => <Experience model={model} place={place} />,
     work: (place) => <Work model={model} place={place} />,
     testimonials: (place) => <Testimonials model={model} place={place} />,
   };
   const affiliations = model.affiliations.length > 0;
-  const total = String(model.order.length).padStart(2, "0");
+  const blocks = model.sequence.filter((kind): kind is Block => kind !== "cta");
+  const total = String(blocks.length).padStart(2, "0");
 
   return (
     <div
@@ -773,7 +817,7 @@ export function MonumentTemplate({
         {affiliations ? <Affiliations model={model} /> : null}
         {model.top
           ? null
-          : model.order.map((kind, index) => (
+          : blocks.map((kind, index) => (
               <Fragment key={kind}>
                 {renderers[kind]({
                   // Grounds alternate down the page; the affiliations band counts as an inverse one.
