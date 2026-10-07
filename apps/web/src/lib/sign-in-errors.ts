@@ -1,9 +1,18 @@
 /** Where a failed sign-in came from. Sent as `via`; the auth library adds its own `error` code. */
 export type SignInSource = "link" | "google";
 
-/** Where the auth library sends people back to when a sign-in fails. */
-export function signInErrorPath(source: SignInSource): string {
-  return `/sign-in?via=${source}`;
+/**
+ * Where the auth library sends people back to when a sign-in fails. It keeps where they were
+ * going (and that they came from the questions), so signing in from there still gets them there.
+ */
+export function signInErrorPath(
+  source: SignInSource,
+  from?: { callbackURL: string; fromStart: boolean },
+): string {
+  const params = new URLSearchParams({ via: source });
+  if (from?.fromStart) params.set("from", "start");
+  if (from && from.callbackURL !== "/dashboard") params.set("callbackURL", from.callbackURL);
+  return `/sign-in?${params}`;
 }
 
 function first(value: unknown): string | null {
@@ -19,7 +28,7 @@ export function signInErrorMessage(via: unknown, error: unknown): string | null 
   const source = first(via);
   const code = first(error);
   if (source === "link") {
-    return "That sign-in link has expired or was already used. Ask for a new one below.";
+    return "That sign-in link has expired or was already used. Enter the code from the same email, or ask for a new one.";
   }
   if (source !== "google") return null;
   switch (code) {

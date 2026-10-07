@@ -3,14 +3,12 @@ import { getDb, tables } from "@ceomaker/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { magicLink } from "better-auth/plugins";
+import { emailOTP, magicLink } from "better-auth/plugins";
 import { headers } from "next/headers";
 import { sendEmailChangeLink, sendSignInEmail } from "./email";
 import { googleSignInEnabled, serverEnv } from "./env";
 import { appUrl } from "./routing";
-
-/** How long a sign-in link stays valid. Links are single-use either way. */
-export const MAGIC_LINK_MINUTES = 15;
+import { confirmLinkFor, MAGIC_LINK_MINUTES, SIGN_IN_CODE_LENGTH } from "./sign-in-link";
 
 /** How long the link that confirms a new email address stays valid. */
 export const EMAIL_CHANGE_HOURS = 24;
@@ -47,8 +45,20 @@ function createAuth() {
         rateLimit: tables.rateLimit,
       },
     }),
-    // Passwordless only: a sign-in link by email, or Google. No passwords to leak or reset.
+    // Passwordless only: a sign-in email (a link and a code), or Google. No passwords to leak.
     emailAndPassword: { enabled: false },
+    // The email-code plugin only signs in with codes that went out with a sign-in link. Its own
+    // sending and its password and email-change flows stay closed.
+    disabledPaths: [
+      "/email-otp/send-verification-otp",
+      "/email-otp/check-verification-otp",
+      "/email-otp/verify-email",
+      "/email-otp/request-password-reset",
+      "/email-otp/reset-password",
+      "/forget-password/email-otp",
+      "/email-otp/request-email-change",
+      "/email-otp/change-email",
+    ],
     user: {
       // A new address is confirmed by a link sent to it; nothing changes until it's opened.
       changeEmail: { enabled: true },
@@ -84,6 +94,8 @@ function createAuth() {
       customRules: {
         // Each request sends an email: keep it tight per IP.
         "/sign-in/magic-link": { window: 60, max: 3 },
+        // Each code also allows 3 tries before it's void.
+        "/sign-in/email-otp": { window: 60, max: 5 },
       },
     },
     advanced: {
@@ -97,7 +109,23 @@ function createAuth() {
         expiresIn: MAGIC_LINK_MINUTES * 60,
         // Only a hash is stored, so a database leak can't be replayed as sign-in links.
         storeToken: "hashed",
-        sendMagicLink: async ({ email, url }) => sendSignInEmail(email, url),
+        // The email links to a confirm page (see lib/sign-in-link) and carries a code as well.
+        sendMagicLink: async ({ email, url }) => {
+          const code = await getAuth().api.createVerificationOTP({
+            body: { email, type: "sign-in" },
+          });
+          await sendSignInEmail(email, confirmLinkFor(url), code);
+        },
+      }),
+      emailOTP({
+        otpLength: SIGN_IN_CODE_LENGTH,
+        expiresIn: MAGIC_LINK_MINUTES * 60,
+        storeOTP: "hashed",
+        allowedAttempts: 3,
+        // Codes are made by sendMagicLink above and go out in the same email.
+        sendVerificationOTP: async () => {
+          throw new Error("Sign-in codes are sent with the sign-in link");
+        },
       }),
       nextCookies(),
     ],

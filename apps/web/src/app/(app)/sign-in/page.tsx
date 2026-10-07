@@ -28,6 +28,7 @@ async function SignIn({ searchParams }: { searchParams: PageProps<"/sign-in">["s
       name={name}
       googleEnabled={googleSignInEnabled()}
       initialError={error}
+      linkFailed={params.via === "link"}
     />
   );
 }
