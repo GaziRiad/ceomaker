@@ -254,9 +254,12 @@ export function titleSizes(title: string, side = false): Sizes {
   );
 }
 
-/** Figures fill their card: the columns a row has at each width set the room. */
-export function figureSizes(value: string, count: number): Sizes {
-  const width = Math.max(0.5, textWidth(value, true));
+/**
+ * Figures fill their card: the columns a row has at each width set the room. One size for the
+ * whole set, from its widest figure, so "5" and "33,000+" read as equals.
+ */
+export function figureSizes(values: readonly string[], count: number): Sizes {
+  const width = Math.max(0.5, ...values.map((value) => textWidth(value, true)));
   return cq(
     each((device) => {
       const columns =

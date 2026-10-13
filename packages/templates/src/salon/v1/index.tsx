@@ -469,6 +469,13 @@ function Credentials({ model }: { model: SiteModel }) {
 
 function Impact({ model }: { model: SiteModel }) {
   const count = model.stats.length;
+  const sizes = sizeVars(
+    "sl-fs",
+    figureSizes(
+      model.stats.map((stat) => stat.value),
+      count,
+    ),
+  );
   return (
     <Section kind="impact">
       <Title model={model} kind="impact" />
@@ -478,7 +485,7 @@ function Impact({ model }: { model: SiteModel }) {
             <span
               {...editable(model, stat.fields.value)}
               className="sl-figure sl-fit"
-              style={sizeVars("sl-fs", figureSizes(stat.value, count))}
+              style={sizes}
             >
               {stat.value}
             </span>

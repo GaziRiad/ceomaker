@@ -233,8 +233,9 @@ export function statementSizes(length: number): Sizes {
 }
 
 /** A figure, sized by how many share the row and fitted to its column. */
-export function figureSizes(value: string, count: number): Sizes {
-  const width = Math.max(0.5, textWidth(value));
+export function figureSizes(values: readonly string[], count: number): Sizes {
+  // One size for the whole set, from its widest figure, so "5" and "33,000+" read as equals.
+  const width = Math.max(0.5, ...values.map((value) => textWidth(value)));
   return cq(
     each((device) => {
       const columns =

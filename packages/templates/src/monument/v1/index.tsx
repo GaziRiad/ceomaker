@@ -404,6 +404,8 @@ function About({ model, place }: { model: SiteModel; place: Place }) {
 function Impact({ model, place }: { model: SiteModel; place: Place }) {
   const heading = title(model, "impact");
   const count = model.stats.length;
+  // One size for the whole set, from its widest figure, so "5" and "33,000+" read as equals.
+  const widest = Math.max(1, ...model.stats.map((stat) => displayWidth(stat.value)));
   return (
     <Section kind="impact" place={place} className="mon-impact">
       <div data-rise="" className="mon-impact-head">
@@ -422,7 +424,7 @@ function Impact({ model, place }: { model: SiteModel; place: Place }) {
             <span
               {...editable(model, stat.fields.value)}
               className="mon-stat-value"
-              style={{ "--mon-w": Math.max(1, displayWidth(stat.value)) } as CSSProperties}
+              style={{ "--mon-w": widest } as CSSProperties}
             >
               {stat.value}
             </span>
