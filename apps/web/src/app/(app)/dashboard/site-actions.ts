@@ -352,7 +352,8 @@ export async function rewriteHeadlineAction(
   try {
     const message = await client.beta.messages.parse({
       model: AI_MODEL,
-      max_tokens: 1000,
+      // Room for the model's thinking as well as the one-line answer.
+      max_tokens: 4000,
       system: REWRITE_SYSTEM_PROMPT,
       messages: [
         {
@@ -370,7 +371,7 @@ export async function rewriteHeadlineAction(
           }),
         },
       ],
-      output_config: { format: betaZodOutputFormat(rewriteOutput) },
+      output_config: { format: betaZodOutputFormat(rewriteOutput), effort: "low" },
     });
     const next = message.parsed_output?.headline.replace(/\s+/g, " ").trim().slice(0, 120);
     await finishAiUsage(db, {

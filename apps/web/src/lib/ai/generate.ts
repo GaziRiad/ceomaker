@@ -55,8 +55,8 @@ export async function generateDraft(input: {
 
   const format = betaZodOutputFormat(draftOutputSchema);
   try {
-    // With a document, the larger model reads it (adaptive thinking is on by default there), and
-    // a request its safeguards decline is re-run on a fallback model instead of failing.
+    // With a document, the stronger model reads it, and a request its safeguards decline is re-run
+    // on a fallback model instead of failing. Both models think by default; effort sets how much.
     const stream = input.document
       ? client.beta.messages.stream({
           model: DOCUMENT_MODEL,
@@ -72,7 +72,7 @@ export async function generateDraft(input: {
           max_tokens: 16_000,
           system: DRAFT_SYSTEM_PROMPT,
           messages: [{ role: "user", content }],
-          output_config: { format },
+          output_config: { format, effort: "medium" },
         });
 
     let text = "";

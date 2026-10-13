@@ -190,13 +190,13 @@ A Google account and an email sign-in with the same address end up as one CEOMak
 
 ### AI drafting (Claude)
 
-Drafts use structured output, streamed so the "Writing your first draft" screen follows real progress. A draft from the answers alone uses Claude Haiku 4.5 (`AI_MODEL`); a draft with a CV or LinkedIn PDF uses Claude Opus 5.5 (`DOCUMENT_MODEL`, effort `medium`), which reads long exports far more completely. Those requests opt into Anthropic's server-side refusal fallbacks (`fallbacks: "default"`): if a safety classifier declines, the API retries on a recommended fallback model in the same call.
+Drafts use structured output, streamed so the "Writing your first draft" screen follows real progress. A draft from the answers alone, and every headline rewrite, uses Claude Haiku 5.5 (`AI_MODEL`); a draft with a CV or LinkedIn PDF uses Claude Sonnet 5.5 (`DOCUMENT_MODEL`), which reads long exports far more completely. Both think by default, at medium effort for drafts and low for rewrites. Document drafts opt into Anthropic's server-side refusal fallbacks (`fallbacks: "default"`): if a safety classifier declines, the API retries on a recommended fallback model in the same call. Haiku 5.5 has no server-side fallback; a declined request keeps the draft built from the answers.
 
 From a document, the draft fills every section the file supports: impact numbers and projects found inside job descriptions, skills or services, experience, certifications, awards and degrees (the Credentials section), and the LinkedIn profile, website and (for drafts made for someone else) email in the contact section. It never invents any of them.
 
 1. Create a key at [console.anthropic.com](https://console.anthropic.com) and add credit to the account.
 2. Set `ANTHROPIC_API_KEY` locally and in Vercel.
-3. Expect about $0.02 per draft from the answers, roughly $0.15 to $0.30 per draft from a CV or LinkedIn PDF (an estimate; `ai_usage` records the real tokens), and well under a cent per headline rewrite. Limits per user per day: Pro 3 drafts and 30 rewrites, free 1 draft ever and 5 rewrites a day, admins 20 drafts a day for drafts made for others (`apps/web/src/lib/ai/client.ts`, `FREE_AI_LIMITS`).
+3. Expect well under a cent per draft from the answers and per headline rewrite, and roughly $0.08 to $0.15 per draft from a CV or LinkedIn PDF (estimates; `ai_usage` records the real tokens). Limits per user per day: Pro 3 drafts and 30 rewrites, free 1 draft ever and 5 rewrites a day, admins 20 drafts a day for drafts made for others (`apps/web/src/lib/ai/client.ts`, `FREE_AI_LIMITS`).
 
 Without a key the product still works end to end: the first draft is built from the answers alone, and the editor says so.
 

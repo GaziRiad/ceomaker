@@ -3,19 +3,19 @@ import Anthropic from "@anthropic-ai/sdk";
 import { serverEnv } from "../env";
 
 /**
- * The smallest current model, for cost while most sign-ups don't publish (owner, October 2026):
- * about $0.02 a draft and a tenth of a cent a rewrite. Without thinking or effort settings, which
- * it doesn't take. Move drafting to a larger model once sign-ups convert.
+ * Drafts from the answers alone and headline rewrites (owner, October 2026): the current small
+ * model, about a tenth of Claude Haiku 4.5's price ($0.10 / $0.50 per million tokens), so well
+ * under a cent a draft. It thinks by default; effort is set per request.
  */
-export const AI_MODEL = "claude-haiku-4-5";
+export const AI_MODEL = "claude-haiku-5-5";
 
 /**
- * Drafting from a CV or LinkedIn export (owner, October 2026): the small model left out much of
- * what long exports hold (projects inside job descriptions, certifications, the profile link),
- * and these drafts are what outreach sends. Roughly $0.15 to $0.30 a draft at medium effort,
- * against about $0.02 on the small model; `ai_usage` records the real tokens.
+ * Drafts from a CV or LinkedIn export (owner, October 2026): long exports need a stronger reader
+ * than the small model (projects inside job descriptions, certifications, the profile link).
+ * Claude Sonnet 5.5 at medium effort, about half Claude Opus 5.5's price: roughly $0.08 to $0.15
+ * a draft. `ai_usage` records the real tokens.
  */
-export const DOCUMENT_MODEL = "claude-opus-5-5";
+export const DOCUMENT_MODEL = "claude-sonnet-5-5";
 
 let client: Anthropic | null = null;
 
