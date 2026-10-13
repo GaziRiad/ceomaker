@@ -13,7 +13,16 @@ import {
   type ModelText,
   type SiteModel,
 } from "../../model";
-import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink } from "../../shared";
+import {
+  ANCHORS,
+  ContactLink,
+  CredentialLine,
+  CredentialLink,
+  CtaLink,
+  editable,
+  mailto,
+  SkipLink,
+} from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
 import { SalonDrift, SalonMenu, SalonQuotes } from "./client";
 import { Icon } from "./icons";
@@ -419,6 +428,45 @@ function Focus({ model }: { model: SiteModel }) {
   );
 }
 
+/** Certifications and awards: the Focus columns, with who issued each and when. */
+function Credentials({ model }: { model: SiteModel }) {
+  const credentials = model.credentials;
+  if (!credentials) return null;
+  const heading = {
+    text: credentials.heading || "Credentials",
+    field: credentials.headingField,
+  };
+  return (
+    <section id="credentials" aria-labelledby="sl-credentials-h" className="sl-sec">
+      <div className="sl-wrap">
+        <h2
+          id="sl-credentials-h"
+          data-rise=""
+          className="sl-title sl-fit"
+          style={sizeVars("sl-fs", titleSizes(heading.text))}
+        >
+          <Words model={model} text={heading} />
+        </h2>
+        <ul className="sl-focus-list" data-count={Math.min(credentials.items.length, 3)}>
+          {credentials.items.map((item, index) => (
+            <li key={index} data-rise="" className="sl-focus-item">
+              <h3 {...editable(model, item.fields.title)} className="sl-focus-name">
+                {item.title}
+              </h3>
+              {item.issuer || item.year ? (
+                <p className="sl-figure-label">
+                  <CredentialLine model={model} item={item} />
+                </p>
+              ) : null}
+              <CredentialLink model={model} item={item} className="sl-credential-link" />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 function Impact({ model }: { model: SiteModel }) {
   const count = model.stats.length;
   return (
@@ -784,6 +832,9 @@ function Contact({
   );
 }
 
+/** Sections only placed after another: Focus and Credentials. */
+type Extra = "focus" | "credentials";
+
 export function SalonTemplate({ model, colors, photoGrade, sendMessage }: TemplateProps) {
   const renderers: Record<MiddleKind, () => ReactNode> = {
     about: () => <About model={model} />,
@@ -794,11 +845,25 @@ export function SalonTemplate({ model, colors, photoGrade, sendMessage }: Templa
   };
   const cta = model.cta ? <Closing model={model} /> : null;
   const after = model.cta?.after ?? 0;
-  // Focus sits right after the section it follows on the page (or first).
-  const blocks = model.sequence.filter((kind) => kind !== "cta");
-  const focusAt = blocks.indexOf("focus");
-  const focusAfter = focusAt > 0 ? blocks[focusAt - 1] : null;
-  const focus = model.focus ? <Focus model={model} /> : null;
+  // Focus and Credentials sit right after the section they follow on the page (or first).
+  const extraNodes: Record<Extra, ReactNode> = {
+    focus: model.focus ? <Focus model={model} /> : null,
+    credentials: model.credentials ? <Credentials model={model} /> : null,
+  };
+  const extrasAfter = new Map<MiddleKind | null, Extra[]>();
+  let previous: MiddleKind | null = null;
+  for (const kind of model.sequence) {
+    if (kind === "cta") continue;
+    if (kind === "focus" || kind === "credentials") {
+      extrasAfter.set(previous, [...(extrasAfter.get(previous) ?? []), kind]);
+    } else {
+      previous = kind;
+    }
+  }
+  const extras = (after: MiddleKind | null) =>
+    (extrasAfter.get(after) ?? []).map((kind) => (
+      <Fragment key={kind}>{extraNodes[kind]}</Fragment>
+    ));
   const top = label(model, "back-to-top", "Back to top");
 
   return (
@@ -820,13 +885,13 @@ export function SalonTemplate({ model, colors, photoGrade, sendMessage }: Templa
       <main id="main">
         <Hero model={model} />
         {after === 0 ? cta : null}
-        {model.top || focusAt !== 0 ? null : focus}
+        {model.top ? null : extras(null)}
         {model.top
           ? null
           : model.order.map((kind, index) => (
               <Fragment key={kind}>
                 {renderers[kind]()}
-                {focusAfter === kind ? focus : null}
+                {extras(kind)}
                 {after === index + 1 ? cta : null}
               </Fragment>
             ))}

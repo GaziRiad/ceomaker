@@ -14,7 +14,15 @@ import {
   type SequenceKind,
   type SiteModel,
 } from "../../model";
-import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink } from "../../shared";
+import {
+  ANCHORS,
+  ContactLink,
+  CredentialLink,
+  CtaLink,
+  editable,
+  mailto,
+  SkipLink,
+} from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
 import { FolioCarousel, FolioMenu, FolioSmooth } from "./client";
 import { Icon } from "./icons";
@@ -42,12 +50,13 @@ import {
 // layout, 1000px is desktop); this file decides what is shown, and measure.ts works out the
 // sizes that depend on the content.
 
-type TitledKind = HeadingKind | "focus";
+type TitledKind = HeadingKind | "focus" | "credentials";
 
 const LABELS: Record<TitledKind, string> = {
   about: "About",
   impact: "Achievements",
   focus: "Focus",
+  credentials: "Credentials",
   experience: "Experience",
   work: "Work",
   testimonials: "Testimonials",
@@ -57,6 +66,7 @@ const LABELS: Record<TitledKind, string> = {
 const ANCHOR: Record<Exclude<SequenceKind, "cta"> | "contact", string> = {
   ...ANCHORS,
   focus: "focus",
+  credentials: "credentials",
 };
 
 function cx(...names: (string | false | null | undefined)[]): string {
@@ -74,6 +84,12 @@ function title(model: SiteModel, kind: TitledKind): ModelText {
     return {
       text: model.focus?.heading || LABELS.focus,
       field: model.focus?.headingField ?? "focus.heading",
+    };
+  }
+  if (kind === "credentials") {
+    return {
+      text: model.credentials?.heading || LABELS.credentials,
+      field: model.credentials?.headingField ?? "credentials.heading",
     };
   }
   return headingOf(model, kind, LABELS[kind]);
@@ -449,6 +465,39 @@ function Focus({ model }: { model: SiteModel }) {
                   {item.description}
                 </p>
               ) : null}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Section>
+  );
+}
+
+/** Certifications and awards: the Focus layout, with the year where Focus has its number. */
+function Credentials({ model }: { model: SiteModel }) {
+  const credentials = model.credentials;
+  if (!credentials) return null;
+  return (
+    <Section kind="credentials" className="fo-focus">
+      <div className="fo-focus-grid">
+        <Title model={model} kind="credentials" side className="fo-focus-title" />
+        <ul className="fo-focus-list" data-one={credentials.items.length === 1 || undefined}>
+          {credentials.items.map((item, index) => (
+            <li key={index} data-rise="" className="fo-card fo-focus-card fo-credential">
+              {item.year ? (
+                <span {...editable(model, item.fields.year)} className="fo-focus-n">
+                  {item.year}
+                </span>
+              ) : null}
+              <h3 {...editable(model, item.fields.title)} className="fo-focus-name">
+                {item.title}
+              </h3>
+              {item.issuer ? (
+                <p {...editable(model, item.fields.issuer)} className="fo-focus-desc">
+                  {item.issuer}
+                </p>
+              ) : null}
+              <CredentialLink model={model} item={item} className="fo-credential-link" />
             </li>
           ))}
         </ul>
@@ -874,6 +923,7 @@ export function FolioTemplate({ model, colors, photoGrade, sendMessage }: Templa
     about: () => <About model={model} />,
     impact: () => <Impact model={model} />,
     focus: () => <Focus model={model} />,
+    credentials: () => <Credentials model={model} />,
     experience: () => <Experience model={model} />,
     work: () => <Work model={model} />,
     testimonials: () => <Testimonials model={model} />,

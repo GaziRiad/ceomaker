@@ -14,7 +14,16 @@ import {
   type SequenceKind,
   type SiteModel,
 } from "../../model";
-import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink } from "../../shared";
+import {
+  ANCHORS,
+  ContactLink,
+  CredentialLine,
+  CredentialLink,
+  CtaLink,
+  editable,
+  mailto,
+  SkipLink,
+} from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
 import { HarbourMenu } from "./client";
 import { Icon } from "./icons";
@@ -33,12 +42,13 @@ import {
 // (container queries on the site's width: 640px leaves the phone layout, 1000px is desktop);
 // this file decides what is shown and in which order.
 
-type TitledKind = HeadingKind | "focus";
+type TitledKind = HeadingKind | "focus" | "credentials";
 
 /** Section titles the owner hasn't rewritten. */
 const TITLES: Record<TitledKind, string> = {
   about: "About",
   focus: "How I help",
+  credentials: "Credentials",
   experience: "Experience",
   impact: "Along the way",
   work: "Selected work",
@@ -50,6 +60,7 @@ const TITLES: Record<TitledKind, string> = {
 const NAV: Record<Exclude<TitledKind, "impact">, string> = {
   about: "About",
   focus: "Focus",
+  credentials: "Credentials",
   experience: "Experience",
   work: "Work",
   testimonials: "Kind words",
@@ -59,6 +70,7 @@ const NAV: Record<Exclude<TitledKind, "impact">, string> = {
 const ANCHOR: Record<Exclude<SequenceKind, "cta"> | "contact" | "gallery", string> = {
   ...ANCHORS,
   focus: "focus",
+  credentials: "credentials",
   gallery: "gallery",
 };
 
@@ -77,6 +89,12 @@ function ownTitle(model: SiteModel, kind: TitledKind): ModelText {
     return {
       text: model.focus?.heading ?? "",
       field: model.focus?.headingField ?? "focus.heading",
+    };
+  }
+  if (kind === "credentials") {
+    return {
+      text: model.credentials?.heading ?? "",
+      field: model.credentials?.headingField ?? "credentials.heading",
     };
   }
   return headingOf(model, kind, "");
@@ -315,6 +333,35 @@ function Focus({ model, place }: { model: SiteModel; place: Place }) {
                 {item.description}
               </p>
             ) : null}
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+function Credentials({ model, place }: { model: SiteModel; place: Place }) {
+  const credentials = model.credentials;
+  if (!credentials) return null;
+  return (
+    <Section kind="credentials" place={place}>
+      <Title model={model} kind="credentials" />
+      <ul
+        className="hb-cards"
+        style={{ "--hb-cards": cardColumns(credentials.items.length, "focus") } as CSSProperties}
+      >
+        {credentials.items.map((item, index) => (
+          <li key={index} data-rise="" className="hb-focus-card hb-credential">
+            <span aria-hidden="true" className="hb-dot" />
+            <h3 {...editable(model, item.fields.title)} className="hb-focus-name">
+              {item.title}
+            </h3>
+            {item.issuer || item.year ? (
+              <p className="hb-small">
+                <CredentialLine model={model} item={item} />
+              </p>
+            ) : null}
+            <CredentialLink model={model} item={item} className="hb-credential-link" />
           </li>
         ))}
       </ul>
@@ -695,6 +742,7 @@ export function HarbourTemplate({ model, colors, photoGrade, sendMessage }: Temp
   const renderers: Record<SequenceKind, () => ReactNode> = {
     about: () => <About model={model} place={at("about")} />,
     focus: () => <Focus model={model} place={at("focus")} />,
+    credentials: () => <Credentials model={model} place={at("credentials")} />,
     experience: () => <Experience model={model} place={at("experience")} />,
     impact: () => <Impact model={model} place={at("impact")} />,
     work: () => <Work model={model} place={at("work")} />,

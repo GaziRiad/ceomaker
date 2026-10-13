@@ -9,6 +9,14 @@ import { serverEnv } from "../env";
  */
 export const AI_MODEL = "claude-haiku-4-5";
 
+/**
+ * Drafting from a CV or LinkedIn export (owner, October 2026): the small model left out much of
+ * what long exports hold (projects inside job descriptions, certifications, the profile link),
+ * and these drafts are what outreach sends. Roughly $0.15 to $0.30 a draft at medium effort,
+ * against about $0.02 on the small model; `ai_usage` records the real tokens.
+ */
+export const DOCUMENT_MODEL = "claude-opus-5-5";
+
 let client: Anthropic | null = null;
 
 /** Null when ANTHROPIC_API_KEY isn't set; callers then use the non-AI path. */

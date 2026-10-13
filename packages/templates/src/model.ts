@@ -15,7 +15,7 @@ import { initialsOf } from "./monogram";
 export type MiddleKind = "impact" | "about" | "experience" | "work" | "testimonials";
 
 /** Everything between the hero and contact, with the sections only some templates show. */
-export type SequenceKind = MiddleKind | "focus" | "cta";
+export type SequenceKind = MiddleKind | "focus" | "credentials" | "cta";
 
 /**
  * Where a piece of displayed text lives in the content, for editing it in place in the editor's
@@ -129,6 +129,23 @@ export interface ModelFocus {
   items: ModelFocusItem[];
 }
 
+export interface ModelCredential {
+  title: string;
+  issuer: string;
+  year: string;
+  /** A badge page or the issuer's record, opened in a new tab. */
+  href: string | null;
+  fields: { title: FieldPath; issuer: FieldPath; year: FieldPath };
+}
+
+/** Certifications, awards and education. Every template shows it. */
+export interface ModelCredentials {
+  /** The owner's title. Empty: the template's own label. */
+  heading: string;
+  headingField: FieldPath;
+  items: ModelCredential[];
+}
+
 export interface ModelStat {
   value: string;
   label: string;
@@ -217,6 +234,8 @@ export interface SiteModel {
   cta: ModelCta | null;
   /** Visible with at least one area; null otherwise. Templates without it ignore it. */
   focus: ModelFocus | null;
+  /** Visible with at least one item; null otherwise. */
+  credentials: ModelCredentials | null;
   contact: {
     blurb: string;
     email: string;
@@ -361,6 +380,7 @@ export function buildSiteModel(
   const work = firstVisible(sections, "portfolio");
   const testimonials = firstVisible(sections, "testimonials");
   const focus = firstVisible(sections, "focus");
+  const credentials = firstVisible(sections, "credentials");
   const contact = firstOf(sections, "contact");
   const heroId = hero?.id ?? "hero";
 
@@ -447,6 +467,25 @@ export function buildSiteModel(
         }
       : null;
 
+  const credentialsModel: ModelCredentials | null =
+    credentials && credentials.items.length
+      ? {
+          heading: credentials.heading ?? "",
+          headingField: `${credentials.id}.heading`,
+          items: credentials.items.map((item, index) => ({
+            title: item.title,
+            issuer: item.issuer ?? "",
+            year: item.year ?? "",
+            href: item.href ?? null,
+            fields: {
+              title: `${credentials.id}.items.${index}.title`,
+              issuer: `${credentials.id}.items.${index}.issuer`,
+              year: `${credentials.id}.items.${index}.year`,
+            },
+          })),
+        }
+      : null;
+
   // Hidden or empty sections drop out, so templates never render an empty block.
   const present: Record<MiddleKind, boolean> = {
     impact: stats.length > 0,
@@ -479,6 +518,7 @@ export function buildSiteModel(
       sequence.push("cta");
     }
     if (section === focus && focusModel) sequence.push("focus");
+    if (section === credentials && credentialsModel) sequence.push("credentials");
     const kind = MIDDLE_KIND[section.type];
     if (kind && section.visible && present[kind] && !order.includes(kind)) {
       order.push(kind);
@@ -551,6 +591,7 @@ export function buildSiteModel(
         }
       : null,
     focus: focusModel,
+    credentials: credentialsModel,
     contact: {
       blurb: contact?.blurb ?? "",
       email: contact?.email ?? "",
@@ -585,6 +626,7 @@ export function buildSiteModel(
         pullQuote: null,
         cta: null,
         focus: null,
+        credentials: null,
       }
     : model;
 }

@@ -981,6 +981,21 @@
   text-wrap: pretty;
 }
 
+/* Credentials: the focus cards, shorter, with where each can be checked. */
+
+.fo .fo-credential-link {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  text-decoration: underline;
+  text-decoration-color: var(--fo-acg);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.16em;
+}
+
 @container (min-width: 600px) {
   .fo-focus-list:not([data-one]) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -989,6 +1004,10 @@
   .fo-focus-card {
     min-height: 200px;
     padding: 28px;
+  }
+
+  .fo-credential {
+    min-height: 0;
   }
 
   .fo .fo-focus-name {

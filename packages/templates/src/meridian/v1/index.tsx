@@ -11,7 +11,17 @@ import {
   type SiteModel,
 } from "../../model";
 import { ContactForm, type FormWords } from "../../contact-form";
-import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink, Spans } from "../../shared";
+import {
+  ANCHORS,
+  ContactLink,
+  CredentialLine,
+  CredentialLink,
+  CtaLink,
+  editable,
+  mailto,
+  SkipLink,
+  Spans,
+} from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
 import { longestWord, meridianRoleStyle, RING_CIRCUMFERENCE, ringText } from "./measure";
 
@@ -388,6 +398,45 @@ function Focus({ model }: { model: SiteModel }) {
   );
 }
 
+/** Certifications and awards: the Focus columns, with who issued each and when. */
+function Credentials({ model }: { model: SiteModel }) {
+  const credentials = model.credentials;
+  if (!credentials) return null;
+  const heading = {
+    text: credentials.heading || "Credentials",
+    field: credentials.headingField,
+  };
+  return (
+    <section id="credentials" className="mer-wrap mer-section mer-focus">
+      <div className="mer-columns mer-section-grid">
+        <h2 className="mer-label">
+          <Words model={model} text={heading} />
+        </h2>
+        <div className="mer-content">
+          <ul
+            className="mer-focus-list"
+            style={{ "--mer-cols": Math.min(credentials.items.length, 3) } as CSSProperties}
+          >
+            {credentials.items.map((item, index) => (
+              <li key={index} className="mer-focus-item">
+                <h3 {...editable(model, item.fields.title)} className="mer-role">
+                  {item.title}
+                </h3>
+                {item.issuer || item.year ? (
+                  <p className="mer-focus-text">
+                    <CredentialLine model={model} item={item} />
+                  </p>
+                ) : null}
+                <CredentialLink model={model} item={item} className="mer-credential-link" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Experience({ model }: { model: SiteModel }) {
   return (
     <Section model={model} kind="experience">
@@ -646,13 +695,14 @@ function Contact({
 }
 
 /** What sits between the hero and the contact section. */
-type Block = MiddleKind | "focus";
+type Block = MiddleKind | "focus" | "credentials";
 
 export function MeridianTemplate({ model, publishedAt, colors, sendMessage }: TemplateProps) {
   const renderers: Record<Block, () => ReactNode> = {
     about: () => <About model={model} />,
     impact: () => <Impact model={model} />,
     focus: () => <Focus model={model} />,
+    credentials: () => <Credentials model={model} />,
     experience: () => <Experience model={model} />,
     work: () => <Work model={model} />,
     testimonials: () => <Testimonials model={model} />,

@@ -14,7 +14,16 @@ import {
   type SequenceKind,
   type SiteModel,
 } from "../../model";
-import { ANCHORS, ContactLink, CtaLink, editable, mailto, SkipLink } from "../../shared";
+import {
+  ANCHORS,
+  ContactLink,
+  CredentialLine,
+  CredentialLink,
+  CtaLink,
+  editable,
+  mailto,
+  SkipLink,
+} from "../../shared";
 import type { SendContactMessage, TemplateProps } from "../../types";
 import { TempoMenu, TempoMotion } from "./client";
 import { Icon } from "./icons";
@@ -47,20 +56,25 @@ import {
 // width: 640px leaves the phone layout, 1000px is desktop); this file decides what is shown,
 // and measure.ts works out the sizes that depend on the content.
 
-type TitledKind = HeadingKind | "focus";
+type TitledKind = HeadingKind | "focus" | "credentials";
 type NumberedKind = Exclude<SequenceKind, "cta"> | "contact";
 
 const LABELS: Record<TitledKind, string> = {
   about: "About",
   impact: "Achievements",
   focus: "Focus",
+  credentials: "Credentials",
   experience: "Experience",
   work: "Work",
   testimonials: "Testimonials",
   contact: "Contact",
 };
 
-const ANCHOR: Record<NumberedKind, string> = { ...ANCHORS, focus: "focus" };
+const ANCHOR: Record<NumberedKind, string> = {
+  ...ANCHORS,
+  focus: "focus",
+  credentials: "credentials",
+};
 
 /** Longest hero button label shown as the round badge; longer ones get a square button. */
 const BADGE_MAX = 34;
@@ -84,6 +98,12 @@ function title(model: SiteModel, kind: TitledKind): ModelText {
     return {
       text: model.focus?.heading || LABELS.focus,
       field: model.focus?.headingField ?? "focus.heading",
+    };
+  }
+  if (kind === "credentials") {
+    return {
+      text: model.credentials?.heading || LABELS.credentials,
+      field: model.credentials?.headingField ?? "credentials.heading",
     };
   }
   return headingOf(model, kind, LABELS[kind]);
@@ -762,6 +782,43 @@ function Focus({ model, number }: { model: SiteModel; number: number }) {
   );
 }
 
+/** Certifications and awards: the Focus tiles, without the moving band. */
+function Credentials({ model, number }: { model: SiteModel; number: number }) {
+  const credentials = model.credentials;
+  if (!credentials) return null;
+  const count = credentials.items.length;
+  const columns = count === 1 ? 1 : count === 2 || count === 4 ? 2 : 3;
+  return (
+    <Section model={model} kind="credentials" number={number}>
+      <ul className="tp-tiles" data-columns={columns}>
+        {credentials.items.map((item, index) => (
+          <li
+            key={index}
+            data-rv=""
+            className="tp-tile"
+            style={{ "--rd": `${((index % columns) * 0.08).toFixed(2)}s` } as CSSProperties}
+          >
+            <span aria-hidden="true" className="tp-tile-n">
+              {pad2(index + 1)}
+            </span>
+            <div className="tp-tile-main">
+              <h3 {...editable(model, item.fields.title)} className="tp-tile-title">
+                {item.title}
+              </h3>
+              {item.issuer || item.year ? (
+                <p className="tp-tile-desc">
+                  <CredentialLine model={model} item={item} />
+                </p>
+              ) : null}
+              <CredentialLink model={model} item={item} className="tp-credential-link" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
 function Testimonials({ model, number }: { model: SiteModel; number: number }) {
   const quotes = model.testimonials;
   return (
@@ -960,6 +1017,7 @@ export function TempoTemplate({ model, colors, photoGrade, sendMessage }: Templa
     about: () => <About model={model} number={at("about")} />,
     impact: () => <Impact model={model} number={at("impact")} />,
     focus: () => <Focus model={model} number={at("focus")} />,
+    credentials: () => <Credentials model={model} number={at("credentials")} />,
     experience: () => <Experience model={model} number={at("experience")} />,
     work: () => <Work model={model} number={at("work")} />,
     testimonials: () => <Testimonials model={model} number={at("testimonials")} />,

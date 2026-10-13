@@ -15,6 +15,8 @@ import {
 import {
   ANCHORS,
   ContactLink,
+  CredentialLine,
+  CredentialLink,
   CtaLink,
   editable,
   loop,
@@ -31,6 +33,7 @@ import {
   nameLines,
   nameMeasure,
   titleScale,
+  titleWordScale,
 } from "./measure";
 
 // T4 Monument: the loud one. The name stacked edge to edge on a full accent field, the initials
@@ -71,7 +74,11 @@ function title(model: SiteModel, kind: HeadingKind): ModelText {
 
 /** Title size follows its length, so a long title the owner wrote still fits. */
 function titleStyle(text: string): CSSProperties {
-  return { "--mon-ts": titleScale(text) } as CSSProperties;
+  const word = titleWordScale(text);
+  return {
+    "--mon-ts": titleScale(text),
+    ...(word < 1 ? { "--mon-tw": word } : {}),
+  } as CSSProperties;
 }
 
 /** "01 / 05": the section's place among the visible ones. */
@@ -468,6 +475,49 @@ function Focus({ model, place }: { model: SiteModel; place: Place }) {
   );
 }
 
+/** Certifications and awards: the Focus layout, with who issued each and when. */
+function Credentials({ model, place }: { model: SiteModel; place: Place }) {
+  const credentials = model.credentials;
+  if (!credentials) return null;
+  const heading = {
+    text: credentials.heading || "Credentials",
+    field: credentials.headingField,
+  };
+  return (
+    <section
+      id="credentials"
+      aria-labelledby="mon-credentials-h"
+      className={cx("mon-sec", `mon-${place.ground}`, "mon-focus")}
+      data-wipe=""
+    >
+      <div data-rise="" className="mon-impact-head">
+        <h2 id="mon-credentials-h" className="mon-title" style={titleStyle(heading.text)}>
+          <Words model={model} text={heading} />
+        </h2>
+        <Count place={place} />
+      </div>
+      <ul
+        className="mon-focus-list"
+        style={{ "--mon-cols": Math.min(credentials.items.length, 3) } as CSSProperties}
+      >
+        {credentials.items.map((item, index) => (
+          <li key={index} data-rise="" className="mon-focus-item">
+            <h3 {...editable(model, item.fields.title)} className="mon-work-title">
+              {item.title}
+            </h3>
+            {item.issuer || item.year ? (
+              <p className="mon-stat-label">
+                <CredentialLine model={model} item={item} />
+              </p>
+            ) : null}
+            <CredentialLink model={model} item={item} className="mon-credential-link" />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function Experience({ model, place }: { model: SiteModel; place: Place }) {
   const heading = title(model, "experience");
   return (
@@ -775,7 +825,7 @@ function Contact({
 }
 
 /** What sits between the hero and the contact section. */
-type Block = MiddleKind | "focus";
+type Block = MiddleKind | "focus" | "credentials";
 
 export function MonumentTemplate({
   model,
@@ -788,6 +838,7 @@ export function MonumentTemplate({
     about: (place) => <About model={model} place={place} />,
     impact: (place) => <Impact model={model} place={place} />,
     focus: (place) => <Focus model={model} place={place} />,
+    credentials: (place) => <Credentials model={model} place={place} />,
     experience: (place) => <Experience model={model} place={place} />,
     work: (place) => <Work model={model} place={place} />,
     testimonials: (place) => <Testimonials model={model} place={place} />,

@@ -1676,6 +1676,18 @@
   color: var(--tp-ink2);
 }
 
+.tp .tp-credential-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--tp-acg);
+  text-underline-offset: 0.14em;
+}
+
 @container (min-width: 640px) {
   .tp-focus {
     padding-bottom: 140px;

@@ -522,7 +522,14 @@ describe("onboarding", () => {
     expect(parsed.success).toBe(true);
     const sections = parsed.data!.sections;
     const hidden = sections.filter((section) => !section.visible).map((section) => section.id);
-    expect(hidden).toEqual(["impact", "focus", "experience", "work", "testimonials"]);
+    expect(hidden).toEqual([
+      "impact",
+      "focus",
+      "experience",
+      "work",
+      "credentials",
+      "testimonials",
+    ]);
     for (const section of sections) {
       if (section.type === "achievements" || section.type === "testimonials") {
         expect(section.items).toEqual([]);
@@ -561,6 +568,7 @@ describe("onboarding", () => {
       "about",
       "experience",
       "focus",
+      "credentials",
       "impact",
       "work",
       "testimonials",

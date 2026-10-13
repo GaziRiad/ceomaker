@@ -7,6 +7,7 @@ const ANCHOR: Partial<Record<Section["type"], string>> = {
   focus: "focus",
   experience: "experience",
   portfolio: "work",
+  credentials: "credentials",
   testimonials: "testimonials",
   contact: "contact",
 };

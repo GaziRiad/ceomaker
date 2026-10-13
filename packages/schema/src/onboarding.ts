@@ -651,11 +651,11 @@ export function formTopicsFromOutcomes(outcomes: readonly string[]): string[] {
 export function sectionOrderFor(goal: SiteGoal): readonly string[] {
   switch (goal) {
     case "hired":
-      return ["about", "experience", "focus", "impact", "work", "testimonials"];
+      return ["about", "experience", "focus", "credentials", "impact", "work", "testimonials"];
     case "clients":
-      return ["about", "focus", "impact", "testimonials", "work", "experience"];
+      return ["about", "focus", "impact", "testimonials", "work", "credentials", "experience"];
     default:
-      return ["impact", "about", "focus", "experience", "work", "testimonials"];
+      return ["impact", "about", "focus", "experience", "work", "credentials", "testimonials"];
   }
 }
 
@@ -711,6 +711,7 @@ export function buildStarterContent(
       items: employed ? [{ role: answers.role, organization: org }] : [],
     },
     work: { id: "work", type: "portfolio", visible: false, items: [] },
+    credentials: { id: "credentials", type: "credentials", visible: false, items: [] },
     testimonials: { id: "testimonials", type: "testimonials", visible: false, items: [] },
   };
 

@@ -894,6 +894,16 @@
   margin: 0;
 }
 
+.sl .sl-credential-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 @container (min-width: 600px) {
   .sl-focus-list[data-count="2"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -30,6 +30,10 @@
 }
 
 @container (min-width: 720px) {
+  .mon-title {
+    --mon-tw-now: 1;
+  }
+
   .mon {
     --mon-pad: 32px;
     --mon-gap: 24px;
@@ -674,7 +678,9 @@
   margin: 6px 0 0;
   min-width: 0;
   font-weight: 900;
-  font-size: calc(var(--mon-title-base) * var(--mon-ts, 1));
+  /* On phones the longest word also has to fit (--mon-tw); wider pages have room for it. */
+  --mon-tw-now: var(--mon-tw, 1);
+  font-size: calc(var(--mon-title-base) * min(var(--mon-ts, 1), var(--mon-tw-now)));
   line-height: 0.86;
   overflow-wrap: break-word;
   text-wrap: balance;
@@ -686,9 +692,11 @@
 
 .mon-head-row {
   display: flex;
+  /* A long title takes the whole line and the count moves under it, so no word breaks. */
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
+  gap: 8px 24px;
 }
 
 .mon-head-row .mon-title {
@@ -1118,6 +1126,18 @@
 .mon-focus-item .mon-work-title,
 .mon-focus-item .mon-stat-label {
   margin: 0;
+}
+
+.mon .mon-credential-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 @container (min-width: 720px) {

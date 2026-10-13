@@ -108,6 +108,15 @@ export function titleScale(title: string): number {
   return 1;
 }
 
+/**
+ * On phones a title's longest word must fit the width whole ("Experience", "Certifications"):
+ * about 8.6 capitals fit there at full size. 1 when it already fits; wider pages ignore it.
+ */
+export function titleWordScale(title: string): number {
+  const longest = Math.max(0, ...title.split(/\s+/).map((word) => word.length));
+  return longest <= 8 ? 1 : Math.floor((8.6 / longest) * 100) / 100;
+}
+
 export interface MonumentRoles {
   /** Text on the accent field: the background or the text colour, whichever reads better. */
   onAccent: "bg" | "ink";

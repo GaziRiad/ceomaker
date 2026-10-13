@@ -6,6 +6,7 @@ import {
   paragraphToMarkup,
   richTextToPlain,
   type EditableSectionType,
+  type CredentialItem,
   type ExperienceItem,
   type FocusItem,
   type PortfolioItem,
@@ -293,6 +294,8 @@ function SectionForm(props: ContentPanelProps & { section: Editable }) {
       return <ExperienceForm section={section} error={error} update={update} />;
     case "portfolio":
       return <WorkForm section={section} error={error} update={update} template={props.template} />;
+    case "credentials":
+      return <CredentialsForm section={section} error={error} update={update} />;
     case "testimonials":
       return (
         <QuotesForm section={section} error={error} update={update} template={props.template} />
@@ -774,6 +777,80 @@ function FocusForm({ section, error, update }: FormProps<"focus">) {
         Up to 6 areas you work on now. Four reads best.
       </span>
       <HiddenNote section={section} count={section.items.length} noun="area" />
+    </>
+  );
+}
+
+function CredentialsForm({ section, error, update }: FormProps<"credentials">) {
+  const setItem = (index: number, patch: Partial<CredentialItem>) =>
+    update((current) => ({
+      ...current,
+      items: current.items.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    }));
+  return (
+    <>
+      <ItemList
+        items={section.items}
+        invalid={(index) => Boolean(error(`items.${index}.`, true))}
+        max={12}
+        addLabel="+ Add a certification or award"
+        removeLabel="Remove this one"
+        onAdd={() =>
+          update((current) => ({ ...current, items: [...current.items, { title: "" }] }))
+        }
+        onRemove={(index) =>
+          update((current) => ({ ...current, items: current.items.filter((_, i) => i !== index) }))
+        }
+        summary={(item) => (
+          <>
+            <span className="font-medium">{item.title || "New certification"}</span>
+            {item.issuer || item.year ? (
+              <span className="line-clamp-1 text-[13px] text-neutral-700">
+                {[item.issuer, item.year].filter(Boolean).join(" · ")}
+              </span>
+            ) : null}
+          </>
+        )}
+        editor={(item, index) => (
+          <>
+            <TextField
+              label="Certification, award or degree"
+              value={item.title}
+              placeholder="ITIL 4 Foundation"
+              maxLength={120}
+              error={error(`items.${index}.title`)}
+              onChange={(title) => setItem(index, { title })}
+            />
+            <TextField
+              label="Issued by (optional)"
+              value={item.issuer}
+              placeholder="PeopleCert"
+              maxLength={100}
+              error={error(`items.${index}.issuer`)}
+              onChange={(issuer) => setItem(index, { issuer })}
+            />
+            <TextField
+              label="Year (optional)"
+              value={item.year}
+              placeholder="2024"
+              maxLength={20}
+              onChange={(year) => setItem(index, { year })}
+            />
+            <TextField
+              label="Badge or verification link (optional)"
+              value={item.href}
+              placeholder="https://www.credly.com/badges/…"
+              spellCheck={false}
+              error={error(`items.${index}.href`)}
+              onChange={(href) => setItem(index, { href: href.trim() })}
+            />
+          </>
+        )}
+      />
+      <span className="text-[13px] text-neutral-700">
+        Certifications, awards and degrees. Add your Credly badge link so visitors can check it.
+      </span>
+      <HiddenNote section={section} count={section.items.length} noun="item" />
     </>
   );
 }

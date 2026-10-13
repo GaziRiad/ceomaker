@@ -98,6 +98,27 @@ export const focusSection = z.object({
   items: z.array(focusItem).max(6),
 });
 
+/** A certification, award or degree: "AWS Solutions Architect", "ITIL 4 Foundation". */
+export const credentialItem = z.object({
+  title: requiredText(120),
+  /** Who issued or awarded it: "Amazon Web Services", "Cumberland College". */
+  issuer: text(100).optional(),
+  year: text(20).optional(),
+  /** Where it can be checked: a badge page (Credly) or the issuer's record. */
+  href: safeLinkUrl.optional(),
+});
+
+/**
+ * Certifications, awards and education, as a short list. Every template shows it. Optional and
+ * additive: sites without it render as before.
+ */
+export const credentialsSection = z.object({
+  ...base,
+  type: z.literal("credentials"),
+  heading,
+  items: z.array(credentialItem).max(12),
+});
+
 export const portfolioItem = z.object({
   title: requiredText(120),
   /** Short category label: "Keynote", "Essay", "Board". */
@@ -193,6 +214,7 @@ export const sectionSchema = z.discriminatedUnion("type", [
   contactSection,
   ctaSection,
   focusSection,
+  credentialsSection,
 ]);
 
 export type Section = z.output<typeof sectionSchema>;
@@ -202,6 +224,7 @@ export type SectionOf<T extends SectionType> = Extract<Section, { type: T }>;
 export type ExperienceItem = z.output<typeof experienceItem>;
 export type AchievementItem = z.output<typeof achievementItem>;
 export type FocusItem = z.output<typeof focusItem>;
+export type CredentialItem = z.output<typeof credentialItem>;
 export type PortfolioItem = z.output<typeof portfolioItem>;
 export type TestimonialItem = z.output<typeof testimonialItem>;
 export type SocialLink = z.output<typeof socialLink>;
@@ -217,6 +240,7 @@ export const SECTION_TYPES = [
   "contact",
   "cta",
   "focus",
+  "credentials",
 ] as const satisfies readonly SectionType[];
 
 /** Sections the editor offers, in the default order of a new site. Hero and contact are fixed. */
@@ -227,6 +251,7 @@ export const EDITABLE_SECTION_TYPES = [
   "focus",
   "experience",
   "portfolio",
+  "credentials",
   "testimonials",
   "cta",
   "contact",

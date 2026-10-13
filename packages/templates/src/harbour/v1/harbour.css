@@ -523,6 +523,27 @@
   text-wrap: balance;
 }
 
+/* Credentials: the focus cards, with where each can be checked. */
+
+.hb .hb-credential-link {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--site-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: color 200ms var(--hb-ease);
+}
+
+.hb .hb-credential-link:hover {
+  color: var(--hb-act);
+}
+
 .hb-work-card {
   position: relative;
   display: flex;

@@ -1,5 +1,6 @@
 import {
   achievementItem,
+  credentialItem,
   EDITABLE_SECTION_TYPES,
   experienceItem,
   FIXED_SECTION_TYPES,
@@ -34,6 +35,7 @@ export const SECTION_LABELS: Record<EditableSectionType, string> = {
   focus: "Focus",
   experience: "Experience",
   portfolio: "Selected work",
+  credentials: "Credentials",
   testimonials: "What colleagues say",
   cta: "Call to action",
   contact: "Let's talk",
@@ -46,6 +48,7 @@ const DEFAULT_IDS: Record<EditableSectionType, string> = {
   focus: "focus",
   experience: "experience",
   portfolio: "work",
+  credentials: "credentials",
   testimonials: "testimonials",
   cta: "cta",
   contact: "contact",
@@ -72,6 +75,7 @@ function emptySection(type: EditableSectionType, meta: SiteMeta): Section {
     case "focus":
     case "experience":
     case "portfolio":
+    case "credentials":
     case "testimonials":
       return { id, type, visible: false, items: [] };
     case "cta":
@@ -137,7 +141,8 @@ export function normalizeForEditing(content: SiteContent): SiteContent {
 const blank = (value: string | undefined) => !value || !value.trim();
 const optional = (value: string | undefined) => (blank(value) ? undefined : value);
 
-type ListType = "achievements" | "focus" | "experience" | "portfolio" | "testimonials";
+type ListType =
+  "achievements" | "focus" | "experience" | "portfolio" | "credentials" | "testimonials";
 type ItemOf<T extends ListType> = SectionOf<T>["items"][number];
 
 /** Rows with anything typed in them; fully blank rows are dropped before saving and previewing. */
@@ -150,6 +155,8 @@ const KEEP: { [T in ListType]: (item: ItemOf<T>) => boolean } = {
     ),
   portfolio: (item) =>
     [item.title, item.kind, item.meta, item.year, item.href].some((value) => !blank(value)),
+  credentials: (item) =>
+    [item.title, item.issuer, item.year, item.href].some((value) => !blank(value)),
   testimonials: (item) => !blank(item.quote) || !blank(item.author),
 };
 
@@ -193,6 +200,16 @@ function cleanSection(section: Section): Section {
           meta: optional(item.meta),
           year: optional(item.year),
           description: optional(item.description),
+          href: optional(item.href),
+        })),
+      };
+    case "credentials":
+      return {
+        ...section,
+        items: section.items.filter(KEEP.credentials).map((item) => ({
+          ...item,
+          issuer: optional(item.issuer),
+          year: optional(item.year),
           href: optional(item.href),
         })),
       };
@@ -261,6 +278,7 @@ const ITEM_SCHEMAS = {
   focus: focusItem,
   experience: experienceItem,
   portfolio: portfolioItem,
+  credentials: credentialItem,
   testimonials: testimonialItem,
 };
 
@@ -276,6 +294,7 @@ function salvage(section: Section): Section | null {
     case "focus":
     case "experience":
     case "portfolio":
+    case "credentials":
     case "testimonials": {
       const schema = ITEM_SCHEMAS[section.type];
       const items = (section.items as unknown[]).filter((item) => schema.safeParse(item).success);
@@ -434,6 +453,7 @@ const ITEM_FIELDS: { [T in ListType]: readonly (keyof ItemOf<T> & string)[] } = 
   focus: ["title", "description"],
   experience: ["role", "organization", "location", "summary", "start", "end"],
   portfolio: ["title", "kind", "meta", "year", "description"],
+  credentials: ["title", "issuer", "year"],
   testimonials: ["quote", "author", "role"],
 };
 const HERO_FIELDS = ["eyebrow", "headline", "subheadline"] as const;
@@ -615,6 +635,7 @@ function editSection(section: Section, rest: string[], before: string, after: st
     case "focus":
     case "experience":
     case "portfolio":
+    case "credentials":
     case "testimonials": {
       const keep = KEEP[section.type] as (item: ItemOf<ListType>) => boolean;
       const fields = ITEM_FIELDS[section.type] as readonly string[];

@@ -150,6 +150,37 @@ describe.each(DESIGNS)("%s v%i template", (key, version) => {
     expect(hidden).not.toContain("Product discovery");
   });
 
+  it("shows certifications and awards, with a link to check them", () => {
+    const credentials: SectionInput = {
+      id: "credentials",
+      type: "credentials",
+      heading: "Certifications",
+      items: [
+        {
+          title: "NetApp Cloud Design Architect",
+          issuer: "NetApp",
+          year: "2019",
+          href: "https://www.credly.com/badges/example",
+        },
+        { title: "Intel HPC council member" },
+      ],
+    };
+    const html = render(key, version, withSections([demoHero, credentials, ...demoRest]));
+    expect(html).toContain("Certifications");
+    expect(html).toContain("NetApp Cloud Design Architect");
+    expect(html).toContain("2019");
+    expect(html).toContain("Intel HPC council member");
+    expect(html).toMatch(
+      /href="https:\/\/www\.credly\.com\/badges\/example" target="_blank" rel="nofollow noopener noreferrer"/,
+    );
+    const hidden = render(
+      key,
+      version,
+      withSections([demoHero, { ...credentials, visible: false }, ...demoRest]),
+    );
+    expect(hidden).not.toContain("NetApp Cloud Design Architect");
+  });
+
   it("opens contact links in a new tab with rel=me and no opener", () => {
     const html = render(key, version, demoSiteContent);
     expect(html).toMatch(/href="https:\/\/www\.linkedin\.com\/" target="_blank" rel="noopener me"/);

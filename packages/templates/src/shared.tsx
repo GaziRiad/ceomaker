@@ -1,7 +1,14 @@
 import type { RichTextSpan } from "@ceomaker/schema";
 import type { CSSProperties, ReactNode } from "react";
 import { linkProps } from "./links";
-import type { FieldPath, MiddleKind, ModelLink, SiteModel } from "./model";
+import {
+  label,
+  type FieldPath,
+  type MiddleKind,
+  type ModelCredential,
+  type ModelLink,
+  type SiteModel,
+} from "./model";
 
 /** Section anchors are stable per kind, so nav links and "#contact" buttons always resolve. */
 export const ANCHORS: Record<MiddleKind | "contact" | "top", string> = {
@@ -112,4 +119,35 @@ export function mailto(email: string): string {
 /** Repeats a list so a CSS marquee that slides by -50% loops without a visible seam. */
 export function loop<T>(items: readonly T[], times = 2): T[] {
   return Array.from({ length: times }, () => items).flat();
+}
+
+/** A credential's issuer and year, "NetApp · 2019", each editable in place. */
+export function CredentialLine({ model, item }: { model: SiteModel; item: ModelCredential }) {
+  return (
+    <>
+      {item.issuer ? <span {...editable(model, item.fields.issuer)}>{item.issuer}</span> : null}
+      {item.issuer && item.year ? " · " : null}
+      {item.year ? <span {...editable(model, item.fields.year)}>{item.year}</span> : null}
+    </>
+  );
+}
+
+/** Where a credential can be checked (a badge page), opened in a new tab. */
+export function CredentialLink({
+  model,
+  item,
+  className,
+}: {
+  model: SiteModel;
+  item: ModelCredential;
+  className?: string;
+}) {
+  if (!item.href) return null;
+  const words = label(model, "view-credential", "View credential");
+  return (
+    <a {...linkProps(item.href)} className={className}>
+      <span {...editable(model, words.field)}>{words.text}</span>
+      <span aria-hidden="true">{" ↗"}</span>
+    </a>
+  );
 }

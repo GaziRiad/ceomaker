@@ -29,6 +29,7 @@ function draft(overrides: Partial<DraftOutput> = {}): DraftOutput {
     experience: [],
     focus: [],
     work: [],
+    credentials: [],
     profile: {
       role: "Chief Executive Officer",
       company: "Meridian Freight Group",
@@ -38,12 +39,71 @@ function draft(overrides: Partial<DraftOutput> = {}): DraftOutput {
       keywords: ["Operator", "Speaker"],
       affiliations: ["Meridian Freight Group"],
     },
+    links: { linkedin: "", website: "", email: "" },
     contact: { invitation: "For speaking, board and advisory enquiries." },
     ...overrides,
   };
 }
 
 describe("contentFromDraft", () => {
+  it("adds credentials, the LinkedIn profile and website from the document", () => {
+    const content = contentFromDraft(
+      answers,
+      draft({
+        credentials: [
+          {
+            title: "NetApp Cloud Design Architect",
+            issuer: "NetApp",
+            year: "2019",
+            url: "https://www.credly.com/badges/abc",
+          },
+          { title: "Intel HPC council member", issuer: "", year: "", url: "not a link" },
+          { title: "", issuer: "Nobody", year: "", url: "" },
+        ],
+        links: {
+          linkedin: "www.linkedin.com/in/ braddykestorage",
+          website: "https://evil.example/x",
+          email: "brad@example.com",
+        },
+      }),
+    );
+    const byId = Object.fromEntries(content!.sections.map((section) => [section.id, section]));
+    expect(byId.credentials).toMatchObject({
+      visible: true,
+      items: [
+        {
+          title: "NetApp Cloud Design Architect",
+          issuer: "NetApp",
+          year: "2019",
+          href: "https://www.credly.com/badges/abc",
+        },
+        { title: "Intel HPC council member" },
+      ],
+    });
+    // Printed without https:// and split over two lines in the export: joined and completed.
+    expect(byId.contact).toMatchObject({
+      email: "brad@example.com",
+      links: [
+        { kind: "linkedin", href: "https://www.linkedin.com/in/braddykestorage" },
+        { kind: "website", href: "https://evil.example/x" },
+      ],
+    });
+  });
+
+  it("keeps the account's email, and only takes LinkedIn addresses as the LinkedIn link", () => {
+    const content = contentFromDraft(
+      answers,
+      draft({
+        links: { linkedin: "https://example.com/in/x", website: "", email: "other@example.com" },
+      }),
+      { email: "amelia@example.com" },
+    );
+    const contact = content!.sections.find((section) => section.type === "contact");
+    expect(contact).toMatchObject({ email: "amelia@example.com", links: [] });
+    const credentials = content!.sections.find((section) => section.type === "credentials");
+    expect(credentials).toMatchObject({ visible: false, items: [] });
+  });
+
   it("builds valid content and keeps fact sections hidden without a document", () => {
     const content = contentFromDraft(answers, draft(), { email: "amelia@example.com" });
     expect(content).not.toBeNull();
@@ -97,6 +157,7 @@ describe("contentFromDraft", () => {
       "focus",
       "work",
       "experience",
+      "credentials",
       "testimonials",
       "contact",
     ]);
@@ -173,6 +234,7 @@ describe("contentFromDraft for job seekers", () => {
       "about",
       "experience",
       "focus",
+      "credentials",
       "impact",
       "work",
       "testimonials",
@@ -227,6 +289,33 @@ describe("mergeRedraft", () => {
       sections: [sections[0]!, ...sections.slice(1).reverse()],
     };
   }
+
+  it("adds credentials to an older site, and the document's links only when it had none", () => {
+    const older = contentFromDraft(answers, draft(), { email: "amelia@example.com" })!;
+    const before = {
+      ...older,
+      sections: older.sections.filter((section) => section.type !== "credentials"),
+    };
+    const fresh = contentFromDraft(
+      answers,
+      draft({
+        credentials: [{ title: "ITIL 4 Foundation", issuer: "PeopleCert", year: "", url: "" }],
+        links: { linkedin: "https://www.linkedin.com/in/amelia", website: "", email: "" },
+      }),
+      { email: "amelia@example.com" },
+    )!;
+    const merged = mergeRedraft(before, fresh)!;
+    const ids = merged.sections.map((section) => section.id);
+    expect(ids.at(-2)).toBe("credentials");
+    expect(merged.sections.find((section) => section.type === "contact")).toMatchObject({
+      links: [{ kind: "linkedin", href: "https://www.linkedin.com/in/amelia" }],
+    });
+    // The owner's own links win.
+    const own = mergeRedraft(edited(), fresh)!;
+    expect(own.sections.find((section) => section.type === "contact")).toMatchObject({
+      links: [{ href: "https://www.linkedin.com/in/amelia", kind: "linkedin" }],
+    });
+  });
 
   it("replaces the words and keeps everything the AI doesn't write", () => {
     const current = edited();

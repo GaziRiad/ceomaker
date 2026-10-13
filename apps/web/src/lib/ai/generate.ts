@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { BetaContentBlockParam } from "@anthropic-ai/sdk/resources/beta/messages/messages";
 import type { OnboardingAnswers, SiteContent } from "@ceomaker/schema";
-import { AI_MODEL, anthropic } from "./client";
+import { AI_MODEL, anthropic, DOCUMENT_MODEL } from "./client";
 import type { SourceDocument } from "./documents";
 import {
   contentFromDraft,
@@ -53,14 +53,27 @@ export async function generateDraft(input: {
   }
   content.push({ type: "text", text: draftUserPrompt(input.answers, input.document !== null) });
 
+  const format = betaZodOutputFormat(draftOutputSchema);
   try {
-    const stream = client.beta.messages.stream({
-      model: AI_MODEL,
-      max_tokens: 16_000,
-      system: DRAFT_SYSTEM_PROMPT,
-      messages: [{ role: "user", content }],
-      output_config: { format: betaZodOutputFormat(draftOutputSchema) },
-    });
+    // With a document, the larger model reads it (adaptive thinking is on by default there), and
+    // a request its safeguards decline is re-run on a fallback model instead of failing.
+    const stream = input.document
+      ? client.beta.messages.stream({
+          model: DOCUMENT_MODEL,
+          max_tokens: 32_000,
+          system: DRAFT_SYSTEM_PROMPT,
+          messages: [{ role: "user", content }],
+          output_config: { format, effort: "medium" },
+          betas: ["server-side-fallback-2026-07-01"],
+          fallbacks: "default",
+        })
+      : client.beta.messages.stream({
+          model: AI_MODEL,
+          max_tokens: 16_000,
+          system: DRAFT_SYSTEM_PROMPT,
+          messages: [{ role: "user", content }],
+          output_config: { format },
+        });
 
     let text = "";
     let reached = 0;
