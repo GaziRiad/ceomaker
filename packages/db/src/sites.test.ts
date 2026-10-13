@@ -58,6 +58,7 @@ import {
   deleteAccount,
   deleteSite,
   getPrimarySiteForOwner,
+  listOwnedSites,
   getPublishedVersion,
   getSiteForOwner,
   getTenantSiteBySubdomain,
@@ -428,6 +429,43 @@ describe.skipIf(!url)("sites (integration)", () => {
       .where(eq(retiredAddress.subdomain, "alice"));
     const claimed = await createSite(db, { ...draft, userId: "mallory", subdomain: "alice" });
     expect(claimed.subdomain).toBe("alice");
+  });
+
+  it("keeps the images of an account with other sites, and can free the address at once", async () => {
+    const own = await createSite(db, { ...draft, userId: "alice", subdomain: "alice" });
+    const other = await createSiteFromAnswers(db, {
+      userId: "alice",
+      answers: { ...answers, name: "Akhila Chowdary" },
+    });
+    await publishSite(db, { userId: "alice", siteId: other.id });
+    expect(
+      (await listOwnedSites(db, "alice")).map((row) => [row.subdomain, row.name, row.status]),
+    ).toEqual([
+      ["alice", null, "draft"],
+      ["akhila", "Akhila Chowdary", "published"],
+    ]);
+    const image = await insertMedia(db, {
+      id: randomUUID(),
+      userId: "alice",
+      contentType: "image/jpeg",
+      byteSize: 3,
+      width: 1,
+      height: 1,
+      sha256: "abc",
+    });
+
+    expect(await deleteSite(db, { userId: "alice", siteId: other.id, holdAddress: false })).toEqual(
+      { subdomain: "akhila", addressHeld: false, domain: null, mediaIds: [] },
+    );
+    expect((await db.select().from(media)).map((row) => row.id)).toEqual([image.id]);
+    expect(await db.select().from(retiredAddress)).toEqual([]);
+    expect(await isSubdomainAvailable(db, "akhila", { userId: "mallory" })).toBe(true);
+    expect((await getPrimarySiteForOwner(db, "alice"))?.id).toBe(own.id);
+
+    // With the last site, the images go.
+    expect((await deleteSite(db, { userId: "alice", siteId: own.id })).mediaIds).toEqual([
+      image.id,
+    ]);
   });
 
   it("lets the address change only before the first publish", async () => {

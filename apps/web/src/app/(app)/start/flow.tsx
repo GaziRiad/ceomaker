@@ -150,6 +150,7 @@ export function QuestionsFlow({
   signedIn,
   addressPrefix,
   addressSuffix,
+  forSomeone = false,
 }: {
   /**
    * A goal chosen before the questions: they open on the role question. From a link (ads) the
@@ -159,6 +160,11 @@ export function QuestionsFlow({
   signedIn: boolean;
   addressPrefix: string;
   addressSuffix: string;
+  /**
+   * An admin making a draft for someone they write to: a new site on their account. It starts
+   * blank and leaves the admin's own saved answers alone.
+   */
+  forSomeone?: boolean;
 }) {
   const router = useRouter();
   const [answers, setAnswers] = useState<AnswersDraft>(FRESH_ANSWERS);
@@ -176,7 +182,7 @@ export function QuestionsFlow({
 
   // Restore saved answers after hydration; a goal from the link wins.
   useEffect(() => {
-    const stored = loadFlow();
+    const stored = forSomeone ? null : loadFlow();
     /* eslint-disable react-hooks/set-state-in-effect -- one-time restore from localStorage */
     if (start) {
       const kept = stored?.answers ?? {};
@@ -214,11 +220,11 @@ export function QuestionsFlow({
       });
     }
     return () => clearTimeout(advanceTimer.current);
-  }, [start, signedIn]);
+  }, [start, signedIn, forSomeone]);
 
   useEffect(() => {
-    if (loaded) saveFlow({ answers, step });
-  }, [answers, step, loaded]);
+    if (loaded && !forSomeone) saveFlow({ answers, step });
+  }, [answers, step, loaded, forSomeone]);
 
   const goal = answers.goal ?? null;
   const outcomes = answers.outcomes ?? [];
@@ -306,9 +312,9 @@ export function QuestionsFlow({
       return;
     }
     startTransition(async () => {
-      const result = await finishOnboarding(encoded);
+      const result = await finishOnboarding(encoded, { forSomeone });
       if (result.ok) {
-        clearFlow();
+        if (!forSomeone) clearFlow();
         router.push(`/dashboard/sites/${result.siteId}/template`);
       } else if (result.reason === "signed-out") {
         router.push(
@@ -338,7 +344,7 @@ export function QuestionsFlow({
   const back = () => {
     clearTimeout(advanceTimer.current);
     if (step === 0) {
-      router.push("/");
+      router.push(forSomeone ? "/dashboard/admin" : "/");
       return;
     }
     if (step - 1 === STEP.goal) setGoalShown(true);
@@ -608,10 +614,24 @@ export function QuestionsFlow({
           <Link href="/" className="mr-auto text-text no-underline hover:text-text">
             <Wordmark />
           </Link>
-          <Link href="/" className="btn btn-ghost">
-            Save and exit
-          </Link>
+          {forSomeone ? (
+            <Link href="/dashboard/admin" className="btn btn-ghost">
+              Cancel
+            </Link>
+          ) : (
+            <Link href="/" className="btn btn-ghost">
+              Save and exit
+            </Link>
+          )}
         </div>
+        {forSomeone ? (
+          <div
+            role="status"
+            className="max-w-[640px] border border-accent bg-accent-100 px-4 py-3 text-[15px]"
+          >
+            A new draft for someone else. Answer as them; your own site stays as it is.
+          </div>
+        ) : null}
         {resumed ? (
           <div
             role="status"

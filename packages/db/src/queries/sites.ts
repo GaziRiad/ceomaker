@@ -177,6 +177,30 @@ export async function listSitesForUser(db: Database, userId: string) {
     .orderBy(asc(site.createdAt));
 }
 
+/**
+ * Every site the user owns, oldest first, with who it's for and its draft's design. The first is
+ * their own; admins can make more, as drafts for people they write to.
+ */
+export async function listOwnedSites(db: Database, userId: string) {
+  const rows = await db
+    .select({
+      id: site.id,
+      subdomain: site.subdomain,
+      status: site.status,
+      createdAt: site.createdAt,
+      answers: site.answers,
+      templateKey: siteVersion.templateKey,
+    })
+    .from(site)
+    .innerJoin(siteVersion, and(eq(siteVersion.siteId, site.id), eq(siteVersion.kind, "draft")))
+    .where(eq(site.userId, userId))
+    .orderBy(asc(site.createdAt), asc(site.id));
+  return rows.map(({ answers, ...row }) => ({
+    ...row,
+    name: readStoredAnswers(answers)?.name ?? null,
+  }));
+}
+
 /** The site the dashboard shows. Users have one site for now; this is their first. */
 export async function getPrimarySiteId(db: Database, userId: string): Promise<string | null> {
   const [row] = await db
@@ -742,14 +766,16 @@ export async function changeSubdomain(
 }
 
 /**
- * Deletes a site the user owns, with its draft, every published version and the user's uploaded
- * images (one site per account). The live page stops at once; callers invalidate its cache.
- * If the site was ever published, its address is reserved for the owner for ADDRESS_HOLD_DAYS.
- * AI usage rows stay, so deleting and starting again doesn't reset drafting limits.
+ * Deletes a site the user owns, with its draft and every published version. The live page stops
+ * at once; callers invalidate its cache. The account's uploaded images go with its last site; an
+ * account that keeps other sites (admins' drafts for others) keeps them, and the daily clean-up
+ * removes the ones no site uses. If the site was ever published, its address is reserved for the
+ * owner for ADDRESS_HOLD_DAYS, unless `holdAddress` is false. AI usage rows stay, so deleting and
+ * starting again doesn't reset drafting limits.
  */
 export async function deleteSite(
   db: Database,
-  input: { userId: string; siteId: string },
+  input: { userId: string; siteId: string; holdAddress?: boolean },
 ): Promise<{
   subdomain: string;
   addressHeld: boolean;
@@ -772,7 +798,7 @@ export async function deleteSite(
       .from(siteVersion)
       .where(and(eq(siteVersion.siteId, owned.id), eq(siteVersion.kind, "published")))
       .limit(1);
-    if (published) {
+    if (published && input.holdAddress !== false) {
       const retiredAt = new Date();
       await tx
         .insert(retiredAddress)
@@ -789,14 +815,18 @@ export async function deleteSite(
       .limit(1);
     // Versions, messages, analytics and the domain go with the site (foreign key cascade).
     await tx.delete(site).where(eq(site.id, owned.id));
-    // The account's images go too; the caller removes their files from storage.
-    const removed = await tx
-      .delete(media)
-      .where(eq(media.userId, input.userId))
-      .returning({ id: media.id });
+    // With its last site, the account's images go too; the caller removes their files.
+    const [remaining] = await tx
+      .select({ id: site.id })
+      .from(site)
+      .where(eq(site.userId, input.userId))
+      .limit(1);
+    const removed = remaining
+      ? []
+      : await tx.delete(media).where(eq(media.userId, input.userId)).returning({ id: media.id });
     return {
       subdomain: owned.subdomain,
-      addressHeld: Boolean(published),
+      addressHeld: Boolean(published) && input.holdAddress !== false,
       domain: domain ?? null,
       mediaIds: removed.map((row) => row.id),
     };

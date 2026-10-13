@@ -27,23 +27,32 @@ const TABS = [
   },
 ] as const;
 
+/** Only for admins, after the others. */
+const ADMIN_TAB = {
+  href: "/dashboard/admin",
+  label: "Admin",
+  match: (path: string) => path.startsWith("/dashboard/admin"),
+};
+
 /** Sign out here, and forget answers this browser kept for the questions. */
 export async function signOutEverywhereInThisBrowser() {
   clearFlow();
   await authClient.signOut();
 }
 
-/** The dashboard's sticky header: wordmark, account menu and the three tabs. */
+/** The dashboard's sticky header: wordmark, account menu and the tabs (Admin for admins). */
 export function DashboardBar({
   name,
   email,
   initials,
   unread,
+  admin = false,
 }: {
   name: string;
   email: string;
   initials: string;
   unread: number;
+  admin?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -150,7 +159,7 @@ export function DashboardBar({
         aria-label="Dashboard"
         className="mx-auto flex max-w-[1200px] gap-5 overflow-x-auto px-5 [scrollbar-width:none] sm:gap-8 sm:px-10"
       >
-        {TABS.map((tab) => {
+        {(admin ? [...TABS, ADMIN_TAB] : TABS).map((tab) => {
           const current = tab.match(pathname);
           return (
             <Link

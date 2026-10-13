@@ -1,7 +1,15 @@
-import { finishAiUsage, getDb, getSiteForOwner, saveDraft, startAiUsage } from "@ceomaker/db";
+import {
+  finishAiUsage,
+  getDb,
+  getPrimarySiteId,
+  getSiteForOwner,
+  saveDraft,
+  startAiUsage,
+} from "@ceomaker/db";
 import { FREE_AI_LIMITS, isPro, parseThemeSettingsForRender } from "@ceomaker/schema";
+import { isAdmin } from "@/lib/admin";
 import { getAuth } from "@/lib/auth";
-import { AI_LIMITS, aiEnabled, DAY_MS, FOREVER_MS } from "@/lib/ai/client";
+import { ADMIN_DRAFTS_PER_DAY, AI_LIMITS, aiEnabled, DAY_MS, FOREVER_MS } from "@/lib/ai/client";
 import { DOCUMENT_MAX_BYTES, readSourceDocument, type SourceDocument } from "@/lib/ai/documents";
 import type { DraftNotice, GenerateEvent } from "@/lib/ai/events";
 import { mergeRedraft } from "@/lib/ai/draft";
@@ -37,6 +45,8 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
   if (!site) return json(404, "Site not found");
   if (!site.answers) return json(409, "This site has no answers to draft from");
   const pro = isPro(await planFor(userId));
+  // An admin's draft for someone they write to: more drafts a day, and not their email.
+  const forSomeone = isAdmin(session.user) && (await getPrimarySiteId(db, userId)) !== id;
   const redraft = new URL(request.url).searchParams.get("redraft") === "1";
   // A free account's one AI draft can also be a redraft, when its first draft was written without
   // AI (before AI was switched on, or after a failure); the usage limit below decides.
@@ -94,8 +104,12 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
           siteId: id,
           kind: "generate",
           // Free accounts get one AI draft, ever; starting over doesn't reset it.
-          limit: pro ? AI_LIMITS.generate : FREE_AI_LIMITS.drafts,
-          windowMs: pro ? DAY_MS : FOREVER_MS,
+          limit: forSomeone
+            ? ADMIN_DRAFTS_PER_DAY
+            : pro
+              ? AI_LIMITS.generate
+              : FREE_AI_LIMITS.drafts,
+          windowMs: pro || forSomeone ? DAY_MS : FOREVER_MS,
         });
         if (!usage) {
           send({
@@ -110,7 +124,7 @@ export async function POST(request: Request, context: RouteContext<"/api/sites/[
         const result = await generateDraft({
           answers,
           document,
-          email: session.user.email,
+          email: forSomeone ? undefined : session.user.email,
           onStep: (step) => send({ type: "step", step }),
         });
         if (result.status === "unavailable") {

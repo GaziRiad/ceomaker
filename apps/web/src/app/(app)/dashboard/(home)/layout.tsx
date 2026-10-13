@@ -14,14 +14,16 @@ async function Bar() {
   const { user } = session;
   const unread = await countUnreadMessages(getDb(), user.id);
   const name = displayName(user);
+  const admin = isAdmin(user);
   return (
     <>
-      <IdentifyAccount id={user.id} internal={isAdmin(user)} />
+      <IdentifyAccount id={user.id} internal={admin} />
       <DashboardBar
         name={name}
         email={user.email}
         initials={initialsFor(user.name, user.email)}
         unread={unread}
+        admin={admin}
       />
     </>
   );

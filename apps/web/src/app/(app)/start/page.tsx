@@ -3,6 +3,7 @@ import { ROLE_MAX, siteGoalFrom, type SiteGoal } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { isAdmin } from "@/lib/admin";
 import { getSession } from "@/lib/auth";
 import { siteAddressParts } from "@/lib/routing";
 import { QuestionsFlow } from "./flow";
@@ -14,8 +15,12 @@ export const metadata: Metadata = {
 
 async function Start({ searchParams }: { searchParams: PageProps<"/start">["searchParams"] }) {
   const [session, params] = await Promise.all([getSession(), searchParams]);
+  // Admins can make drafts for people they write to (`?for=someone`): a new site each time.
+  const forSomeone = params.for === "someone" && session !== null && isAdmin(session.user);
   // One site per account for now: returning users go straight to it.
-  if (session && (await getPrimarySiteId(getDb(), session.user.id))) redirect("/dashboard");
+  if (session && !forSomeone && (await getPrimarySiteId(getDb(), session.user.id))) {
+    redirect("/dashboard");
+  }
   const address = siteAddressParts();
   // `?goal=hired` (ads, the /cv page) starts on the role question. The home page asks the first
   // question itself (`&from=home`), so there it counts as answered. Older role links
@@ -37,6 +42,7 @@ async function Start({ searchParams }: { searchParams: PageProps<"/start">["sear
       signedIn={Boolean(session)}
       addressPrefix={address.prefix}
       addressSuffix={address.suffix}
+      forSomeone={forSomeone}
     />
   );
 }
