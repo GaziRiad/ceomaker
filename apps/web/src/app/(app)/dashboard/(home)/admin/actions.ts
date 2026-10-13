@@ -1,13 +1,26 @@
 "use server";
 
-import { endProGift, getDb, giveProGift } from "@ceomaker/db";
+import {
+  deleteSite,
+  endProGift,
+  getDb,
+  giveProGift,
+  listOwnedSites,
+  SiteNotFoundError,
+} from "@ceomaker/db";
 import { GIFT_MONTHS, type GiftMonths } from "@ceomaker/schema";
+import { updateTag } from "next/cache";
 import { adminSession } from "@/lib/admin";
 import { refreshLiveSites } from "@/lib/billing";
+import { forgetDomainRouting } from "@/lib/domain-routing";
+import { releaseFromProvider } from "@/lib/domains/service";
+import { removeMedia } from "@/lib/media-store";
 import { trackServerEvent } from "@/lib/product-analytics/server";
+import { siteCacheTag } from "@/lib/sites";
 
-// Gifts of Pro from the admin page. Each action checks again that an admin is signed in. When
-// the plan changes, the owner's live site shows it on its next visit.
+// The admin page's actions: gifts of Pro, and drafts made for other people. Each action checks
+// again that an admin is signed in. When the plan changes, the owner's live site shows it on its
+// next visit.
 
 type Result = { ok: true; message: string } | { ok: false; error: string };
 
@@ -61,4 +74,33 @@ export async function endProGiftAction(userId: string): Promise<Result> {
     ok: true,
     message: ended.plan === "pro" ? "Gift ended. Their subscription keeps Pro." : "Gift ended",
   };
+}
+
+/**
+ * Deletes a draft the admin made for someone else. Their own site (their first) isn't deleted
+ * here. The address is freed at once, so the person can take it for their own site.
+ */
+export async function deleteDraftForSomeoneAction(siteId: string): Promise<Result> {
+  const session = await adminSession();
+  if (!session) return NOT_ALLOWED;
+  const db = getDb();
+  const userId = session.user.id;
+  const sites = await listOwnedSites(db, userId);
+  const index = sites.findIndex((row) => row.id === siteId);
+  const gone: Result = { ok: false, error: "This draft was already deleted." };
+  if (index === -1) return gone;
+  if (index === 0) return { ok: false, error: "Your own site is deleted from Settings." };
+  try {
+    const deleted = await deleteSite(db, { userId, siteId, holdAddress: false });
+    updateTag(siteCacheTag(deleted.subdomain));
+    await removeMedia(deleted.mediaIds);
+    if (deleted.domain) {
+      await releaseFromProvider(deleted.domain);
+      forgetDomainRouting();
+    }
+    return { ok: true, message: "Draft deleted" };
+  } catch (error) {
+    if (error instanceof SiteNotFoundError) return gone;
+    throw error;
+  }
 }

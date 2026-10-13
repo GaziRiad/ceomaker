@@ -1,4 +1,10 @@
-import { getAdminOverview, getDb, listAccountsForAdmin, type AdminAccount } from "@ceomaker/db";
+import {
+  getAdminOverview,
+  getDb,
+  listAccountsForAdmin,
+  listOwnedSites,
+  type AdminAccount,
+} from "@ceomaker/db";
 import { giftGrantsPro, normalizeTemplateKey } from "@ceomaker/schema";
 import type { Metadata } from "next";
 import Form from "next/form";
@@ -11,10 +17,12 @@ import { siteAddressParts, siteUrl } from "@/lib/routing";
 import { displayName } from "@/lib/site-data";
 import { enter } from "../_components/enter";
 import { When } from "../_components/relative-time";
+import { DeleteDraft } from "./_components/delete-draft";
 import { EndGift, GiftPro } from "./_components/gift-controls";
 
-// The admin page: every account, its plan and its site, and gifts of Pro. Only for the emails
-// in ADMIN_EMAILS; anyone else sees a page that doesn't exist.
+// The admin page: drafts made for people the admin writes to, every account with its plan and
+// its site, and gifts of Pro. Only for the emails in ADMIN_EMAILS; anyone else sees a page that
+// doesn't exist.
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false } };
 
@@ -167,15 +175,103 @@ function AccountRow({ account, now }: { account: AdminAccount; now: Date }) {
   );
 }
 
+type OwnedSite = Awaited<ReturnType<typeof listOwnedSites>>[number];
+
+/**
+ * Sites the admin made for people they write to: every site on their account after their own.
+ * Each opens in the editor; published ones are public at the person's address.
+ */
+function DraftsForOthers({ drafts }: { drafts: OwnedSite[] }) {
+  const parts = siteAddressParts();
+  return (
+    <section {...enter(5)} className="cm-enter">
+      <Blueprint className="flex flex-col gap-4 p-[18px] sm:px-6 sm:py-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="mr-auto flex min-w-0 flex-col gap-0.5">
+            <h2 className="m-0 text-lg font-semibold">Drafts for others</h2>
+            <span className="text-sm text-neutral-700">
+              Sites you make for people you write to. Your own site stays your first.
+            </span>
+          </div>
+          <Link href="/start?for=someone" className="btn btn-primary min-h-11">
+            New draft for someone
+          </Link>
+        </div>
+        {drafts.length ? (
+          <ul className="m-0 list-none p-0">
+            {drafts.map((draft) => {
+              const address = `${parts.prefix}${draft.subdomain}${parts.suffix}`;
+              const status = STATUS[draft.status];
+              const name = draft.name ?? draft.subdomain;
+              return (
+                <li
+                  key={draft.id}
+                  className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-divider py-3.5 first:border-t-0"
+                >
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="font-semibold">{name}</span>
+                    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                      {draft.status === "published" ? (
+                        <a
+                          href={siteUrl(draft.subdomain)}
+                          target="_blank"
+                          rel="noopener"
+                          className="inline-flex min-w-0 items-center gap-1.5 break-all"
+                        >
+                          {address}
+                          <ExternalLink size={14} />
+                        </a>
+                      ) : (
+                        <span className="min-w-0 break-all">{address}</span>
+                      )}
+                      <span
+                        className={`px-1.5 py-0.5 text-xs font-semibold uppercase ${status.className}`}
+                      >
+                        {status.label}
+                      </span>
+                    </span>
+                    <span className="text-sm text-neutral-700">
+                      {templateName(draft.templateKey)}, made {shortDate.format(draft.createdAt)}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/dashboard/sites/${draft.id}/edit`}
+                      className="btn btn-secondary min-h-11 px-3.5 sm:min-h-9"
+                    >
+                      Edit
+                    </Link>
+                    <DeleteDraft
+                      siteId={draft.id}
+                      name={name}
+                      address={address}
+                      live={draft.status === "published"}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="m-0 text-sm text-neutral-700">
+            None yet. Answer the questions as the person, then edit and publish their draft.
+          </p>
+        )}
+      </Blueprint>
+    </section>
+  );
+}
+
 async function Admin({ searchParams }: { searchParams: Search }) {
-  await requireAdmin();
+  const session = await requireAdmin();
   const search = await searchParams;
   const query = typeof search.q === "string" ? search.q.trim().slice(0, 100) : "";
   const db = getDb();
   const now = new Date();
-  const [overview, { accounts, more }] = await Promise.all([
+  const [overview, { accounts, more }, ownSites] = await Promise.all([
     getAdminOverview(db, now),
     listAccountsForAdmin(db, { search: query, now }),
+    listOwnedSites(db, session.user.id),
   ]);
 
   return (
@@ -197,7 +293,8 @@ async function Admin({ searchParams }: { searchParams: Search }) {
         <Tile index={3} label="Paying" value={overview.paying} />
         <Tile index={4} label="Gifted Pro" value={overview.gifted} />
       </div>
-      <section {...enter(5)} className="cm-enter">
+      <DraftsForOthers drafts={ownSites.slice(1)} />
+      <section {...enter(6)} className="cm-enter">
         <Blueprint className="flex flex-col gap-4 p-[18px] sm:px-6 sm:py-5">
           <Form action={PATH} role="search" className="flex max-w-[560px] gap-2">
             <input

@@ -24,6 +24,11 @@ export const DAY_MS = 24 * 60 * 60 * 1000;
 export const FOREVER_MS = 100 * 365 * DAY_MS;
 /** Per user per rolling day. Drafting is the expensive call; rewrites are small. */
 export const AI_LIMITS = { generate: 3, rewrite: 30 } as const;
+/**
+ * Drafts an admin can write in a rolling day for people they write to (owner, October 2026):
+ * about $0.40 at most. Their own site keeps Pro's limit.
+ */
+export const ADMIN_DRAFTS_PER_DAY = 20;
 
 export function aiEnabled(): boolean {
   return Boolean(serverEnv().ANTHROPIC_API_KEY);
