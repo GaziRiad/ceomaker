@@ -821,6 +821,8 @@ function Credentials({ model, number }: { model: SiteModel; number: number }) {
 
 function Testimonials({ model, number }: { model: SiteModel; number: number }) {
   const quotes = model.testimonials;
+  // One size for every quote, from the longest, so a short one doesn't shout beside the rest.
+  const sizes = sizeVars("tp-qs", quoteSizes(Math.max(0, ...quotes.map((q) => q.quote.length))));
   return (
     <Section model={model} kind="testimonials" number={number}>
       <div className="tp-quotes">
@@ -833,7 +835,7 @@ function Testimonials({ model, number }: { model: SiteModel; number: number }) {
               <blockquote
                 {...editable(model, quote.fields.quote)}
                 className="tp-quote-text"
-                style={sizeVars("tp-qs", quoteSizes(quote.quote.length))}
+                style={sizes}
               >
                 {quote.quote}
               </blockquote>

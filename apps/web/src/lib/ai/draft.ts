@@ -60,6 +60,7 @@ export const draftOutputSchema = z.object({
     affiliations: z.array(z.string()),
   }),
   links: z.object({ linkedin: z.string(), website: z.string(), email: z.string() }),
+  cta: z.object({ headline: z.string(), line: z.string() }),
   contact: z.object({ invitation: z.string() }),
 });
 
@@ -110,6 +111,8 @@ Writing rules:
 - profile.keywords: 2 to 5 short descriptors from their answers and document, e.g. "Operator", "Brand designer". At most 24 characters each.
 - profile.affiliations: organisations from the answers and document only, at most 8. Leave empty unless the goal is credibility.
 - links.linkedin: their LinkedIn profile address if the document shows it (LinkedIn exports print it under Contact, often split over two lines: join them), as https://www.linkedin.com/in/… . links.website: their own or their company's website if stated. links.email: their email address if stated. Empty when not in the document.
+- cta.headline: the closing invitation before the contact section, one short sentence or question about what readers could come to them for, at most 70 characters, e.g. "Planning a storage migration? Let's talk." It states no facts, so write it with or without a document.
+- cta.line: one sentence under it, at most 140 characters, saying what to get in touch about. Don't repeat contact.invitation.
 - contact.invitation: one sentence inviting the enquiries they want, at most 90 characters.`;
 
 /** Who reads the site and what it leads with, by goal. */
@@ -262,6 +265,9 @@ export function contentFromDraft(
   const documentEmail = z.email().max(254).safeParse(clip(draft.links?.email, 254));
   const email = options.email ?? (documentEmail.success ? documentEmail.data : undefined);
 
+  const ctaHeadline = clip(draft.cta?.headline, 120);
+  const ctaLine = clip(draft.cta?.line, 280);
+
   const starterHero = starterSection("hero");
   const starterExperience = starterSection("experience");
   const starterFocus = starterSection("focus");
@@ -341,6 +347,18 @@ export function contentFromDraft(
         primaryCta: { label: GOAL_CALL_TO_ACTION[answers.goal], href: "#contact" },
       },
       ...middle,
+      // The closing invitation, before contact; templates without one leave it out.
+      ...(ctaHeadline
+        ? [
+            {
+              id: "cta",
+              type: "cta" as const,
+              headline: ctaHeadline,
+              ...(ctaLine ? { body: ctaLine } : {}),
+              button: { label: GOAL_CALL_TO_ACTION[answers.goal], href: "#contact" },
+            },
+          ]
+        : []),
       {
         ...starterSection("contact"),
         blurb: clip(draft.contact.invitation, 280) || starterSection("contact").blurb,
@@ -356,8 +374,8 @@ export function contentFromDraft(
 /**
  * A redraft of a site the owner has already worked on: the new draft's words go into the current
  * content, and everything the AI doesn't write stays (photos, gallery, section order and
- * visibility, testimonials, custom titles and wording; contact links and email unless there were
- * none). A work list
+ * visibility, testimonials, custom titles and wording; the closing invitation, contact links and
+ * email unless there were none). A work list
  * with photos on it stays as it is too, since new items couldn't keep them.
  */
 export function mergeRedraft(current: SiteContent, fresh: SiteContent): SiteContent | null {
@@ -398,6 +416,9 @@ export function mergeRedraft(current: SiteContent, fresh: SiteContent): SiteCont
         return section.items.some((item) => item.image)
           ? section
           : list(section, next as typeof section);
+      case "cta":
+        // The owner's own closing words stay; an empty one takes the new draft's.
+        return section.headline.trim() ? section : (next as typeof section);
       case "contact": {
         const contact = next as typeof section;
         return {
@@ -413,13 +434,13 @@ export function mergeRedraft(current: SiteContent, fresh: SiteContent): SiteCont
     }
   });
 
-  // Sites made before Credentials existed get the section, before contact, when the AI wrote one.
+  // Sections the site doesn't have yet go in before contact when the AI wrote them: Credentials
+  // (sites made before it existed) and the closing invitation (never saved while empty).
   const added = fresh.sections.filter(
     (section) =>
-      section.type === "credentials" &&
-      section.visible &&
-      section.items.length > 0 &&
-      !current.sections.some((own) => own.type === "credentials"),
+      ((section.type === "credentials" && section.visible && section.items.length > 0) ||
+        section.type === "cta") &&
+      !current.sections.some((own) => own.type === section.type),
   );
   if (added.length) {
     const at = sections.findIndex((section) => section.type === "contact");

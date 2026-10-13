@@ -40,6 +40,7 @@ function draft(overrides: Partial<DraftOutput> = {}): DraftOutput {
       affiliations: ["Meridian Freight Group"],
     },
     links: { linkedin: "", website: "", email: "" },
+    cta: { headline: "", line: "" },
     contact: { invitation: "For speaking, board and advisory enquiries." },
     ...overrides,
   };
@@ -88,6 +89,30 @@ describe("contentFromDraft", () => {
         { kind: "website", href: "https://evil.example/x" },
       ],
     });
+  });
+
+  it("writes the closing invitation before contact, with the goal's button", () => {
+    const content = contentFromDraft(
+      answers,
+      draft({
+        cta: {
+          headline: "Planning a supply chain overhaul? Let's talk.",
+          line: "I take on a few board and advisory roles each year.",
+        },
+      }),
+    )!;
+    const ids = content.sections.map((section) => section.id);
+    expect(ids.slice(-2)).toEqual(["cta", "contact"]);
+    expect(content.sections.find((section) => section.type === "cta")).toMatchObject({
+      visible: true,
+      headline: "Planning a supply chain overhaul? Let's talk.",
+      body: "I take on a few board and advisory roles each year.",
+      button: { href: "#contact" },
+    });
+    // Without a headline there is no closing section.
+    expect(
+      contentFromDraft(answers, draft())!.sections.some((section) => section.type === "cta"),
+    ).toBe(false);
   });
 
   it("keeps the account's email, and only takes LinkedIn addresses as the LinkedIn link", () => {
@@ -314,6 +339,20 @@ describe("mergeRedraft", () => {
     const own = mergeRedraft(edited(), fresh)!;
     expect(own.sections.find((section) => section.type === "contact")).toMatchObject({
       links: [{ href: "https://www.linkedin.com/in/amelia", kind: "linkedin" }],
+    });
+  });
+
+  it("adds the closing invitation when the site has none, and keeps the owner's", () => {
+    const withCta = (headline: string) =>
+      contentFromDraft(answers, draft({ cta: { headline, line: "" } }), {
+        email: "amelia@example.com",
+      })!;
+    const before = contentFromDraft(answers, draft(), { email: "amelia@example.com" })!;
+    const merged = mergeRedraft(before, withCta("Building something hard? Let's talk."))!;
+    expect(merged.sections.map((section) => section.id).slice(-2)).toEqual(["cta", "contact"]);
+    const own = mergeRedraft(withCta("My own words."), withCta("New words."))!;
+    expect(own.sections.find((section) => section.type === "cta")).toMatchObject({
+      headline: "My own words.",
     });
   });
 

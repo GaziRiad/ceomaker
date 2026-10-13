@@ -725,6 +725,11 @@ function Work({ model }: { model: SiteModel }) {
 function Testimonials({ model }: { model: SiteModel }) {
   const quotes = model.testimonials;
   const alone = quotes.length === 1;
+  // One size for every quote, from the longest, so a short one doesn't shout beside the rest.
+  const sizes = sizeVars(
+    "fo-qs",
+    quoteSizes(Math.max(0, ...quotes.map((quote) => quote.quote.length)), alone),
+  );
   return (
     <Section kind="testimonials">
       <Title model={model} kind="testimonials" />
@@ -739,10 +744,7 @@ function Testimonials({ model }: { model: SiteModel }) {
             data-rise=""
             className={alone ? "fo-quote-alone" : "fo-card fo-quote"}
           >
-            <blockquote
-              className="fo-quote-text"
-              style={sizeVars("fo-qs", quoteSizes(quote.quote.length, alone))}
-            >
+            <blockquote className="fo-quote-text" style={sizes}>
               “<span {...editable(model, quote.fields.quote)}>{quote.quote}</span>”
             </blockquote>
             <figcaption className="fo-quote-by">

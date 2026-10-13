@@ -1506,22 +1506,27 @@
 
 /* Testimonials: one quote set large, or cards in columns. */
 
+/* Quotes in a grid: cards in a row share its height, and their names line up at the bottom. */
 .fo-quotes {
-  columns: 1;
-  column-gap: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
 }
 
 .fo-quotes[data-alone] {
-  columns: auto;
+  display: block;
 }
 
 .fo .fo-quote {
-  break-inside: avoid;
-  margin: 0 0 16px;
+  margin: 0;
   padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.fo-quote .fo-quote-by {
+  margin-top: auto;
 }
 
 .fo-quote-text {
@@ -1598,7 +1603,7 @@
 
 @container (min-width: 600px) {
   .fo-quotes {
-    columns: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .fo .fo-quote {
@@ -1608,11 +1613,7 @@
 
 @container (min-width: 1000px) {
   .fo-quotes:not([data-two]) {
-    columns: 3;
-  }
-
-  .fo-quotes[data-alone] {
-    columns: auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
