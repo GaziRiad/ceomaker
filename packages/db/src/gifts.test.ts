@@ -76,6 +76,7 @@ describe.skipIf(!url)("gifts and admin (integration)", () => {
     expect(first).toEqual({
       userId: "alice",
       email: "alice@example.com",
+      name: "Alice",
       extended: false,
       plan: "pro",
       planChanged: true,

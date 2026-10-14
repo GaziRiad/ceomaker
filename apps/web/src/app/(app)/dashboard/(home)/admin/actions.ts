@@ -4,6 +4,7 @@ import {
   deleteSite,
   endProGift,
   getDb,
+  getPrimarySiteId,
   giveProGift,
   listOwnedSites,
   SiteNotFoundError,
@@ -14,9 +15,11 @@ import { adminSession } from "@/lib/admin";
 import { refreshLiveSites } from "@/lib/billing";
 import { forgetDomainRouting } from "@/lib/domain-routing";
 import { releaseFromProvider } from "@/lib/domains/service";
-import { canSendEmail, sendGiftGivenEmail } from "@/lib/email";
+import { emailConfigured } from "@/lib/email";
+import { lifecycleGiftGiven } from "@/lib/lifecycle-email";
 import { removeMedia } from "@/lib/media-store";
 import { trackServerEvent } from "@/lib/product-analytics/server";
+import { appUrl } from "@/lib/routing";
 import { siteCacheTag } from "@/lib/sites";
 
 // The admin page's actions: gifts of Pro, and drafts made for other people. Each action checks
@@ -43,8 +46,9 @@ function isGiftMonths(value: unknown): value is GiftMonths {
 }
 
 /**
- * Gives Pro for 1, 3, 6 or 12 months, added to a gift that hasn't ended, and emails the owner. A
- * failed email doesn't undo the gift; the message says so.
+ * Gives Pro for 1, 3, 6 or 12 months, added to a gift that hasn't ended, and tells Resend, whose
+ * "Gift of Pro" Automation emails the owner. A failed email doesn't undo the gift; the message
+ * says so.
  */
 export async function giveProGiftAction(
   userId: string,
@@ -55,23 +59,29 @@ export async function giveProGiftAction(
   if (typeof userId !== "string" || !userId) return NO_ACCOUNT;
   if (!isGiftMonths(months)) return { ok: false, error: "Choose 1, 3, 6 or 12 months." };
   const text = typeof note === "string" ? note.trim().slice(0, NOTE_MAX) : "";
-  const gift = await giveProGift(getDb(), { userId, months, note: text || null });
+  const db = getDb();
+  const gift = await giveProGift(db, { userId, months, note: text || null });
   if (!gift) return NO_ACCOUNT;
   if (gift.planChanged) {
     await refreshLiveSites(userId);
     trackServerEvent(userId, "plan_changed", { plan: gift.plan, cause: "gift" });
   }
   const until = `Pro until ${longDate.format(gift.proUntil)}`;
-  if (!canSendEmail()) {
+  if (!emailConfigured()) {
     return { ok: true, message: `${until}. Email is off, so they weren't told.` };
   }
   try {
-    await sendGiftGivenEmail({ to: gift.email, endsOn: gift.proUntil, extended: gift.extended });
+    const siteId = await getPrimarySiteId(db, userId);
+    await lifecycleGiftGiven(gift, {
+      endsOn: gift.proUntil,
+      extended: gift.extended,
+      editUrl: `${appUrl()}/dashboard${siteId ? `/sites/${siteId}/edit` : ""}`,
+    });
   } catch (error) {
-    console.error(`Emailing ${userId} about their gift of Pro failed`, error);
-    return { ok: true, message: `${until}. The email to them didn't send.` };
+    console.error(`Telling Resend about ${userId}'s gift of Pro failed`, error);
+    return { ok: true, message: `${until}. The email to them didn't go out.` };
   }
-  return { ok: true, message: `${until}, emailed` };
+  return { ok: true, message: `${until}. Their email is on its way.` };
 }
 
 /** Ends the gift now; the account keeps Pro only if a subscription pays for it. */

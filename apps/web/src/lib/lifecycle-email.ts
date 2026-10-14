@@ -4,10 +4,11 @@ import { draftCardUrl } from "./draft-card";
 import { serverEnv } from "./env";
 import { SHARE_CARD_PATH } from "./share-card";
 
-// The onboarding emails (welcome, "one step from live", "need a hand?", "you're live") are an
-// Automation in Resend's dashboard, with templates edited there. The app only tells Resend what
-// happened: an account signed up (which also makes it a contact), its first site went live, or
-// the account was deleted (which removes the contact). Off without RESEND_API_KEY.
+// The onboarding emails (welcome, "one step from live", "need a hand?", "you're live") and the
+// gift of Pro email are Automations in Resend's dashboard, with templates edited there. The app
+// only tells Resend what happened: an account signed up (which also makes it a contact), its
+// first site went live, it was given Pro, or it was deleted (which removes the contact). Off
+// without RESEND_API_KEY.
 
 const RESEND_API = "https://api.resend.com";
 const TIMEOUT_MS = 5000;
@@ -16,6 +17,7 @@ const TIMEOUT_MS = 5000;
 export const LIFECYCLE_EVENTS = {
   signedUp: "user.signed_up",
   firstPublished: "site.first_published",
+  giftGiven: "gift.given",
 } as const;
 
 async function resend(method: "POST" | "DELETE", path: string, body?: unknown): Promise<void> {
@@ -102,6 +104,49 @@ export function lifecycleFirstPublished(
       },
     }),
   );
+}
+
+const longDate = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/** What the gift email is filled with: the greeting, the end date as people read it, a link. */
+export function giftGivenPayload(gift: {
+  name: string | null | undefined;
+  endsOn: Date;
+  extended: boolean;
+  editUrl: string;
+}) {
+  return {
+    greeting_name: greetingName(gift.name),
+    ends_on: longDate.format(gift.endsOn),
+    edit_url: gift.editUrl,
+    // The Automation picks the subject by it: a new gift, or more time on one that hadn't ended.
+    extended: gift.extended,
+  };
+}
+
+/**
+ * The account was given Pro: Resend's "Gift of Pro" Automation emails them. Awaited, unlike the
+ * other events, so the admin page can say whether it went; throws when Resend refuses it.
+ */
+export async function lifecycleGiftGiven(
+  user: { email: string; name?: string | null },
+  gift: { endsOn: Date; extended: boolean; editUrl: string },
+): Promise<void> {
+  // Accounts from before the onboarding emails may not be contacts yet; one that is already a
+  // contact is fine.
+  await resend("POST", "/contacts", { email: user.email, first_name: firstName(user.name) }).catch(
+    (error) => console.error("Creating the Resend contact failed", error),
+  );
+  await resend("POST", "/events/send", {
+    event: LIFECYCLE_EVENTS.giftGiven,
+    email: user.email,
+    payload: giftGivenPayload({ name: user.name, ...gift }),
+  });
 }
 
 /** A deleted account leaves no contact behind. */

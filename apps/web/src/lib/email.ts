@@ -134,26 +134,6 @@ const longDate = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-/** Tells an owner they were given Pro, or that a gift they have now runs longer. */
-export async function sendGiftGivenEmail(input: {
-  to: string;
-  endsOn: Date;
-  extended: boolean;
-}): Promise<void> {
-  const date = longDate.format(input.endsOn);
-  await sendLinkEmail({
-    to: input.to,
-    subject: input.extended
-      ? `Your CEOMaker Pro now runs until ${date}`
-      : `You've been given CEOMaker Pro until ${date}`,
-    intro: `${input.extended ? `Your free Pro has been extended to ${date}.` : `You've been given CEOMaker Pro, free until ${date}.`} It's on your account now: every template, your own domain, the contact form and Messages inbox, visitor analytics, and no badge. There's no card to add and nothing to pay.`,
-    button: "Open your dashboard",
-    url: `${appUrl()}/dashboard`,
-    footnote:
-      "When it ends, your site stays live on the free plan unless you subscribe. We'll email you a week before.",
-  });
-}
-
 /** Tells an owner, once, that their gift of Pro ends within a week. */
 export async function sendGiftEndingEmail(input: { to: string; endsOn: Date }): Promise<void> {
   const date = longDate.format(input.endsOn);

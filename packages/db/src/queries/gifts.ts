@@ -30,6 +30,7 @@ export interface GiftChange {
 export interface GiftGiven extends GiftChange {
   proUntil: Date;
   email: string;
+  name: string;
   extended: boolean;
 }
 
@@ -64,7 +65,14 @@ export async function giveProGift(
       .set({ proUntil, proNote: note, proRemindedAt: null })
       .where(eq(user.id, input.userId));
     const settled = await settlePlan(tx, input.userId, { ...account, proUntil }, now);
-    return { userId: input.userId, proUntil, email: account.email, extended, ...settled };
+    return {
+      userId: input.userId,
+      proUntil,
+      email: account.email,
+      name: account.name,
+      extended,
+      ...settled,
+    };
   });
 }
 

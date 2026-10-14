@@ -17,6 +17,7 @@ export type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 export interface LockedAccount {
   email: string;
+  name: string;
   plan: string;
   proUntil: Date | null;
   proNote: string | null;
@@ -27,6 +28,7 @@ export async function lockAccount(tx: Transaction, userId: string): Promise<Lock
   const [account] = await tx
     .select({
       email: user.email,
+      name: user.name,
       plan: user.plan,
       proUntil: user.proUntil,
       proNote: user.proNote,
