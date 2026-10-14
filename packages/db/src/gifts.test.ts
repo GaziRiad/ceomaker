@@ -75,6 +75,8 @@ describe.skipIf(!url)("gifts and admin (integration)", () => {
     const first = await giveProGift(db, { userId: "alice", months: 3, note: "Beta", now: NOW });
     expect(first).toEqual({
       userId: "alice",
+      email: "alice@example.com",
+      extended: false,
       plan: "pro",
       planChanged: true,
       proUntil: new Date("2027-01-05T12:00:00Z"),
@@ -85,6 +87,7 @@ describe.skipIf(!url)("gifts and admin (integration)", () => {
     const second = await giveProGift(db, { userId: "alice", months: 1, now: days(30) });
     expect(second?.proUntil).toEqual(new Date("2027-02-05T12:00:00Z"));
     expect(second?.planChanged).toBe(false);
+    expect(second?.extended).toBe(true);
     expect((await account("alice")).proNote).toBe("Beta");
 
     expect(await giveProGift(db, { userId: "nobody", months: 1, now: NOW })).toBeNull();
@@ -94,6 +97,7 @@ describe.skipIf(!url)("gifts and admin (integration)", () => {
     await giveProGift(db, { userId: "alice", months: 1, now: days(-60) });
     const gift = await giveProGift(db, { userId: "alice", months: 1, note: "Again", now: NOW });
     expect(gift?.proUntil).toEqual(new Date("2026-11-05T12:00:00Z"));
+    expect(gift?.extended).toBe(false);
     expect((await account("alice")).proNote).toBe("Again");
   });
 

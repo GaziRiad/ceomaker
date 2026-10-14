@@ -14,6 +14,7 @@ import { adminSession } from "@/lib/admin";
 import { refreshLiveSites } from "@/lib/billing";
 import { forgetDomainRouting } from "@/lib/domain-routing";
 import { releaseFromProvider } from "@/lib/domains/service";
+import { canSendEmail, sendGiftGivenEmail } from "@/lib/email";
 import { removeMedia } from "@/lib/media-store";
 import { trackServerEvent } from "@/lib/product-analytics/server";
 import { siteCacheTag } from "@/lib/sites";
@@ -41,7 +42,10 @@ function isGiftMonths(value: unknown): value is GiftMonths {
   return GIFT_MONTHS.some((months) => months === value);
 }
 
-/** Gives Pro for 1, 3, 6 or 12 months, added to a gift that hasn't ended. */
+/**
+ * Gives Pro for 1, 3, 6 or 12 months, added to a gift that hasn't ended, and emails the owner. A
+ * failed email doesn't undo the gift; the message says so.
+ */
 export async function giveProGiftAction(
   userId: string,
   months: number,
@@ -52,12 +56,22 @@ export async function giveProGiftAction(
   if (!isGiftMonths(months)) return { ok: false, error: "Choose 1, 3, 6 or 12 months." };
   const text = typeof note === "string" ? note.trim().slice(0, NOTE_MAX) : "";
   const gift = await giveProGift(getDb(), { userId, months, note: text || null });
-  if (!gift?.proUntil) return NO_ACCOUNT;
+  if (!gift) return NO_ACCOUNT;
   if (gift.planChanged) {
     await refreshLiveSites(userId);
     trackServerEvent(userId, "plan_changed", { plan: gift.plan, cause: "gift" });
   }
-  return { ok: true, message: `Pro until ${longDate.format(gift.proUntil)}` };
+  const until = `Pro until ${longDate.format(gift.proUntil)}`;
+  if (!canSendEmail()) {
+    return { ok: true, message: `${until}. Email is off, so they weren't told.` };
+  }
+  try {
+    await sendGiftGivenEmail({ to: gift.email, endsOn: gift.proUntil, extended: gift.extended });
+  } catch (error) {
+    console.error(`Emailing ${userId} about their gift of Pro failed`, error);
+    return { ok: true, message: `${until}. The email to them didn't send.` };
+  }
+  return { ok: true, message: `${until}, emailed` };
 }
 
 /** Ends the gift now; the account keeps Pro only if a subscription pays for it. */

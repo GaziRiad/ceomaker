@@ -26,6 +26,13 @@ export interface GiftChange {
   proUntil: Date | null;
 }
 
+/** A gift just given: who to tell, and whether it added to one that hadn't ended. */
+export interface GiftGiven extends GiftChange {
+  proUntil: Date;
+  email: string;
+  extended: boolean;
+}
+
 /** When the account's gift ends or ended; null if it never had one. */
 export async function getProGiftEnd(db: Database, userId: string): Promise<Date | null> {
   const [row] = await db
@@ -44,11 +51,12 @@ export async function getProGiftEnd(db: Database, userId: string): Promise<Date 
 export async function giveProGift(
   db: Database,
   input: { userId: string; months: GiftMonths; note?: string | null; now?: Date },
-): Promise<GiftChange | null> {
+): Promise<GiftGiven | null> {
   const now = input.now ?? new Date();
   return db.transaction(async (tx) => {
     const account = await lockAccount(tx, input.userId);
     if (!account) return null;
+    const extended = giftGrantsPro(account.proUntil, now);
     const proUntil = giftEndAfter(account.proUntil, input.months, now);
     const note = input.note?.trim() || account.proNote;
     await tx
@@ -56,7 +64,7 @@ export async function giveProGift(
       .set({ proUntil, proNote: note, proRemindedAt: null })
       .where(eq(user.id, input.userId));
     const settled = await settlePlan(tx, input.userId, { ...account, proUntil }, now);
-    return { userId: input.userId, proUntil, ...settled };
+    return { userId: input.userId, proUntil, email: account.email, extended, ...settled };
   });
 }
 

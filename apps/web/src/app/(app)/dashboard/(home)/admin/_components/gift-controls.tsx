@@ -109,8 +109,8 @@ export function GiftPro({
           />
         </div>
         <p className="m-0 text-sm text-neutral-700">
-          Their live site shows Pro straight away. They aren&apos;t emailed now; they get one
-          reminder a week before it ends, unless they subscribe.
+          Their live site shows Pro straight away, and they get an email with the end date. One
+          reminder follows a week before it ends, unless they subscribe.
         </p>
       </ConfirmDialog>
     </>

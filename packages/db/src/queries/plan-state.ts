@@ -16,6 +16,7 @@ import { subscription, user } from "../schema";
 export type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 export interface LockedAccount {
+  email: string;
   plan: string;
   proUntil: Date | null;
   proNote: string | null;
@@ -24,7 +25,12 @@ export interface LockedAccount {
 /** Locks the account for the rest of the transaction, so two plan changes can't interleave. */
 export async function lockAccount(tx: Transaction, userId: string): Promise<LockedAccount | null> {
   const [account] = await tx
-    .select({ plan: user.plan, proUntil: user.proUntil, proNote: user.proNote })
+    .select({
+      email: user.email,
+      plan: user.plan,
+      proUntil: user.proUntil,
+      proNote: user.proNote,
+    })
     .from(user)
     .where(eq(user.id, userId))
     .for("update");
